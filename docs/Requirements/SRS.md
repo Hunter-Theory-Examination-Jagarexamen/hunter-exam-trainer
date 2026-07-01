@@ -186,3 +186,185 @@ The development of the Hunter Exam Trainer is subject to the following constrain
 - The initial release focuses only on the theoretical part of the Swedish Hunter Examination.
 
 ---
+
+# 3 Functional Requirements
+
+This chapter describes the functional requirements of the application. These requirements define the core functionalities that the system shall provide to support students preparing for the Swedish Hunter Examination and administrators responsible for managing the application.
+
+Each requirement is assigned a unique identifier to support implementation, testing, and future maintenance.
+
+## 3.1 User Authentication
+
+The system shall provide secure user authentication to allow students and administrators to access features based on their assigned roles.
+
+| ID     | Requirement                                                                                  | Priority |
+|--------|----------------------------------------------------------------------------------------------|----------|
+| FR-001 | The system shall allow new users to create an account using an email address and password.   | High     |  
+| FR-002 | The system shall allow registered users to log in using valid credentials.                   | High     |
+| FR-003 | The system shall allow users to log out securely.                                            | High     |
+| FR-004 | The system shall prevent unauthorized access to protected pages.                             | High     |
+| FR-005 | The system shall distinguish between Student and Administrator roles after successful login. | High     |
+
+## 3.2 Dashboard
+
+After successful authentication, users shall be redirected to a dashboard that provides access to the application's main features.
+
+| ID     | Requirement                                                  | Priority |
+|--------|--------------------------------------------------------------|----------|
+| FR-006 | The system shall display a dashboard after successful login. | High     |  
+| FR-007 | The dashboard shall provide access to all practice modes.    | High     |
+| FR-008 | The dashboard shall display the user's recent activity.      | Medium   |
+| FR-009 | The dashboard shall provide quick access to user statistics. | Medium   |
+
+## 3.3 Practice Mode
+
+The application shall provide flexible practice modes to help users prepare for the theoretical examination.
+
+| ID     | Requirement                                                          | Priority |
+|--------|----------------------------------------------------------------------|----------|
+| FR-010 | The system shall allow users to practice questions by subject area.  | High     |
+| FR-011 | The system shall allow users to start a randomized practice session. | High     |
+| FR-012 | The system shall display one question at a time.                     | High     |
+| FR-013 | The system shall allow users to select an answer before proceeding.  | High     |
+| FR-014 | The system shall provide immediate feedback after each question.     | High     |
+| FR-015 | The system shall explain the correct answer when appropriate.        | Medium   |
+| FR-016 | The system shall allow users to restart a practice session.          | Medium   |
+
+## 3.4 Exam Simulation
+
+The system shall provide a simulation of the official Swedish Hunter Examination, allowing users to experience the test environment before taking the real examination.
+
+| ID     | Requirement                                                                                    | Priority |
+|--------|------------------------------------------------------------------------------------------------|----------|
+| FR-017 | The system shall allow users to start a full exam simulation.                                  | High     |
+| FR-018 | The system shall randomly select 70 questions for each exam attempt.                           | High     |
+| FR-019 | The system shall allow users to navigate between questions before submission.                  | Medium   |
+| FR-020 | The system shall allow the user to submit the exam.                                            | High     |
+| FR-021 | The system shall calculate the final score after submission.                                   | High     |
+| FR-022 | The system shall indicate whether the user has passed or failed the simulated exam.            | High     |
+| FR-023 | The system shall display a detailed summary of correct and incorrect answers after completion. | High     |
+
+## 3.5 Results and Statistics
+
+The system shall record user performance and present meaningful statistics to help users monitor their learning progress.
+
+| ID     | Requirement                                                               | Priority |
+|--------|---------------------------------------------------------------------------|----------|
+| FR-024 | The system shall store the results of completed quizzes and exams.        | High     |
+| FR-025 | The system shall display the user's quiz history.                         | Medium   |
+| FR-026 | The system shall calculate the user's overall accuracy.                   | High     |
+| FR-027 | The system shall display subject-wise performance statistics.             | High     |
+| FR-028 | The system shall display the user's progress over time.                   | Medium   |
+| FR-029 | The system shall identify the user's strongest and weakest subject areas. | Medium   |
+| FR-030 | The system shall allow users to review previously completed quizzes.      | Medium   |
+
+## 3.6 User Profile
+
+The system shall provide each user with a personal profile containing account information and learning progress.
+
+| ID     | Requirement                                                               | Priority |
+|--------|---------------------------------------------------------------------------|----------|
+| FR-031 | The system shall display the user's profile information.                  | Medium   |
+| FR-032 | The system shall allow users to update their personal information.        | Low      |
+| FR-033 | The system shall allow users to change their password.                    | Medium   |
+| FR-034 | The system shall display the total number of quizzes and exams completed. | Medium   |
+
+## 3.7 Administration Panel
+
+The system shall provide an administration interface that enables instructors to manage the application content and monitor learner performance.
+
+| ID     | Requirement                                                                      | Priority |
+|--------|----------------------------------------------------------------------------------|----------|
+| FR-035 | The system shall provide a secure administrator login.                           | High     |
+| FR-036 | The system shall allow administrators to add new questions.                      | High     |
+| FR-037 | The system shall allow administrators to edit existing questions.                | High     |
+| FR-038 | The system shall allow administrators to delete questions.                       | High     |
+| FR-039 | The system shall allow administrators to assign questions to subject categories. | High     |
+| FR-040 | The system shall allow administrators to search and filter questions.            | Medium   |
+| FR-041 | The system shall display learner performance statistics.                         | Medium   |
+| FR-042 | The system shall display the number of registered users.                         | Low      |
+
+## 3.8 General System Functions
+
+The system shall provide general functionality required to support usability, accessibility, and overall application behavior.
+
+| ID     | Requirement                                                                              | Priority |
+|--------|------------------------------------------------------------------------------------------|----------|
+| FR-043 | The system shall provide a responsive interface for desktop, tablet, and mobile devices. | High     |
+| FR-044 | The system shall display meaningful error messages when an operation fails.              | High     |
+| FR-045 | The system shall display confirmation messages after successful actions.                 | Medium   |
+| FR-046 | The system shall securely store user data in the database.                               | High     |
+| FR-047 | The system shall maintain user sessions until logout or session expiration.              | Medium   |
+| FR-048 | The system shall support future expansion without significant architectural changes.     | Low      |
+
+### Summary
+
+The Hunter Exam Trainer includes functional requirements grouped into eight functional areas. These requirements define the expected behavior of the application from both the student and administrator perspectives. Each requirement will serve as a reference during system design, implementation, testing, and project evaluation.
+
+---
+
+# 4. Non-Functional Requirements
+
+This chapter defines the quality attributes and constraints that the Hunter Exam Trainer shall satisfy. These requirements ensure that the application is reliable, secure, responsive, and easy to use across different platforms.
+
+## 4.1 Performance
+
+| ID      | Requirement                                                                           | Priority |
+|---------|---------------------------------------------------------------------------------------|----------|
+| NFR-001 | The system shall load pages within 3 seconds under normal network conditions.         | High     |
+| NFR-002 | The system shall process quiz submissions.                                            | High     |
+| NFR-003 | The system shall support concurrent users without noticeable performance degradation. | Medium   |
+
+## 4.2 Security
+
+| ID      | Requirement                                                                    | Priority |
+|---------|--------------------------------------------------------------------------------|----------|
+| NFR-004 | User passwords shall be securely encrypted before storage.                     | High     |
+| NFR-005 | All communication between the client and server shall use HTTPS.               | High     |
+| NFR-006 | Only authenticated users shall access protected resources.                     | High     |
+| NFR-007 | Administrator functions shall only be accessible to authorized administrators. | High     |
+
+## 4.3 Reliability
+
+| ID      | Requirement                                                          | Priority |
+|---------|----------------------------------------------------------------------|----------|
+| NFR-008 | The application shall save completed quiz results without data loss. | High     |
+| NFR-009 | The application shall recover gracefully from unexpected errors.     | Medium   |
+| NFR-010 | System failures shall not corrupt stored user data.                  | High     |
+
+## 4.4 Usability
+
+| ID      | Requirement                                                          | Priority |
+|---------|----------------------------------------------------------------------|----------|
+| NFR-011 | The application shall provide a simple and intuitive user interface. | High     |
+| NFR-012 | Navigation shall remain consistent across all pages.                 | High     |
+| NFR-013 | Users shall be able to complete a quiz without prior training.       | Medium   |
+| NFR-014 | Important actions shall provide visual feedback to the user.         | Medium   |
+
+## 4.5 Compatibility
+
+| ID      | Requirement                                                                             | Priority |
+|---------|-----------------------------------------------------------------------------------------|----------|
+| NFR-015 | The application shall support the latest versions of Chrome, Edge, Firefox, and Safari. | High     |
+| NFR-016 | The application shall function correctly on desktop, tablet, and mobile devices.        | High     |
+
+## 4.6 Maintainability
+
+| ID      | Requirement                                                          | Priority |
+|---------|----------------------------------------------------------------------|----------|
+| NFR-017 | The source code shall follow consistent coding standards.            | High     |
+| NFR-018 | The project shall use version control through GitHub.                | High     |
+| NFR-019 | The application architecture shall support future feature additions. | Medium   |
+| NFR-020 | Technical documentation shall be maintained throughout the project.  | High     |
+
+## 4.7 Availability
+
+| ID      | Requirement                                                                         | Priority |
+|---------|-------------------------------------------------------------------------------------|----------|
+| NFR-021 | The application shall be available whenever the hosting environment is operational. | Medium   |
+| NFR-022 | Scheduled maintenance shall be communicated to users in advance when applicable.    | Low      |
+
+### Summary
+
+The non-functional requirements define the expected quality characteristics of the Hunter Exam Trainer. These requirements ensure that the application remains secure, reliable, maintainable, and user-friendly throughout its lifecycle.
+
