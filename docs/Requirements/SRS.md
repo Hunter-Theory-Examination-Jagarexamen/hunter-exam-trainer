@@ -49,7 +49,7 @@ The application will provide multiple learning modes to accommodate different st
 
 * Practice questions by subject area
 * Randomized practice sessions
-* Full exam simulation based on the official examination format
+* Full exam simulation (Mock Exam) based on the official examination format
 
 The system will provide immediate feedback after each quiz, allowing users to review their answers and improve their understanding of the subject matter. User performance will be stored to generate statistics and monitor learning progress over time.
 
@@ -59,7 +59,7 @@ The application will be developed as a **Progressive Web Application (PWA)**, en
 
 ## 1.3 Project Goals
 
-The project aims to develop a responsive Progressive Web Application that supports students preparing for the Swedish Hunter Examination by providing interactive practice quizzes, realistic exam simulations, performance tracking, and an administration interface for managing educational content.
+The project aims to develop a responsive Progressive Web Application that supports students preparing for the Swedish Hunter Examination by providing interactive practice quizzes, realistic exam simulations (mock exams), performance tracking, and an administration interface for managing educational content.
 
 ## 1.4 Objectives
 
@@ -97,7 +97,7 @@ The following documents were used while preparing this Software Requirements Spe
 
 The application is a web-based educational application developed to support students preparing for the Swedish Hunter Examination. It complements traditional classroom instruction by providing an interactive platform where learners can practice theoretical questions at their own pace.
 
-Unlike printed study materials, the application offers immediate feedback, performance tracking, and realistic exam simulations, helping learners identify strengths and areas for improvement before taking the official examination.
+Unlike printed study materials, the application offers immediate feedback, performance tracking, and realistic exam simulations (mock exams), helping learners identify strengths and areas for improvement before taking the official examination.
 
 The application follows a client-server architecture, where the frontend communicates with the backend through a REST API. The backend manages user authentication, retrieves questions from the database, evaluates submitted answers, calculates scores, and stores user progress.
 
@@ -138,7 +138,7 @@ The application provides the following core features:
 - Secure user authentication
 - Practice by subject area
 - Random practice mode
-- Full exam simulation
+- Full exam simulation (Mock exam)
 - Automatic answer validation
 - Performance statistics
 - Quiz history
@@ -216,33 +216,32 @@ After successful authentication, users shall be redirected to a dashboard that p
 | FR-008 | The dashboard shall display the user's recent activity.      | Medium   |
 | FR-009 | The dashboard shall provide quick access to user statistics. | Medium   |
 
-## 3.3 Practice Mode
+## 3.3 Practice Mode (Subject-wise)
 
 The application shall provide flexible practice modes to help users prepare for the theoretical examination.
 
 | ID     | Requirement                                                          | Priority |
 |--------|----------------------------------------------------------------------|----------|
 | FR-010 | The system shall allow users to practice questions by subject area.  | High     |
-| FR-011 | The system shall allow users to start a randomized practice session. | High     |
-| FR-012 | The system shall display one question at a time.                     | High     |
-| FR-013 | The system shall allow users to select an answer before proceeding.  | High     |
-| FR-014 | The system shall provide immediate feedback after each question.     | High     |
-| FR-015 | The system shall explain the correct answer when appropriate.        | Medium   |
-| FR-016 | The system shall allow users to restart a practice session.          | Medium   |
+| FR-011 | The system shall display one question at a time.                     | High     |
+| FR-012 | The system shall allow users to select an answer before proceeding.  | High     |
+| FR-013 | The system shall provide immediate feedback after each question.     | High     |
+| FR-014 | The system shall explain the correct answer when appropriate.        | Medium   |
+| FR-015 | The system shall allow users to restart a practice session.          | Medium   |
 
-## 3.4 Exam Simulation
+## 3.4 Exam Simulation (Mock Exam)
 
 The system shall provide a simulation of the official Swedish Hunter Examination, allowing users to experience the test environment before taking the real examination.
 
 | ID     | Requirement                                                                                    | Priority |
 |--------|------------------------------------------------------------------------------------------------|----------|
-| FR-017 | The system shall allow users to start a full exam simulation.                                  | High     |
-| FR-018 | The system shall randomly select 70 questions for each exam attempt.                           | High     |
-| FR-019 | The system shall allow users to navigate between questions before submission.                  | Medium   |
-| FR-020 | The system shall allow the user to submit the exam.                                            | High     |
-| FR-021 | The system shall calculate the final score after submission.                                   | High     |
-| FR-022 | The system shall indicate whether the user has passed or failed the simulated exam.            | High     |
-| FR-023 | The system shall display a detailed summary of correct and incorrect answers after completion. | High     |
+| FR-016 | The system shall allow users to start a full exam simulation.                                  | High     |
+| FR-017 | The system shall randomly select 70 questions for each exam attempt.                           | High     |
+| FR-018 | The system shall allow users to navigate between questions before submission.                  | Medium   |
+| FR-019 | The system shall allow the user to submit the exam.                                            | High     |
+| FR-020 | The system shall calculate the final score after submission.                                   | High     |
+| FR-021 | The system shall indicate whether the user has passed or failed the simulated exam.            | High     |
+| FR-022 | The system shall display a detailed summary of correct and incorrect answers after completion. | High     |
 
 ## 3.5 Results and Statistics
 
@@ -250,13 +249,13 @@ The system shall record user performance and present meaningful statistics to he
 
 | ID     | Requirement                                                               | Priority |
 |--------|---------------------------------------------------------------------------|----------|
-| FR-024 | The system shall store the results of completed quizzes and exams.        | High     |
-| FR-025 | The system shall display the user's quiz history.                         | Medium   |
-| FR-026 | The system shall calculate the user's overall accuracy.                   | High     |
-| FR-027 | The system shall display subject-wise performance statistics.             | High     |
-| FR-028 | The system shall display the user's progress over time.                   | Medium   |
-| FR-029 | The system shall identify the user's strongest and weakest subject areas. | Medium   |
-| FR-030 | The system shall allow users to review previously completed quizzes.      | Medium   |
+| FR-023 | The system shall store the results of completed quizzes and exams.        | High     |
+| FR-024 | The system shall display the user's quiz history.                         | Medium   |
+| FR-025 | The system shall calculate the user's overall accuracy.                   | High     |
+| FR-026 | The system shall display subject-wise performance statistics.             | High     |
+| FR-027 | The system shall display the user's progress over time.                   | Medium   |
+| FR-028 | The system shall identify the user's strongest and weakest subject areas. | Medium   |
+| FR-029 | The system shall allow users to review previously completed quizzes.      | Medium   |
 
 ## 3.6 User Profile
 
@@ -264,10 +263,10 @@ The system shall provide each user with a personal profile containing account in
 
 | ID     | Requirement                                                               | Priority |
 |--------|---------------------------------------------------------------------------|----------|
-| FR-031 | The system shall display the user's profile information.                  | Medium   |
-| FR-032 | The system shall allow users to update their personal information.        | Low      |
-| FR-033 | The system shall allow users to change their password.                    | Medium   |
-| FR-034 | The system shall display the total number of quizzes and exams completed. | Medium   |
+| FR-030 | The system shall display the user's profile information.                  | Medium   |
+| FR-031 | The system shall allow users to update their personal information.        | Low      |
+| FR-032 | The system shall allow users to change their password.                    | Medium   |
+| FR-033 | The system shall display the total number of quizzes and exams completed. | Medium   |
 
 ## 3.7 Administration Panel
 
@@ -275,14 +274,14 @@ The system shall provide an administration interface that enables instructors to
 
 | ID     | Requirement                                                                      | Priority |
 |--------|----------------------------------------------------------------------------------|----------|
-| FR-035 | The system shall provide a secure administrator login.                           | High     |
-| FR-036 | The system shall allow administrators to add new questions.                      | High     |
-| FR-037 | The system shall allow administrators to edit existing questions.                | High     |
-| FR-038 | The system shall allow administrators to delete questions.                       | High     |
-| FR-039 | The system shall allow administrators to assign questions to subject categories. | High     |
-| FR-040 | The system shall allow administrators to search and filter questions.            | Medium   |
-| FR-041 | The system shall display learner performance statistics.                         | Medium   |
-| FR-042 | The system shall display the number of registered users.                         | Low      |
+| FR-034 | The system shall provide a secure administrator login.                           | High     |
+| FR-035 | The system shall allow administrators to add new questions.                      | High     |
+| FR-036 | The system shall allow administrators to edit existing questions.                | High     |
+| FR-037 | The system shall allow administrators to delete questions.                       | High     |
+| FR-038 | The system shall allow administrators to assign questions to subject categories. | High     |
+| FR-039 | The system shall allow administrators to search and filter questions.            | Medium   |
+| FR-040 | The system shall display learner performance statistics.                         | Medium   |
+| FR-041 | The system shall display the number of registered users.                         | Low      |
 
 ## 3.8 General System Functions
 
@@ -290,12 +289,12 @@ The system shall provide general functionality required to support usability, ac
 
 | ID     | Requirement                                                                              | Priority |
 |--------|------------------------------------------------------------------------------------------|----------|
-| FR-043 | The system shall provide a responsive interface for desktop, tablet, and mobile devices. | High     |
-| FR-044 | The system shall display meaningful error messages when an operation fails.              | High     |
-| FR-045 | The system shall display confirmation messages after successful actions.                 | Medium   |
-| FR-046 | The system shall securely store user data in the database.                               | High     |
-| FR-047 | The system shall maintain user sessions until logout or session expiration.              | Medium   |
-| FR-048 | The system shall support future expansion without significant architectural changes.     | Low      |
+| FR-042 | The system shall provide a responsive interface for desktop, tablet, and mobile devices. | High     |
+| FR-043 | The system shall display meaningful error messages when an operation fails.              | High     |
+| FR-044 | The system shall display confirmation messages after successful actions.                 | Medium   |
+| FR-045 | The system shall securely store user data in the database.                               | High     |
+| FR-046 | The system shall maintain user sessions until logout or session expiration.              | Medium   |
+| FR-047 | The system shall support future expansion without significant architectural changes.     | Low      |
 
 ### Summary
 
@@ -368,3 +367,244 @@ This chapter defines the quality attributes and constraints that the Hunter Exam
 
 The non-functional requirements define the expected quality characteristics of the Hunter Exam Trainer. These requirements ensure that the application remains secure, reliable, maintainable, and user-friendly throughout its lifecycle.
 
+---
+
+# 5 User Interface Requirements
+
+## 5.1 Overview
+
+The Hunter Exam Trainer shall provide a responsive and intuitive user interface that supports desktop, tablet, and mobile devices. The interface shall be designed to minimize the learning curve and provide easy access to all major features of the application.
+
+The application shall follow a consistent layout, navigation structure, and visual design across all pages to provide a seamless user experience.
+
+## 5.2 Login Page
+
+### Purpose
+
+The Login page allows registered users to securely access the application.
+
+### Components
+
+- Application logo
+- Email field
+- Password field
+- Login button
+- "Create Account" link
+- "Forgot Password" link (optional for MVP)
+
+### User Actions
+
+- Enter login credentials
+- Login to the application
+- Navigate to the registration page
+
+### Navigation
+
+Successful login redirects the user to the Dashboard.
+
+## 5.3 Registration Page
+
+### Purpose
+
+Allows new users to create an account.
+
+### Components
+
+- Full Name
+- Email
+- Password
+- Confirm Password
+- Register button
+
+### User Actions
+
+- Enter registration information
+- Create a new account
+- Return to the Login page
+
+## 5.4 Dashboard
+
+### Purpose
+
+The Dashboard serves as the main entry point after login.
+
+### Components
+
+- Welcome message
+- Practice by Subject
+- Random Practice
+- Exam Simulation
+- Statistics
+- Profile
+- Logout
+
+### User Actions
+
+- Select a practice mode
+- View statistics
+- Start an exam
+- Navigate to profile
+
+## 5.5 Practice Quiz Page
+
+### Purpose
+
+Allows users to practice theoretical questions.
+
+### Components
+
+- Question number
+- Subject category
+- Question text
+- Answer options
+- Submit button
+- Next Question button
+- Progress indicator
+
+### User Actions
+
+- Select an answer
+- Submit the answer
+- View immediate feedback
+- Continue to the next question
+
+## 5.6 Exam Simulation Page
+
+### Purpose
+
+Provides a realistic simulation of the official Swedish Hunter Examination.
+
+### Components
+
+- Question number
+- Question text
+- Answer options
+- Previous button
+- Next button
+- Submit Exam button
+
+### User Actions
+
+- Answer questions
+- Navigate between questions
+- Submit the completed examination
+
+## 5.7 Results Page
+
+### Purpose
+
+Displays the user's performance after completing a quiz or examination.
+
+### Components
+
+- Final score
+- Pass/Fail status
+- Correct answers
+- Incorrect answers
+- Percentage score
+- Review Answers button
+- Return to Dashboard button
+
+### User Actions
+
+- Review results
+- Return to dashboard
+- Review incorrect answers
+
+## 5.8 Statistics Page
+
+### Purpose
+
+Provides users with an overview of their learning progress.
+
+### Components
+
+- Overall accuracy
+- Subject-wise performance
+- Progress chart
+- Quiz history
+- Strongest subject
+- Weakest subject
+
+### User Actions
+
+- View statistics
+- Review previous quizzes
+
+## 5.9 User Profile
+
+### Purpose
+
+Displays user account information.
+
+### Components
+
+- Name
+- Email
+- Change Password
+- Quiz Summary
+- Logout
+
+### User Actions
+
+- Update profile
+- Change password
+- Logout
+
+## 5.10 Administrator Dashboard
+
+### Purpose
+
+Allows administrators to manage questions and monitor learner performance.
+
+### Components
+
+- Question Management
+- Add Question
+- Edit Question
+- Delete Question
+- User Statistics
+- Search Questions
+- Category Management
+
+### User Actions
+
+- Create questions
+- Update questions
+- Delete questions
+- View learner statistics
+
+## 5.11 Responsive Design
+
+The application shall provide a responsive interface that adapts to different screen sizes.
+
+### Desktop
+
+- Sidebar navigation
+- Multi-column layout
+- Larger content area
+
+### Tablet
+
+- Collapsible sidebar
+- Optimized touch controls
+
+### Mobile
+
+- Bottom navigation or hamburger menu
+- Single-column layout
+- Large touch-friendly buttons
+
+## 5.12 Accessibility
+
+The user interface should follow basic accessibility principles.
+
+- Readable font sizes
+- Sufficient color contrast
+- Keyboard navigation support
+- Clear error messages
+- Responsive layouts
+
+### Summary
+
+The user interface requirements define the expected layout and interaction behavior for the Hunter Exam Trainer. The interface is designed to provide a consistent and user-friendly experience across desktop and mobile devices while supporting both students and administrators.
