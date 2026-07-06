@@ -608,3 +608,96 @@ The user interface should follow basic accessibility principles.
 ### Summary
 
 The user interface requirements define the expected layout and interaction behavior for the Hunter Exam Trainer. The interface is designed to provide a consistent and user-friendly experience across desktop and mobile devices while supporting both students and administrators.
+
+---
+
+# 6. Acceptance Criteria
+
+## 6.1 Overview
+
+The Hunter Exam Trainer shall be considered complete when all mandatory functional and non-functional requirements have been implemented, tested, and accepted by the project coordinator. The following acceptance criteria define the minimum requirements for successful project completion.
+
+## 6.2 Functional Acceptance Criteria
+
+| ID     | Acceptance Criteria                                                  | Status |
+|--------|----------------------------------------------------------------------|--------|
+| AC-001 | Users can create an account and log in successfully.                 |        |
+| AC-002 | Users can practice questions by selecting a subject area.            |        |
+| AC-003 | The system provides immediate feedback after each practice question. |        |
+| AC-004 | Users can complete a full exam simulation containing 70 questions.   |        |
+| AC-006 | The system calculates and displays the final exam score.             |        |
+| AC-007 | Users can view their quiz history and statistics.                    |        |
+| AC-008 | Administrators can add, edit, and delete questions.                  |        |
+| AC-009 | Administrators can organize questions by subject category.           |        |
+| AC-010 | The application is fully responsive on desktop and mobile devices.   |        |
+
+## 6.3 Technical Acceptance Criteria
+
+| ID     | Acceptance Criteria                                            | Status |
+|--------|----------------------------------------------------------------|--------|
+| AC-011 | REST API communication works correctly.                        |        |
+| AC-012 | User information is stored securely in the database.           |        |
+| AC-013 | Quiz results are stored successfully.                          |        |
+| AC-014 | The application is installable as a Progressive Web App (PWA). |        |
+| AC-015 | Authentication prevents unauthorized access.                   |        |
+
+## 6.4 Quality Acceptance Criteria
+
+| ID     | Acceptance Criteria                                              | Status |
+|--------|------------------------------------------------------------------|--------|
+| AC-016 | The application provides a consistent user interface.            |        |
+| AC-017 | Navigation is intuitive and easy to use.                         |        |
+| AC-018 | Error messages are clear and understandable.                     |        |
+| AC-019 | The application performs without major bugs during user testing. |        |
+| AC-020 | All mandatory project documentation has been completed.          |        |
+
+## 6.5 Documentation Deliverables
+
+The following documents shall be completed before project delivery:
+
+- Software Requirements Specification (SRS)
+- Database Design
+- API Documentation
+- Test Plan
+- Test Report
+- User Guide
+- Final Project Presentation
+
+## 6.6 Final Approval
+
+The project shall be considered successfully completed when:
+
+- All mandatory acceptance criteria have been satisfied.
+- The application has been demonstrated successfully.
+- The project coordinator has reviewed the final deliverables.
+- All required documentation has been submitted.
+
+---
+
+# 7. Future Enhancements
+
+## 7.1 Overview
+
+The Hunter Exam Trainer is designed with future scalability in mind. Although the current project focuses on delivering the Minimum Viable Product (MVP), several additional features may be implemented in future versions to improve the user experience and extend the application's functionality.
+
+## 7.2 Planned Enhancements
+
+The following features are considered potential improvements for future releases:
+
+- Random Practice Mode with questions selected from all subject areas.
+- Offline mode to allow users to practice without an internet connection.
+- Question explanations to help users understand the correct answers.
+- Bookmark or favorite questions for later review.
+- Push notifications to remind users to continue practicing.
+- Dark mode for improved accessibility and user preference.
+- Multi-language support.
+
+## 7.3 Scalability
+
+The system architecture should support future expansion without requiring major structural changes. Additional features should be implemented using the existing frontend, backend, and database architecture wherever possible.
+
+Future enhancements should follow the same development standards and coding practices established during the initial project.
+
+### Summary
+
+The future enhancements described in this chapter are outside the scope of the current internship project. They represent possible improvements that can be implemented in later versions based on user feedback, project requirements, and available development time.
