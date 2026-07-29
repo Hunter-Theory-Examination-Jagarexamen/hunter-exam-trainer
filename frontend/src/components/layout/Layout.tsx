@@ -1,5 +1,6 @@
 import Header from "./Header";
 import Sidebar from "./Sidebar";
+import "../../styles/layout.css"
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -7,13 +8,16 @@ interface LayoutProps {
 
 const Layout = ({ children } : LayoutProps) => {
     return (
-        <>
+        <div className="layout">
             <Header />
-            <Sidebar />
-            <main>
-                {children}
-            </main>
-        </>
+
+            <div className="layout-body">
+                <Sidebar />
+                <main className="main-content">
+                    {children}
+                </main>
+            </div>
+        </div>
     );
 };
 
