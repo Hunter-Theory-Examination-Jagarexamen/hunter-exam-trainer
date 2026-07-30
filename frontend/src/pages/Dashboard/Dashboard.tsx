@@ -1,5 +1,14 @@
+import PageTitle from "../../components/common/PageTitle.tsx";
+
 const Dashboard = () => {
-    return <h2>Dashboard</h2>;
+    return (
+        <div className="dashboard">
+            <PageTitle
+                title="Dashboard"
+                subtitle="Track your learning progress."
+            />
+        </div>
+    );
 };
 
 export default Dashboard;
