@@ -1,0 +1,33 @@
+.sidebar {
+    width: 260px;
+    min-height: calc(100vh - 70vh);
+    background: var(--color-primary);
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 24px;
+    color: white;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.sidebar-nav a:hover {
+    background: var(--color-secondary);
+}
+
+.sidebar-nav a.active {
+    background: var(--color-secondary);
+    border-left: 5px solid white;
+    font-weight: 600;
+}
+
+
+
