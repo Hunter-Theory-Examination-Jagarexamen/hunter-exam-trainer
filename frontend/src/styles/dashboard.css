@@ -9,7 +9,7 @@
     gap: 1.5rem;
 }
 
-.dashboard-section {
+.dashboard-section:not(:first-child) {
     margin-top: 2rem;
 }
 
