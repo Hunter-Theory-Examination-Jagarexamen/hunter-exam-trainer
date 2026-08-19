@@ -1,0 +1,96 @@
+.practice-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.practice-card {
+    background-color: var(--color-surface);
+    border-radius: 12px;
+    padding: 1.75rem;
+    width: 250px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.icon-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.icon-circle--green {
+    background: color-mix(in srgb, var(--color-success) 15%, transparent);
+    color: var(--color-success);
+}
+
+.icon-circle--amber {
+    background: color-mix(in srgb, var(--color-warning) 15%, transparent);
+    color: var(--color-warning);
+}
+
+.icon-circle--blue {
+    background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+    color: var(--color-primary);
+}
+
+.practice-title h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.practice-title p {
+    font-size: 14px;
+    color: var(--color-primary);
+}
+
+.practice-features {
+    list-style: none;
+    margin: 1.25rem 0;
+    padding: 0;
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.practice-features li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.check-icon {
+    color: var(--color-primary);
+    flex-shrink: 0;
+}
+
+.practice-button {
+    margin-top: auto;
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid var(--color-primary);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--color-primary);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.practice-button:hover {
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}

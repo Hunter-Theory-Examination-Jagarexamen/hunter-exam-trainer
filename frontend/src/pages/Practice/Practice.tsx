@@ -1,8 +1,16 @@
+import PageTitle from "../../components/common/PageTitle.tsx";
+import PracticeCards from "../../components/practice/PracticeCards.tsx";
 
 const Practice = () => {
     return (
         <div>
-            <h2>Practice Page</h2>
+            <PageTitle
+                title="Practice"
+                subtitle="Choose a mode to start practicing."
+            />
+
+            <PracticeCards />
+
         </div>
     );
 };
