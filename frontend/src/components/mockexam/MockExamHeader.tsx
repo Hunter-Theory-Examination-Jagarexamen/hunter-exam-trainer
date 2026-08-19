@@ -2,8 +2,8 @@ import "../../styles/mockexam.css";
 
 const MockExamHeader = () => {
     return (
-        <section className="mockexam-header" >
-            <h2 >Exam Overview</h2>
+        <section className="mockExam-header" >
+            <h2>Exam Overview</h2>
 
             <div className="exam-details">
                 <div className="exam-detail">

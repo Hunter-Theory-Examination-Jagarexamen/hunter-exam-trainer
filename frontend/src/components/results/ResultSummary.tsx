@@ -19,7 +19,7 @@ const ResultSummary = ({
     return (
         <section className="result-summary">
 
-            <div className="result-score">
+            <div className={`result-score ${score < 80 ? "result-score--low" : ""}`}>
                 <span>{score}%</span>
                 <p>
                     {correctAnswers} / {totalQuestions} Correct

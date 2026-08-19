@@ -1,4 +1,4 @@
-.mockexam {
+.mockExam {
     display: flex;
     flex-direction: column;
     gap: 2rem;
@@ -6,15 +6,15 @@
 
 /* Common Section */
 
-.mockexam-section {
+.mockExam-section {
     background: var(--color-surface);
-    padding: 1.5rem;
+    padding: 1.15rem;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0,0,0,.08);
 }
 
-.mockexam-section h2 {
-    margin-bottom: 1.5rem;
+.mockExam-section h2 {
+    margin-bottom: 1rem;
 }
 
 /* Exam Overview */

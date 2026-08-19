@@ -2,7 +2,7 @@ import "../../styles/mockexam.css";
 
 const ExamInstructions = () => {
     return (
-        <section className="mockexam-section">
+        <section className="mockExam-section">
 
             <h2>Instructions</h2>
 

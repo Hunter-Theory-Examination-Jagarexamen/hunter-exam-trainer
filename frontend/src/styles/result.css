@@ -21,6 +21,10 @@
     line-height: 1;
 }
 
+.result-score--low span{
+    color: var(--color-danger);
+}
+
 .result-score p {
     margin-top: 8px;
     font-size: 0.95rem;
