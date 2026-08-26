@@ -1,10 +1,9 @@
-import LoginForm from "../../components/auth/LoginForm";
+import RegisterForm from "../../components/auth/RegisterForm";
 import logo from "../../assets/images/logo.svg";
-import "../../styles/auth.css";
 
-const Login = () => {
+const Register = () => {
     return (
-        <div className="auth-page login">
+        <div className="auth-page register">
 
             <div className="auth-brand-panel">
                 <div className="auth-brand-content">
@@ -13,14 +12,16 @@ const Login = () => {
                     </div>
                     <h1>HUNTER EXAM TRAINER</h1>
                     <p>
-                        The best way to prepare for the hunter exam.
+                        Create an account to track your progress
+                        and improve your results.
                     </p>
                 </div>
             </div>
 
-            <LoginForm />
+            <RegisterForm />
+
         </div>
     );
 };
 
-export default Login;
+export default Register;

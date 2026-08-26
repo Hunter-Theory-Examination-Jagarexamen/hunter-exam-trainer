@@ -7,4 +7,10 @@
 
     --color-border: #E5E7EB;
     --color-text: #2C2C2C;
+
+    --color-success: #16a34a;
+    --color-warning: #d97706;
+    --color-danger: #dc2626;
+
+    --color-text-muted: #6b7280;
 }
