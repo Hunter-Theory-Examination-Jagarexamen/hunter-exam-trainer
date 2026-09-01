@@ -1,6 +1,7 @@
 package com.hunterexam.backend.controller;
 
 import com.hunterexam.backend.dto.LoginRequest;
+import com.hunterexam.backend.dto.LoginResponse;
 import com.hunterexam.backend.dto.RegisterRequest;
 import com.hunterexam.backend.dto.RegisterResponse;
 import com.hunterexam.backend.entity.User;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
 
     private final AuthService authService;
@@ -40,10 +40,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
 
-        authService.login(request);
+        String token = authService.login(request);
 
-        return ResponseEntity.ok("Login successful");
+        LoginResponse response = new LoginResponse(token, "Bearer");
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("JWT authentication is working.");
     }
 }

@@ -1,8 +1,9 @@
 import {useState} from "react";
 import { useNavigate } from "react-router-dom";
-import {Eye, EyeOff, Lock, Mail, UserRound} from "lucide-react";
+import {Eye, EyeOff, Lock, Mail} from "lucide-react";
 import logo from "../../assets/images/logo.svg";
 import "../../styles/auth.css";
+import {loginUser} from "../../services/authService.ts";
 
 const LoginForm = () => {
 
@@ -12,8 +13,9 @@ const LoginForm = () => {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if(!email || !password) {
@@ -21,8 +23,23 @@ const LoginForm = () => {
             return;
         }
 
-        console.log("Email:", email);
-        console.log("Password:", password);
+        try {
+            setIsLoading(true);
+
+            const response = await loginUser({
+                email,
+                password,
+            });
+
+            localStorage.setItem("token", response.token);
+            navigate("/dashboard");
+
+        } catch (error) {
+            alert("Invalid email or password");
+        } finally {
+            setIsLoading(false);
+        }
+
     };
 
     return (
@@ -94,8 +111,9 @@ const LoginForm = () => {
                 <button
                     type="submit"
                     className="auth-primary-button"
+                    disabled={isLoading}
                 >
-                    Log In
+                    {isLoading ? "Logging in..." : "Log In"}
                 </button>
             </form>
 

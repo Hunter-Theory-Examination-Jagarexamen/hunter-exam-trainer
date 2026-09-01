@@ -4,6 +4,7 @@ import com.hunterexam.backend.dto.LoginRequest;
 import com.hunterexam.backend.dto.RegisterRequest;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.repository.UserRepository;
+import com.hunterexam.backend.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,10 +15,16 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService) {
+
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     public User register(RegisterRequest request) {
@@ -35,19 +42,14 @@ public class AuthService {
         return userRepository.save(user);
     }
 
-    public void login(LoginRequest request) {
+    public String login(LoginRequest request) {
 
         if(request == null) {
             throw new RuntimeException("Login request cannot be null");
         }
 
-        Optional<User> optionalUser = userRepository.findByEmail(request.getEmail());
-
-        if (optionalUser.isEmpty()) {
-            throw new RuntimeException("Invalid Email or Password");
-        }
-
-        User user = optionalUser.get();
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
 
         if (!passwordEncoder.matches(
                 request.getPassword(),
@@ -55,6 +57,9 @@ public class AuthService {
             throw new RuntimeException("Invalid Email or Password");
         }
 
-        System.out.println("Login successful for: " + request.getEmail());
+        return jwtService.generateToken(
+                user.getEmail(),
+                user.getRole()
+        );
     }
 }
