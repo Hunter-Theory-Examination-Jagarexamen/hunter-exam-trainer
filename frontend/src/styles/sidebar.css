@@ -9,7 +9,7 @@
     flex-direction: column;
 }
 
-.sidebar-nav a {
+.sidebar-nav a, .sidebar-nav button {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -19,7 +19,15 @@
     transition: all 0.2s ease;
 }
 
-.sidebar-nav a:hover {
+.sidebar-nav button {
+    border: none;
+    background: transparent;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.sidebar-nav a:hover, .sidebar-nav button:hover {
     background: var(--color-secondary);
 }
 
@@ -28,6 +36,3 @@
     border-left: 5px solid white;
     font-weight: 600;
 }
-
-
-

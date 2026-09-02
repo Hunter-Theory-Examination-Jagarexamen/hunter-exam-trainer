@@ -7,11 +7,18 @@ import {
     LogOut,
     User
 } from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
+import {NavLink, useLocation, useNavigate} from "react-router-dom";
 
 const Sidebar = () => {
 
     const location = useLocation();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+
+        localStorage.removeItem("token");
+        navigate("/login");
+    }
 
     return (
 
@@ -51,10 +58,13 @@ const Sidebar = () => {
                     Profile
                 </NavLink>
 
-                <NavLink to="/logout">
+                <button
+                    type="button"
+                    onClick={handleLogout}
+                >
                     <LogOut size={20} />
                     Logout
-                </NavLink>
+                </button>
 
             </nav>
         </aside>
