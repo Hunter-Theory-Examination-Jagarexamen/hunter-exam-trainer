@@ -2,7 +2,8 @@ import {ArrowRight, BookOpen} from "lucide-react";
 import "../../styles/practice.css";
 import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
-import type {Subject} from "../../types/subject.ts";
+import type { Subject } from "../../types/subject.ts";
+import {subjectIcons} from "../../types/subjects.ts";
 import apiClient from "../../api/apiClient.ts";
 
 const SubjectCards = () => {
@@ -51,12 +52,14 @@ const SubjectCards = () => {
 
             {subjects.map((subject) => {
 
+                const Icon = subjectIcons[subject.name] ?? BookOpen;
+
                 return (
 
                     <div className="subject-card" key={subject.id}>
                         <div className="subject-card-header">
                             <div className="subject-icon">
-                                <BookOpen size={24} />
+                                <Icon size={24} />
                             </div>
                             <div>
                                 <h3>{subject.name}</h3>

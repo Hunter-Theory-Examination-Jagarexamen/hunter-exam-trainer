@@ -33,7 +33,15 @@ const PracticeQuestion = ({
                         <label
                             key={option.id}
                             className={`practice-answer ${
-                                selectedAnswer === option.id ? "selected" : ""
+                                selectedAnswer === option.id 
+                                    ? showFeedback 
+                                        ? option.isCorrect 
+                                            ? "correct" 
+                                            : "incorrect"
+                                        : "selected"
+                                    : showFeedback && option.isCorrect 
+                                        ? "correct" 
+                                        : ""
                             }`}
                         >
                             <input

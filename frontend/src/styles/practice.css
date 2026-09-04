@@ -247,6 +247,16 @@ Practice Subject-Wise Questions
     border-color: var(--color-primary);
 }
 
+.practice-answer.correct {
+    background-color: #d1fae5;
+    border-color: #22c55e;
+}
+
+.practice-answer.incorrect {
+    background-color: #fee2e2;
+    border-color: #ef4444;
+}
+
 .practice-answer input {
     margin: 0;
 }

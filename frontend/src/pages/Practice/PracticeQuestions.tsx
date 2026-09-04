@@ -1,25 +1,94 @@
-import {useParams} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import PageTitle from "../../components/common/PageTitle";
-import PracticeQuestion from "../../components/practice/PracticeQuestion.tsx";
-import PracticeNavigation from "../../components/practice/PracticeNavigation.tsx";
-import {practiceQuestions} from "../../types/practiceQuestions.ts";
-import {useState} from "react";
+import PracticeQuestion from "../../components/practice/PracticeQuestion";
+import PracticeNavigation from "../../components/practice/PracticeNavigation";
+import type { PracticeQuestion as PracticeQuestionType } from "../../types/practiceQuestions";
+import {useEffect, useState} from "react";
+import type {Question} from "../../types/question.ts";
+import apiClient from "../../api/apiClient.ts";
 
 const PracticeQuestions = () => {
 
+    const navigate = useNavigate();
     const { subject } = useParams();
 
-    const questions = practiceQuestions.filter(
-        (question) =>
-            question.subjectArea.toLowerCase() === subject?.toLowerCase()
-    );
+    const [questions, setQuestions] = useState<PracticeQuestionType[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState("");
 
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+    const [showFeedback, setShowFeedback] = useState(false);
+
+    useEffect(() => {
+
+        const fetchQuestions = async () => {
+
+            if (!subject) {
+                setError("Subject not found");
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+
+                setIsLoading(true);
+                setError("");
+
+                const data: Question[]= await apiClient(`/api/questions?subjectId=${subject}`);
+
+                const mappedQuestions: PracticeQuestionType[] =
+                    data.map((question) => {
+
+                        return {
+                            id: question.id.toString(),
+                            subjectArea: question.subject.name,
+                            question: question.questionText,
+
+                            options: [
+                                {
+                                    id: "A",
+                                    answer: question.optionA,
+                                    isCorrect: question.optionA === question.correctAnswer
+                                },
+                                {
+                                    id: "B",
+                                    answer: question.optionB,
+                                    isCorrect: question.optionB === question.correctAnswer
+                                },
+                                {
+                                    id: "C",
+                                    answer: question.optionC,
+                                    isCorrect: question.optionC === question.correctAnswer
+                                },
+                                {
+                                    id: "D",
+                                    answer: question.optionD,
+                                    isCorrect: question.optionD === question.correctAnswer
+                                }
+                            ]
+                        };
+                });
+                setQuestions(mappedQuestions);
+
+                // Start from the first question whenever a subject is loaded
+                setCurrentQuestionIndex(0);
+                setSelectedAnswer(null);
+                setShowFeedback(false);
+            }
+            catch (error) {
+                console.error("Failed to fetch questions: ", error);
+                setError("Failed to load questions. Please try again");
+            }
+            finally {
+                setIsLoading(false);
+            }
+        };
+        fetchQuestions();
+
+    }, [subject]);
 
     const currentQuestion = questions[currentQuestionIndex];
-
-    const [showFeedback, setShowFeedback] = useState(false);
 
     const handleAnswerSelect = (answerId: string) => {
         setSelectedAnswer(answerId);
@@ -41,7 +110,7 @@ const PracticeQuestions = () => {
 
         } else {
 
-            console.log("Practice completed");
+            navigate("/practice/subjects");
         }
     };
 
@@ -54,6 +123,28 @@ const PracticeQuestions = () => {
             setShowFeedback(false);
         }
     };
+
+    if (isLoading) {
+        return (
+            <div>
+                <PageTitle
+                    title="Practice"
+                    subtitle="Loading questions..."
+                />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div>
+                <PageTitle
+                    title="Practice"
+                    subtitle={error}
+                />
+            </div>
+        );
+    }
 
     if (!currentQuestion) {
         return (
@@ -69,7 +160,7 @@ const PracticeQuestions = () => {
     return (
         <div className="practice-questions">
             <PageTitle
-                title={subject ?? "Practice"}
+                title={currentQuestion.subjectArea}
                 subtitle="Answer the questions and improve your knowledge."
             />
 
