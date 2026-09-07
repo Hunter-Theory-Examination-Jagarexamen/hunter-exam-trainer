@@ -1,8 +1,7 @@
 package com.hunterexam.backend.controller;
 
-import com.hunterexam.backend.entity.Subject;
+import com.hunterexam.backend.dto.SubjectResponse;
 import com.hunterexam.backend.service.SubjectService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,7 +19,7 @@ public class SubjectController {
     }
 
     @GetMapping
-    public List<Subject> getAllSubjects() {
+    public List<SubjectResponse> getAllSubjects() {
 
         return subjectService.findAllSubjects();
     }

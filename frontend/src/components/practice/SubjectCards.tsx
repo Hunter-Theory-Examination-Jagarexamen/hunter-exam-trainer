@@ -69,7 +69,7 @@ const SubjectCards = () => {
 
                         <div className="subject-card-footer">
                             <span>
-                                Start practicing
+                                {subject.questionCount} questions
                             </span>
                             <button
                                 onClick={() => navigate(`/practice/subjects/${subject.id}`)}
