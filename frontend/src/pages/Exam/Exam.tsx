@@ -2,12 +2,19 @@ import "../../styles/exam.css";
 import ExamHeader from "../../components/exam/ExamHeader";
 import QuestionPanel from "../../components/exam/QuestionPanel";
 import ExamNavigation from "../../components/exam/ExamNavigation";
-import { mockQuestions } from "../../types/mockQuestions.ts";
+import type { ExamQuestion } from "../../types/examQuestion.ts";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import apiClient from "../../api/apiClient.ts";
 
 
 const Exam = () => {
+
+    const navigate = useNavigate();
+
+    const [questions, setQuestions] = useState<ExamQuestion[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState("");
 
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
@@ -15,9 +22,32 @@ const Exam = () => {
 
     const [timeLeft, setTimeLeft] = useState(60 * 60);
 
-    const currentQuestion = mockQuestions[currentQuestionIndex];
+    useEffect(() => {
 
-    const navigate = useNavigate();
+        const fetchExamQuestions = async () => {
+
+            try {
+                setIsLoading(true);
+                setError("");
+
+                const data: ExamQuestion[] =
+                    await apiClient("/api/exam/start", {
+                        method: "POST"
+                    });
+                setQuestions(data);
+            }
+            catch (error) {
+                console.error("Failed to load exam questions.");
+                setError("Failed to load exam questions. Please try again.");
+            }
+            finally {
+                setIsLoading(false);
+            }
+        }
+        fetchExamQuestions();
+
+    }, []);
+
 
     useEffect(() => {
 
@@ -26,27 +56,34 @@ const Exam = () => {
         }
 
         const timer = setInterval(() => {
-            setTimeLeft((previousTime) => previousTime - 1);
+            setTimeLeft(
+                (previousTime) => previousTime - 1
+            );
         }, 1000);
 
         return () => clearInterval(timer);
 
     }, [timeLeft]);
 
+    const currentQuestion = questions[currentQuestionIndex];
+
     const handleAnswerChange = (answerId: string) => {
+
         setAnswers((previousAnswers) => ({
             ...previousAnswers,
             [currentQuestion.id]: answerId
         }));
-    }
+    };
 
     const handleNext = () => {
-        if (currentQuestionIndex < mockQuestions.length - 1) {
+
+        if (currentQuestionIndex < questions.length - 1) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
         }
     };
 
     const handlePrevious = () => {
+
         if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex(currentQuestionIndex - 1);
         }
@@ -54,50 +91,42 @@ const Exam = () => {
 
     const handleSubmit = () => {
 
-        let correctAnswers = 0;
-
-        mockQuestions.forEach((question) => {
-
-            const selectedAnswer = answers[question.id];
-
-            const correctOption = question.options.find(
-                (option) => option.isCorrect
-            );
-
-            if(selectedAnswer &&
-                correctOption &&
-                selectedAnswer === correctOption.id
-            ) {
-                correctAnswers++;
-            }
-        });
-
-        const totalQuestions = mockQuestions.length;
-
-        const unanswered = totalQuestions - Object.keys(answers).length;
-
-        const incorrectAnswers = totalQuestions - correctAnswers - unanswered;
-
-        const score = Math.round(
-            (correctAnswers / totalQuestions) * 100
-        );
-
-        navigate("/result", {
-            state: {
-                score,
-                correctAnswers,
-                incorrectAnswers,
-                unanswered,
-                totalQuestions
-            }
-        });
+        console.log("Answer submitted: ", answers);
+        navigate("/result");
     };
+
+    if (isLoading) {
+
+        return (
+            <div className="exam">
+                <p>Loading exam questions...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+
+        return (
+            <div className="exam">
+                <p>{error}</p>
+            </div>
+        );
+    }
+
+    if (questions.length === 0) {
+
+        return (
+            <div className="exam">
+                <p>No exam questions available.</p>
+            </div>
+        );
+    }
 
     return (
         <div className="exam">
             <ExamHeader
                 currentQuestion={currentQuestionIndex + 1}
-                totalQuestions={mockQuestions.length}
+                totalQuestions={questions.length}
                 timeLeft={timeLeft}
             />
 
@@ -112,7 +141,7 @@ const Exam = () => {
                 onNext={handleNext}
                 onSubmit={handleSubmit}
                 isFirstQuestion={currentQuestionIndex === 0}
-                isLastQuestion={currentQuestionIndex === mockQuestions.length - 1}
+                isLastQuestion={currentQuestionIndex === questions.length - 1}
             />
         </div>
     );

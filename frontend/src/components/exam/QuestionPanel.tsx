@@ -1,25 +1,35 @@
 import "../../styles/exam.css";
-import type {Question} from "../../types/mockQuestions.ts";
+import type { ExamQuestion } from "../../types/examQuestion.ts";
 
 interface QuestionPanelProps {
-    question: Question;
+    question: ExamQuestion;
     selectedAnswer?: string;
     onAnswerChange: (answerId: string) => void;
 }
 
-const QuestionPanel = (
-    { question, selectedAnswer, onAnswerChange }: QuestionPanelProps) => {
+const QuestionPanel = ({
+                           question,
+                           selectedAnswer,
+                           onAnswerChange
+}: QuestionPanelProps) => {
+
+    const options = [
+        { id: "A", text: question.optionA },
+        { id: "B", text: question.optionB },
+        { id: "C", text: question.optionC },
+        { id: "D", text: question.optionD }
+    ];
 
     return (
         <section className="question-panel">
 
             <div className="question-card">
-                <h3>{question.question}</h3>
+                <h3>{question.questionText}</h3>
             </div>
 
             <div className="answer-options">
 
-                {question.options.map((option) => (
+                {options.map((option) => (
 
                     <label
                         key={option.id}
