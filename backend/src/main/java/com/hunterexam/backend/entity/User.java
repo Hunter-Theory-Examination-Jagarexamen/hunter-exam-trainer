@@ -5,6 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
+
 @Entity
 @Getter
 @Setter
@@ -25,4 +29,7 @@ public class User {
     private String password;
 
     private String role;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
 }

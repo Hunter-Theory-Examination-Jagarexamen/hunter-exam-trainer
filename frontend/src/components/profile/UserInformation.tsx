@@ -1,13 +1,47 @@
 import "../../styles/profile.css";
-
-const user = {
-    name: "John Joseph",
-    email: "john.joseph@example.com",
-    role: "Student",
-    memberSince: "August 2026"
-}
+import {useEffect, useState} from "react";
+import apiClient from "../../api/apiClient.ts";
+import type { User } from "../../types/user.ts";
 
 const UserInformation = () => {
+
+    const [user, setUser] = useState<User>();
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+
+        const fetchUserInfo = async () => {
+            try {
+                setIsLoading(true);
+                setError("");
+
+                const data: User = await apiClient("/api/users/me");
+                setUser(data);
+            }
+            catch (error) {
+                console.error("Failed to load user details:", error);
+                setError("Failed to load User details. Please try again");
+            }
+            finally {
+                setIsLoading(false);
+            }
+        };
+        void fetchUserInfo();
+    }, []);
+
+    if (isLoading) {
+        return <p>Loading User details...</p>;
+    }
+
+    if (error) {
+        return <p>{error}</p>;
+    }
+
+    if (!user) {
+        return <p>User details not available.</p>;
+    }
+
     return (
         <section className="profile-section">
             <h2>User Information</h2>
@@ -15,7 +49,7 @@ const UserInformation = () => {
             <div className="profile-card">
                 <div className="profile-row">
                     <span>Name</span>
-                    <strong>{user.name}</strong>
+                    <strong>{user.fullName}</strong>
                 </div>
                 <div className="profile-row">
                     <span>Email</span>
@@ -27,7 +61,15 @@ const UserInformation = () => {
                 </div>
                 <div className="profile-row">
                     <span>Member Since</span>
-                    <strong>{user.memberSince}</strong>
+                    <strong>
+                        {new Date(user.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                                month: "long",
+                                year: "numeric"
+                            }
+                        )}
+                    </strong>
                 </div>
             </div>
         </section>

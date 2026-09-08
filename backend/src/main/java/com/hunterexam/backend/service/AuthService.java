@@ -8,6 +8,7 @@ import com.hunterexam.backend.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -38,6 +39,7 @@ public class AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole("STUDENT");
+        user.setCreatedAt(LocalDateTime.now());
 
         return userRepository.save(user);
     }
