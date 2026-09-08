@@ -1,9 +1,11 @@
 package com.hunterexam.backend.controller;
 
 import com.hunterexam.backend.dto.ExamQuestionResponse;
+import com.hunterexam.backend.dto.ExamResultResponse;
+import com.hunterexam.backend.dto.ExamSubmitRequest;
 import com.hunterexam.backend.service.ExamService;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,5 +25,13 @@ public class ExamController {
     public List<ExamQuestionResponse> startExam() {
 
         return examService.startExam();
+    }
+
+    @PostMapping("/submit")
+    public ExamResultResponse submitExam(
+            @RequestBody ExamSubmitRequest request
+    ) {
+
+        return examService.submitExam(request);
     }
 }

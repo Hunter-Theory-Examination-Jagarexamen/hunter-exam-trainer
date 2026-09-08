@@ -89,10 +89,29 @@ const Exam = () => {
         }
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
 
-        console.log("Answer submitted: ", answers);
-        navigate("/result");
+        try {
+            const questionIds = questions.map(
+                (question) => question.id);
+
+            const result = await apiClient("/api/exam/submit", {
+                method: "POST",
+                body: JSON.stringify({
+                    questionIds,
+                    answers
+                })
+            });
+
+            console.log("Exam result: ", result);
+            navigate("/result", {
+                state: result
+            });
+        }
+        catch (error) {
+            console.error("Failed to submit exam: ", error);
+            alert("Failed to submit exam. Please try again");
+        }
     };
 
     if (isLoading) {
