@@ -15,13 +15,11 @@ const Exam = () => {
     const [questions, setQuestions] = useState<ExamQuestion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
-
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-
     const [answers, setAnswers] = useState<Record<string, string>>({});
+    const [timeLeft, setTimeLeft] = useState(60);
 
-    const [timeLeft, setTimeLeft] = useState(60 * 60);
-
+    //Load exam questions
     useEffect(() => {
 
         const fetchExamQuestions = async () => {
@@ -43,12 +41,12 @@ const Exam = () => {
             finally {
                 setIsLoading(false);
             }
-        }
-        fetchExamQuestions();
+        };
 
+        void fetchExamQuestions();
     }, []);
 
-
+    // Timer
     useEffect(() => {
 
         if (timeLeft <= 0) {
@@ -65,10 +63,16 @@ const Exam = () => {
 
     }, [timeLeft]);
 
+    //Auto-submit when time runs out
+    useEffect(() => {
+        if (timeLeft === 0) {
+            void submitExam();
+        }
+    }, [timeLeft]);
+
     const currentQuestion = questions[currentQuestionIndex];
 
     const handleAnswerChange = (answerId: string) => {
-
         setAnswers((previousAnswers) => ({
             ...previousAnswers,
             [currentQuestion.id]: answerId
@@ -76,20 +80,18 @@ const Exam = () => {
     };
 
     const handleNext = () => {
-
         if (currentQuestionIndex < questions.length - 1) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
         }
     };
 
     const handlePrevious = () => {
-
         if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex(currentQuestionIndex - 1);
         }
     };
 
-    const handleSubmit = async () => {
+    const submitExam = async () => {
 
         try {
             const questionIds = questions.map(
@@ -114,8 +116,11 @@ const Exam = () => {
         }
     };
 
-    if (isLoading) {
+    const handleSubmit = () => {
+        void submitExam();
+    };
 
+    if (isLoading) {
         return (
             <div className="exam">
                 <p>Loading exam questions...</p>
@@ -124,7 +129,6 @@ const Exam = () => {
     }
 
     if (error) {
-
         return (
             <div className="exam">
                 <p>{error}</p>
@@ -133,7 +137,6 @@ const Exam = () => {
     }
 
     if (questions.length === 0) {
-
         return (
             <div className="exam">
                 <p>No exam questions available.</p>
