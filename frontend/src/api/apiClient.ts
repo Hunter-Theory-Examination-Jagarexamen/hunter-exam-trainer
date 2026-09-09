@@ -36,7 +36,13 @@ const apiClient = async (
         return null;
     }
 
-    return response.json();
+    const contentType = response.headers.get("content-type");
+
+    if(contentType?.includes("application/json")) {
+        return response.json();
+    }
+
+    return response.text();
 };
 
 export default apiClient;

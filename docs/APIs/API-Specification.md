@@ -5,6 +5,7 @@
 | POST   | /api/auth/register         | Register new user            |
 | POST   | /api/auth/login            | User login                   |
 | GET    | /api/users/me              | Get logged-in user's profile |
+| PUT    | /api/users/me/password     | Change user's password       |
 | GET    | /api/subjects              | List all subject areas       |
 | GET    | /api/questions             | List all questions           |
 | GET    | /api/questions/{id}        | Get a specific question      |
