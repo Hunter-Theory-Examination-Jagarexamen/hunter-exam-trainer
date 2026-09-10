@@ -1,6 +1,7 @@
 package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.DashboardResponse;
+import com.hunterexam.backend.dto.RecentActivityResponse;
 import com.hunterexam.backend.entity.ExamResult;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.repository.ExamResultRepository;
@@ -57,5 +58,24 @@ public class DashboardService {
                 averageScore,
                 bestScore
         );
+    }
+
+    public List<RecentActivityResponse> getRecentActivity(String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<ExamResult> results = examResultRepository.findByUserOrderByCompletedAtDesc(user);
+
+        return results.stream()
+                .limit(5)
+                .map(result -> new RecentActivityResponse(
+                        result.getId(),
+                        result.getCorrectAnswers(),
+                        result.getTotalQuestions(),
+                        result.getScore(),
+                        result.getCompletedAt()
+                ))
+                .toList();
     }
 }

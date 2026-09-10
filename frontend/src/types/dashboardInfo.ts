@@ -5,3 +5,12 @@ export interface DashboardInfo {
     averageScore: number;
     bestScore: number;
 }
+
+export interface RecentActivity {
+
+    id: number;
+    correctAnswers: number;
+    totalQuestions: number;
+    score: number;
+    completedAt: string;
+}
