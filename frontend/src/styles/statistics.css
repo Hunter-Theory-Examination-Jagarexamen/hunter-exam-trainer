@@ -50,7 +50,9 @@
     box-shadow: 0 2px 8px rgba(0,0,0,.08);
 }
 
-.recent-results, .performance-result {
+/* Recent Results */
+.recent-results,
+.performance-result {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -58,19 +60,31 @@
     border-bottom: 1px solid var(--color-border);
 }
 
-.result-icon, .performance-icon {
+.recent-results:last-child,
+.performance-result:last-child {
+    border-bottom: none;
+}
+
+.recent-result-icon,
+.performance-icon {
     color: var(--color-primary);
 }
 
-.result-name, .subject-title {
+.recent-result-name,
+.subject-title {
     flex: 1;
     font-weight: 500;
     font-size: 0.95rem;
 }
 
-.result-score, .subject-name {
+.recent-result-score,
+.subject-name {
     font-weight: 700;
     font-size: 1rem;
     color: var(--color-primary);
 }
 
+.recent-result-date {
+    font-size: 0.85rem;
+    color: var(--color-secondary);
+}

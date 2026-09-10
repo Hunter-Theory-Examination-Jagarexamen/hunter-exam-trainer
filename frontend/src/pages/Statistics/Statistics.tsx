@@ -4,8 +4,40 @@ import SummaryCards from "../../components/statistics/SummaryCards";
 import ProgressBar from "../../components/statistics/ProgressBar";
 import RecentResults from "../../components/statistics/RecentResults";
 import PerformanceSummary from "../../components/statistics/PerformanceSummary";
+import {useEffect, useState} from "react";
+import type {RecentActivity} from "../../types/dashboardInfo.ts";
+import apiClient from "../../api/apiClient.ts";
 
 const Statistics = () => {
+
+    const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
+
+    const [isLoadingRecent, setIsLoadingRecent] = useState(true);
+
+    const [recentError, setRecentError] = useState("");
+
+    useEffect(() => {
+        const fetchRecentResults = async () => {
+            try {
+                setIsLoadingRecent(true);
+                setRecentError("");
+
+                const data: RecentActivity[] = await apiClient("/api/dashboard/recent");
+
+                setRecentActivities(data);
+
+            } catch (error) {
+                console.error("Failed to load recent results:", error);
+                setRecentError("Failed to load recent results. Please try again.");
+
+            } finally {
+                setIsLoadingRecent(false);
+            }
+        };
+
+        void fetchRecentResults();
+    }, []);
+
     return (
         <div className="statistics">
             <PageTitle
@@ -22,11 +54,32 @@ const Statistics = () => {
             </section>
 
             <section className="dashboard-section">
+
                 <h2>Recent Results</h2>
+
                 <div className="statistics-card">
-                    <RecentResults practice="Practice Session #12" percentage={82} />
-                    <RecentResults practice="Practice Session #11" percentage={74} />
-                    <RecentResults practice="Mock Exam #2" percentage={68} />
+                    {isLoadingRecent && (
+                        <p>Loading recent results...</p>
+                    )}
+
+                    {recentError && (
+                        <p>{recentError}</p>
+                    )}
+
+                    {!isLoadingRecent &&
+                        !recentError &&
+                        recentActivities.length === 0 && (
+                            <p>No recent results yet.</p>
+                        )}
+
+                    {!isLoadingRecent &&
+                        !recentError &&
+                        recentActivities.map((activity) => (
+                            <RecentResults
+                                key={activity.id}
+                                activity={activity}
+                            />
+                        ))}
                 </div>
             </section>
 
