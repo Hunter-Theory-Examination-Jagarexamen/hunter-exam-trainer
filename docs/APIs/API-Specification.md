@@ -13,6 +13,7 @@
 | POST   | /api/practice/start        | Start a practice session     |
 | POST   | /api/exam/start            | Start a mock exam            |
 | POST   | /api/exam/submit           | Submit exam answers          |
+| GET    | /api/dashbaord             | Get Dashboard information    |
 | GET    | /api/results               | View previous results        |
 | GET    | /api/statistics            | View learning statistics     |
 | GET    | /api/admin/questions       | List all questions (Admin)   |

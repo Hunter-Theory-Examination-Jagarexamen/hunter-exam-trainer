@@ -3,10 +3,15 @@ package com.hunterexam.backend.service;
 import com.hunterexam.backend.dto.ExamQuestionResponse;
 import com.hunterexam.backend.dto.ExamResultResponse;
 import com.hunterexam.backend.dto.ExamSubmitRequest;
+import com.hunterexam.backend.entity.ExamResult;
 import com.hunterexam.backend.entity.Question;
+import com.hunterexam.backend.entity.User;
+import com.hunterexam.backend.repository.ExamResultRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
+import com.hunterexam.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -15,9 +20,17 @@ import java.util.Map;
 public class ExamService {
 
     private final QuestionRepository questionRepository;
+    private final ExamResultRepository examResultRepository;
+    private final UserRepository userRepository;
 
-    public ExamService(QuestionRepository questionRepository) {
+    public ExamService(
+            QuestionRepository questionRepository,
+            ExamResultRepository examResultRepository,
+            UserRepository userRepository
+    ) {
         this.questionRepository = questionRepository;
+        this.examResultRepository = examResultRepository;
+        this.userRepository = userRepository;
     }
 
     public List<ExamQuestionResponse> startExam() {
@@ -45,7 +58,10 @@ public class ExamService {
                 .toList();
     }
 
-    public ExamResultResponse submitExam(ExamSubmitRequest request) {
+    public ExamResultResponse submitExam(
+            ExamSubmitRequest request,
+            String email
+    ) {
 
         List<Long> questionIds = request.getQuestionIds();
         Map<String, String> answers = request.getAnswers();
@@ -96,6 +112,21 @@ public class ExamService {
         long score = Math.round(
                 ((double) correctAnswers / totalQuestions) * 100
         );
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        ExamResult examResult = new ExamResult();
+
+        examResult.setTotalQuestions((int) totalQuestions);
+        examResult.setCorrectAnswers((int) correctAnswers);
+        examResult.setIncorrectAnswers((int) incorrectAnswers);
+        examResult.setUnanswered((int) unanswered);
+        examResult.setScore((int) score);
+        examResult.setCompletedAt(LocalDateTime.now());
+        examResult.setUser(user);
+
+        examResultRepository.save(examResult);
 
         return new ExamResultResponse(
                 totalQuestions,
