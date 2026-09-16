@@ -125,21 +125,13 @@ const PracticeQuestions = () => {
                 return;
             }
 
-            const selectedOption = currentQuestion.options.find(
-                (option) => option.id === selectedAnswer
-            );
-
-            const finalCorrectAnswers =
-                correctAnswers +
-                (selectedOption?.isCorrect ? 1 : 0);
-
             try {
 
                 await apiClient("/api/practice/results", {
                     method: "POST",
                     body: JSON.stringify({
                         subjectId: Number(subject),
-                        correctAnswers: finalCorrectAnswers,
+                        correctAnswers: correctAnswers,
                         totalQuestions: questions.length
                     })
                 });
