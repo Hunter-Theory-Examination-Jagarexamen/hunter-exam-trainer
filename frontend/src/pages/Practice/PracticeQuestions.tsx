@@ -19,6 +19,7 @@ const PracticeQuestions = () => {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
     const [showFeedback, setShowFeedback] = useState(false);
+    const [correctAnswers, setCorrectAnswers] = useState(0);
 
     useEffect(() => {
 
@@ -75,6 +76,7 @@ const PracticeQuestions = () => {
                 setCurrentQuestionIndex(0);
                 setSelectedAnswer(null);
                 setShowFeedback(false);
+                setCorrectAnswers(0);
             }
             catch (error) {
                 console.error("Failed to fetch questions: ", error);
@@ -95,12 +97,21 @@ const PracticeQuestions = () => {
     }
 
     const handleCheckAnswer = () => {
-        if (selectedAnswer) {
-            setShowFeedback(true);
+        if (!selectedAnswer) {
+            return;
         }
+        const selectedOption = currentQuestion.options.find(
+            (option) => option.id === selectedAnswer
+        );
+
+        if (selectedOption?.isCorrect) {
+            setCorrectAnswers((previous) => previous + 1);
+        }
+
+        setShowFeedback(true);
     };
 
-    const handleNext = () => {
+    const handleNext = async () => {
 
         if (currentQuestionIndex < questions.length - 1) {
 
@@ -110,7 +121,35 @@ const PracticeQuestions = () => {
 
         } else {
 
-            navigate("/practice/subjects");
+            if (!subject) {
+                return;
+            }
+
+            const selectedOption = currentQuestion.options.find(
+                (option) => option.id === selectedAnswer
+            );
+
+            const finalCorrectAnswers =
+                correctAnswers +
+                (selectedOption?.isCorrect ? 1 : 0);
+
+            try {
+
+                await apiClient("/api/practice/results", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        subjectId: Number(subject),
+                        correctAnswers: finalCorrectAnswers,
+                        totalQuestions: questions.length
+                    })
+                });
+
+                navigate("/practice/subjects");
+
+            } catch (error) {
+
+                console.error("Failed to save practice result:", error);
+            }
         }
     };
 

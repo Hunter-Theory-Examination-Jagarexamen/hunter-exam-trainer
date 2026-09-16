@@ -4,17 +4,20 @@ import SummaryCards from "../../components/statistics/SummaryCards";
 import ProgressBar from "../../components/statistics/ProgressBar";
 import RecentResults from "../../components/statistics/RecentResults";
 import PerformanceSummary from "../../components/statistics/PerformanceSummary";
-import {useEffect, useState} from "react";
-import type {RecentActivity} from "../../types/dashboardInfo.ts";
+import { useEffect, useState } from "react";
+import type { RecentActivity } from "../../types/dashboardInfo.ts";
 import apiClient from "../../api/apiClient.ts";
+import type { SubjectPerformance } from "../../types/subjectPerformance.ts";
 
 const Statistics = () => {
 
     const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
-
     const [isLoadingRecent, setIsLoadingRecent] = useState(true);
-
     const [recentError, setRecentError] = useState("");
+
+    const [subjectPerformance, setSubjectPerformance] = useState<SubjectPerformance[]>([]);
+    const [isLoadingProgress, setIsLoadingProgress] = useState(true);
+    const [progressError, setProgressError] = useState("");
 
     useEffect(() => {
         const fetchRecentResults = async () => {
@@ -38,6 +41,52 @@ const Statistics = () => {
         void fetchRecentResults();
     }, []);
 
+    useEffect(() => {
+        const fetchSubjectPerformance = async () => {
+
+            try {
+                setIsLoadingProgress(true);
+                setProgressError("");
+
+                const data: SubjectPerformance[] =
+                    await apiClient("/api/statistics/subjects");
+
+                setSubjectPerformance(data);
+
+            } catch (error) {
+
+                console.error("Failed to load subject performance:", error);
+
+                setProgressError(
+                    "Failed to load subject performance. Please try again."
+                );
+
+            } finally {
+                setIsLoadingProgress(false);
+            }
+        };
+
+        void fetchSubjectPerformance();
+    }, []);
+
+    const strongestSubject =
+        subjectPerformance.length > 0
+            ? subjectPerformance.reduce((strongest, current) =>
+                current.percentage > strongest.percentage
+                    ? current
+                    : strongest
+            )
+            : null;
+
+    const needsImprovement =
+        subjectPerformance.length > 0
+            ? subjectPerformance.reduce((lowest, current) =>
+                current.percentage < lowest.percentage
+                    ? current
+                    : lowest
+            )
+            : null;
+
     return (
         <div className="statistics">
             <PageTitle
@@ -48,9 +97,33 @@ const Statistics = () => {
 
             <section className="dashboard-section">
                 <h2>Performance by Subject</h2>
-                <ProgressBar subject="Hunting Laws" percentage={65}/>
-                <ProgressBar subject="Weapons & Equipment" percentage={74}/>
-                <ProgressBar subject="Dog Handling" percentage={58}/>
+                {isLoadingProgress && (
+                    <p>Loading subject performance...</p>
+                )}
+
+                {!isLoadingProgress && progressError && (
+                    <p>{progressError}</p>
+                )}
+
+                {!isLoadingProgress &&
+                    !progressError &&
+                    subjectPerformance.length === 0 && (
+                        <p>No practice results yet.</p>
+                    )}
+
+                {!isLoadingProgress &&
+                    !progressError &&
+                    subjectPerformance.length > 0 && (
+                        <div className="subject-performance-grid">
+                            {subjectPerformance.map((subject) => (
+                                <ProgressBar
+                                    key={subject.subjectId}
+                                    subject={subject.subjectName}
+                                    percentage={subject.percentage}
+                                />
+                            ))}
+                        </div>
+                    )}
             </section>
 
             <section className="dashboard-section">
@@ -85,11 +158,16 @@ const Statistics = () => {
 
             <section className="dashboard-section">
                 <h2>Performance Summary</h2>
+
                 <div className="statistics-card">
-                    <PerformanceSummary
-                        strongestSubject="Safety"
-                        needsImprovement="Dog Handling"
-                    />
+                    {subjectPerformance.length === 0 ? (
+                        <p>No practice results yet.</p>
+                    ) : (
+                        <PerformanceSummary
+                            strongestSubject={strongestSubject?.subjectName ?? ""}
+                            needsImprovement={needsImprovement?.subjectName ?? ""}
+                        />
+                    )}
                 </div>
             </section>
         </div>

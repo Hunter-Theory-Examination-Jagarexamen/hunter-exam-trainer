@@ -5,7 +5,9 @@ interface ProgressBarProps {
     percentage: number;
 }
 
-const ProgressBar = ({ subject, percentage }: ProgressBarProps) => {
+const ProgressBar = (
+    { subject, percentage }: ProgressBarProps) => {
+
     return (
         <section className="subject-progress">
             <div className="subject-header">

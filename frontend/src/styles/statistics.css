@@ -13,8 +13,14 @@
     gap: 1.5rem;
 }
 
+.subject-performance-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem 2rem;
+}
+
 .subject-progress {
-    margin-top: 20px;
+    margin-top: 0;
 }
 
 .subject-header {
@@ -87,4 +93,15 @@
 .recent-result-date {
     font-size: 0.85rem;
     color: var(--color-secondary);
+}
+
+
+@media (max-width: 768px) {
+
+    .subject-performance-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+
 }
