@@ -15,6 +15,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Loads initial subjects and questions into the database when the application starts.
+ * <p>
+ * Subjects and questions are stored as JSON files in the application's resources.
+ * Data is only loaded when the corresponding database table is empty.
+ */
 @Component
 public class DataInitializer implements CommandLineRunner {
 
@@ -35,7 +41,7 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        // Load subjects if the database is empty
+        // Load subjects from the JSON file when the subject table is empty.
         if (subjectRepository.count() == 0) {
 
             InputStream subjectFile =
@@ -50,7 +56,7 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("Subjects loaded: " + subjects.size());
         }
 
-        // Load subjects if the database is empty
+        // Load questions from the JSON file when the question table is empty.
         if (questionRepository.count() == 0) {
 
             InputStream questionFile =
@@ -61,6 +67,7 @@ public class DataInitializer implements CommandLineRunner {
                     new TypeReference<List<Map<String, Object>>>() {}
             );
 
+            // Create a lookup map so each question can be linked to its subject.
             Map<String, Subject> subjectsByName = subjectRepository.findAll()
                     .stream()
                     .collect(Collectors.toMap(
@@ -81,6 +88,7 @@ public class DataInitializer implements CommandLineRunner {
                         question.setCorrectAnswer((String) data.get("correctAnswer"));
                         question.setExplanation((String) data.get("explanation"));
 
+                        // Find the subject using the subject name from the JSON data.
                         String subjectName = (String) data.get("subject");
                         Subject subject = subjectsByName.get(subjectName);
 

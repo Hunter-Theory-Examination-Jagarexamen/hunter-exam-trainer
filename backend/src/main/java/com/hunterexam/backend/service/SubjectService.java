@@ -8,6 +8,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Handles retrieval of hunter-exam subjects.
+ * <p>
+ * This service fetches all available subjects along with the number of
+ * questions in each, used for the subject selection screen.
+ */
 @Service
 public class SubjectService  {
 
@@ -22,6 +28,12 @@ public class SubjectService  {
         this.questionRepository = questionRepository;
     }
 
+
+    /**
+     * Fetches all subjects along with their question count.
+     *
+     * @return list of subject responses (id, name, description and question count)
+     */
     public List<SubjectResponse> findAllSubjects() {
 
         return subjectRepository.findAll()
@@ -30,6 +42,8 @@ public class SubjectService  {
                         subject.getId(),
                         subject.getName(),
                         subject.getDescription(),
+                        // Count questions for this subject separately, since Subject
+                        // doesn't hold a direct reference to its questions.
                         questionRepository.countBySubjectId(subject.getId())
                 ))
                 .toList();

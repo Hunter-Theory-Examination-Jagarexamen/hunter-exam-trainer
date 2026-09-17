@@ -10,6 +10,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+
+/**
+ * Fetch dashboard details.
+ * <p>
+ * This service fetch the dashboard data's,
+ * including mock exams, questions answered, score, correct answers count,
+ * incorrect answers count, total questions and completed date.
+ */
 @Service
 public class DashboardService {
 
@@ -24,8 +32,18 @@ public class DashboardService {
         this.examResultRepository = examResultRepository;
     }
 
+    /**
+     * Retrieves dashboard summary details for the given user.
+     * <p>
+     * Looks up the user by email and aggregates their mock exam results
+     * (total exams, questions answered, average score, best score).
+     * <p>
+     * @param email user's email id
+     * @return the dashboard response
+     */
     public DashboardResponse getDashboard(String email) {
 
+        // Find the user using the email provided during login.
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -60,8 +78,17 @@ public class DashboardService {
         );
     }
 
+    /**
+     * Retrieves the user's most recent mock exam activity.
+     * <p>
+     * Looks up the user by email and returns their last 5 completed exam results.
+     * <p>
+     * @param email user's email id
+     * @return the list of recent activity response
+     */
     public List<RecentActivityResponse> getRecentActivity(String email) {
 
+        // Find the user using the email provided during login.
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 

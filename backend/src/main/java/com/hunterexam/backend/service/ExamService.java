@@ -16,6 +16,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Handles the mock exam workflow.
+ * <p>
+ * This service generates randomized mock exam questions and evaluates
+ * submitted exam answers, calculating the score and saving the result
+ * for the logged-in user.
+ */
 @Service
 public class ExamService {
 
@@ -33,6 +40,14 @@ public class ExamService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Starts a new mock exam.
+     * <p>
+     * Selects 70 questions at random from the full question bank.
+     * Throws an exception if fewer than 70 questions are available.
+     *
+     * @return list of exam questions (without the correct answer included)
+     */
     public List<ExamQuestionResponse> startExam() {
 
         List<Question> questions = questionRepository.findAll();
@@ -43,6 +58,7 @@ public class ExamService {
             );
         }
 
+        // Randomize question order so each exam attempt is different.
         Collections.shuffle(questions);
 
         return questions.stream()
@@ -58,6 +74,18 @@ public class ExamService {
                 .toList();
     }
 
+
+    /**
+     * Submits and evaluates a completed mock exam.
+     * <p>
+     * Compares the submitted answers against the correct answers, calculates
+     * the number of correct, incorrect and unanswered questions, computes the
+     * final score, and saves the result for the logged-in user.
+     *
+     * @param request exam submission containing the question IDs and the user's selected answers
+     * @param email   user's email id
+     * @return the exam result response, including score and answer breakdown
+     */
     public ExamResultResponse submitExam(
             ExamSubmitRequest request,
             String email
@@ -84,10 +112,12 @@ public class ExamService {
 
             String selectedAnswer = answers.get(question.getId().toString());
 
+            // Question was not answered by the user.
             if (selectedAnswer == null) {
                 continue;
             }
 
+            // Map the selected option letter (A/B/C/D) to its answer text.
             String selectedAnswerText = switch (selectedAnswer) {
                 case "A" -> question.getOptionA();
                 case "B" -> question.getOptionB();
@@ -97,6 +127,7 @@ public class ExamService {
             };
 
             if (selectedAnswerText == null) {
+                // Selected answer did not match any known option (e.g. invalid value submitted).
                 incorrectAnswers++;
             }
             else if (selectedAnswerText.equals(question.getCorrectAnswer())) {
@@ -107,12 +138,14 @@ public class ExamService {
             }
         }
 
+        // Any question not accounted for as correct/incorrect was left unanswered.
         long unanswered = totalQuestions - correctAnswers - incorrectAnswers;
 
         long score = Math.round(
                 ((double) correctAnswers / totalQuestions) * 100
         );
 
+        // Find the logged-in user to associate the result with.
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
