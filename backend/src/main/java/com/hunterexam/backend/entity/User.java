@@ -9,6 +9,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 
+/**
+ * Represents a registered user of the application.
+ * <p>
+ * Stores login credentials and profile information, and is linked to
+ * the user's practice and mock exam results.
+ */
 @Entity
 @Getter
 @Setter
@@ -25,9 +31,11 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    // Stores the BCrypt-hashed password, never plain text.
     @Column(nullable = false)
     private String password;
 
+    // e.g. "USER" or "ADMIN". Nullable for now — no default role is enforced.
     private String role;
 
     @Column(nullable = false)

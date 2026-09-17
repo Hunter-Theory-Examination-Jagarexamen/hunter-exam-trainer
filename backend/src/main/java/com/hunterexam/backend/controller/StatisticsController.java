@@ -10,6 +10,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * REST controller for user statistics.
+ * <p>
+ * Provides endpoints for retrieving the authenticated user's
+ * learning and practice performance.
+ */
 @RestController
 @RequestMapping("/api/statistics")
 public class StatisticsController {
@@ -20,6 +26,16 @@ public class StatisticsController {
         this.statisticsService = statisticsService;
     }
 
+
+    /**
+     * Returns the authenticated user's performance for practiced subjects.
+     * <p>
+     * The user's email is obtained from the JWT authentication context
+     * so that statistics are retrieved only for the currently logged-in user.
+     *
+     * @param authentication authentication information from Spring Security
+     * @return subject performance data
+     */
     @GetMapping("/subjects")
     public ResponseEntity<List<SubjectPerformanceResponse>> getSubjectPerformance(
             Authentication authentication) {

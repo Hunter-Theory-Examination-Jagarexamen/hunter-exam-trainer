@@ -7,6 +7,13 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+/**
+ * Represents the result of a single completed practice session.
+ * <p>
+ * Stores how many questions were answered correctly for a given subject,
+ * linked to the user who completed the session. Used to calculate
+ * subject performance statistics.
+ */
 @Entity
 @Getter
 @Setter
@@ -21,6 +28,7 @@ public class PracticeResult {
 
     private long totalQuestions;
 
+    // Percentage score (0–100), calculated from correctAnswers / totalQuestions.
     private long score;
 
     @Column(nullable = false)

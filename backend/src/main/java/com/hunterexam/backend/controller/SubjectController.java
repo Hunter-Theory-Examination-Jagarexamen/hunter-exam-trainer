@@ -8,6 +8,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * REST controller for hunter exam subjects.
+ * <p>
+ * Provides an endpoint for retrieving all available subjects
+ * together with their question counts.
+ */
 @RestController
 @RequestMapping("/api/subjects")
 public class SubjectController {
@@ -18,6 +24,15 @@ public class SubjectController {
         this.subjectService = subjectService;
     }
 
+
+    /**
+     * Returns all available hunter exam subjects.
+     * <p>
+     * The service also provides the number of questions available
+     * for each subject.
+     *
+     * @return list of subject information
+     */
     @GetMapping
     public List<SubjectResponse> getAllSubjects() {
 

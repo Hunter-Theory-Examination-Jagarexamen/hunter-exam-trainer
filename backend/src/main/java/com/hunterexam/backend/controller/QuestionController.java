@@ -10,6 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * REST controller for retrieving practice questions.
+ * <p>
+ * Provides endpoints for retrieving questions based on their subject.
+ */
 @RestController
 @RequestMapping("/api/questions")
 public class QuestionController {
@@ -20,8 +25,15 @@ public class QuestionController {
         this.questionService = questionService;
     }
 
+
+    /**
+     * Returns all questions belonging to a specific subject.
+     *
+     * @param subjectId ID of the subject
+     * @return list of questions for the selected subject
+     */
     @GetMapping
-    public List<Question> getQuestionsBySubject(@Valid @RequestParam Long subjectId) {
+    public List<Question> getQuestionsBySubject(@RequestParam Long subjectId) {
 
         return questionService.findBySubjectId(subjectId);
     }

@@ -5,6 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Represents a hunter-exam subject (e.g. "Jaktetik", "Ekologi").
+ * <p>
+ * Questions are grouped by subject for both practice sessions and mock exams.
+ */
 @Entity
 @Getter
 @Setter

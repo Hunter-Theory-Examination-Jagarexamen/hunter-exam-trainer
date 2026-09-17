@@ -7,6 +7,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * REST controller for the currently authenticated user.
+ * <p>
+ * Provides endpoints for retrieving user profile information
+ * and changing the user's password.
+ */
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -17,6 +23,16 @@ public class UserController {
         this.userService = userService;
     }
 
+
+    /**
+     * Returns the profile information of the currently authenticated user.
+     * <p>
+     * The user's email is obtained from the JWT authentication context,
+     * so the client does not need to provide a user ID.
+     *
+     * @param authentication authentication information from Spring Security
+     * @return information about the authenticated user
+     */
     @GetMapping("/me")
     public UserResponse getUserInfo(Authentication authentication) {
 
@@ -25,6 +41,17 @@ public class UserController {
         return userService.getUserInfo(email);
     }
 
+
+    /**
+     * Changes the password of the currently authenticated user.
+     * <p>
+     * The current password is verified before the new password is saved.
+     * If the current password is incorrect, a bad request response is returned.
+     *
+     * @param authentication authentication information from Spring Security
+     * @param request current and new password provided by the client
+     * @return success message or an error message
+     */
     @PutMapping("/me/password")
     public ResponseEntity<String> changePassword(
             Authentication authentication,

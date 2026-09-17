@@ -5,6 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Represents a single multiple-choice exam question.
+ * <p>
+ * Belongs to a subject and is used in both practice sessions and mock exams.
+ */
 @Entity
 @Getter
 @Setter
@@ -30,9 +35,11 @@ public class Question {
     @Column(nullable = false)
     private String optionD;
 
+    // Stores the correct option's text (not the letter A/B/C/D).
     @Column(nullable = false)
     private String correctAnswer;
 
+    // Optional explanation shown to the user after answering, for learning purposes.
     private String explanation;
 
     @ManyToOne(fetch = FetchType.LAZY)
