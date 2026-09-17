@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Request data used when practicing the exam.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

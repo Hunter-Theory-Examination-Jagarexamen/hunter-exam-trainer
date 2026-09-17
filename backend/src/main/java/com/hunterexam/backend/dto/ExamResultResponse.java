@@ -2,6 +2,9 @@ package com.hunterexam.backend.dto;
 
 import lombok.Getter;
 
+/**
+ * Response returned after a successful mock exam submission.
+ */
 @Getter
 public class ExamResultResponse {
 

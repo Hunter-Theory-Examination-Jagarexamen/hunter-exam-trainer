@@ -4,6 +4,12 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+/**
+ * Response containing a user's recent mock exam activity.
+ * <p>
+ * Includes the number of correct answers, total questions,
+ * score, and completion date.
+ */
 @Getter
 public class RecentActivityResponse {
 

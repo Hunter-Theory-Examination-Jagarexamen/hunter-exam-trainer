@@ -2,6 +2,12 @@ package com.hunterexam.backend.dto;
 
 import lombok.Getter;
 
+/**
+ * Response containing a question for the mock exam.
+ * <p>
+ * The correct answer is intentionally not included so that
+ * it is not exposed to the client before the exam is submitted.
+ */
 @Getter
 public class ExamQuestionResponse {
 

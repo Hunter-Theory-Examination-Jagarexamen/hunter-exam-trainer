@@ -6,6 +6,9 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Request data used when registering a new user.
+ */
 @Getter
 @Setter
 public class RegisterRequest {

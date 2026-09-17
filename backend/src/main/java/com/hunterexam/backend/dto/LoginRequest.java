@@ -5,6 +5,9 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Request data used when logging in.
+ */
 @Getter
 @Setter
 public class LoginRequest {

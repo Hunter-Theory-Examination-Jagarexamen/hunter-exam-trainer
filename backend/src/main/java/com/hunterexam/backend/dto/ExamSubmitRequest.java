@@ -7,6 +7,9 @@ import lombok.Setter;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Request data used when submitting the exam.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

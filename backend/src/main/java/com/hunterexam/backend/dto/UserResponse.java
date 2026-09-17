@@ -4,6 +4,13 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+/**
+ * Response containing the profile information of the
+ * currently authenticated user.
+ * <p>
+ * Includes the user's ID, name, email, role, and
+ * account creation date.
+ */
 @Getter
 public class UserResponse {
 

@@ -2,6 +2,12 @@ package com.hunterexam.backend.dto;
 
 import lombok.Getter;
 
+/**
+ * Response containing dashboard statistics for the authenticated user.
+ * <p>
+ * Includes the number of mock exams, questions answered,
+ * average score, and best score.
+ */
 @Getter
 public class DashboardResponse {
 
