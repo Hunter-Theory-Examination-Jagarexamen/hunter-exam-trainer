@@ -17,7 +17,7 @@ const Exam = () => {
     const [error, setError] = useState("");
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [answers, setAnswers] = useState<Record<string, string>>({});
-    const [timeLeft, setTimeLeft] = useState(60);
+    const [timeLeft, setTimeLeft] = useState(60 * 60);
 
     //Load exam questions
     useEffect(() => {
