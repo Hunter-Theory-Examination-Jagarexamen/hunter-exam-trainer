@@ -16,7 +16,7 @@ Statistics and progress tracking require user authentication.
 
 **Answer**
 
-_To be discussed._
+No, login required.
 
 ---
 
@@ -34,7 +34,7 @@ This determines the exam generation logic.
 
 **Answer**
 
-_To be discussed._
+Yes.
 
 ---
 
@@ -50,7 +50,7 @@ This affects the exam navigation and user interface.
 
 **Answer**
 
-_To be discussed._
+Yes.
 
 ---
 
@@ -62,7 +62,7 @@ Do we need to add timer for the quiz?
 
 **Answer**
 
-_To be discussed._
+Yes, 60 minutes.
 
 ---
 
@@ -80,7 +80,7 @@ This affects the result screen design.
 
 **Answer**
 
-_To be discussed._
+Correct answers can be displayed immediately in the practice mode.
 
 ---
 
