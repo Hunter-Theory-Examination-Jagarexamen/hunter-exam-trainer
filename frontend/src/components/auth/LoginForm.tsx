@@ -32,9 +32,11 @@ const LoginForm = () => {
             });
 
             localStorage.setItem("token", response.token);
+
             navigate("/dashboard");
 
         } catch (error) {
+            console.error("Login/API error:", error);
             alert("Invalid email or password");
         } finally {
             setIsLoading(false);
