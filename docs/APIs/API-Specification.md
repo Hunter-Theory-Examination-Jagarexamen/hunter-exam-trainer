@@ -1,22 +1,17 @@
 ## API Specification
 
-| Method | Endpoint                   | Purpose                      |
-|--------|----------------------------|------------------------------|
-| POST   | /api/auth/register         | Register new user            |
-| POST   | /api/auth/login            | User login                   |
-| GET    | /api/users/me              | Get logged-in user's profile |
-| PUT    | /api/users/me/password     | Change user's password       |
-| GET    | /api/subjects              | List all subject areas       |
-| GET    | /api/questions             | List all questions           |
-| GET    | /api/questions/{id}        | Get a specific question      |
-| GET    | /api/questions/{subjectId} | Get questions by subject     |
-| POST   | /api/practice/start        | Start a practice session     |
-| POST   | /api/exam/start            | Start a mock exam            |
-| POST   | /api/exam/submit           | Submit exam answers          |
-| GET    | /api/dashbaord             | Get Dashboard information    |
-| GET    | /api/results               | View previous results        |
-| GET    | /api/statistics            | View learning statistics     |
-| GET    | /api/admin/questions       | List all questions (Admin)   |
-| POST   | /api/admin/questions       | Add a new question           |
-| PUT    | /api/admin/questions/{id}  | Update a question            |
-| DELETE | /api/admin/questions/{id}  | Delete a question            |
+| Method | Endpoint                      | Purpose                                         | Authentication |
+|--------|-------------------------------|-------------------------------------------------|----------------|
+| POST   | /api/auth/register            | Register new user                               | Public         |
+| POST   | /api/auth/login               | Authenticate user and return JWT                | Public         |
+| GET    | /api/auth/test                | Test JWT authentication                         | Required       |
+| GET    | /api/users/me                 | Get logged-in user's profile                    | Required       |
+| PUT    | /api/users/me/password        | Change the logged-in user's password            | Required       |
+| GET    | /api/subjects                 | Get all subjects and question counts            | Required       |
+| GET    | /api/questions?subjectId={id} | Get questions for a specific subject            | Required       |
+| POST   | /api/practice/results         | Save a completed practice session result        | Required       |
+| POST   | /api/exam/start               | Start a mock exam and receive 70 questions      | Required       |
+| POST   | /api/exam/submit              | Submit a mock exam answers and save the result  | Required       |
+| GET    | /api/dashbaord                | Get dashboard statistics for the logged-in user | Required       |
+| GET    | /api/dashboard/recent         | Get the user's recent mock exam activity        | Required       |
+| GET    | /api/statistics/subjects      | Get the user's practice performance by subject  | Required       |
