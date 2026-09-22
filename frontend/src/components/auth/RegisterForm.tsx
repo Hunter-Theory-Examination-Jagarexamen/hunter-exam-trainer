@@ -1,3 +1,4 @@
+import apiClient from "../../api/apiClient";
 import "../../styles/auth.css";
 import {useState} from "react";
 import { useNavigate } from "react-router-dom";
@@ -17,25 +18,43 @@ const RegisterForm = () => {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [acceptedTerms, setAcceptedTerms] = useState(false);
 
-    const handleRegister = (e: React.FormEvent<HTMLFormElement>) => {
+    const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        if(!fullName || !email || !password || !confirmPassword) {
-            alert("Please fill in all the fields.");
+        if (!fullName || !email || !password || !confirmPassword) {
+            setError("Please fill in all the fields.");
             return;
         }
-        if(password !== confirmPassword) {
-            alert("Passwords do not match.");
+        if (password !== confirmPassword) {
+            setError("Passwords do not match.");
             return;
         }
-        if(!acceptedTerms) {
-            alert("Please accept the Terms of Use and Privacy Policy.");
+        if (!acceptedTerms) {
+            setError("Please accept the Terms of Use and Privacy Policy.");
             return;
         }
-        console.log("FullName:", fullName);
-        console.log("Email:", email);
-        console.log("Password:", password);
-        console.log("AcceptedTerms:", acceptedTerms);
+
+        setIsLoading(true);
+
+        try {
+            await apiClient("/api/auth/register", {
+                method: "POST",
+                body: JSON.stringify({
+                    fullName,
+                    email,
+                    password,
+                }),
+            });
+
+            navigate("/login");
+        } catch (err: any) {
+            setError(err.message || "Registration failed. Please try again.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -160,12 +179,19 @@ const RegisterForm = () => {
                     </label>
                 </div>
 
+                {error && (
+                    <p style={{ color: "#e53e3e", marginBottom: "1rem", fontSize: "0.875rem" }}>
+                        {error}
+                    </p>
+                )}
+
                 {/* Submit */}
                 <button
                     type="submit"
                     className="auth-primary-button"
+                    disabled={isLoading}
                 >
-                    Create Account
+                    {isLoading ? "Creating Account..." : "Create Account"}
                 </button>
             </form>
         </div>
