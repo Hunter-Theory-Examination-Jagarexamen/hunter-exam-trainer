@@ -1,5 +1,10 @@
 package com.hunterexam.backend.service;
 
+import com.hunterexam.backend.dto.ExamStartResponse;
+import com.hunterexam.backend.entity.ExamSession;
+import com.hunterexam.backend.repository.ExamSessionRepository;
+import java.time.Duration;
+
 import com.hunterexam.backend.dto.ExamQuestionResponse;
 import com.hunterexam.backend.dto.ExamResultResponse;
 import com.hunterexam.backend.dto.ExamSubmitRequest;
@@ -12,6 +17,7 @@ import com.hunterexam.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -26,18 +32,24 @@ import java.util.Map;
 @Service
 public class ExamService {
 
+    private static final long EXAM_TIME_LIMIT_MINUTES = 60;
+
     private final QuestionRepository questionRepository;
     private final ExamResultRepository examResultRepository;
     private final UserRepository userRepository;
 
+    private final ExamSessionRepository examSessionRepository;
+
     public ExamService(
             QuestionRepository questionRepository,
             ExamResultRepository examResultRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            ExamSessionRepository examSessionRepository
     ) {
         this.questionRepository = questionRepository;
         this.examResultRepository = examResultRepository;
         this.userRepository = userRepository;
+        this.examSessionRepository = examSessionRepository;
     }
 
     /**
@@ -48,7 +60,7 @@ public class ExamService {
      *
      * @return list of exam questions (without the correct answer included)
      */
-    public List<ExamQuestionResponse> startExam() {
+    public ExamStartResponse startExam(User user) {
 
         List<Question> questions = questionRepository.findAll();
 
@@ -61,7 +73,10 @@ public class ExamService {
         // Randomize question order so each exam attempt is different.
         Collections.shuffle(questions);
 
-        return questions.stream()
+        ExamSession session = new ExamSession(user, LocalDateTime.now());
+        ExamSession savedSession = examSessionRepository.save(session);
+
+        List<ExamQuestionResponse> questionDtos = questions.stream()
                 .limit(70)
                 .map(question -> new ExamQuestionResponse(
                         question.getId(),
@@ -72,6 +87,8 @@ public class ExamService {
                         question.getOptionD()
                 ))
                 .toList();
+
+        return new ExamStartResponse(savedSession.getId(), questionDtos);
     }
 
 
@@ -90,6 +107,29 @@ public class ExamService {
             ExamSubmitRequest request,
             String email
     ) {
+
+        Long sessionId = request.getSessionId();
+        if (sessionId == null) {
+            throw new IllegalArgumentException("Session ID is required for exam submission.");
+        }
+
+        ExamSession session = examSessionRepository.findById(sessionId)
+                .orElseThrow(() -> new IllegalArgumentException("Exam session not found with ID: " + sessionId));
+
+        if (session.isCompleted()) {
+            throw new IllegalArgumentException("This exam session has already been submitted.");
+        }
+
+        long minutesElapsed = Duration.between(session.getStartedAt(), LocalDateTime.now()).toMinutes();
+
+        if (minutesElapsed > EXAM_TIME_LIMIT_MINUTES) {
+            session.setCompleted(true);
+            examSessionRepository.save(session);
+            throw new IllegalArgumentException("Exam submission failed: Time limit of " + EXAM_TIME_LIMIT_MINUTES + " minutes exceeded.");
+        }
+
+        session.setCompleted(true);
+        examSessionRepository.save(session);
 
         List<Long> questionIds = request.getQuestionIds();
         Map<String, String> answers = request.getAnswers();
