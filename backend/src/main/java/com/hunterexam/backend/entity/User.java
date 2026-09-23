@@ -16,6 +16,7 @@ import java.util.Date;
  * the user's practice and mock exam results.
  */
 @Entity
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
