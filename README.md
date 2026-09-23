@@ -79,7 +79,7 @@ Before running the project, make sure the following are installed:
 - Maven
 - Node.js
 - npm
-- PostgreSQL (or a hosted PostgreSQL service such as Neon)
+- PostgreSQL (locally installed or via Docker)
 - Git
 - IntelliJ IDEA (recommended)
 - Postman (optional, for API testing)
@@ -101,16 +101,6 @@ git --version
 
 Follow these steps when setting up the project on a new computer:
 
-### Optional: Using Neon (hosted PostgreSQL)
-
-Instead of running PostgreSQL locally, the project can use a hosted instance on [Neon](https://neon.tech).
-
-1. Create a Neon project and copy the connection string from the dashboard.
-2. Set `spring.datasource.url` in `application.properties` to the Neon URL, for example:
-3. Set the `DB_USERNAME` and `DB_PASSWORD` environment variables to your Neon credentials.
-
-Note: the Neon **pooler** endpoint works for the running application, but if Hibernate's first-run schema creation fails with a DDL error, temporarily switch to the direct (non-pooler) endpoint.
-
 ### 1. Clone the repository
 
 Clone the repository and open the project in IntelliJ IDEA.
@@ -121,7 +111,15 @@ cd hunter-exam-trainer
 
 ### 2. Create the PostgreSQL database
 
-Create the database used by the backend:
+**Option A: Docker (recommended).** This starts PostgreSQL in a container and creates the `hunter_exam` database automatically:
+
+```bash
+docker run -d --name hunter-exam-postgres -e POSTGRES_USER=<user> -e POSTGRES_PASSWORD=<password> -e POSTGRES_DB=hunter_exam -p 5432:5432 postgres:16
+```
+
+If port 5432 is already in use on your computer, map another host port (e.g. `-p 5433:5432`) and set `DB_URL=jdbc:postgresql://localhost:5433/hunter_exam` (see Environment Variables below).
+
+**Option B: Local PostgreSQL installation.** Create the database used by the backend:
 
 ```sql
 CREATE DATABASE hunter_exam;
@@ -136,13 +134,10 @@ backend/src/main/resources/application.properties
 The current configuration uses:
 
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/hunter_exam
+spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5432/hunter_exam}
+```
 
-```
-or a hosted PostgreSQL service such as Neon
-```
-spring.datasource.url=jdbc:postgresql://ep-empty-glade-b4cs37rk-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
-```
+This means: use the `DB_URL` environment variable if it is set, otherwise connect to local PostgreSQL on port 5432.
 
 ### 3. Configure Database Credentials
 
@@ -158,7 +153,7 @@ For example, when running the backend from IntelliJ IDEA, these can be added und
 
 **Run → Edit Configurations → Environment Variables**
 
-The values should match the PostgreSQL account used on the local computer (or your Neon database user).
+The values should match the PostgreSQL account used on the local computer (or the `POSTGRES_USER`/`POSTGRES_PASSWORD` given to the Docker container).
 
 ### 4. Configure JWT Secret
 
@@ -499,15 +494,18 @@ This is useful during development and debugging.
 
 ### Environment Variables
 
-The backend requires:
+The backend reads these environment variables:
 
-```
-DB_USERNAME
-DB_PASSWORD
-JWT_SECRET
-```
+| Variable | Required | Notes |
+|---|---|---|
+| `DB_URL` | No | Defaults to `jdbc:postgresql://localhost:5432/hunter_exam`. Set it only if your database runs elsewhere (e.g. another port). |
+| `DB_USERNAME` | Yes | PostgreSQL username |
+| `DB_PASSWORD` | Yes | PostgreSQL password |
+| `JWT_SECRET` | Yes | Base64 string, at least 32 characters. **No surrounding quotes**: the value is Base64-decoded at startup, and a quote character breaks it. |
 
-These values should be configured locally and should not be committed to the repository.
+To set them in IntelliJ IDEA: **Run → Edit Configurations → (backend run configuration) → Environment variables**, click the list icon at the right of the field, and add one row per variable.
+
+These values should be configured locally and should not be committed to the repository. Do not paste them into `application.properties`.
 
 ### Frontend API Configuration
 
@@ -580,7 +578,7 @@ Check:
 
 - Java version
 - Maven installation
-- PostgreSQL is running (or Neon is reachable)
+- PostgreSQL is running
 - PostgreSQL database `hunter_exam` exists
 - `DB_USERNAME` is configured
 - `DB_PASSWORD` is configured
@@ -591,12 +589,12 @@ Check:
 Check the configuration:
 
 ```
-spring.datasource.url=jdbc:postgresql://localhost:5432/hunter_exam
+spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5432/hunter_exam}
 spring.datasource.username=${DB_USERNAME}
 spring.datasource.password=${DB_PASSWORD}
 ```
 
-Make sure the PostgreSQL server is running (or Neon is reachable) and the credentials are correct.
+Make sure the PostgreSQL server is running, the port matches (`DB_URL` if not 5432) and the credentials are correct.
 
 ### Questions or subjects are not loaded
 
@@ -630,7 +628,7 @@ Before making changes to the project:
 1. Pull the latest changes from GitHub.
 2. Make sure the backend starts successfully.
 3. Make sure the frontend starts successfully.
-4. Verify that PostgreSQL is running (or that Neon is reachable).
+4. Verify that PostgreSQL is running.
 5. Check that the required environment variables are configured.
 6. Test login before testing protected functionality.
 7. If using a new database, allow `DataInitializer` to load the initial subjects and questions.
