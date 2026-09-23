@@ -9,5 +9,5 @@ Browser --> ReactPWA
 
 ReactPWA --> SpringBoot
 
-SpringBoot --> MySQL
+SpringBoot --> PostgreSQL
 ```

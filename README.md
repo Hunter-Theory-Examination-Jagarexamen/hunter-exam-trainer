@@ -60,7 +60,7 @@ The project is built as a Progressive Web App (PWA), allowing it to run on deskt
 
 ### Database
 
-- MySQL
+- PostgreSQL
 
 ### Development Tools
 
@@ -79,7 +79,7 @@ Before running the project, make sure the following are installed:
 - Maven
 - Node.js
 - npm
-- MySQL
+- PostgreSQL (or a hosted PostgreSQL service such as Neon)
 - Git
 - IntelliJ IDEA (recommended)
 - Postman (optional, for API testing)
@@ -91,7 +91,7 @@ java -version
 mvn -version
 node -v
 npm -v
-mysql --version
+psql --version
 git --version
 ```
 
@@ -101,6 +101,16 @@ git --version
 
 Follow these steps when setting up the project on a new computer:
 
+### Optional: Using Neon (hosted PostgreSQL)
+
+Instead of running PostgreSQL locally, the project can use a hosted instance on [Neon](https://neon.tech).
+
+1. Create a Neon project and copy the connection string from the dashboard.
+2. Set `spring.datasource.url` in `application.properties` to the Neon URL, for example:
+3. Set the `DB_USERNAME` and `DB_PASSWORD` environment variables to your Neon credentials.
+
+Note: the Neon **pooler** endpoint works for the running application, but if Hibernate's first-run schema creation fails with a DDL error, temporarily switch to the direct (non-pooler) endpoint.
+
 ### 1. Clone the repository
 
 Clone the repository and open the project in IntelliJ IDEA.
@@ -109,7 +119,7 @@ git clone <repository-url>
 cd hunter-exam-trainer
 ````
 
-### 2. Create the MySQL database
+### 2. Create the PostgreSQL database
 
 Create the database used by the backend:
 
@@ -126,12 +136,17 @@ backend/src/main/resources/application.properties
 The current configuration uses:
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/hunter_exam
+spring.datasource.url=jdbc:postgresql://localhost:5432/hunter_exam
+
+```
+or a hosted PostgreSQL service such as Neon
+```
+spring.datasource.url=jdbc:postgresql://ep-empty-glade-b4cs37rk-pooler.c-6.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
 ```
 
 ### 3. Configure Database Credentials
 
-The application does not store the MySQL username and password directly in `application.properties`.
+The application does not store the PostgreSQL username and password directly in `application.properties`.
 The following environment variables must be configured:
 
 ```
@@ -143,7 +158,7 @@ For example, when running the backend from IntelliJ IDEA, these can be added und
 
 **Run → Edit Configurations → Environment Variables**
 
-The values should match the MySQL account used on the local computer.
+The values should match the PostgreSQL account used on the local computer (or your Neon database user).
 
 ### 4. Configure JWT Secret
 
@@ -152,8 +167,9 @@ The application also requires the following environment variable:
 ```
 JWT_SECRET
 ```
-
 The application uses a JWT secret for creating and validating authentication tokens.
+
+The secret must be at least 32 characters (256 bits) long, otherwise the backend will fail to start with a `WeakKeyException`.
 
 Each developer should create their **own local JWT secret**. The secret should not be committed to GitHub or shared in the repository.
 
@@ -564,8 +580,8 @@ Check:
 
 - Java version
 - Maven installation
-- MySQL is running
-- MySQL database `hunter_exam` exists
+- PostgreSQL is running (or Neon is reachable)
+- PostgreSQL database `hunter_exam` exists
 - `DB_USERNAME` is configured
 - `DB_PASSWORD` is configured
 - `JWT_SECRET` is configured
@@ -575,12 +591,12 @@ Check:
 Check the configuration:
 
 ```
-spring.datasource.url=jdbc:mysql://localhost:3306/hunter_exam
+spring.datasource.url=jdbc:postgresql://localhost:5432/hunter_exam
 spring.datasource.username=${DB_USERNAME}
 spring.datasource.password=${DB_PASSWORD}
 ```
 
-Make sure the MySQL server is running and the credentials are correct.
+Make sure the PostgreSQL server is running (or Neon is reachable) and the credentials are correct.
 
 ### Questions or subjects are not loaded
 
@@ -614,7 +630,7 @@ Before making changes to the project:
 1. Pull the latest changes from GitHub.
 2. Make sure the backend starts successfully.
 3. Make sure the frontend starts successfully.
-4. Verify that MySQL is running.
+4. Verify that PostgreSQL is running (or that Neon is reachable).
 5. Check that the required environment variables are configured.
 6. Test login before testing protected functionality.
 7. If using a new database, allow `DataInitializer` to load the initial subjects and questions.
