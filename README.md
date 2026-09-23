@@ -526,7 +526,7 @@ Possible future improvements include:
 - Question review/history
 - Improved exam result history
 - Practice mode - Random Practice
-- Improved PWA/offline functionality
+- Offline support for exam content (currently only the app shell is cached for install/fast load, not questions or results)
 - Production deployment
 - Automated backend and frontend tests
 - Improved exceptional/error handling
