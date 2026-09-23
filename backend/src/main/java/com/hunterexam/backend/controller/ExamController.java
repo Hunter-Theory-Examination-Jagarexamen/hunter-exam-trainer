@@ -1,5 +1,10 @@
 package com.hunterexam.backend.controller;
 
+import com.hunterexam.backend.dto.ExamStartResponse;
+import com.hunterexam.backend.entity.User;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
+
 import com.hunterexam.backend.dto.ExamQuestionResponse;
 import com.hunterexam.backend.dto.ExamResultResponse;
 import com.hunterexam.backend.dto.ExamSubmitRequest;
@@ -38,9 +43,9 @@ public class ExamController {
      * @return list of questions for the mock exam
      */
     @PostMapping("/start") 
-    public List<ExamQuestionResponse> startExam() {
+    public ExamStartResponse startExam(@AuthenticationPrincipal User user) {
 
-        return examService.startExam();
+        return examService.startExam(user);
     }
 
 
