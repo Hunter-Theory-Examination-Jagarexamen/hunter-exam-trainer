@@ -1,0 +1,134 @@
+.statistics {
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-section:not(:first-child) {
+    margin-top: 2rem;
+}
+
+.statistics-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 260px));
+    gap: 1.5rem;
+}
+
+.subject-performance-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem 2rem;
+}
+
+.subject-progress {
+    margin-top: 0;
+
+    width: 100%;
+
+    border: none;
+    background: transparent;
+
+    padding: 0.5rem 0.75rem;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    border-radius: 8px;
+
+    font: inherit;
+    color: inherit;
+
+    transition: background-color 0.2s ease;
+}
+
+.subject-progress:hover {
+    background-color: var(--color-surface);
+}
+
+.subject-progress:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.subject-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+
+    font-weight: 600;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 12px;
+
+    background: #dddddd;
+
+    border-radius: 20px;
+
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--color-primary);
+    border-radius: 20px;
+    transition: width 0.4s ease;
+}
+
+.statistics-card {
+    background: var(--color-surface);
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+/* Recent Results */
+.recent-results,
+.performance-result {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.recent-results:last-child,
+.performance-result:last-child {
+    border-bottom: none;
+}
+
+.recent-result-icon,
+.performance-icon {
+    color: var(--color-primary);
+}
+
+.recent-result-name,
+.subject-title {
+    flex: 1;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.recent-result-score,
+.subject-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--color-primary);
+}
+
+.recent-result-date {
+    font-size: 0.85rem;
+    color: var(--color-secondary);
+}
+
+
+@media (max-width: 768px) {
+
+    .subject-performance-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+
+}

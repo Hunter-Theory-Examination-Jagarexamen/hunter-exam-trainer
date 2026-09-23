@@ -1,0 +1,64 @@
+.result-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 500px;
+}
+
+.result-score {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 2.0rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.result-score span {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    line-height: 1;
+}
+
+.result-score--low span{
+    color: var(--color-danger);
+}
+
+.result-score p {
+    margin-top: 8px;
+    font-size: 0.95rem;
+    color: var(--color-secondary);
+}
+
+.result-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.result-details div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.result-details div:not(:last-child) {
+    border-bottom: 1px solid var(--color-border);
+}
+
+.result-details span {
+    font-size: 0.9rem;
+    color: var(--color-secondary);
+}
+
+.result-details strong {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-text);
+}

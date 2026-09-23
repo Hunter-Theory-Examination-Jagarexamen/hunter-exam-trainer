@@ -1,0 +1,1002 @@
+[
+  {
+    "subject": "Introduktion",
+    "questionText": "Hur många frågor ingår i jägarexamens teoriprov?",
+    "optionA": "50 frågor",
+    "optionB": "70 frågor",
+    "optionC": "60 frågor",
+    "optionD": "80 frågor",
+    "correctAnswer": "70 frågor",
+    "explanation": ""
+  },
+  {
+    "subject": "Introduktion",
+    "questionText": "Hur många rätt krävs för godkänt på teoriprovet?",
+    "optionA": "Minst 50 av 70",
+    "optionB": "Minst 55 av 70",
+    "optionC": "Minst 65 av 70",
+    "optionD": "Minst 60 av 70",
+    "correctAnswer": "Minst 60 av 70",
+    "explanation": ""
+  },
+  {
+    "subject": "Introduktion",
+    "questionText": "Vilka tre praktiska prov ingår i jägarexamen?",
+    "optionA": "Hagelgevär, pistol och bågskjutning",
+    "optionB": "Hagelgevär (lerduvor), grundprov kula och högviltsprov",
+    "optionC": "Gevär, pistol och eftersök",
+    "optionD": "Hagelgevär, kulgevär och jaktprov",
+    "correctAnswer": "Hagelgevär (lerduvor), grundprov kula och högviltsprov",
+    "explanation": ""
+  },
+  {
+    "subject": "Introduktion",
+    "questionText": "Vad ger jakträtten på en fastighet?",
+    "optionA": "Jakträtten söks separat hos länsstyrelsen",
+    "optionB": "Jakträtten ges automatiskt till alla jägare",
+    "optionC": "Jakträtten följer med ägd eller arrenderad mark",
+    "optionD": "Jakträtten kräver alltid tillstånd från kommunen",
+    "correctAnswer": "Jakträtten följer med ägd eller arrenderad mark",
+    "explanation": ""
+  },
+  {
+    "subject": "Introduktion",
+    "questionText": "Vad är ett viltvårdsområde (VVO)?",
+    "optionA": "En frivillig sammanslutning av markägare för gemensam jakt och viltförvaltning",
+    "optionB": "Ett statligt naturreservat",
+    "optionC": "En kommunal jaktmark öppen för allmänheten",
+    "optionD": "Ett område där all jakt är förbjuden",
+    "correctAnswer": "En frivillig sammanslutning av markägare för gemensam jakt och viltförvaltning",
+    "explanation": ""
+  },
+  {
+    "subject": "Introduktion",
+    "questionText": "Vad kallas det dokument som berättigar till jakt i Sverige?",
+    "optionA": "Jaktlicens",
+    "optionB": "Jaktpass",
+    "optionC": "Jakttillstånd",
+    "optionD": "Jaktkort",
+    "correctAnswer": "Jaktkort",
+    "explanation": ""
+  },
+  {
+    "subject": "Introduktion",
+    "questionText": "Vilken organisation ansvarar för jägarexamen i Sverige?",
+    "optionA": "Naturvårdsverket",
+    "optionB": "Svenska Jägareförbundet",
+    "optionC": "Länsstyrelsen",
+    "optionD": "Jordbruksverket",
+    "correctAnswer": "Svenska Jägareförbundet",
+    "explanation": ""
+  },
+  {
+    "subject": "Jaktetik",
+    "questionText": "Vad är grundprincipen för etisk jakt?",
+    "optionA": "Jägaren ska alltid skjuta vid första möjliga tillfälle",
+    "optionB": "Jakten ska ge maximal köttmängd",
+    "optionC": "Djuret ska dö snabbt och utan onödigt lidande",
+    "optionD": "Djuret ska alltid jagas med hund",
+    "correctAnswer": "Djuret ska dö snabbt och utan onödigt lidande",
+    "explanation": ""
+  },
+  {
+    "subject": "Jaktetik",
+    "questionText": "Vad bör jägaren alltid göra vid skadeskjutning?",
+    "optionA": "Lämna platsen och hoppas djuret överlever",
+    "optionB": "Eftersöka och avliva det skadade djuret",
+    "optionC": "Anmäla till Jägareförbundet och avvakta",
+    "optionD": "Skjuta igen omedelbart utan att byta position",
+    "correctAnswer": "Eftersöka och avliva det skadade djuret",
+    "explanation": ""
+  },
+  {
+    "subject": "Jaktetik",
+    "questionText": "Vad menas med att 'avvakta rätt tillfälle' vid jakt?",
+    "optionA": "Att vänta tills djuret sover",
+    "optionB": "Att skjuta så fort djuret är inom räckhåll",
+    "optionC": "Att alltid vänta till gryningen",
+    "optionD": "Att skjuta bara när man kan ta ett rent och säkert skott",
+    "correctAnswer": "Att skjuta bara när man kan ta ett rent och säkert skott",
+    "explanation": ""
+  },
+  {
+    "subject": "Jaktetik",
+    "questionText": "Vad innebär hänsyn mot andra människor vid jakt?",
+    "optionA": "Informera grannar, respektera friluftsliv och undvika störning",
+    "optionB": "Alltid jaga ensam",
+    "optionC": "Aldrig använda hund",
+    "optionD": "Enbart jaga på helgerna",
+    "correctAnswer": "Informera grannar, respektera friluftsliv och undvika störning",
+    "explanation": ""
+  },
+  {
+    "subject": "Jaktetik",
+    "questionText": "Hur bör jägare tänka kring publicering på sociala medier?",
+    "optionA": "Publicera allt för att sprida jaktkultur",
+    "optionB": "Undvika bilder och inlägg som kan ge en negativ bild av jakt",
+    "optionC": "Enbart publicera på privata konton",
+    "optionD": "Sociala medier är irrelevanta för jägare",
+    "correctAnswer": "Undvika bilder och inlägg som kan ge en negativ bild av jakt",
+    "explanation": ""
+  },
+  {
+    "subject": "Jaktetik",
+    "questionText": "Vad innebär 'fair chase' (sportsliga principer)?",
+    "optionA": "Att alltid använda den effektivaste teknologin",
+    "optionB": "Att jaga lika många djur som föds varje år",
+    "optionC": "Att alltid jaga i grupp",
+    "optionD": "Att ge viltet rimliga chanser och inte använda otillbörliga hjälpmedel",
+    "correctAnswer": "Att ge viltet rimliga chanser och inte använda otillbörliga hjälpmedel",
+    "explanation": ""
+  },
+  {
+    "subject": "Jaktetik",
+    "questionText": "Varför är noggrann träningskytte viktig ur ett etikperspektiv?",
+    "optionA": "För att minska risken för skadeskjutning och säkerställa snabb död",
+    "optionB": "För att träffa fler djur per jaktdag",
+    "optionC": "För att imponera på andra jägare",
+    "optionD": "Skytte-träning är inte etiskt relevant",
+    "correctAnswer": "För att minska risken för skadeskjutning och säkerställa snabb död",
+    "explanation": ""
+  },
+  {
+    "subject": "Ekologi",
+    "questionText": "Vilka fyra faktorer bestämmer en populations storlek?",
+    "optionA": "Ålder, vikt, kön och hälsa",
+    "optionB": "Föda, vatten, skydd och predatorer",
+    "optionC": "Årstider, väder, terräng och konkurrens",
+    "optionD": "Födslar (natalitet), dödsfall (mortalitet), immigration och emigration",
+    "correctAnswer": "Födslar (natalitet), dödsfall (mortalitet), immigration och emigration",
+    "explanation": ""
+  },
+  {
+    "subject": "Ekologi",
+    "questionText": "Vad är skillnaden mellan hemområde och revir?",
+    "optionA": "Hemområdet är alltid större än reviret",
+    "optionB": "Reviret försvaras aktivt mot artfränder, hemområdet gör det inte",
+    "optionC": "Det finns ingen skillnad",
+    "optionD": "Reviret är ett årstidsbundet hemområde",
+    "correctAnswer": "Reviret försvaras aktivt mot artfränder, hemområdet gör det inte",
+    "explanation": ""
+  },
+  {
+    "subject": "Ekologi",
+    "questionText": "Vad menas med att ett djur är 'territoriellt'?",
+    "optionA": "Det försvarar ett område mot andra individer av samma art",
+    "optionB": "Det lever i flock",
+    "optionC": "Det vandrar långa sträckor",
+    "optionD": "Det är nattaktivt",
+    "correctAnswer": "Det försvarar ett område mot andra individer av samma art",
+    "explanation": ""
+  },
+  {
+    "subject": "Ekologi",
+    "questionText": "Vad karakteriserar småvilt jämfört med högvilt sett till populationsdynamik?",
+    "optionA": "Småvilt har låg reproduktion och låg dödlighet",
+    "optionB": "Småvilt lever längre och reproducerar sig mer sällan",
+    "optionC": "Småvilt har hög reproduktion men också hög dödlighet",
+    "optionD": "Småvilt och högvilt har identisk populationsdynamik",
+    "correctAnswer": "Småvilt har hög reproduktion men också hög dödlighet",
+    "explanation": ""
+  },
+  {
+    "subject": "Ekologi",
+    "questionText": "Vad är licensjakt?",
+    "optionA": "Jakt som kräver speciell utbildning",
+    "optionB": "Jakt på begränsat antal djur av reglerad art med tilldelning från myndighet",
+    "optionC": "Jakt enbart tillåten för markägare",
+    "optionD": "Jakt på fredade arter med dispens",
+    "correctAnswer": "Jakt på begränsat antal djur av reglerad art med tilldelning från myndighet",
+    "explanation": ""
+  },
+  {
+    "subject": "Ekologi",
+    "questionText": "Vad är syftet med viltvård?",
+    "optionA": "Att förbättra viltets livsmiljö och säkerställa hållbara populationer",
+    "optionB": "Att enbart skydda utrotningshotade arter",
+    "optionC": "Att hålla viltpopulationer så låga som möjligt",
+    "optionD": "Att maximera antalet fällda djur per jaktdag",
+    "correctAnswer": "Att förbättra viltets livsmiljö och säkerställa hållbara populationer",
+    "explanation": ""
+  },
+  {
+    "subject": "Ekologi",
+    "questionText": "Vad kallas samspelet mellan alla levande organismer och deras icke-levande miljö?",
+    "optionA": "Biotop",
+    "optionB": "Habitat",
+    "optionC": "Ekosystem",
+    "optionD": "Biodiversitet",
+    "correctAnswer": "Ekosystem",
+    "explanation": ""
+  },
+  {
+    "subject": "Klövvilt",
+    "questionText": "Hur tung kan en vuxen älgtjur bli (levande vikt)?",
+    "optionA": "100–200 kg",
+    "optionB": "200–300 kg",
+    "optionC": "350–650 kg",
+    "optionD": "700–900 kg",
+    "correctAnswer": "350–650 kg",
+    "explanation": ""
+  },
+  {
+    "subject": "Klövvilt",
+    "questionText": "Vad kallas rådjurets horn?",
+    "optionA": "Gevir",
+    "optionB": "Råbock (eller rådjurshorn)",
+    "optionC": "Palett",
+    "optionD": "Krona",
+    "correctAnswer": "Råbock (eller rådjurshorn)",
+    "explanation": ""
+  },
+  {
+    "subject": "Klövvilt",
+    "questionText": "Hur ofta fäller hjortdjur sina horn?",
+    "optionA": "Aldrig – hornen sitter kvar livet ut",
+    "optionB": "Vart annat år",
+    "optionC": "Två gånger per år",
+    "optionD": "En gång per år",
+    "correctAnswer": "En gång per år",
+    "explanation": ""
+  },
+  {
+    "subject": "Klövvilt",
+    "questionText": "Vad är passad vikt hos klövvilt?",
+    "optionA": "Vikten av skinnet och inälvorna",
+    "optionB": "Vikten efter att inälvor tagits bort, ca 70 % av levande vikt",
+    "optionC": "Vikten av det rena köttet, ca 50 %",
+    "optionD": "Vikten med inälvor men utan huvud",
+    "correctAnswer": "Vikten efter att inälvor tagits bort, ca 70 % av levande vikt",
+    "explanation": ""
+  },
+  {
+    "subject": "Klövvilt",
+    "questionText": "Vad kallas djur vars horn sitter kvar hela livet och byggs på årligen?",
+    "optionA": "Slidhornsdjur (t.ex. getter och kor)",
+    "optionB": "Pansarhornsdjur",
+    "optionC": "Hjortdjur",
+    "optionD": "Årshornsdjur",
+    "correctAnswer": "Slidhornsdjur (t.ex. getter och kor)",
+    "explanation": ""
+  },
+  {
+    "subject": "Klövvilt",
+    "questionText": "Hur identifierar man vildsvin i fält?",
+    "optionA": "Randig päls som föl, tappar ränder vid 6 månaders ålder",
+    "optionB": "Vit fläck i pannan, lång svans",
+    "optionC": "Svart päls, stor nos, alltid i flock",
+    "optionD": "Kraftig framkropp, gles borstig päls, trynflikar och betar hos galten",
+    "correctAnswer": "Kraftig framkropp, gles borstig päls, trynflikar och betar hos galten",
+    "explanation": ""
+  },
+  {
+    "subject": "Klövvilt",
+    "questionText": "Vilken klövviltsart är minst i Sverige?",
+    "optionA": "Dåvhjort",
+    "optionB": "Mufflonfår",
+    "optionC": "Rådjur",
+    "optionD": "Kronhjort",
+    "correctAnswer": "Rådjur",
+    "explanation": ""
+  },
+  {
+    "subject": "Klövvilt",
+    "questionText": "Vad är karaktäristiskt för kronhjortens horn?",
+    "optionA": "Platta palmer som älgen",
+    "optionB": "Grenade horn med en 'krona' av taggar i toppen hos gamla djur",
+    "optionC": "Enkla spetsiga horn utan grenar",
+    "optionD": "Spiralvridna horn",
+    "correctAnswer": "Grenade horn med en 'krona' av taggar i toppen hos gamla djur",
+    "explanation": ""
+  },
+  {
+    "subject": "Övriga däggdjur",
+    "questionText": "Vilka är de fyra stora rovdjuren i Sverige?",
+    "optionA": "Björn, varg, lo och järv",
+    "optionB": "Björn, varg, räv och utter",
+    "optionC": "Varg, lo, mårdhund och grävling",
+    "optionD": "Björn, lo, lodjur och kungsörn",
+    "correctAnswer": "Björn, varg, lo och järv",
+    "explanation": ""
+  },
+  {
+    "subject": "Övriga däggdjur",
+    "questionText": "Hur känner man igen minken på ett säkert sätt?",
+    "optionA": "Minken har en lång buskig svans",
+    "optionB": "Minken har ränder längs ryggen",
+    "optionC": "Minken har orange päls",
+    "optionD": "Minken har en karaktäristisk vit haklapp",
+    "correctAnswer": "Minken har en karaktäristisk vit haklapp",
+    "explanation": ""
+  },
+  {
+    "subject": "Övriga däggdjur",
+    "questionText": "Varför bekämpas mårdhunden aktivt i Sverige?",
+    "optionA": "Den konkurrerar med räven om föda",
+    "optionB": "Den är en invasiv art som hotar inhemsk fauna, framför allt fågelägg",
+    "optionC": "Den bär på farlig smitta för nötkreatur",
+    "optionD": "Den är en skadegörare på skog",
+    "correctAnswer": "Den är en invasiv art som hotar inhemsk fauna, framför allt fågelägg",
+    "explanation": ""
+  },
+  {
+    "subject": "Övriga däggdjur",
+    "questionText": "Vad skiljer lodjuret från ett vanligt tamkatt exteriört?n aktivt i Sverige?",
+    "optionA": "Lo är mycket större, har tofsöron, kort svans och kraftiga tassar",
+    "optionB": "Lo har lång svans och randigt mönster",
+    "optionC": "Lo och tamkatt är svåra att skilja åt",
+    "optionD": "Lo har vit päls på vintern",
+    "correctAnswer": "Lo är mycket större, har tofsöron, kort svans och kraftiga tassar",
+    "explanation": ""
+  },
+  {
+    "subject": "Övriga däggdjur",
+    "questionText": "Vad är järvens mest karaktäristiska drag?",
+    "optionA": "Smal kropp, lång svans och vit buk",
+    "optionB": "Randig päls och kort nos",
+    "optionC": "Bred, kraftig kropp med ljusa sidofläckar och lång päls",
+    "optionD": "Pansarlika hornplattor på ryggen",
+    "correctAnswer": "Bred, kraftig kropp med ljusa sidofläckar och lång päls",
+    "explanation": ""
+  },
+  {
+    "subject": "Övriga däggdjur",
+    "questionText": "Vilken art är tamgåsens vilda anfader?",
+    "optionA": "Grågåsen",
+    "optionB": "Kanadagåsen",
+    "optionC": "Bläsgåsen",
+    "optionD": "Snögåsen",
+    "correctAnswer": "Grågåsen",
+    "explanation": ""
+  },
+  {
+    "subject": "Övriga däggdjur",
+    "questionText": "Vad menas med att en art är 'invasiv'?",
+    "optionA": "Den är utrotningshotad",
+    "optionB": "Den vandrar in naturligt från grannländer",
+    "optionC": "Den är introducerad utanför sitt naturliga utbredningsområde och påverkar ekosystemet negativt",
+    "optionD": "Den lever enbart i odlingslandskapet",
+    "correctAnswer": "Den är introducerad utanför sitt naturliga utbredningsområde och påverkar ekosystemet negativt",
+    "explanation": ""
+  },
+  {
+    "subject": "Fåglar: gäss & änder",
+    "questionText": "Hur lyfter simänder från vattnet?",
+    "optionA": "De springer på ytan och lyfter gradvis",
+    "optionB": "Rakt upp ur vattnet",
+    "optionC": "De dyker och dyker upp igen på en annan plats",
+    "optionD": "De springer på land och lyfter",
+    "correctAnswer": "Rakt upp ur vattnet",
+    "explanation": ""
+  },
+  {
+    "subject": "Fåglar: gäss & änder",
+    "questionText": "Hur känner man igen grågåsen?",
+    "optionA": "Svart huvud med vit kindfleck",
+    "optionB": "Vit kropp med svarta vingar",
+    "optionC": "Brun kropp med röd näbb",
+    "optionD": "Stor fågel med grå fjäderdräkt och orange näbb",
+    "correctAnswer": "Stor fågel med grå fjäderdräkt och orange näbb",
+    "explanation": ""
+  },
+  {
+    "subject": "Fåglar: gäss & änder",
+    "questionText": "Vad karaktäriserar gräsandhannen (draken)?",
+    "optionA": "Brunfläckig kropp och orange näbb",
+    "optionB": "Vit kropp med svart stjärt",
+    "optionC": "Grön huvud, vit halsring och gul näbb",
+    "optionD": "Röd hjässa och grå kropp",
+    "correctAnswer": "Grön huvud, vit halsring och gul näbb",
+    "explanation": ""
+  },
+  {
+    "subject": "Fåglar: gäss & änder",
+    "questionText": "Vad är skillnaden mellan simänder och dykänder när de dyker?",
+    "optionA": "Simänder dyker sällan; dykänder dyker regelbundet för att söka föda",
+    "optionB": "Det finns ingen skillnad",
+    "optionC": "Simänder är bättre dykare",
+    "optionD": "Dykänder dyker bara vid fara",
+    "correctAnswer": "Simänder dyker sällan; dykänder dyker regelbundet för att söka föda",
+    "explanation": ""
+  },
+  {
+    "subject": "Fåglar: gäss & änder",
+    "questionText": "Vilken vild fågelart är tamandernas anfader?",
+    "optionA": "Grågåsen",
+    "optionB": "Branta",
+    "optionC": "Bläsanden",
+    "optionD": "Gräsanden",
+    "correctAnswer": "Gräsanden",
+    "explanation": ""
+  },
+  {
+    "subject": "Fåglar: gäss & änder",
+    "questionText": "Hur lyfter dykänder från vattnet?",
+    "optionA": "De lyfter rakt upp som simänder",
+    "optionB": "De springer på vattenytan en bit innan de lyfter",
+    "optionC": "De lyfter alltid mot vinden",
+    "optionD": "De tar sats från land",
+    "correctAnswer": "De springer på vattenytan en bit innan de lyfter",
+    "explanation": ""
+  },
+  {
+    "subject": "Fåglar: gäss & änder",
+    "questionText": "Vad kallas den färggranna vingspegeln på många änderfåglars vinge?",
+    "optionA": "Vingbandet",
+    "optionB": "Spegeln (ett blankt färgat fältmönster på armpennorna)",
+    "optionC": "Armspetsen",
+    "optionD": "Täckfjädrarna",
+    "correctAnswer": "Spegeln (ett blankt färgat fältmönster på armpennorna)",
+    "explanation": ""
+  },
+  {
+    "subject": "Fåglar: övriga",
+    "questionText": "Hur känner man igen tjädertuppenunder lek?",
+    "optionA": "Han sjunger högt i trädtopparna",
+    "optionB": "Han gör ett kraftfullt dykande flykt",
+    "optionC": "Han visar sin vita buk mot honorna",
+    "optionD": "Han sprider stjärten som en solfjäder och har röda ögonrosor",
+    "correctAnswer": "Han sprider stjärten som en solfjäder och har röda ögonrosor",
+    "explanation": ""
+  },
+  {
+    "subject": "Fåglar: övriga",
+    "questionText": "Vad karaktäriserar orrhanen?",
+    "optionA": "Brun fjäderdräkt, kort stjärt",
+    "optionB": "Vit kropp med svarta vingar",
+    "optionC": "Svart med blågrön glans, lyrformad stjärt och röda ögonrosor",
+    "optionD": "Randig brun och vit fjäderdräkt",
+    "correctAnswer": "Svart med blågrön glans, lyrformad stjärt och röda ögonrosor",
+    "explanation": ""
+  },
+  {
+    "subject": "Fåglar: övriga",
+    "questionText": "Var inplanterades fasanen ursprungligen i Sverige?",
+    "optionA": "I Dalarna på 1800-talet",
+    "optionB": "I Skåne på 1700-talet",
+    "optionC": "I Norrland på 1600-talet",
+    "optionD": "I Blekinge på 1900-talet",
+    "correctAnswer": "I Skåne på 1700-talet",
+    "explanation": ""
+  },
+  {
+    "subject": "Fåglar: övriga",
+    "questionText": "Hur skiljer man kajan från svartkråkan?",
+    "optionA": "Kajan är större och har röd näbb",
+    "optionB": "Det finns ingen säker skillnad",
+    "optionC": "Kajan har vita vingar",
+    "optionD": "Kajan är mindre, har grå nacke och ljusa ögon",
+    "correctAnswer": "Kajan är mindre, har grå nacke och ljusa ögon",
+    "explanation": ""
+  },
+  {
+    "subject": "Fåglar: övriga",
+    "questionText": "Vilka fåglar räknas till kråkfåglarna (Corvidae)?",
+    "optionA": "Kråka, kaja, råka, skata, nötskrika och nötkråka",
+    "optionB": "Måsar, tärnor och labbar",
+    "optionC": "Duvor, trastar och starar",
+    "optionD": "Hönsfåglar och vadare",
+    "correctAnswer": "Kråka, kaja, råka, skata, nötskrika och nötkråka",
+    "explanation": ""
+  },
+  {
+    "subject": "Fåglar: övriga",
+    "questionText": "Vad är den tydligaste skillnaden i storlek mellan tjäder och orre?",
+    "optionA": "Tjädern och orren är ungefär lika stora",
+    "optionB": "Orren är dubbelt så stor som tjädern",
+    "optionC": "Tjädertuppenväger 3–5 kg, orrhanen ca 1–1,5 kg",
+    "optionD": "Tjädern väger 10–12 kg",
+    "correctAnswer": "Tjädertuppenväger 3–5 kg, orrhanen ca 1–1,5 kg",
+    "explanation": ""
+  },
+  {
+    "subject": "Fåglar: övriga",
+    "questionText": "Vad kallas den speciella flygstilen hos duvor i startfasen?",
+    "optionA": "Vingklappandet – de klappar vingarna mot varandra vid start",
+    "optionB": "Glidflygten",
+    "optionC": "Stormseglingen",
+    "optionD": "Termikflygten",
+    "correctAnswer": "Vingklappandet – de klappar vingarna mot varandra vid start",
+    "explanation": ""
+  },
+  {
+    "subject": "Vapen: hagel",
+    "questionText": "Vilka är de vanligaste kalibrarna för hagelgevär?",
+    "optionA": "10, 12, 14 och 16",
+    "optionB": "12, 20, 28 och .410",
+    "optionC": "6, 8, 10 och 12",
+    "optionD": "12, 16, 20 och .410",
+    "correctAnswer": "12, 16, 20 och .410",
+    "explanation": ""
+  },
+  {
+    "subject": "Vapen: hagel",
+    "questionText": "Vad styr hagelsvärens spridningsmönster?",
+    "optionA": "Hagelkornens vikt",
+    "optionB": "Krutladdningens storlek",
+    "optionC": "Choken – trångborrningen i pipans mynning",
+    "optionD": "Pipans längd",
+    "correctAnswer": "Choken – trångborrningen i pipans mynning",
+    "explanation": ""
+  },
+  {
+    "subject": "Vapen: hagel",
+    "questionText": "Vad kallas de fyra standardgraderna av choke?",
+    "optionA": "Cylinder, kvart, halv och helt trång (full)",
+    "optionB": "Öppen, smal, trång och extra trång",
+    "optionC": "Fri, kvart, trekvart och full",
+    "optionD": "Öppen, halv, trekvart och sluten",
+    "correctAnswer": "Cylinder, kvart, halv och helt trång (full)",
+    "explanation": ""
+  },
+  {
+    "subject": "Vapen: hagel",
+    "questionText": "Vilket är det maximala etiska skotthållet med hagel?",
+    "optionA": "Ca 50 meter",
+    "optionB": "Ca 10 meter",
+    "optionC": "Ca 25 meter",
+    "optionD": "Ca 75 meter",
+    "correctAnswer": "Ca 25 meter",
+    "explanation": ""
+  },
+  {
+    "subject": "Vapen: hagel",
+    "questionText": "Vad händer med hagelsvärens spridning vid smalare choke?",
+    "optionA": "Spridningen ökar",
+    "optionB": "Spridningen minskar – svärmen hålls tätare länge",
+    "optionC": "Spridningen påverkas inte av choken",
+    "optionD": "Haglen flyger snabbare",
+    "correctAnswer": "Spridningen minskar – svärmen hålls tätare länge",
+    "explanation": ""
+  },
+  {
+    "subject": "Vapen: hagel",
+    "questionText": "Hur förvaras hagelgevär lagligt i Sverige?",
+    "optionA": "I ett låst rum utan krav på skåp",
+    "optionB": "I ett godkänt låst vapenförvaringsskåp, ammunition separat",
+    "optionC": "I ett olåst skåp om man bor ensam",
+    "optionD": "Vapnet behöver inte förvaras låst om man har jaktkort",
+    "correctAnswer": "I ett godkänt låst vapenförvaringsskåp, ammunition separat",
+    "explanation": ""
+  },
+  {
+    "subject": "Vapen: hagel",
+    "questionText": "Vad är viktigaste säkerhetsregeln vid hantering av hagelgevär?",
+    "optionA": "Kontrollera att säkringen är på",
+    "optionB": "Peka alltid mot marken",
+    "optionC": "Ladda ur vapnet vid varje rörelsepaus",
+    "optionD": "Behandla alltid vapnet som om det är laddat",
+    "correctAnswer": "Behandla alltid vapnet som om det är laddat",
+    "explanation": ""
+  },
+  {
+    "subject": "Vapen: kula",
+    "questionText": "Vad betyder beteckningen 3–9×50 på ett kikarsikte?",
+    "optionA": "3–9 cm siktlängd och 50 grams vikt",
+    "optionB": "3–9 gångers förstoring och 50 mm objektivdiameter",
+    "optionC": "3 till 9 meters räckvidd vid 50 m",
+    "optionD": "3–9 mm röreöppning och 50 mm totallängd",
+    "correctAnswer": "3–9 gångers förstoring och 50 mm objektivdiameter",
+    "explanation": ""
+  },
+  {
+    "subject": "Vapen: kula",
+    "questionText": "Vilken är en typisk utgångshastighet för en jaktkula?",
+    "optionA": "300–400 m/s",
+    "optionB": "1 500–2 000 m/s",
+    "optionC": "700–900 m/s",
+    "optionD": "100–200 m/s",
+    "correctAnswer": "700–900 m/s",
+    "explanation": ""
+  },
+  {
+    "subject": "Vapen: kula",
+    "questionText": "Vad är E100?",
+    "optionA": "Mynningsenergin vid skottögonblicket",
+    "optionB": "Kulans anslagsenergi mätt 100 meter från mynningen, i joule",
+    "optionC": "Energin vid 50 meters avstånd",
+    "optionD": "Rekylenergikraft mot skyttens axel",
+    "correctAnswer": "Kulans anslagsenergi mätt 100 meter från mynningen, i joule",
+    "explanation": ""
+  },
+  {
+    "subject": "Vapen: kula",
+    "questionText": "Vad innebär att 'nolla' ett vapen?",
+    "optionA": "Att rengöra vapnet efter skjutning",
+    "optionB": "Att ställa in säkringen",
+    "optionC": "Att kontrollera att magasinet är tomt",
+    "optionD": "Att justera siktet så att träffpunkten stämmer på ett bestämt avstånd",
+    "correctAnswer": "Att justera siktet så att träffpunkten stämmer på ett bestämt avstånd",
+    "explanation": ""
+  },
+  {
+    "subject": "Vapen: kula",
+    "questionText": "Hur delas kulammunition in i klasser i Sverige?",
+    "optionA": "Tre klasser efter kaliber",
+    "optionB": "Fyra klasser efter kulvikt, konstruktion och anslagsenergi (E100)",
+    "optionC": "Två klasser: jakt- och tävlingsammunition",
+    "optionD": "Klassindelning finns inte i Sverige",
+    "correctAnswer": "Fyra klasser efter kulvikt, konstruktion och anslagsenergi (E100)",
+    "explanation": ""
+  },
+  {
+    "subject": "Vapen: kula",
+    "questionText": "Vilka faktorer påverkar en kulas bana?",
+    "optionA": "Enbart hastighet och vikt",
+    "optionB": "Enbart luftmotstånd och gravitation",
+    "optionC": "Hastighet, kulvikt, luftmotstånd, vind och gravitation",
+    "optionD": "Temperaturen och luftfuktigheten är de enda faktorerna",
+    "correctAnswer": "Hastighet, kulvikt, luftmotstånd, vind och gravitation",
+    "explanation": ""
+  },
+  {
+    "subject": "Vapen: kula",
+    "questionText": "Vad menas med ballistisk koefficient (BC)?",
+    "optionA": "Kulans maximala hastighet",
+    "optionB": "Kulans vikt i gram",
+    "optionC": "Ammunitioens hållbarhetsgrad",
+    "optionD": "Kulans förmåga att behålla sin hastighet mot luftmotståndet",
+    "correctAnswer": "Kulans förmåga att behålla sin hastighet mot luftmotståndet",
+    "explanation": ""
+  },
+  {
+    "subject": "Träffområden",
+    "questionText": "Var är det optimala träffområdet på klövvilt vid sidoskott?",
+    "optionA": "Huvud och hals",
+    "optionB": "Hjärta-/lungregionen bakom frambenets överkant",
+    "optionC": "Bakdelen och ryggraden",
+    "optionD": "Magen och buken",
+    "correctAnswer": "Hjärta-/lungregionen bakom frambenets överkant",
+    "explanation": ""
+  },
+  {
+    "subject": "Träffområden",
+    "questionText": "Vad är skillnaden mellan en expanderande och en helmantlad kula?",
+    "optionA": "Expanderande svampar upp och ger större sårkanal; helmantlad behåller sin form",
+    "optionB": "Helmantlad expanderar mer än expanderande",
+    "optionC": "Det finns ingen skillnad i effekt",
+    "optionD": "Helmantlad är snabbare och mer humanär",
+    "correctAnswer": "Expanderande svampar upp och ger större sårkanal; helmantlad behåller sin form",
+    "explanation": ""
+  },
+  {
+    "subject": "Träffområden",
+    "questionText": "Varför är rena sidoskott att föredra?",
+    "optionA": "Sidoskott är enklast att ta",
+    "optionB": "Djuret faller alltid på stället",
+    "optionC": "Sidoskott ger mest kött",
+    "optionD": "Störst träffyta mot vitala organ och minst risk för skadeskjutning",
+    "correctAnswer": "Störst träffyta mot vitala organ och minst risk för skadeskjutning",
+    "explanation": ""
+  },
+  {
+    "subject": "Träffområden",
+    "questionText": "Vad menas med 'tecken' vid skott mot vilt?",
+    "optionA": "Spår djuret lämnar i snön",
+    "optionB": "Blodets färg",
+    "optionC": "Djurets reaktion i skottögonblicket som visar var det träffades",
+    "optionD": "Lukten från djuret",
+    "correctAnswer": "Djurets reaktion i skottögonblicket som visar var det träffades",
+    "explanation": ""
+  },
+  {
+    "subject": "Träffområden",
+    "questionText": "Hur påverkar sneda skottvinklar risken för skadeskjutning?",
+    "optionA": "Risken ökar – träffytan mot vitala organ minskar",
+    "optionB": "Risken minskar eftersom skottvägen är längre",
+    "optionC": "Sneda skott är alltid mer humana",
+    "optionD": "Det spelar ingen roll för träffresultatet",
+    "correctAnswer": "Risken ökar – träffytan mot vitala organ minskar",
+    "explanation": ""
+  },
+  {
+    "subject": "Träffområden",
+    "questionText": "Vad kallas djurets vitala organ vad gäller skottplacering?",
+    "optionA": "Lever, njurar och mage",
+    "optionB": "Ryggmärg, hjärna och ögon",
+    "optionC": "Hjärta, lungor och stora blodkärl i brösthålan",
+    "optionD": "Skelett, muskler och senor",
+    "correctAnswer": "Hjärta, lungor och stora blodkärl i brösthålan",
+    "explanation": ""
+  },
+  {
+    "subject": "Träffområden",
+    "questionText": "Vad bör man göra om man är osäker på om ett skott var rent?",
+    "optionA": "Avvakta och se om djuret dör av sig självt",
+    "optionB": "Alltid söka efter djuret noggrant och anlita eftersökshund vid behov",
+    "optionC": "Rapportera till Jägareförbundet och gå hem",
+    "optionD": "Skjuta en gång till om man ser djuret igen",
+    "correctAnswer": "Alltid söka efter djuret noggrant och anlita eftersökshund vid behov",
+    "explanation": ""
+  },
+  {
+    "subject": "Jakthundar",
+    "questionText": "Vad kallas hundar som driver viltet med skall?",
+    "optionA": "Apporterare",
+    "optionB": "Ställare",
+    "optionC": "Spanare",
+    "optionD": "Stövare",
+    "correctAnswer": "Stövare (t.ex. hamiltonstövare, drever och tax)",
+    "explanation": ""
+  },
+  {
+    "subject": "Jakthundar",
+    "questionText": "Vad är skillnaden i storlek och arealbehov mellan stövare och drever?",
+    "optionA": "Stövare och drever är lika stora",
+    "optionB": "Drevaren är större och behöver mer mark",
+    "optionC": "Stövare ca 30–35 kg och behöver 200 ha; drever ca 15 kg och behöver 100 ha",
+    "optionD": "Taxen är störst av drevhundarna",
+    "correctAnswer": "Stövare ca 30–35 kg och behöver 200 ha; drever ca 15 kg och behöver 100 ha",
+    "explanation": ""
+  },
+  {
+    "subject": "Jakthundar",
+    "questionText": "Vad menas med ståndskall?",
+    "optionA": "Att hunden skäller för att markera att viltet har stannat",
+    "optionB": "Att hunden skäller vid starten av en jaktdag",
+    "optionC": "Att hunden skäller på jägaren för att meddela träff",
+    "optionD": "Att hunden är tyst men markerar med kroppen",
+    "correctAnswer": "Att hunden skäller för att markera att viltet har stannat (ej flykt)",
+    "explanation": ""
+  },
+  {
+    "subject": "Jakthundar",
+    "questionText": "Vad är en apporterande hunds uppgift?",
+    "optionA": "Att driva viltet mot skyttarna",
+    "optionB": "Att vakta fällt vilt mot predatorer",
+    "optionC": "Att söka upp och hämta (apportera) skjutet vilt",
+    "optionD": "Att ställa upp vilt på pass",
+    "correctAnswer": "Att söka upp och hämta (apportera) skjutet vilt",
+    "explanation": ""
+  },
+  {
+    "subject": "Jakthundar",
+    "questionText": "Vad kallas jaktformen där hundar driver viltet mot stående jägare?",
+    "optionA": "Smygjakt",
+    "optionB": "Drevjakt",
+    "optionC": "Vaktjakt",
+    "optionD": "Vallning",
+    "correctAnswer": "Drevjakt",
+    "explanation": ""
+  },
+  {
+    "subject": "Jakthundar",
+    "questionText": "Vilka hundtyper används vid fågeljakt för att markera (ställa) viltet?",
+    "optionA": "Stövare och tax",
+    "optionB": "Retrievers och spaniels",
+    "optionC": "Vinthundar och terrierr",
+    "optionD": "Ställande och stötande raser",
+    "correctAnswer": "Ställande och stötande raser, t.ex. setter och pointer",
+    "explanation": ""
+  },
+  {
+    "subject": "Eftersök",
+    "questionText": "Vad är det första man ska göra efter ett skott mot vilt?",
+    "optionA": "Ladda om omedelbart och följa efter",
+    "optionB": "Ringa till Jägareförbundet",
+    "optionC": "Ta ögonmärke – notera exakt var djuret stod och åt vilket håll det försvann",
+    "optionD": "Vänta 24 timmar och börja sedan söka",
+    "correctAnswer": "Ta ögonmärke – notera exakt var djuret stod och åt vilket håll det försvann",
+    "explanation": ""
+  },
+  {
+    "subject": "Eftersök",
+    "questionText": "Varför ska man vänta innan man söker skadeskjutet vilt?",
+    "optionA": "Det är lagstadgat att vänta 30 minuter",
+    "optionB": "Djuret ska hinna lägga sig och lugna ned sig – för tidig störning driver det vidare",
+    "optionC": "Man behöver hämta hunden hemma",
+    "optionD": "Det spelar ingen roll när man söker",
+    "correctAnswer": "Djuret ska hinna lägga sig och lugna ned sig – för tidig störning driver det vidare",
+    "explanation": ""
+  },
+  {
+    "subject": "Eftersök",
+    "questionText": "Inom hur lång tid ska eftersökshund finnas tillgänglig vid älgjakt?",
+    "optionA": "Inom 30 minuter",
+    "optionB": "Inom 12 timmar",
+    "optionC": "Inom 24 timmar",
+    "optionD": "Inom 2 timmar",
+    "correctAnswer": "Inom 2 timmar",
+    "explanation": ""
+  },
+  {
+    "subject": "Eftersök",
+    "questionText": "Vad är anmälningsskyldigheten vid viltolycka på väg?",
+    "optionA": "Plikten är att ringa Jägareförbundet",
+    "optionB": "Jägaren/den inblandade ska rädda djuret om möjligt och anmäla till polisen",
+    "optionC": "Det finns ingen anmälningsplikt",
+    "optionD": "Man anmäler enbart om det är en älg",
+    "correctAnswer": "Jägaren/den inblandade ska rädda djuret om möjligt och anmäla till polisen",
+    "explanation": ""
+  },
+  {
+    "subject": "Eftersök",
+    "questionText": "Vad kallas spåret av blod och vävnad som ett träffat djur lämnar?",
+    "optionA": "Spåret",
+    "optionB": "Svansen",
+    "optionC": "Löpan",
+    "optionD": "Märket",
+    "correctAnswer": "Svansen",
+    "explanation": ""
+  },
+  {
+    "subject": "Eftersök",
+    "questionText": "Vilken information ger blodets färg och konsistens vid eftersök?",
+    "optionA": "Blodets färg är alltid densamma oavsett träffbild",
+    "optionB": "Ljust blod indikerar magträff",
+    "optionC": "Blodfärgen är irrelevant vid eftersök",
+    "optionD": "Klart rött skummigt blod tyder på lungträff; mörkt blod kan indikera leverträff",
+    "correctAnswer": "Klart rött skummigt blod tyder på lungträff; mörkt blod kan indikera leverträff",
+    "explanation": ""
+  },
+  {
+    "subject": "Viltet efter skottet",
+    "questionText": "Vad är slaktvikt hos klövvilt?",
+    "optionA": "Vikten av köttet utan skinn och inälvor, ca 50–55 % av levande vikt",
+    "optionB": "Vikten efter att inälvor tagits bort, ca 70 %",
+    "optionC": "Hela djurets vikt inklusive skinn",
+    "optionD": "Vikten av enbart köttbitarna exklusive ben",
+    "correctAnswer": "Vikten av köttet utan skinn och inälvor, ca 50–55 % av levande vikt",
+    "explanation": ""
+  },
+  {
+    "subject": "Viltet efter skottet",
+    "questionText": "Vad är principen för 'dygnsgrader' vid hängning av vilt?",
+    "optionA": "Köttet ska hänga i exakt 7 dagar oavsett temperatur",
+    "optionB": "Hängtiden räknas i timmar multiplicerat med luftfuktigheten",
+    "optionC": "Temperatur (°C) × antal dygn ska uppgå till ca 40 dygnsgrader för optimal mörning",
+    "optionD": "Köttet ska alltid frysas direkt",
+    "correctAnswer": "Temperatur (°C) × antal dygn ska uppgå till ca 40 dygnsgrader för optimal mörning",
+    "explanation": ""
+  },
+  {
+    "subject": "Viltet efter skottet",
+    "questionText": "Vilka viltslag måste alltid trikinprovas?",
+    "optionA": "Björn och vildsvin",
+    "optionB": "Älg och rådjur",
+    "optionC": "Räv och grävling",
+    "optionD": "Alla däggdjur utan undantag",
+    "correctAnswer": "Björn och vildsvin",
+    "explanation": ""
+  },
+  {
+    "subject": "Viltet efter skottet",
+    "questionText": "Varför ska köttet inte kylas under 10 °C de första 10 timmarna?",
+    "optionA": "Det finns inga sådana regler",
+    "optionB": "För att förhindra bakterietillväxt",
+    "optionC": "Köttet ska frysas direkt för bästa resultat",
+    "optionD": "För snabb nedkylning hindrar mörningsprocessen och ger segt kött",
+    "correctAnswer": "För snabb nedkylning hindrar mörningsprocessen och ger segt kött",
+    "explanation": ""
+  },
+  {
+    "subject": "Viltet efter skottet",
+    "questionText": "Vad kallas steget då jägaren öppnar djuret och tar bort inälvorna direkt i fält?",
+    "optionA": "Styckning",
+    "optionB": "Slakt",
+    "optionC": "Urtagning",
+    "optionD": "Flåning",
+    "correctAnswer": "Urtagning (eller grovtagning)",
+    "explanation": ""
+  },
+  {
+    "subject": "Viltet efter skottet",
+    "questionText": "Vad innebär livsmedelssäkerhetens krav vid vilthantering?",
+    "optionA": "Allt vilt måste genomgå officiell besiktning av veterinär",
+    "optionB": "Köttet ska hanteras hygieniskt, kylas korrekt och trikinprovas vid behov",
+    "optionC": "Köttet får enbart användas för eget bruk",
+    "optionD": "Det finns inga lagkrav på vilthantering",
+    "correctAnswer": "Köttet ska hanteras hygieniskt, kylas korrekt och trikinprovas vid behov",
+    "explanation": ""
+  },
+  {
+    "subject": "Lagen",
+    "questionText": "Vad är lagkedjan inom svensk jaktlagstiftning?",
+    "optionA": "Naturvårdsverket → Länsstyrelsen → Kommunen",
+    "optionB": "Jägareförbundet → Länsstyrelsen → Polisen",
+    "optionC": "EU → Riksdag → Länsstyrelsen",
+    "optionD": "Riksdag (jaktlag) → Regering (jaktförordning) → Naturvårdsverket (föreskrifter)",
+    "correctAnswer": "Riksdag (jaktlag) → Regering (jaktförordning) → Naturvårdsverket (föreskrifter)",
+    "explanation": ""
+  },
+  {
+    "subject": "Lagen",
+    "questionText": "Vad är fredningstidens syfte?",
+    "optionA": "Att underlätta polisens kontroll av jägare",
+    "optionB": "Att skydda markägare från obehörig jakt",
+    "optionC": "Att skydda viltet under känsliga perioder, framför allt reproduktionstid",
+    "optionD": "Att begränsa antalet jaktkort",
+    "correctAnswer": "Att skydda viltet under känsliga perioder, framför allt reproduktionstid",
+    "explanation": ""
+  },
+  {
+    "subject": "Lagen",
+    "questionText": "Vad innebär olaga jakt?",
+    "optionA": "Jakt med fel typ av vapen",
+    "optionB": "Jakt utan tillstånd, på annans mark eller utanför jakttid",
+    "optionC": "Jakt utan eftersökshund",
+    "optionD": "Jakt utan orange väst",
+    "correctAnswer": "Jakt utan tillstånd, på annans mark eller utanför jakttid",
+    "explanation": ""
+  },
+  {
+    "subject": "Lagen",
+    "questionText": "Vilken myndighet fastställer jakttiderna i Sverige?",
+    "optionA": "Skogsstyrelsen",
+    "optionB": "Jägareförbundet",
+    "optionC": "Länsstyrelsen",
+    "optionD": "Naturvårdsverket",
+    "correctAnswer": "Naturvårdsverket",
+    "explanation": ""
+  },
+  {
+    "subject": "Lagen",
+    "questionText": "Vad krävs för att få köpa ett jaktvapen i Sverige?",
+    "optionA": "Jaktkort räcker som bevis",
+    "optionB": "Vapentillstånd (licens) utfärdat av polismyndigheten",
+    "optionC": "Godkänd jägarexamen räcker",
+    "optionD": "Tillstånd söks hos länsstyrelsen",
+    "correctAnswer": "Vapentillstånd (licens) utfärdat av polismyndigheten",
+    "explanation": ""
+  },
+  {
+    "subject": "Lagen",
+    "questionText": "Vad gäller för jakt på annans mark utan tillstånd?",
+    "optionA": "Det är förbjudet och klassas som olaga jakt",
+    "optionB": "Det är tillåtet om man har jaktkort",
+    "optionC": "Det är tillåtet under allmän jakttid",
+    "optionD": "Det är tillåtet på statlig mark",
+    "correctAnswer": "Det är förbjudet och klassas som olaga jakt",
+    "explanation": ""
+  },
+  {
+    "subject": "Lagen",
+    "questionText": "Vilka vapenkrav gäller generellt vid jakt på älg?",
+    "optionA": "Klass 3-ammunition med minst 1 000 J",
+    "optionB": "Hagelgevär kaliber 12 duger",
+    "optionC": "Alla vapenkaliber är tillåtna vid älgjakt",
+    "optionD": "Klass 1-ammunition med minst 2 700 joule anslagsenergi vid 100 m (E100)",
+    "correctAnswer": "Klass 1-ammunition med minst 2 700 joule anslagsenergi vid 100 m (E100)",
+    "explanation": ""
+  },
+  {
+    "subject": "Repetition",
+    "questionText": "Vilket ämne är vanligast att blivande jägare misslyckas med på teoriprovet?",
+    "optionA": "Vapenkunskap",
+    "optionB": "Lagen",
+    "optionC": "Ekologi",
+    "optionD": "Artkännedom",
+    "correctAnswer": "Artkännedom",
+    "explanation": ""
+  },
+  {
+    "subject": "Repetition",
+    "questionText": "Vad ska alltid finnas tillgängligt vid jakt på stora däggdjur?",
+    "optionA": "Eftersökshund",
+    "optionB": "En mobiltelefon med GPS",
+    "optionC": "Minst två jägare",
+    "optionD": "En förbandslåda",
+    "correctAnswer": "Eftersökshund (ska kunna kallas inom 2 timmar)",
+    "explanation": ""
+  },
+  {
+    "subject": "Repetition",
+    "questionText": "Vad är det grundläggande syftet med jägarexamen?",
+    "optionA": "Att begränsa antalet jägare i Sverige",
+    "optionB": "Att säkerställa att jägare har tillräckliga kunskaper om vilt, vapen, lag och etik",
+    "optionC": "Att finansiera Jägareförbundets verksamhet",
+    "optionD": "Att ta ut en statlig avgift för jaktutövande",
+    "correctAnswer": "Att säkerställa att jägare har tillräckliga kunskaper om vilt, vapen, lag och etik",
+    "explanation": ""
+  },
+  {
+    "subject": "Repetition",
+    "questionText": "Vad är viktigt att tänka på vid förvaring av vapen och ammunition?",
+    "optionA": "Vapen och ammunition kan förvaras ihop i låst skåp",
+    "optionB": "Ammunition behöver inte låsas in",
+    "optionC": "Vapnet ska förvaras i godkänt låst skåp och ammunition ska förvaras separat",
+    "optionD": "Vapenskåp krävs bara om man har fler än 5 vapen",
+    "correctAnswer": "Vapnet ska förvaras i godkänt låst skåp och ammunition ska förvaras separat",
+    "explanation": ""
+  }
+]
