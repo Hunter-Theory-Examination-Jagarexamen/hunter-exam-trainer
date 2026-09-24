@@ -1,6 +1,6 @@
 # First group leader
 
-- **Date:** 2026-09-16
+- **Date:** 2026-09-17
 - **Status:** Accepted
 - **Related issues:** none
 

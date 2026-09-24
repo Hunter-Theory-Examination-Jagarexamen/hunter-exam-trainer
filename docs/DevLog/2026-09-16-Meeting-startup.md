@@ -16,5 +16,5 @@ Admin access to the repository given to the new group members.
 ## Follow-up work
 
 - Group members to clone the repo and get familiar with the project and the code.
-- Decide a group leader before Friday's meeting; the role can rotate. (See [2026-09-16-Decision-first-group-leader.md](2026-09-16-Decision-first-group-leader.md).)
+- Decide a group leader before Friday's meeting; the role can rotate. (See [2026-09-17-Decision-first-group-leader.md](2026-09-17-Decision-first-group-leader.md).)
 - Project transition meeting: Friday 2026-09-18, 10:00-11:00.
