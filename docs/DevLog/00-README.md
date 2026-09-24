@@ -6,7 +6,7 @@ A short, running record of what the team decided and why. It lets new team membe
 
 One flat folder, no subfolders. This file is named `00-README.md` so it always sorts first; every other file is a dated entry, so the folder sorts itself in date order.
 
-**Filename:** `YYYY-MM-DD-Type-short-title.md`, for example `2026-09-25-Decision-mysql-vs-postgres.md`. Type is one of `Meeting`, `Decision` or `Test`. The short title matters: two entries can land on the same date, and the title is what tells them apart.
+**Filename:** `YYYY-MM-DD-Type-short-title.md`, for example `2026-09-25-Decision-mysql-vs-postgres.md`. Type is `Meeting` or `Decision`. The short title matters: two entries can land on the same date, and the title is what tells them apart.
 
 ## Meeting vs. Decision
 
@@ -14,7 +14,7 @@ A **Meeting** entry is the record of a meeting: what was discussed and what was 
 
 A **Decision** entry is for something settled outside a meeting, for example over text between meetings. It gives a decision made asynchronously the same kind of home a meeting-made one already has.
 
-A **Test** entry records a code test or experiment: what was tried, how, and what came of it.
+Test logs are not kept here: they go in `docs/Testing/`, as described in its [test plan](../Testing/00-Test-Plan.md).
 
 ## Adding an entry
 
@@ -76,28 +76,4 @@ What else did we look at, and why did we not choose it?
 ## Consequences
 
 What changes because of this? Is there anything we now have to do or watch out for?
-```
-
-### Test
-
-```markdown
-# Test: short title
-
-- **Date:** YYYY-MM-DD
-- **Branch / commit:**
-- **Related issues:** #
-
-## What we tested and why
-
-## How
-
-The steps, so someone else can repeat the test.
-
-## Result
-
-What happened?
-
-## Conclusion
-
-What do we do with the result?
 ```
