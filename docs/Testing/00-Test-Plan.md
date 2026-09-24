@@ -36,7 +36,31 @@ Planned for weeks 19–20 (see the [Timeline](../ProjectManagement/Timeline.md))
 
 ## Recording results
 
-Each test run is recorded as a DevLog **Test** entry (`docs/DevLog/YYYY-MM-DD-Test-short-title.md`): what was tested, how, the result and the conclusion. Together these entries form the basis of the Test Report at the end of the project.
+Each test run is recorded as its own file in this folder, named `YYYY-MM-DD-short-title.md` (for example `2026-09-18-local-setup-verified.md`). Together these entries form the basis of the Test Report at the end of the project. Add them through a branch and pull request, like any other change.
+
+Format:
+
+```markdown
+# Test: short title
+
+- **Date:** YYYY-MM-DD
+- **Branch / commit:**
+- **Related issues:** #
+
+## What we tested and why
+
+## How
+
+The steps, so someone else can repeat the test.
+
+## Result
+
+What happened?
+
+## Conclusion
+
+What do we do with the result?
+```
 
 ## Current state and known gaps
 
