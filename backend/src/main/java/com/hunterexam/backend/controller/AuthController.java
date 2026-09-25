@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.*;
 /**
  * REST controller for user authentication.
  * <p>
- * Provides endpoints for registering new users, logging in,
- * and testing JWT authentication.
+ * Provides endpoints for registering new users and logging in.
  */
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -76,16 +76,4 @@ public class AuthController {
     }
 
 
-    /**
-     * Test endpoint used to verify that JWT authentication is working.
-     * <p>
-     * This endpoint is protected by Spring Security, so a valid JWT
-     * must be included in the request.
-     *
-     * @return confirmation message when authentication succeeds
-     */
-    @GetMapping("/test")
-    public ResponseEntity<String> test() {
-        return ResponseEntity.ok("JWT authentication is working.");
-    }
 }

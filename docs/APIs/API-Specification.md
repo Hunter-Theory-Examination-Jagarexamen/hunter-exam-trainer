@@ -4,7 +4,6 @@
 |--------|-------------------------------|-------------------------------------------------|----------------|
 | POST   | /api/auth/register            | Register new user                               | Public         |
 | POST   | /api/auth/login               | Authenticate user and return JWT                | Public         |
-| GET    | /api/auth/test                | Test JWT authentication                         | Required       |
 | GET    | /api/users/me                 | Get logged-in user's profile                    | Required       |
 | PUT    | /api/users/me/password        | Change the logged-in user's password            | Required       |
 | GET    | /api/subjects                 | Get all subjects and question counts            | Required       |
