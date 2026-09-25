@@ -5,20 +5,21 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.crypto.SecretKey;
 import java.util.List;
-
 /**
  * Configures authentication, authorization, JWT validation,
  * password encryption, and CORS for the application.
@@ -40,6 +41,26 @@ public class SecurityConfig {
     }
 
     /**
+     * Maps the "role" claim from a JWT into a Spring Security authority
+     * of the form {@code ROLE_<role>}.
+     * <p>
+     * Spring Security's {@code hasRole("ADMIN")} check expects an authority
+     * named {@code ROLE_ADMIN}, so the prefix is added here.
+     *
+     * @return JWT authentication converter
+     */
+    @Bean
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        authoritiesConverter.setAuthorityPrefix("ROLE_");
+        authoritiesConverter.setAuthoritiesClaimName("role");
+
+        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
+        converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
+        return converter;
+    }
+
+    /**
      * Configures HTTP security for the application.
      * <p>
      * Registration and login are publicly accessible because users
@@ -56,7 +77,7 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws  Exception {
+            throws Exception {
 
         http
                 // CSRF is disabled because the application uses JWT authentication.
@@ -75,12 +96,17 @@ public class SecurityConfig {
                         // Allow browser CORS preflight requests.
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
+                        // Admin-only endpoints.
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
                         // All other endpoints require authentication.
                         .anyRequest().authenticated()
                 )
                 // Use JWT tokens to authenticate protected requests.
                 .oauth2ResourceServer(oauth2 ->
-                        oauth2.jwt(jwt -> {})
+                        oauth2.jwt(jwt ->
+                                jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())
+                        )
                 );
 
         return http.build();

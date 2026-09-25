@@ -42,7 +42,7 @@ public class UserService {
                  user.getId(),
                  user.getFullName(),
                  user.getEmail(),
-                 user.getRole(),
+                 user.getRole().name(),
                  user.getCreatedAt()
          );
     }

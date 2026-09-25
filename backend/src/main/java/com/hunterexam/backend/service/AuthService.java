@@ -2,6 +2,7 @@ package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.LoginRequest;
 import com.hunterexam.backend.dto.RegisterRequest;
+import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.repository.UserRepository;
 import com.hunterexam.backend.security.JwtService;
@@ -9,9 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
-
-
 
 /**
  * Handles user registration and login.
@@ -41,14 +39,14 @@ public class AuthService {
      * <p>
      * Checks that the email is not already registered, hashes the password
      * before storing it, assigns the default STUDENT role, and saves the user.
-     * <p>
+     *
      * @param request registration details provided by the client
      * @return the newly created user
      */
     public User register(RegisterRequest request) {
 
         // Prevent multiple accounts from being registered with the same email.
-        if(userRepository.findByEmail(request.getEmail()).isPresent()) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("Email is already registered");
         }
 
@@ -60,7 +58,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         // New users are registered as students by default.
-        user.setRole("STUDENT");
+        user.setRole(Role.STUDENT);
         user.setCreatedAt(LocalDateTime.now());
 
         return userRepository.save(user);
@@ -78,7 +76,7 @@ public class AuthService {
      */
     public String login(LoginRequest request) {
 
-        if(request == null) {
+        if (request == null) {
             throw new RuntimeException("Login request cannot be null");
         }
 
@@ -96,7 +94,7 @@ public class AuthService {
         // Generate a JWT that the frontend uses for authenticated requests.
         return jwtService.generateToken(
                 user.getEmail(),
-                user.getRole()
+                user.getRole().name()
         );
     }
 }
