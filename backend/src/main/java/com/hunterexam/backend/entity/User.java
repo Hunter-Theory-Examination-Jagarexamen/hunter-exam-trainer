@@ -36,8 +36,10 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    // e.g. "USER" or "ADMIN". Nullable for now — no default role is enforced.
-    private String role;
+    // e.g. "STUDENT" or "ADMIN". Nullable for now — no default role is enforced.
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
