@@ -46,7 +46,7 @@ const Exam = () => {
             alert("Failed to submit exam. Please try again");
         }
     };
-    
+
 
     //Load exam questions
     useEffect(() => {
