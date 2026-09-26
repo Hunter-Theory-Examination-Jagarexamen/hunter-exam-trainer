@@ -192,8 +192,8 @@ In IntelliJ IDEA:
 1. Open Run → Edit Configurations.
 2. Select the Spring Boot backend configuration.
 3. Find Environment variables.
-4. Add JWT_SECRET.
-5. Paste the generated value.
+4. Add JWT_SECRET, ADMIN_EMAIL, and ADMIN_PASSWORD.
+5. Paste the generated values.
 6. Apply the changes and restart the backend.
 
 The JWT secret is used only by the local backend and should not be added to `application.properties` or committed to GitHub.
@@ -502,6 +502,8 @@ The backend reads these environment variables:
 | `DB_USERNAME` | Yes | PostgreSQL username |
 | `DB_PASSWORD` | Yes | PostgreSQL password |
 | `JWT_SECRET` | Yes | Base64 string, at least 32 characters. **No surrounding quotes**: the value is Base64-decoded at startup, and a quote character breaks it. |
+| `ADMIN_EMAIL` | Yes* | Email for the seeded admin user | 
+| `ADMIN_PASSWORD` | Yes* | Password for the seeded admin user |
 
 To set them in IntelliJ IDEA: **Run → Edit Configurations → (backend run configuration) → Environment variables**, click the list icon at the right of the field, and add one row per variable.
 
