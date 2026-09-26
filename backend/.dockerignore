@@ -1,9 +1,0 @@
-target/
-.mvn/wrapper/maven-wrapper.jar
-.git/
-.gitignore
-*.md
-.idea/
-*.iml
-.vscode/
-.DS_Store
