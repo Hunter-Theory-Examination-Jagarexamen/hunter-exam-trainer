@@ -1,6 +1,10 @@
 ## What changed
 
-Closes #
+<!--
+Describe the change in a few lines.
+If this PR finishes an issue, add "Closes #<number>" (e.g. Closes #38). GitHub then closes the issue when the PR is merged.
+If it only relates to an issue, write "Related to #<number>" instead. If there is no issue, leave it out.
+-->
 
 ## How I tested
 
