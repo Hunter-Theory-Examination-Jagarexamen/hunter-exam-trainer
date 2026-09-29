@@ -32,6 +32,12 @@ const RegisterForm = () => {
             setError("Passwords do not match.");
             return;
         }
+
+        if(password.length < 8) {
+            setError("Password must be at least 8 characters long.");
+            return;
+        }
+
         if (!acceptedTerms) {
             setError("Please accept the Terms of Use and Privacy Policy.");
             return;
