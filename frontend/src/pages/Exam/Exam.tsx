@@ -12,12 +12,41 @@ const Exam = () => {
 
     const navigate = useNavigate();
 
+    const [sessionId, setSessionId] = useState<string | null>(null);
     const [questions, setQuestions] = useState<ExamQuestion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [timeLeft, setTimeLeft] = useState(60 * 60);
+
+
+    const submitExam = async () => {
+
+        try {
+            const questionIds = questions.map(
+                (question) => question.id);
+
+            const result = await apiClient("/api/exam/submit", {
+                method: "POST",
+                body: JSON.stringify({
+                    sessionId,
+                    questionIds,
+                    answers
+                })
+            });
+
+            console.log("Exam result: ", result);
+            navigate("/result", {
+                state: result
+            });
+        }
+        catch (err) {
+            console.error("Failed to submit exam: ", err);
+            alert("Failed to submit exam. Please try again");
+        }
+    };
+
 
     //Load exam questions
     useEffect(() => {
@@ -28,14 +57,21 @@ const Exam = () => {
                 setIsLoading(true);
                 setError("");
 
-                const data: ExamQuestion[] =
+                interface ExamStartResponse {
+                    sessionId: string;
+                    questions: ExamQuestion[];
+                }
+
+                const data: ExamStartResponse =
                     await apiClient("/api/exam/start", {
                         method: "POST"
                     });
-                setQuestions(data);
+                setSessionId(data.sessionId);
+                setQuestions(data.questions);
             }
-            catch (error) {
-                console.error("Failed to load exam questions.");
+
+            catch (err) {
+                console.error("Failed to load exam questions.", err);
                 setError("Failed to load exam questions. Please try again.");
             }
             finally {
@@ -91,30 +127,6 @@ const Exam = () => {
         }
     };
 
-    const submitExam = async () => {
-
-        try {
-            const questionIds = questions.map(
-                (question) => question.id);
-
-            const result = await apiClient("/api/exam/submit", {
-                method: "POST",
-                body: JSON.stringify({
-                    questionIds,
-                    answers
-                })
-            });
-
-            console.log("Exam result: ", result);
-            navigate("/result", {
-                state: result
-            });
-        }
-        catch (error) {
-            console.error("Failed to submit exam: ", error);
-            alert("Failed to submit exam. Please try again");
-        }
-    };
 
     const handleSubmit = () => {
         void submitExam();
