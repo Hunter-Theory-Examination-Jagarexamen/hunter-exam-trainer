@@ -3,18 +3,26 @@
 ```mermaid
 erDiagram
 
-    USER ||--o{ PRACTICE_RESULT : has 
-    USER ||--o{ EXAM_RESULT : has 
+    USERS ||--o{ PRACTICE_RESULT : has 
+    USERS ||--o{ EXAM_RESULT : has 
+    USERS ||--o{ EXAM_SESSIONS : starts 
     SUBJECT ||--o{ QUESTION : contains 
     SUBJECT ||--o{ PRACTICE_RESULT : used_for
 
-    USER {
+    USERS {
         bigint id PK 
         varchar full_name 
         varchar email UK 
         varchar password 
-        varchar role 
+        varchar role "STUDENT or ADMIN" 
         datetime created_at
+    }
+
+    EXAM_SESSIONS {
+        bigint id PK
+        bigint user_id FK
+        datetime started_at
+        boolean completed
     }
 
     SUBJECT {
