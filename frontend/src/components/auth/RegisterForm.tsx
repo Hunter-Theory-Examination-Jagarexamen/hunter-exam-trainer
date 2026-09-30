@@ -21,28 +21,30 @@ const RegisterForm = () => {
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
+    // Handles form submission for new user registration
     const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
+    // Validates that all form fields are populated
         if (!fullName || !email || !password || !confirmPassword) {
             setError("Please fill in all the fields.");
             return;
         }
+    // Validates that password matches confirm password
         if (password !== confirmPassword) {
             setError("Passwords do not match.");
             return;
         }
-
+    // Validates minimum password length requirement of 8 characters
         if(password.length < 8) {
             setError("Password must be at least 8 characters long.");
             return;
         }
-
+    // Validates that the user accepted terms and conditions
         if (!acceptedTerms) {
             setError("Please accept the Terms of Use and Privacy Policy.");
             return;
         }
-
+    // Sets loading state to true during API request
         setIsLoading(true);
 
         try {
@@ -54,7 +56,7 @@ const RegisterForm = () => {
                     password,
                 }),
             });
-
+    // Redirects user to login page after successful registration
             navigate("/login");
         } catch (err: any) {
             setError(err.message || "Registration failed. Please try again.");
