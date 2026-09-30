@@ -318,6 +318,73 @@
     font-size: 0.9rem;
 }
 
+.auth-error-banner {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+
+    z-index: 10;
+
+    padding: 0.75rem 1.25rem;
+
+    border-radius: 8px;
+
+    background-color: var(--color-danger, #dc2626);
+    color: white;
+
+    font-size: 0.9rem;
+    font-weight: 600;
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.forgot-message {
+    margin-top: 1.5rem;
+    padding: 1rem;
+
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+
+    background-color: var(--color-surface);
+
+    text-align: center;
+
+    color: var(--color-text);
+    font-size: 0.95rem;
+}
+
+.forgot-message p {
+    margin: 0 0 0.5rem;
+}
+
+.forgot-new-password span {
+    display: block;
+
+    margin-top: 0.75rem;
+
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+}
+
+.forgot-new-password strong {
+    display: block;
+
+    margin: 0.5rem 0;
+
+    font-size: 1.25rem;
+    letter-spacing: 0.05em;
+
+    color: var(--color-primary);
+}
+
+.forgot-new-password p {
+    margin: 0.5rem 0 0;
+
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+}
+
 /* =========================
    Register Fields
    ========================= */

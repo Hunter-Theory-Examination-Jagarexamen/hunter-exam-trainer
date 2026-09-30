@@ -1,9 +1,13 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import { useNavigate } from "react-router-dom";
 import {Eye, EyeOff, Lock, Mail} from "lucide-react";
 import logo from "../../assets/images/logo.svg";
 import "../../styles/auth.css";
-import {loginUser} from "../../services/authService.ts";
+import {
+    checkGoogleLoginEnabled,
+    loginAsGuest,
+    loginUser
+} from "../../services/authService.ts";
 
 const LoginForm = () => {
 
@@ -14,6 +18,12 @@ const LoginForm = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [isGuestLoading, setIsGuestLoading] = useState(false);
+    const [googleEnabled, setGoogleEnabled] = useState(false);
+
+    useEffect(() => {
+        checkGoogleLoginEnabled().then(setGoogleEnabled);
+    }, []);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -42,6 +52,39 @@ const LoginForm = () => {
             setIsLoading(false);
         }
 
+    };
+
+    const handleGuestLogin = async () => {
+
+        try {
+            setIsGuestLoading(true);
+
+            const response = await loginAsGuest();
+
+            localStorage.setItem("token", response.token);
+
+            navigate("/dashboard");
+
+        } catch (error) {
+            console.error("Guest login error:", error);
+            alert("Unable to start a guest session. Please try again.");
+        } finally {
+            setIsGuestLoading(false);
+        }
+    };
+
+    const handleGoogleLogin = () => {
+
+        if (!googleEnabled) {
+            alert(
+                "Google sign-in is not configured yet. " +
+                "Use your email or continue as a guest."
+            );
+            return;
+        }
+
+        window.location.href =
+            "http://localhost:8080/oauth2/authorization/google";
     };
 
     return (
@@ -105,7 +148,10 @@ const LoginForm = () => {
                 </div>
 
                 <div className="forgot-password">
-                    <button type="button">
+                    <button
+                        type="button"
+                        onClick={() => navigate("/forgot-password")}
+                    >
                         Forgot Password?
                     </button>
                 </div>
@@ -113,7 +159,7 @@ const LoginForm = () => {
                 <button
                     type="submit"
                     className="auth-primary-button"
-                    disabled={isLoading}
+                    disabled={isLoading || isGuestLoading}
                 >
                     {isLoading ? "Logging in..." : "Log In"}
                 </button>
@@ -127,14 +173,17 @@ const LoginForm = () => {
                 <button
                     type="button"
                     className="auth-secondary-button"
+                    onClick={handleGoogleLogin}
                 >
                     Continue with Google
                 </button>
                 <button
                     type="button"
                     className="auth-secondary-button"
+                    onClick={handleGuestLogin}
+                    disabled={isGuestLoading}
                 >
-                    Continue with Guest
+                    {isGuestLoading ? "Starting guest session..." : "Continue with Guest"}
                 </button>
             </div>
 
