@@ -393,6 +393,36 @@ Logging out removes the JWT token from local storage and redirects the user to t
 |--------|---------------------------------|-----------------------------|
 | GET    | `/api/questions?subjectId={id}` | Get questions for a subject |
 
+Question management requires a JWT with the `ADMIN` role. Regular users receive
+`403 Forbidden`; requests without authentication receive `401 Unauthorized`.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/admin/questions` | Create a question (201, with Location header) |
+| PUT | `/api/admin/questions/{id}` | Replace a question (200) |
+| DELETE | `/api/admin/questions/{id}` | Delete a question (204) |
+
+POST and PUT accept the same JSON body:
+
+```json
+{
+  "questionText": "Which option is correct?",
+  "optionA": "First option",
+  "optionB": "Second option",
+  "optionC": "Third option",
+  "optionD": "Fourth option",
+  "correctAnswer": "First option",
+  "explanation": "Optional explanation",
+  "subjectId": 1
+}
+```
+
+All fields except `explanation` are required. Text fields have a maximum length of
+255 characters. `subjectId` must be positive and refer to an existing subject.
+`correctAnswer` must exactly match one of the four option texts. Invalid input
+returns 400; a missing question or subject returns 404. PUT replaces all editable
+fields, including clearing the explanation when omitted.
+
 ### Practice
 
 | Method | Endpoint                | Description                       |
@@ -604,7 +634,6 @@ Possible future improvements include:
 
 - Admin authentication/authorization
 - Admin interface for question management
-- Add, edit and delete questions
 - More detailed statistics
 - Question review/history
 - Improved exam result history
