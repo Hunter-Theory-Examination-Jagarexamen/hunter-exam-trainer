@@ -32,3 +32,23 @@
     border: solid 2px darkslategrey;
     border-radius: 20px;
 }
+
+@media (max-width: 768px) {
+
+    .header {
+        height: 64px;
+        padding: 0 1rem;
+    }
+
+    .header-left h1 {
+        font-size: 1.05rem;
+    }
+
+    .header-right {
+        font-size: 0.8rem;
+    }
+
+    .header-logo {
+        height: 24px;
+    }
+}
