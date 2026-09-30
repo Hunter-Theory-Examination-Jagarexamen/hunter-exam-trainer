@@ -200,6 +200,20 @@ The JWT secret is used only by the local backend and should not be added to `app
 
 **Do not commit the JWT secret to GitHub.**
 
+### Optional: Google Login
+
+Google login is **off by default**, and the backend starts without any Google keys. To turn it on, add these environment variables to the backend Run/Debug configuration:
+
+```
+GOOGLE_LOGIN_ENABLED=true
+GOOGLE_CLIENT_ID=<client-id-from-google-cloud-console>
+GOOGLE_CLIENT_SECRET=<client-secret-from-google-cloud-console>
+```
+
+The client ID and secret come from registering the app in Google Cloud Console (#61). When Google login is off, the "Continue with Google" button shows a "not configured yet" message.
+
+**Do not commit the Google client secret to GitHub.**
+
 ### 5. Start the Backend
 
 Open the `backend` project/module in IntelliJ IDEA and run the Spring Boot application.
@@ -356,6 +370,9 @@ Logging out removes the JWT token from local storage and redirects the user to t
 |--------|----------------------|------------------------|
 | POST   | `/api/auth/register` | Register a new user    |
 | POST   | `/api/auth/login`    | Log in and receive JWT |
+| POST   | `/api/auth/guest`    | Start a guest session and receive JWT |
+| POST   | `/api/auth/forgot-password` | Generate a new password (dev only: returned in the response, see #62) |
+| GET    | `/api/auth/google/status` | Whether Google login is enabled |
 
 ### User
 
