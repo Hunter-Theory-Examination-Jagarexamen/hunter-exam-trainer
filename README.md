@@ -200,6 +200,20 @@ The JWT secret is used only by the local backend and should not be added to `app
 
 **Do not commit the JWT secret to GitHub.**
 
+### Optional: Google Login
+
+Google login is **off by default**, and the backend starts without any Google keys. To turn it on, add these environment variables to the backend Run/Debug configuration:
+
+```
+GOOGLE_LOGIN_ENABLED=true
+GOOGLE_CLIENT_ID=<client-id-from-google-cloud-console>
+GOOGLE_CLIENT_SECRET=<client-secret-from-google-cloud-console>
+```
+
+The client ID and secret come from registering the app in Google Cloud Console (#61). When Google login is off, the "Continue with Google" button shows a "not configured yet" message.
+
+**Do not commit the Google client secret to GitHub.**
+
 ### 5. Start the Backend
 
 Open the `backend` project/module in IntelliJ IDEA and run the Spring Boot application.
@@ -356,6 +370,9 @@ Logging out removes the JWT token from local storage and redirects the user to t
 |--------|----------------------|------------------------|
 | POST   | `/api/auth/register` | Register a new user    |
 | POST   | `/api/auth/login`    | Log in and receive JWT |
+| POST   | `/api/auth/guest`    | Start a guest session and receive JWT |
+| POST   | `/api/auth/forgot-password` | Generate a new password (dev only: returned in the response, see #62) |
+| GET    | `/api/auth/google/status` | Whether Google login is enabled |
 
 ### User
 
@@ -492,30 +509,79 @@ spring.jpa.show-sql=true
 
 This is useful during development and debugging.
 
+## Temporary Deployment (PWA Testing)
+
+The app is temporarily deployed to free hosting so we can test the **PWA install workflow on a real mobile device** — mobile browsers require HTTPS to install a PWA, which `localhost` cannot provide.
+
+This deployment is **not production, and not a permanent staging environment.** It exists to validate the PWA install flow and to let the team demo the app on real phones. If it stops being useful, it can be torn down without affecting local development.
+
+### URLs
+
+| Service | URL | Platform |
+|---|---|---|
+| Backend | https://hunter-exam-trainer-bak.onrender.com | Render (Docker) |
+| Frontend | https://hunter01-kappa.vercel.app | Vercel (Vite) |
+| Database | Neon (same instance as local dev) | — |
+
+### How It Works
+
+- Both services are connected to the repo and pick up code changes from `develop`.
+- Configuration is via environment variables on each platform. No secrets are committed to the repo.
+- The deployed backend uses the same Neon database as local development — test data created on the deployment will also appear locally.
+
 ### Environment Variables
 
-The backend reads these environment variables:
+**On Render (backend):**
 
-| Variable | Required | Notes |
-|---|---|---|
-| `DB_URL` | No | Defaults to `jdbc:postgresql://localhost:5432/hunter_exam`. Set it only if your database runs elsewhere (e.g. another port). |
-| `DB_USERNAME` | Yes | PostgreSQL username |
-| `DB_PASSWORD` | Yes | PostgreSQL password |
-| `JWT_SECRET` | Yes | Base64 string, at least 32 characters. **No surrounding quotes**: the value is Base64-decoded at startup, and a quote character breaks it. |
-| `ADMIN_EMAIL` | Yes* | Email for the seeded admin user | 
-| `ADMIN_PASSWORD` | Yes* | Password for the seeded admin user |
+| Variable | Value / Notes |
+|---|---|
+| `DB_URL` | Neon connection string |
+| `DB_USERNAME` | Neon username |
+| `DB_PASSWORD` | Neon password |
+| `JWT_SECRET` | Same Base64 secret used locally |
+| `ADMIN_EMAIL` | Admin seed email |
+| `ADMIN_PASSWORD` | Admin seed password |
+| `APP_CORS_ALLOWED_ORIGINS` | `http://localhost:5173,https://hunter01-kappa.vercel.app` |
 
-To set them in IntelliJ IDEA: **Run → Edit Configurations → (backend run configuration) → Environment variables**, click the list icon at the right of the field, and add one row per variable.
+**On Vercel (frontend):**
 
-These values should be configured locally and should not be committed to the repository. Do not paste them into `application.properties`.
+| Variable | Value |
+|---|---|
+| `VITE_API_BASE_URL` | `https://hunter-exam-trainer-bak.onrender.com` |
+
+⚠️ **Vite env vars are baked in at build time.** Changing `VITE_API_BASE_URL` on Vercel has no effect until the frontend is redeployed with the cache disabled.
+
+⚠️ **Set Vercel env vars for all environments** (Production, Preview, Development) — otherwise preview deployments fall back to `localhost:8080`.
+
+### Known Limitations
+
+- **Render free tier sleeps after ~15 minutes of inactivity.** The first request after sleep takes 30–60 seconds.
+- **No test gate before deploy.** Pushing to `develop` deploys whatever is on `develop` — a broken `develop` will produce a broken deployed app.
+- **CORS origins must match exactly** — including `https://` vs `http://` and no trailing slash.
+
+### Testing on Mobile (PWA Install)
+
+- **iOS Safari:** open the frontend URL → tap Share → **Add to Home Screen**
+- **Android Chrome:** open the frontend URL → tap ⋮ menu → **Install app**
+
+Once installed, the app launches full-screen and behaves like a native app.
+
+### Current Deployment Setup Is Temporary
+
+The Vercel project is deployed from a **standalone copy of the frontend repo** because the main `hunter-exam-trainer` repo is org-owned and requires org-level approval for the Vercel GitHub App. Once that approval is granted, the plan is to:
+
+1. Create a new Vercel project on the main repo, watching `develop`
+2. Update `APP_CORS_ALLOWED_ORIGINS` on Render with the new URL
+3. Retire the standalone frontend repo
+
+Until then, treat this deployment as a **test rig for PWA workflows**, not as our canonical staging environment.
 
 ### Frontend API Configuration
 
-The frontend API client currently communicates with:
+The frontend reads the API base URL from `VITE_API_BASE_URL`:
 
-```
-http://localhost:8080
-```
+- **Local dev:** defaults to `http://localhost:8080` when the env var is not set.
+- **Deployed:** set on Vercel to the temporary deployment backend URL (see "Temporary Deployment (PWA Testing)").
 
 The frontend development server runs on:
 
@@ -523,7 +589,8 @@ The frontend development server runs on:
 http://localhost:5173
 ```
 
-The backend CORS configuration allows requests from the frontend development server.
+
+The backend CORS configuration allows requests from the frontend development server and from the deployed Vercel URL (configured via `APP_CORS_ALLOWED_ORIGINS`).
 
 ## Current Project Status
 

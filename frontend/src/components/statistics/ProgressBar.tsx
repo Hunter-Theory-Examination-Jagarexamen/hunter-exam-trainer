@@ -3,13 +3,18 @@ import "../../styles/statistics.css"
 interface ProgressBarProps {
     subject: string;
     percentage: number;
+    onClick?: () => void;
 }
 
 const ProgressBar = (
-    { subject, percentage }: ProgressBarProps) => {
+    { subject, percentage, onClick }: ProgressBarProps) => {
 
     return (
-        <section className="subject-progress">
+        <button
+            type="button"
+            className="subject-progress"
+            onClick={onClick}
+        >
             <div className="subject-header">
                 <span>{subject}</span>
                 <span>{percentage}%</span>
@@ -19,7 +24,7 @@ const ProgressBar = (
 
                 </div>
             </div>
-        </section>
+        </button>
     );
 };
 

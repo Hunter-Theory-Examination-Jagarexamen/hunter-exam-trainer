@@ -36,7 +36,7 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    // e.g. "STUDENT" or "ADMIN". Nullable for now — no default role is enforced.
+    // STUDENT or ADMIN. New users are registered as STUDENT (see AuthService).
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;

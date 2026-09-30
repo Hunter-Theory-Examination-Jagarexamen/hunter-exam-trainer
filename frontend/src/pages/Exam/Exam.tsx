@@ -3,7 +3,7 @@ import ExamHeader from "../../components/exam/ExamHeader";
 import QuestionPanel from "../../components/exam/QuestionPanel";
 import ExamNavigation from "../../components/exam/ExamNavigation";
 import type { ExamQuestion } from "../../types/examQuestion.ts";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../../api/apiClient.ts";
 
@@ -21,7 +21,7 @@ const Exam = () => {
     const [timeLeft, setTimeLeft] = useState(60 * 60);
 
 
-    const submitExam = async () => {
+    const submitExam = useCallback(async () => {
 
         try {
             const questionIds = questions.map(
@@ -45,7 +45,7 @@ const Exam = () => {
             console.error("Failed to submit exam: ", err);
             alert("Failed to submit exam. Please try again");
         }
-    };
+    }, [sessionId, questions, answers, navigate]);
 
 
     //Load exam questions
@@ -99,12 +99,16 @@ const Exam = () => {
 
     }, [timeLeft]);
 
-    //Auto-submit when time runs out
+    // Auto-submit when time runs out
     useEffect(() => {
-        if (timeLeft === 0) {
+        if (timeLeft === 0 && questions.length > 0) {
             void submitExam();
         }
-    }, [timeLeft]);
+    }, [timeLeft, submitExam, questions]);
+
+    const handleSubmit = () => {
+        void submitExam();
+    };
 
     const currentQuestion = questions[currentQuestionIndex];
 
@@ -125,11 +129,6 @@ const Exam = () => {
         if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex(currentQuestionIndex - 1);
         }
-    };
-
-
-    const handleSubmit = () => {
-        void submitExam();
     };
 
     if (isLoading) {
