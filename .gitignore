@@ -144,3 +144,5 @@ vite.config.ts.timestamp-*
 
 # IDE settings
 .idea/
+.DS_Store
+**/.DS_Store
