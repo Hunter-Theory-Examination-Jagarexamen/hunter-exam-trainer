@@ -10,9 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -154,6 +152,7 @@ public class AuthService {
                     User oauthUser = new User();
                     oauthUser.setFullName(fullName);
                     oauthUser.setEmail(email);
+                    oauthUser.setPasswordLoginEnabled(false);
                     oauthUser.setPassword(passwordEncoder.encode(
                             UUID.randomUUID().toString()
                     ));
@@ -169,47 +168,10 @@ public class AuthService {
     }
 
     /**
-     * Resets a user's password to a new generated value.
-     * <p>
-     * This development-friendly flow returns the new password directly so
-     * it can be displayed to the user without requiring a mail server.
-     *
-     * @param email email of the account to reset
-     * @return the generated password, or null when no account matches
-     */
-    public String forgotPassword(String email) {
-
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-
-        if (optionalUser.isEmpty()) {
-            return null;
-        }
-
-        String newPassword = generateRandomPassword();
-
-        User user = optionalUser.get();
-        user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
-
-        return newPassword;
-    }
-
-    /**
      * @return true when Google login is configured and enabled
      */
     public boolean isGoogleLoginEnabled() {
         return googleLoginEnabled;
     }
 
-    private String generateRandomPassword() {
-        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
-        SecureRandom random = new SecureRandom();
-        StringBuilder password = new StringBuilder();
-
-        for (int i = 0; i < 12; i++) {
-            password.append(chars.charAt(random.nextInt(chars.length())));
-        }
-
-        return password.toString();
-    }
 }
