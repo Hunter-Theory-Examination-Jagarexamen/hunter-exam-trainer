@@ -1,5 +1,6 @@
 package com.hunterexam.backend.controller;
 
+import com.hunterexam.backend.dto.ForgotPasswordRequest;
 import com.hunterexam.backend.dto.LoginRequest;
 import com.hunterexam.backend.dto.LoginResponse;
 import com.hunterexam.backend.dto.RegisterRequest;
@@ -11,12 +12,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * REST controller for user authentication.
  * <p>
- * Provides endpoints for registering new users, logging in,
- * and testing JWT authentication.
+ * Provides endpoints for registering new users and logging in.
  */
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -47,7 +50,7 @@ public class AuthController {
                 user.getId(),
                 user.getFullName(),
                 user.getEmail(),
-                user.getRole()
+                user.getRole().name()
         );
 
         return ResponseEntity
@@ -77,15 +80,61 @@ public class AuthController {
 
 
     /**
-     * Test endpoint used to verify that JWT authentication is working.
+     * Starts a guest session without requiring an account.
      * <p>
-     * This endpoint is protected by Spring Security, so a valid JWT
-     * must be included in the request.
+     * A JWT is returned immediately so guests can use the application.
      *
-     * @return confirmation message when authentication succeeds
+     * @return JWT token with the Bearer authentication type
      */
-    @GetMapping("/test")
-    public ResponseEntity<String> test() {
-        return ResponseEntity.ok("JWT authentication is working.");
+    @PostMapping("/guest")
+    public ResponseEntity<LoginResponse> guest() {
+
+        String token = authService.guestLogin();
+
+        LoginResponse response = new LoginResponse(token, "Bearer");
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Resets the password for the given account.
+     * <p>
+     * For development, the generated password is returned in the response
+     * so the flow can be completed without an email server.
+     *
+     * @param request email of the account to reset
+     * @return message and, when the account exists, the generated password
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request) {
+
+        String newPassword = authService.forgotPassword(request.getEmail());
+
+        if (newPassword == null) {
+            return ResponseEntity.ok(Map.of(
+                    "message",
+                    "If an account exists for that email, a new password has been generated."
+            ));
+        }
+
+        return ResponseEntity.ok(Map.of(
+                "message",
+                "A new password has been generated for your account.",
+                "newPassword",
+                newPassword
+        ));
+    }
+
+    /**
+     * Tells the frontend whether Google login is currently configured.
+     *
+     * @return whether Google login is enabled
+     */
+    @GetMapping("/google/status")
+    public ResponseEntity<Map<String, Boolean>> googleStatus() {
+        return ResponseEntity.ok(
+                Map.of("enabled", authService.isGoogleLoginEnabled())
+        );
     }
 }

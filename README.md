@@ -60,7 +60,7 @@ The project is built as a Progressive Web App (PWA), allowing it to run on deskt
 
 ### Database
 
-- MySQL
+- PostgreSQL
 
 ### Development Tools
 
@@ -79,7 +79,7 @@ Before running the project, make sure the following are installed:
 - Maven
 - Node.js
 - npm
-- MySQL
+- PostgreSQL (locally installed or via Docker)
 - Git
 - IntelliJ IDEA (recommended)
 - Postman (optional, for API testing)
@@ -91,7 +91,7 @@ java -version
 mvn -version
 node -v
 npm -v
-mysql --version
+psql --version
 git --version
 ```
 
@@ -109,9 +109,17 @@ git clone <repository-url>
 cd hunter-exam-trainer
 ````
 
-### 2. Create the MySQL database
+### 2. Create the PostgreSQL database
 
-Create the database used by the backend:
+**Option A: Docker (recommended).** This starts PostgreSQL in a container and creates the `hunter_exam` database automatically:
+
+```bash
+docker run -d --name hunter-exam-postgres -e POSTGRES_USER=<user> -e POSTGRES_PASSWORD=<password> -e POSTGRES_DB=hunter_exam -p 5432:5432 postgres:16
+```
+
+If port 5432 is already in use on your computer, map another host port (e.g. `-p 5433:5432`) and set `DB_URL=jdbc:postgresql://localhost:5433/hunter_exam` (see Environment Variables below).
+
+**Option B: Local PostgreSQL installation.** Create the database used by the backend:
 
 ```sql
 CREATE DATABASE hunter_exam;
@@ -126,12 +134,14 @@ backend/src/main/resources/application.properties
 The current configuration uses:
 
 ```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/hunter_exam
+spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5432/hunter_exam}
 ```
+
+This means: use the `DB_URL` environment variable if it is set, otherwise connect to local PostgreSQL on port 5432.
 
 ### 3. Configure Database Credentials
 
-The application does not store the MySQL username and password directly in `application.properties`.
+The application does not store the PostgreSQL username and password directly in `application.properties`.
 The following environment variables must be configured:
 
 ```
@@ -143,7 +153,7 @@ For example, when running the backend from IntelliJ IDEA, these can be added und
 
 **Run → Edit Configurations → Environment Variables**
 
-The values should match the MySQL account used on the local computer.
+The values should match the PostgreSQL account used on the local computer (or the `POSTGRES_USER`/`POSTGRES_PASSWORD` given to the Docker container).
 
 ### 4. Configure JWT Secret
 
@@ -152,8 +162,9 @@ The application also requires the following environment variable:
 ```
 JWT_SECRET
 ```
-
 The application uses a JWT secret for creating and validating authentication tokens.
+
+The secret must be at least 32 characters (256 bits) long, otherwise the backend will fail to start with a `WeakKeyException`.
 
 Each developer should create their **own local JWT secret**. The secret should not be committed to GitHub or shared in the repository.
 
@@ -181,13 +192,27 @@ In IntelliJ IDEA:
 1. Open Run → Edit Configurations.
 2. Select the Spring Boot backend configuration.
 3. Find Environment variables.
-4. Add JWT_SECRET.
-5. Paste the generated value.
+4. Add JWT_SECRET, ADMIN_EMAIL, and ADMIN_PASSWORD.
+5. Paste the generated values.
 6. Apply the changes and restart the backend.
 
 The JWT secret is used only by the local backend and should not be added to `application.properties` or committed to GitHub.
 
 **Do not commit the JWT secret to GitHub.**
+
+### Optional: Google Login
+
+Google login is **off by default**, and the backend starts without any Google keys. To turn it on, add these environment variables to the backend Run/Debug configuration:
+
+```
+GOOGLE_LOGIN_ENABLED=true
+GOOGLE_CLIENT_ID=<client-id-from-google-cloud-console>
+GOOGLE_CLIENT_SECRET=<client-secret-from-google-cloud-console>
+```
+
+The client ID and secret come from registering the app in Google Cloud Console (#61). When Google login is off, the "Continue with Google" button shows a "not configured yet" message.
+
+**Do not commit the Google client secret to GitHub.**
 
 ### 5. Start the Backend
 
@@ -345,6 +370,9 @@ Logging out removes the JWT token from local storage and redirects the user to t
 |--------|----------------------|------------------------|
 | POST   | `/api/auth/register` | Register a new user    |
 | POST   | `/api/auth/login`    | Log in and receive JWT |
+| POST   | `/api/auth/guest`    | Start a guest session and receive JWT |
+| POST   | `/api/auth/forgot-password` | Generate a new password (dev only: returned in the response, see #62) |
+| GET    | `/api/auth/google/status` | Whether Google login is enabled |
 
 ### User
 
@@ -481,25 +509,79 @@ spring.jpa.show-sql=true
 
 This is useful during development and debugging.
 
+## Temporary Deployment (PWA Testing)
+
+The app is temporarily deployed to free hosting so we can test the **PWA install workflow on a real mobile device** — mobile browsers require HTTPS to install a PWA, which `localhost` cannot provide.
+
+This deployment is **not production, and not a permanent staging environment.** It exists to validate the PWA install flow and to let the team demo the app on real phones. If it stops being useful, it can be torn down without affecting local development.
+
+### URLs
+
+| Service | URL | Platform |
+|---|---|---|
+| Backend | https://hunter-exam-trainer-bak.onrender.com | Render (Docker) |
+| Frontend | https://hunter01-kappa.vercel.app | Vercel (Vite) |
+| Database | Neon (same instance as local dev) | — |
+
+### How It Works
+
+- Both services are connected to the repo and pick up code changes from `develop`.
+- Configuration is via environment variables on each platform. No secrets are committed to the repo.
+- The deployed backend uses the same Neon database as local development — test data created on the deployment will also appear locally.
+
 ### Environment Variables
 
-The backend requires:
+**On Render (backend):**
 
-```
-DB_USERNAME
-DB_PASSWORD
-JWT_SECRET
-```
+| Variable | Value / Notes |
+|---|---|
+| `DB_URL` | Neon connection string |
+| `DB_USERNAME` | Neon username |
+| `DB_PASSWORD` | Neon password |
+| `JWT_SECRET` | Same Base64 secret used locally |
+| `ADMIN_EMAIL` | Admin seed email |
+| `ADMIN_PASSWORD` | Admin seed password |
+| `APP_CORS_ALLOWED_ORIGINS` | `http://localhost:5173,https://hunter01-kappa.vercel.app` |
 
-These values should be configured locally and should not be committed to the repository.
+**On Vercel (frontend):**
+
+| Variable | Value |
+|---|---|
+| `VITE_API_BASE_URL` | `https://hunter-exam-trainer-bak.onrender.com` |
+
+⚠️ **Vite env vars are baked in at build time.** Changing `VITE_API_BASE_URL` on Vercel has no effect until the frontend is redeployed with the cache disabled.
+
+⚠️ **Set Vercel env vars for all environments** (Production, Preview, Development) — otherwise preview deployments fall back to `localhost:8080`.
+
+### Known Limitations
+
+- **Render free tier sleeps after ~15 minutes of inactivity.** The first request after sleep takes 30–60 seconds.
+- **No test gate before deploy.** Pushing to `develop` deploys whatever is on `develop` — a broken `develop` will produce a broken deployed app.
+- **CORS origins must match exactly** — including `https://` vs `http://` and no trailing slash.
+
+### Testing on Mobile (PWA Install)
+
+- **iOS Safari:** open the frontend URL → tap Share → **Add to Home Screen**
+- **Android Chrome:** open the frontend URL → tap ⋮ menu → **Install app**
+
+Once installed, the app launches full-screen and behaves like a native app.
+
+### Current Deployment Setup Is Temporary
+
+The Vercel project is deployed from a **standalone copy of the frontend repo** because the main `hunter-exam-trainer` repo is org-owned and requires org-level approval for the Vercel GitHub App. Once that approval is granted, the plan is to:
+
+1. Create a new Vercel project on the main repo, watching `develop`
+2. Update `APP_CORS_ALLOWED_ORIGINS` on Render with the new URL
+3. Retire the standalone frontend repo
+
+Until then, treat this deployment as a **test rig for PWA workflows**, not as our canonical staging environment.
 
 ### Frontend API Configuration
 
-The frontend API client currently communicates with:
+The frontend reads the API base URL from `VITE_API_BASE_URL`:
 
-```
-http://localhost:8080
-```
+- **Local dev:** defaults to `http://localhost:8080` when the env var is not set.
+- **Deployed:** set on Vercel to the temporary deployment backend URL (see "Temporary Deployment (PWA Testing)").
 
 The frontend development server runs on:
 
@@ -507,7 +589,8 @@ The frontend development server runs on:
 http://localhost:5173
 ```
 
-The backend CORS configuration allows requests from the frontend development server.
+
+The backend CORS configuration allows requests from the frontend development server and from the deployed Vercel URL (configured via `APP_CORS_ALLOWED_ORIGINS`).
 
 ## Current Project Status
 
@@ -526,7 +609,7 @@ Possible future improvements include:
 - Question review/history
 - Improved exam result history
 - Practice mode - Random Practice
-- Improved PWA/offline functionality
+- Offline support for exam content (currently only the app shell is cached for install/fast load, not questions or results)
 - Production deployment
 - Automated backend and frontend tests
 - Improved exceptional/error handling
@@ -564,8 +647,8 @@ Check:
 
 - Java version
 - Maven installation
-- MySQL is running
-- MySQL database `hunter_exam` exists
+- PostgreSQL is running
+- PostgreSQL database `hunter_exam` exists
 - `DB_USERNAME` is configured
 - `DB_PASSWORD` is configured
 - `JWT_SECRET` is configured
@@ -575,12 +658,12 @@ Check:
 Check the configuration:
 
 ```
-spring.datasource.url=jdbc:mysql://localhost:3306/hunter_exam
+spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5432/hunter_exam}
 spring.datasource.username=${DB_USERNAME}
 spring.datasource.password=${DB_PASSWORD}
 ```
 
-Make sure the MySQL server is running and the credentials are correct.
+Make sure the PostgreSQL server is running, the port matches (`DB_URL` if not 5432) and the credentials are correct.
 
 ### Questions or subjects are not loaded
 
@@ -614,7 +697,7 @@ Before making changes to the project:
 1. Pull the latest changes from GitHub.
 2. Make sure the backend starts successfully.
 3. Make sure the frontend starts successfully.
-4. Verify that MySQL is running.
+4. Verify that PostgreSQL is running.
 5. Check that the required environment variables are configured.
 6. Test login before testing protected functionality.
 7. If using a new database, allow `DataInitializer` to load the initial subjects and questions.

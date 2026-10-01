@@ -21,6 +21,33 @@
 
 .subject-progress {
     margin-top: 0;
+
+    width: 100%;
+
+    border: none;
+    background: transparent;
+
+    padding: 0.5rem 0.75rem;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    border-radius: 8px;
+
+    font: inherit;
+    color: inherit;
+
+    transition: background-color 0.2s ease;
+}
+
+.subject-progress:hover {
+    background-color: var(--color-surface);
+}
+
+.subject-progress:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
 }
 
 .subject-header {

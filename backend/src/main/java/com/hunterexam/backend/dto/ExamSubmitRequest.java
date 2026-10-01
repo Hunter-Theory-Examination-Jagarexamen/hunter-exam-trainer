@@ -15,6 +15,8 @@ import java.util.Map;
 @NoArgsConstructor
 public class ExamSubmitRequest {
 
+    private Long sessionId;
+
     private List<Long> questionIds;
 
     private Map<String, String> answers;

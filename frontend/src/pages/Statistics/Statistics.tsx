@@ -5,11 +5,14 @@ import ProgressBar from "../../components/statistics/ProgressBar";
 import RecentResults from "../../components/statistics/RecentResults";
 import PerformanceSummary from "../../components/statistics/PerformanceSummary";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import type { RecentActivity } from "../../types/dashboardInfo.ts";
 import apiClient from "../../api/apiClient.ts";
 import type { SubjectPerformance } from "../../types/subjectPerformance.ts";
 
 const Statistics = () => {
+
+    const navigate = useNavigate();
 
     const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
     const [isLoadingRecent, setIsLoadingRecent] = useState(true);
@@ -120,6 +123,9 @@ const Statistics = () => {
                                     key={subject.subjectId}
                                     subject={subject.subjectName}
                                     percentage={subject.percentage}
+                                    onClick={() =>
+                                        navigate(`/practice/subjects/${subject.subjectId}`)
+                                    }
                                 />
                             ))}
                         </div>

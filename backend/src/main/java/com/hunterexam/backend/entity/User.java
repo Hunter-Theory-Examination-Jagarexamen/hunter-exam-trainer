@@ -16,6 +16,7 @@ import java.util.Date;
  * the user's practice and mock exam results.
  */
 @Entity
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -35,8 +36,10 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    // e.g. "USER" or "ADMIN". Nullable for now — no default role is enforced.
-    private String role;
+    // STUDENT or ADMIN. New users are registered as STUDENT (see AuthService).
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
