@@ -1,10 +1,13 @@
 package com.hunterexam.backend.service;
 
+import com.hunterexam.backend.dto.SubjectRequest;
 import com.hunterexam.backend.dto.SubjectResponse;
 import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -48,4 +51,62 @@ public class SubjectService  {
                 ))
                 .toList();
     }
+
+    // Retrieves a single subject by ID or throws a 404 if not found.
+    public SubjectResponse findSubjectById(Long id) {
+        Subject subject = subjectRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Subject not found with id: " + id));
+
+        return mapToResponse(subject);
+    }
+
+    // Creates a new subject category
+    public SubjectResponse createSubject(SubjectRequest request) {
+        Subject subject = new Subject();
+        subject.setName(request.getName());
+        subject.setDescription(request.getDescription());
+
+        // Save entity to database
+        Subject savedSubject = subjectRepository.save(subject);
+        return mapToResponse(savedSubject);
+    }
+
+    // Updates an existing subject category
+    public SubjectResponse updateSubject(Long id, SubjectRequest request) {
+        Subject subject = subjectRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Subject not found with id: " + id));
+
+        //Update entity fields from request
+        subject.setName(request.getName());
+        subject.setDescription(request.getDescription());
+
+        // Save updated entity to database
+        Subject updatedSubject = subjectRepository.save(subject);
+        return mapToResponse(updatedSubject);
+    }
+
+    // Deletes a subject category by ID
+    public void deleteSubject(Long id) {
+        if (!subjectRepository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Subject not found with id: " + id);
+        }
+
+        // Delete entity from database
+        subjectRepository.deleteById(id);
+    }
+
+    // Helper method to map a Subject entity to SubjectResponse DTO
+    private SubjectResponse mapToResponse(Subject subject) {
+        long questionCount = questionRepository.countBySubjectId(subject.getId());
+
+        // Return populated DTO
+        return new SubjectResponse(
+                subject.getId(),
+                subject.getName(),
+                subject.getDescription(),
+                questionCount
+        );
+    }
+
+
 }
