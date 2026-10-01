@@ -1,12 +1,14 @@
 package com.hunterexam.backend.controller;
 
 import com.hunterexam.backend.dto.ForgotPasswordRequest;
+import com.hunterexam.backend.dto.ResetPasswordRequest;
 import com.hunterexam.backend.dto.LoginRequest;
 import com.hunterexam.backend.dto.LoginResponse;
 import com.hunterexam.backend.dto.RegisterRequest;
 import com.hunterexam.backend.dto.RegisterResponse;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.service.AuthService;
+import com.hunterexam.backend.service.PasswordResetService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,9 +27,11 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final PasswordResetService passwordResetService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, PasswordResetService passwordResetService) {
         this.authService = authService;
+        this.passwordResetService = passwordResetService;
     }
 
 
@@ -96,34 +100,19 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Resets the password for the given account.
-     * <p>
-     * For development, the generated password is returned in the response
-     * so the flow can be completed without an email server.
-     *
-     * @param request email of the account to reset
-     * @return message and, when the account exists, the generated password
-     */
     @PostMapping("/forgot-password")
     public ResponseEntity<Map<String, String>> forgotPassword(
             @Valid @RequestBody ForgotPasswordRequest request) {
+        passwordResetService.requestReset(request.getEmail());
+        return ResponseEntity.ok(Map.of("message",
+                "If an eligible account exists for that email, a password reset link has been sent."));
+    }
 
-        String newPassword = authService.forgotPassword(request.getEmail());
-
-        if (newPassword == null) {
-            return ResponseEntity.ok(Map.of(
-                    "message",
-                    "If an account exists for that email, a new password has been generated."
-            ));
-        }
-
-        return ResponseEntity.ok(Map.of(
-                "message",
-                "A new password has been generated for your account.",
-                "newPassword",
-                newPassword
-        ));
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, String>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
+        passwordResetService.resetPassword(request.getToken(), request.getNewPassword());
+        return ResponseEntity.ok(Map.of("message", "Password reset successfully. You can now log in."));
     }
 
     /**

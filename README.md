@@ -75,7 +75,7 @@ The project is built as a Progressive Web App (PWA), allowing it to run on deskt
 
 Before running the project, make sure the following are installed:
 
-- Java 25 or compatible Java version used by the project
+- JDK 21 (required for the backend)
 - Maven
 - Node.js
 - npm
@@ -94,6 +94,23 @@ npm -v
 psql --version
 git --version
 ```
+
+Both `java -version` and `mvn -version` must report Java 21. Set `JAVA_HOME`
+to your JDK 21 installation and put its `bin` directory on `PATH`, then reopen
+your terminal. The Maven build enforces JDK 21, and the Spring Boot parent derives
+the compiler release from `java.version` in `backend/pom.xml`.
+
+In IntelliJ, import `backend/pom.xml` as a Maven project and set:
+
+- Project SDK and backend module SDK: JDK 21; language level: SDK default (21).
+- Maven importer JDK and Maven runner JRE: JDK 21 (or Project SDK).
+- Spring Boot and test run configurations: JDK 21 (or Project SDK).
+
+Reload the Maven project after changing these settings. When switching JDKs,
+run `mvn clean test` from `backend` to remove stale compiled classes. If IntelliJ
+has built classes into its own output directory, use **Build → Rebuild Project**
+as well. The Docker build and runtime also use Java 21. Personal IDE settings
+should not be committed.
 
 ---
 
@@ -213,6 +230,88 @@ GOOGLE_CLIENT_SECRET=<client-secret-from-google-cloud-console>
 The client ID and secret come from registering the app in Google Cloud Console (#61). When Google login is off, the "Continue with Google" button shows a "not configured yet" message.
 
 **Do not commit the Google client secret to GitHub.**
+
+### Password recovery email (SMTP)
+
+The backend uses Spring Boot Mail and SMTP. Set these variables in the backend's
+IntelliJ Run Configuration or hosting environment, never in frontend `VITE_*`
+variables or committed files.
+
+| Variable | Purpose | Local default / safe production example |
+|----------|---------|-----------------------------------------|
+| `MAIL_HOST` | SMTP server | `localhost` / `smtp.example.com` |
+| `MAIL_PORT` | SMTP port | `1025` / `587` (STARTTLS) |
+| `MAIL_USERNAME` | SMTP login | Empty / `<smtp-username>` |
+| `MAIL_PASSWORD` | SMTP password or provider app password | Empty / `<smtp-app-password>` |
+| `MAIL_FROM` | Authorized sender address | `no-reply@hunterexam.local` / `no-reply@example.com` |
+| `MAIL_SMTP_AUTH` | Enable SMTP authentication | `false` / `true` |
+| `MAIL_STARTTLS_ENABLED` | Enable and require STARTTLS | `false` / `true` |
+| `FRONTEND_URL` | Trusted frontend base URL for reset links | `http://localhost:5173` / `https://app.example.com` |
+
+For local development, run Mailpit to capture email without external delivery:
+
+```bash
+docker run --rm --name hunter-exam-mailpit -p 127.0.0.1:1025:1025 -p 127.0.0.1:8025:8025 axllent/mailpit
+```
+
+Start the backend with the local defaults, request a link using Forgot Password,
+and open the email at `http://localhost:8025`. Follow the link, enter and confirm
+a new password, then log in. Restart the backend after changing its environment.
+Production needs an SMTP provider, authorized sender and any required domain
+verification, authentication, STARTTLS, and an HTTPS `FRONTEND_URL`. Configure
+`APP_CORS_ALLOWED_ORIGINS` and `VITE_API_BASE_URL` as usual. The frontend host must
+serve its SPA at `/reset-password`; the existing Vercel rewrite supports this.
+
+Both endpoints are public and accept JSON:
+
+- `POST /api/auth/forgot-password`: `{"email":"student@example.com"}`.
+  All valid addresses receive HTTP 200 with
+  `{"message":"If an eligible account exists for that email, a password reset link has been sent."}`.
+  This includes unknown addresses, Google-only accounts and mail delivery failures.
+- `POST /api/auth/reset-password`: `{"token":"<token-from-email>","newPassword":"<new-password>"}`.
+  HTTP 200: `{"message":"Password reset successfully. You can now log in."}`.
+  Invalid, expired or consumed links return HTTP 400 with
+  `{"message":"Reset link is invalid, expired, or already used. Please request a new reset link."}`.
+  Input validation also returns HTTP 400 with `{"message":"..."}`. Passwords must
+  have at least eight characters, matching registration, and at most 72 UTF-8
+  bytes (BCrypt's input limit).
+
+Tokens contain 256 random bits, expire after 30 minutes, and are stored only as
+SHA-256 hashes. A new request replaces the previous link. Password update and
+token consumption share a locked database transaction. Links use a URL fragment
+to keep tokens out of HTTP access logs and referrers; the reset page removes the
+fragment from the address bar. Do not enable SMTP message debugging or Hibernate
+bind-parameter logging in production. Delivery failures log only a generic warning;
+use SMTP provider monitoring to investigate delivery issues.
+
+The existing Hibernate `ddl-auto=update` adds three columns to `users`:
+`password_login_enabled` (default true), `password_reset_token_hash` (nullable,
+unique, 64 characters), and `password_reset_expires_at` (nullable timestamp).
+No new migration framework or token table is needed.
+
+**Classify existing Google-only accounts before exposing password recovery.**
+The previous implementation stored random BCrypt passwords for Google users
+without recording their account type, so their origin cannot be inferred from
+the hash. Existing users default to password-enabled to preserve normal accounts.
+Identify known Google-only accounts from your account records and mark them:
+
+```sql
+UPDATE users SET password_login_enabled = false,
+    password_reset_token_hash = NULL, password_reset_expires_at = NULL
+WHERE email IN ('<known-google-only-email>');
+```
+
+New Google-only accounts are marked automatically. Google sign-in for an existing
+password account preserves recovery eligibility. The shared guest account is
+excluded. Existing JWTs retain their current one-hour expiry after a password
+reset. SMTP is synchronous, so response times can vary; deployments should
+rate-limit recovery requests at their ingress. Response statuses and bodies never
+disclose account existence.
+
+Backend tests use H2 and mocked email boundaries; they need no external database
+or mail server. With Java 21, run `cd backend` then `./mvnw test` (Windows:
+`mvnw.cmd test`). For the frontend run `npm ci` and `npm run build` from `frontend`.
+The repository currently has no frontend test runner.
 
 ### 5. Start the Backend
 
@@ -371,7 +470,8 @@ Logging out removes the JWT token from local storage and redirects the user to t
 | POST   | `/api/auth/register` | Register a new user    |
 | POST   | `/api/auth/login`    | Log in and receive JWT |
 | POST   | `/api/auth/guest`    | Start a guest session and receive JWT |
-| POST   | `/api/auth/forgot-password` | Generate a new password (dev only: returned in the response, see #62) |
+| POST   | `/api/auth/forgot-password` | Request a password reset email |
+| POST   | `/api/auth/reset-password` | Set a new password using a reset token |
 | GET    | `/api/auth/google/status` | Whether Google login is enabled |
 
 ### User

@@ -59,7 +59,6 @@ export const checkGoogleLoginEnabled = async (): Promise<boolean> => {
 
 export interface ForgotPasswordResponse {
     message: string;
-    newPassword?: string;
 }
 
 export const forgotPassword = async (
@@ -77,4 +76,20 @@ export const forgotPassword = async (
     }
 
     return response.json();
+};
+
+export const resetPassword = async (
+    token: string,
+    newPassword: string
+): Promise<{message: string}> => {
+    const response = await fetch(`${API_URL}/auth/reset-password`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({token, newPassword}),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.message || "Unable to reset password. Please try again.");
+    }
+    return data;
 };
