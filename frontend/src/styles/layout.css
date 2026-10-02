@@ -14,3 +14,14 @@
     padding: 2rem;
     background: var(--color-background);
 }
+
+@media (max-width: 768px) {
+
+    .layout-body {
+        flex-direction: column;
+    }
+
+    .main-content {
+        padding: 1rem;
+    }
+}

@@ -12,6 +12,9 @@ import PracticeSubjects from "../pages/Practice/PracticeSubjects";
 import RandomPractice from "../pages/Practice/RandomPractice";
 import PracticeQuestions from "../pages/Practice/PracticeQuestions";
 import Register from "../pages/Register/Register";
+import ResetPassword from "../pages/ResetPassword/ResetPassword";
+import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
+import OAuth2Redirect from "../pages/OAuth2Redirect/OAuth2Redirect";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 
 const AppRoutes = () => {
@@ -22,6 +25,9 @@ const AppRoutes = () => {
                 {/* Public Routes */}
                 <Route path="/login" element={ <Login /> } />
                 <Route path="/register" element={ <Register /> } />
+                <Route path="/reset-password" element={ <ResetPassword /> } />
+                <Route path="/forgot-password" element={ <ForgotPassword /> } />
+                <Route path="/oauth2/redirect" element={ <OAuth2Redirect /> } />
 
                 {/* Protected Routes */}
                 <Route element={<ProtectedRoute />} >

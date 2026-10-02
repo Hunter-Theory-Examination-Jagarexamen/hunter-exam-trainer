@@ -1,15 +1,20 @@
 package com.hunterexam.backend.controller;
 
+import com.hunterexam.backend.dto.ForgotPasswordRequest;
+import com.hunterexam.backend.dto.ResetPasswordRequest;
 import com.hunterexam.backend.dto.LoginRequest;
 import com.hunterexam.backend.dto.LoginResponse;
 import com.hunterexam.backend.dto.RegisterRequest;
 import com.hunterexam.backend.dto.RegisterResponse;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.service.AuthService;
+import com.hunterexam.backend.service.PasswordResetService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
  * REST controller for user authentication.
@@ -22,9 +27,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final PasswordResetService passwordResetService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, PasswordResetService passwordResetService) {
         this.authService = authService;
+        this.passwordResetService = passwordResetService;
     }
 
 
@@ -47,7 +54,7 @@ public class AuthController {
                 user.getId(),
                 user.getFullName(),
                 user.getEmail(),
-                user.getRole()
+                user.getRole().name()
         );
 
         return ResponseEntity
@@ -76,4 +83,47 @@ public class AuthController {
     }
 
 
+    /**
+     * Starts a guest session without requiring an account.
+     * <p>
+     * A JWT is returned immediately so guests can use the application.
+     *
+     * @return JWT token with the Bearer authentication type
+     */
+    @PostMapping("/guest")
+    public ResponseEntity<LoginResponse> guest() {
+
+        String token = authService.guestLogin();
+
+        LoginResponse response = new LoginResponse(token, "Bearer");
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request) {
+        passwordResetService.requestReset(request.getEmail());
+        return ResponseEntity.ok(Map.of("message",
+                "If an eligible account exists for that email, a password reset link has been sent."));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, String>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
+        passwordResetService.resetPassword(request.getToken(), request.getNewPassword());
+        return ResponseEntity.ok(Map.of("message", "Password reset successfully. You can now log in."));
+    }
+
+    /**
+     * Tells the frontend whether Google login is currently configured.
+     *
+     * @return whether Google login is enabled
+     */
+    @GetMapping("/google/status")
+    public ResponseEntity<Map<String, Boolean>> googleStatus() {
+        return ResponseEntity.ok(
+                Map.of("enabled", authService.isGoogleLoginEnabled())
+        );
+    }
 }

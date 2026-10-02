@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Date;
 
 /**
@@ -36,8 +37,19 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    // e.g. "USER" or "ADMIN". Nullable for now — no default role is enforced.
-    private String role;
+    // Existing password accounts remain eligible; new Google-only accounts opt out.
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean passwordLoginEnabled = true;
+
+    @Column(length = 64, unique = true)
+    private String passwordResetTokenHash;
+
+    private Instant passwordResetExpiresAt;
+
+    // STUDENT or ADMIN. New users are registered as STUDENT (see AuthService).
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;

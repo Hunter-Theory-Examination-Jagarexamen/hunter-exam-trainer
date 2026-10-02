@@ -75,7 +75,7 @@ The project is built as a Progressive Web App (PWA), allowing it to run on deskt
 
 Before running the project, make sure the following are installed:
 
-- Java 25 or compatible Java version used by the project
+- JDK 25 (required for the backend)
 - Maven
 - Node.js
 - npm
@@ -94,6 +94,23 @@ npm -v
 psql --version
 git --version
 ```
+
+Both `java -version` and `mvn -version` must report Java 25. Set `JAVA_HOME`
+to your JDK 25 installation and put its `bin` directory on `PATH`, then reopen
+your terminal. The Maven build requires JDK 25 or newer, and the Spring Boot parent derives
+the compiler release from `java.version` in `backend/pom.xml`.
+
+In IntelliJ, import `backend/pom.xml` as a Maven project and set:
+
+- Project SDK and backend module SDK: JDK 25; language level: SDK default (25).
+- Maven importer JDK and Maven runner JRE: JDK 25 (or Project SDK).
+- Spring Boot and test run configurations: JDK 25 (or Project SDK).
+
+Reload the Maven project after changing these settings. When switching JDKs,
+run `mvn clean test` from `backend` to remove stale compiled classes. If IntelliJ
+has built classes into its own output directory, use **Build → Rebuild Project**
+as well. The Docker build and runtime also use Java 25. Personal IDE settings
+should not be committed.
 
 ---
 
@@ -192,13 +209,109 @@ In IntelliJ IDEA:
 1. Open Run → Edit Configurations.
 2. Select the Spring Boot backend configuration.
 3. Find Environment variables.
-4. Add JWT_SECRET.
-5. Paste the generated value.
+4. Add JWT_SECRET, ADMIN_EMAIL, and ADMIN_PASSWORD.
+5. Paste the generated values.
 6. Apply the changes and restart the backend.
 
 The JWT secret is used only by the local backend and should not be added to `application.properties` or committed to GitHub.
 
 **Do not commit the JWT secret to GitHub.**
+
+### Optional: Google Login
+
+Google login is **off by default**, and the backend starts without any Google keys. To turn it on, add these environment variables to the backend Run/Debug configuration:
+
+```
+GOOGLE_LOGIN_ENABLED=true
+GOOGLE_CLIENT_ID=<client-id-from-google-cloud-console>
+GOOGLE_CLIENT_SECRET=<client-secret-from-google-cloud-console>
+```
+
+The client ID and secret come from registering the app in Google Cloud Console (#61). When Google login is off, the "Continue with Google" button shows a "not configured yet" message.
+
+**Do not commit the Google client secret to GitHub.**
+
+### Password recovery email (SMTP)
+
+The backend uses Spring Boot Mail and SMTP. Set these variables in the backend's
+IntelliJ Run Configuration or hosting environment, never in frontend `VITE_*`
+variables or committed files.
+
+| Variable | Purpose | Local default / safe production example |
+|----------|---------|-----------------------------------------|
+| `MAIL_HOST` | SMTP server | `localhost` / `smtp.example.com` |
+| `MAIL_PORT` | SMTP port | `1025` / `587` (STARTTLS) |
+| `MAIL_USERNAME` | SMTP login | Empty / `<smtp-username>` |
+| `MAIL_PASSWORD` | SMTP password or provider app password | Empty / `<smtp-app-password>` |
+| `MAIL_FROM` | Authorized sender address | `no-reply@hunterexam.local` / `no-reply@example.com` |
+| `MAIL_SMTP_AUTH` | Enable SMTP authentication | `false` / `true` |
+| `MAIL_STARTTLS_ENABLED` | Enable and require STARTTLS | `false` / `true` |
+| `FRONTEND_URL` | Trusted frontend base URL for reset links | `http://localhost:5173` / `https://app.example.com` |
+
+For local development, run Mailpit to capture email without external delivery:
+
+```bash
+docker run --rm --name hunter-exam-mailpit -p 127.0.0.1:1025:1025 -p 127.0.0.1:8025:8025 axllent/mailpit
+```
+
+Start the backend with the local defaults, request a link using Forgot Password,
+and open the email at `http://localhost:8025`. Follow the link, enter and confirm
+a new password, then log in. Restart the backend after changing its environment.
+Production needs an SMTP provider, authorized sender and any required domain
+verification, authentication, STARTTLS, and an HTTPS `FRONTEND_URL`. Configure
+`APP_CORS_ALLOWED_ORIGINS` and `VITE_API_BASE_URL` as usual. The frontend host must
+serve its SPA at `/reset-password`; the existing Vercel rewrite supports this.
+
+Both endpoints are public and accept JSON:
+
+- `POST /api/auth/forgot-password`: `{"email":"student@example.com"}`.
+  All valid addresses receive HTTP 200 with
+  `{"message":"If an eligible account exists for that email, a password reset link has been sent."}`.
+  This includes unknown addresses, Google-only accounts and mail delivery failures.
+- `POST /api/auth/reset-password`: `{"token":"<token-from-email>","newPassword":"<new-password>"}`.
+  HTTP 200: `{"message":"Password reset successfully. You can now log in."}`.
+  Invalid, expired or consumed links return HTTP 400 with
+  `{"message":"Reset link is invalid, expired, or already used. Please request a new reset link."}`.
+  Input validation also returns HTTP 400 with `{"message":"..."}`. Passwords must
+  have at least eight characters, matching registration, and at most 72 UTF-8
+  bytes (BCrypt's input limit).
+
+Tokens contain 256 random bits, expire after 30 minutes, and are stored only as
+SHA-256 hashes. A new request replaces the previous link. Password update and
+token consumption share a locked database transaction. Links use a URL fragment
+to keep tokens out of HTTP access logs and referrers; the reset page removes the
+fragment from the address bar. Do not enable SMTP message debugging or Hibernate
+bind-parameter logging in production. Delivery failures log only a generic warning;
+use SMTP provider monitoring to investigate delivery issues.
+
+The existing Hibernate `ddl-auto=update` adds three columns to `users`:
+`password_login_enabled` (default true), `password_reset_token_hash` (nullable,
+unique, 64 characters), and `password_reset_expires_at` (nullable timestamp).
+No new migration framework or token table is needed.
+
+**Classify existing Google-only accounts before exposing password recovery.**
+The previous implementation stored random BCrypt passwords for Google users
+without recording their account type, so their origin cannot be inferred from
+the hash. Existing users default to password-enabled to preserve normal accounts.
+Identify known Google-only accounts from your account records and mark them:
+
+```sql
+UPDATE users SET password_login_enabled = false,
+    password_reset_token_hash = NULL, password_reset_expires_at = NULL
+WHERE email IN ('<known-google-only-email>');
+```
+
+New Google-only accounts are marked automatically. Google sign-in for an existing
+password account preserves recovery eligibility. The shared guest account is
+excluded. Existing JWTs retain their current one-hour expiry after a password
+reset. SMTP is synchronous, so response times can vary; deployments should
+rate-limit recovery requests at their ingress. Response statuses and bodies never
+disclose account existence.
+
+Backend tests use H2 and mocked email boundaries; they need no external database
+or mail server. With Java 25, run `cd backend` then `./mvnw test` (Windows:
+`mvnw.cmd test`). For the frontend run `npm ci` and `npm run build` from `frontend`.
+The repository currently has no frontend test runner.
 
 ### 5. Start the Backend
 
@@ -356,6 +469,10 @@ Logging out removes the JWT token from local storage and redirects the user to t
 |--------|----------------------|------------------------|
 | POST   | `/api/auth/register` | Register a new user    |
 | POST   | `/api/auth/login`    | Log in and receive JWT |
+| POST   | `/api/auth/guest`    | Start a guest session and receive JWT |
+| POST   | `/api/auth/forgot-password` | Request a password reset email |
+| POST   | `/api/auth/reset-password` | Set a new password using a reset token |
+| GET    | `/api/auth/google/status` | Whether Google login is enabled |
 
 ### User
 
@@ -375,6 +492,36 @@ Logging out removes the JWT token from local storage and redirects the user to t
 | Method | Endpoint                        | Description                 |
 |--------|---------------------------------|-----------------------------|
 | GET    | `/api/questions?subjectId={id}` | Get questions for a subject |
+
+Question management requires a JWT with the `ADMIN` role. Regular users receive
+`403 Forbidden`; requests without authentication receive `401 Unauthorized`.
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/admin/questions` | Create a question (201, with Location header) |
+| PUT | `/api/admin/questions/{id}` | Replace a question (200) |
+| DELETE | `/api/admin/questions/{id}` | Delete a question (204) |
+
+POST and PUT accept the same JSON body:
+
+```json
+{
+  "questionText": "Which option is correct?",
+  "optionA": "First option",
+  "optionB": "Second option",
+  "optionC": "Third option",
+  "optionD": "Fourth option",
+  "correctAnswer": "First option",
+  "explanation": "Optional explanation",
+  "subjectId": 1
+}
+```
+
+All fields except `explanation` are required. Text fields have a maximum length of
+255 characters. `subjectId` must be positive and refer to an existing subject.
+`correctAnswer` must exactly match one of the four option texts. Invalid input
+returns 400; a missing question or subject returns 404. PUT replaces all editable
+fields, including clearing the explanation when omitted.
 
 ### Practice
 
@@ -492,28 +639,79 @@ spring.jpa.show-sql=true
 
 This is useful during development and debugging.
 
+## Temporary Deployment (PWA Testing)
+
+The app is temporarily deployed to free hosting so we can test the **PWA install workflow on a real mobile device** — mobile browsers require HTTPS to install a PWA, which `localhost` cannot provide.
+
+This deployment is **not production, and not a permanent staging environment.** It exists to validate the PWA install flow and to let the team demo the app on real phones. If it stops being useful, it can be torn down without affecting local development.
+
+### URLs
+
+| Service | URL | Platform |
+|---|---|---|
+| Backend | https://hunter-exam-trainer-bak.onrender.com | Render (Docker) |
+| Frontend | https://hunter01-kappa.vercel.app | Vercel (Vite) |
+| Database | Neon (same instance as local dev) | — |
+
+### How It Works
+
+- Both services are connected to the repo and pick up code changes from `develop`.
+- Configuration is via environment variables on each platform. No secrets are committed to the repo.
+- The deployed backend uses the same Neon database as local development — test data created on the deployment will also appear locally.
+
 ### Environment Variables
 
-The backend reads these environment variables:
+**On Render (backend):**
 
-| Variable | Required | Notes |
-|---|---|---|
-| `DB_URL` | No | Defaults to `jdbc:postgresql://localhost:5432/hunter_exam`. Set it only if your database runs elsewhere (e.g. another port). |
-| `DB_USERNAME` | Yes | PostgreSQL username |
-| `DB_PASSWORD` | Yes | PostgreSQL password |
-| `JWT_SECRET` | Yes | Base64 string, at least 32 characters. **No surrounding quotes**: the value is Base64-decoded at startup, and a quote character breaks it. |
+| Variable | Value / Notes |
+|---|---|
+| `DB_URL` | Neon connection string |
+| `DB_USERNAME` | Neon username |
+| `DB_PASSWORD` | Neon password |
+| `JWT_SECRET` | Same Base64 secret used locally |
+| `ADMIN_EMAIL` | Admin seed email |
+| `ADMIN_PASSWORD` | Admin seed password |
+| `APP_CORS_ALLOWED_ORIGINS` | `http://localhost:5173,https://hunter01-kappa.vercel.app` |
 
-To set them in IntelliJ IDEA: **Run → Edit Configurations → (backend run configuration) → Environment variables**, click the list icon at the right of the field, and add one row per variable.
+**On Vercel (frontend):**
 
-These values should be configured locally and should not be committed to the repository. Do not paste them into `application.properties`.
+| Variable | Value |
+|---|---|
+| `VITE_API_BASE_URL` | `https://hunter-exam-trainer-bak.onrender.com` |
+
+⚠️ **Vite env vars are baked in at build time.** Changing `VITE_API_BASE_URL` on Vercel has no effect until the frontend is redeployed with the cache disabled.
+
+⚠️ **Set Vercel env vars for all environments** (Production, Preview, Development) — otherwise preview deployments fall back to `localhost:8080`.
+
+### Known Limitations
+
+- **Render free tier sleeps after ~15 minutes of inactivity.** The first request after sleep takes 30–60 seconds.
+- **No test gate before deploy.** Pushing to `develop` deploys whatever is on `develop` — a broken `develop` will produce a broken deployed app.
+- **CORS origins must match exactly** — including `https://` vs `http://` and no trailing slash.
+
+### Testing on Mobile (PWA Install)
+
+- **iOS Safari:** open the frontend URL → tap Share → **Add to Home Screen**
+- **Android Chrome:** open the frontend URL → tap ⋮ menu → **Install app**
+
+Once installed, the app launches full-screen and behaves like a native app.
+
+### Current Deployment Setup Is Temporary
+
+The Vercel project is deployed from a **standalone copy of the frontend repo** because the main `hunter-exam-trainer` repo is org-owned and requires org-level approval for the Vercel GitHub App. Once that approval is granted, the plan is to:
+
+1. Create a new Vercel project on the main repo, watching `develop`
+2. Update `APP_CORS_ALLOWED_ORIGINS` on Render with the new URL
+3. Retire the standalone frontend repo
+
+Until then, treat this deployment as a **test rig for PWA workflows**, not as our canonical staging environment.
 
 ### Frontend API Configuration
 
-The frontend API client currently communicates with:
+The frontend reads the API base URL from `VITE_API_BASE_URL`:
 
-```
-http://localhost:8080
-```
+- **Local dev:** defaults to `http://localhost:8080` when the env var is not set.
+- **Deployed:** set on Vercel to the temporary deployment backend URL (see "Temporary Deployment (PWA Testing)").
 
 The frontend development server runs on:
 
@@ -521,7 +719,8 @@ The frontend development server runs on:
 http://localhost:5173
 ```
 
-The backend CORS configuration allows requests from the frontend development server.
+
+The backend CORS configuration allows requests from the frontend development server and from the deployed Vercel URL (configured via `APP_CORS_ALLOWED_ORIGINS`).
 
 ## Current Project Status
 
@@ -535,7 +734,6 @@ Possible future improvements include:
 
 - Admin authentication/authorization
 - Admin interface for question management
-- Add, edit and delete questions
 - More detailed statistics
 - Question review/history
 - Improved exam result history

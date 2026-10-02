@@ -3,7 +3,7 @@ import ExamHeader from "../../components/exam/ExamHeader";
 import QuestionPanel from "../../components/exam/QuestionPanel";
 import ExamNavigation from "../../components/exam/ExamNavigation";
 import type { ExamQuestion } from "../../types/examQuestion.ts";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient from "../../api/apiClient.ts";
 
@@ -12,12 +12,41 @@ const Exam = () => {
 
     const navigate = useNavigate();
 
+    const [sessionId, setSessionId] = useState<string | null>(null);
     const [questions, setQuestions] = useState<ExamQuestion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [timeLeft, setTimeLeft] = useState(60 * 60);
+
+
+    const submitExam = useCallback(async () => {
+
+        try {
+            const questionIds = questions.map(
+                (question) => question.id);
+
+            const result = await apiClient("/api/exam/submit", {
+                method: "POST",
+                body: JSON.stringify({
+                    sessionId,
+                    questionIds,
+                    answers
+                })
+            });
+
+            console.log("Exam result: ", result);
+            navigate("/result", {
+                state: result
+            });
+        }
+        catch (err) {
+            console.error("Failed to submit exam: ", err);
+            alert("Failed to submit exam. Please try again");
+        }
+    }, [sessionId, questions, answers, navigate]);
+
 
     //Load exam questions
     useEffect(() => {
@@ -28,14 +57,21 @@ const Exam = () => {
                 setIsLoading(true);
                 setError("");
 
-                const data: ExamQuestion[] =
+                interface ExamStartResponse {
+                    sessionId: string;
+                    questions: ExamQuestion[];
+                }
+
+                const data: ExamStartResponse =
                     await apiClient("/api/exam/start", {
                         method: "POST"
                     });
-                setQuestions(data);
+                setSessionId(data.sessionId);
+                setQuestions(data.questions);
             }
-            catch (error) {
-                console.error("Failed to load exam questions.");
+
+            catch (err) {
+                console.error("Failed to load exam questions.", err);
                 setError("Failed to load exam questions. Please try again.");
             }
             finally {
@@ -63,12 +99,16 @@ const Exam = () => {
 
     }, [timeLeft]);
 
-    //Auto-submit when time runs out
+    // Auto-submit when time runs out
     useEffect(() => {
-        if (timeLeft === 0) {
+        if (timeLeft === 0 && questions.length > 0) {
             void submitExam();
         }
-    }, [timeLeft]);
+    }, [timeLeft, submitExam, questions]);
+
+    const handleSubmit = () => {
+        void submitExam();
+    };
 
     const currentQuestion = questions[currentQuestionIndex];
 
@@ -89,35 +129,6 @@ const Exam = () => {
         if (currentQuestionIndex > 0) {
             setCurrentQuestionIndex(currentQuestionIndex - 1);
         }
-    };
-
-    const submitExam = async () => {
-
-        try {
-            const questionIds = questions.map(
-                (question) => question.id);
-
-            const result = await apiClient("/api/exam/submit", {
-                method: "POST",
-                body: JSON.stringify({
-                    questionIds,
-                    answers
-                })
-            });
-
-            console.log("Exam result: ", result);
-            navigate("/result", {
-                state: result
-            });
-        }
-        catch (error) {
-            console.error("Failed to submit exam: ", error);
-            alert("Failed to submit exam. Please try again");
-        }
-    };
-
-    const handleSubmit = () => {
-        void submitExam();
     };
 
     if (isLoading) {

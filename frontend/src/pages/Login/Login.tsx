@@ -1,8 +1,13 @@
 import LoginForm from "../../components/auth/LoginForm";
 import logo from "../../assets/images/logo.svg";
 import "../../styles/auth.css";
+import { useSearchParams } from "react-router-dom";
 
 const Login = () => {
+
+    const [searchParams] = useSearchParams();
+    const googleError = searchParams.get("error") === "google";
+
     return (
         <div className="auth-page login">
 
@@ -17,6 +22,12 @@ const Login = () => {
                     </p>
                 </div>
             </div>
+
+            {googleError && (
+                <div className="auth-error-banner">
+                    Google sign-in failed. Try again or use another method.
+                </div>
+            )}
 
             <LoginForm />
         </div>
