@@ -22,4 +22,10 @@
 //     it("sets the fill width to the percentage", () => {
 //         // Arrange / Act / Assert: the .progress-fill element has width 40%
 //     });
+//
+//     it("calls onClick when clicked", () => {
+//         // Arrange: a mock function, onClick = vi.fn(), passed as a prop
+//         // Act:     click the button
+//         // Assert:  onClick was called once
+//     });
 // });
