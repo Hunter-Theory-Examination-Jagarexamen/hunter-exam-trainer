@@ -469,7 +469,6 @@ Logging out removes the JWT token from local storage and redirects the user to t
 |--------|----------------------|------------------------|
 | POST   | `/api/auth/register` | Register a new user    |
 | POST   | `/api/auth/login`    | Log in and receive JWT |
-| POST   | `/api/auth/guest`    | Start a guest session and receive JWT |
 | POST   | `/api/auth/forgot-password` | Request a password reset email |
 | POST   | `/api/auth/reset-password` | Set a new password using a reset token |
 | GET    | `/api/auth/google/status` | Whether Google login is enabled |
