@@ -83,22 +83,6 @@ public class AuthController {
     }
 
 
-    /**
-     * Starts a guest session without requiring an account.
-     * <p>
-     * A JWT is returned immediately so guests can use the application.
-     *
-     * @return JWT token with the Bearer authentication type
-     */
-    @PostMapping("/guest")
-    public ResponseEntity<LoginResponse> guest() {
-
-        String token = authService.guestLogin();
-
-        LoginResponse response = new LoginResponse(token, "Bearer");
-
-        return ResponseEntity.ok(response);
-    }
 
     @PostMapping("/forgot-password")
     public ResponseEntity<Map<String, String>> forgotPassword(
