@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Date;
 
 /**
@@ -35,6 +36,15 @@ public class User {
     // Stores the BCrypt-hashed password, never plain text.
     @Column(nullable = false)
     private String password;
+
+    // Existing password accounts remain eligible; new Google-only accounts opt out.
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private boolean passwordLoginEnabled = true;
+
+    @Column(length = 64, unique = true)
+    private String passwordResetTokenHash;
+
+    private Instant passwordResetExpiresAt;
 
     // STUDENT or ADMIN. New users are registered as STUDENT (see AuthService).
     @Enumerated(EnumType.STRING)
