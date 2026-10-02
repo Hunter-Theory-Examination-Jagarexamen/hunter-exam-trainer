@@ -14,7 +14,7 @@ start now and each part fits in one pull request:
 
 1. Admin area: access and question overview (new text for #32)
 2. Admin: add, edit and delete questions (uses the endpoints from #30 / PR #71)
-3. Manage subjects (categories), later, depends on #31
+3. Manage subjects (categories), using the endpoints from #31 (PR #74)
 
 Images in questions are handled in their own issues ("Add optional image to
 questions", then image upload), so none of the admin parts waits for them.
