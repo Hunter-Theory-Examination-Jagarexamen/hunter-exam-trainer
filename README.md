@@ -75,7 +75,7 @@ The project is built as a Progressive Web App (PWA), allowing it to run on deskt
 
 Before running the project, make sure the following are installed:
 
-- JDK 21 (required for the backend)
+- JDK 25 (required for the backend)
 - Maven
 - Node.js
 - npm
@@ -95,21 +95,21 @@ psql --version
 git --version
 ```
 
-Both `java -version` and `mvn -version` must report Java 21. Set `JAVA_HOME`
-to your JDK 21 installation and put its `bin` directory on `PATH`, then reopen
-your terminal. The Maven build enforces JDK 21, and the Spring Boot parent derives
+Both `java -version` and `mvn -version` must report Java 25. Set `JAVA_HOME`
+to your JDK 25 installation and put its `bin` directory on `PATH`, then reopen
+your terminal. The Maven build requires JDK 25 or newer, and the Spring Boot parent derives
 the compiler release from `java.version` in `backend/pom.xml`.
 
 In IntelliJ, import `backend/pom.xml` as a Maven project and set:
 
-- Project SDK and backend module SDK: JDK 21; language level: SDK default (21).
-- Maven importer JDK and Maven runner JRE: JDK 21 (or Project SDK).
-- Spring Boot and test run configurations: JDK 21 (or Project SDK).
+- Project SDK and backend module SDK: JDK 25; language level: SDK default (25).
+- Maven importer JDK and Maven runner JRE: JDK 25 (or Project SDK).
+- Spring Boot and test run configurations: JDK 25 (or Project SDK).
 
 Reload the Maven project after changing these settings. When switching JDKs,
 run `mvn clean test` from `backend` to remove stale compiled classes. If IntelliJ
 has built classes into its own output directory, use **Build → Rebuild Project**
-as well. The Docker build and runtime also use Java 21. Personal IDE settings
+as well. The Docker build and runtime also use Java 25. Personal IDE settings
 should not be committed.
 
 ---
@@ -309,7 +309,7 @@ rate-limit recovery requests at their ingress. Response statuses and bodies neve
 disclose account existence.
 
 Backend tests use H2 and mocked email boundaries; they need no external database
-or mail server. With Java 21, run `cd backend` then `./mvnw test` (Windows:
+or mail server. With Java 25, run `cd backend` then `./mvnw test` (Windows:
 `mvnw.cmd test`). For the frontend run `npm ci` and `npm run build` from `frontend`.
 The repository currently has no frontend test runner.
 
