@@ -27,7 +27,7 @@
 		<url/>
 	</scm>
 	<properties>
-		<java.version>21</java.version>
+		<java.version>25</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -129,15 +129,15 @@
 				<artifactId>maven-enforcer-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>require-java-21</id>
+						<id>require-java-25</id>
 						<goals>
 							<goal>enforce</goal>
 						</goals>
 						<configuration>
 							<rules>
 								<requireJavaVersion>
-									<version>[${java.version},22)</version>
-									<message>The backend requires JDK 21. Check JAVA_HOME, PATH, and the IntelliJ Maven JDK settings.</message>
+									<version>[${java.version},)</version>
+									<message>The backend requires JDK 25 or newer. Check JAVA_HOME, PATH, and the IntelliJ Maven JDK settings.</message>
 								</requireJavaVersion>
 							</rules>
 						</configuration>
