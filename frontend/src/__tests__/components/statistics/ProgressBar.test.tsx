@@ -14,10 +14,14 @@ describe("ProgressBar", () => {
         expect(screen.getByText("Viltvård")).toBeInTheDocument();
     });
 
-    // it("shows the percentage as text", () => {
-    //     // Arrange / Act / Assert: e.g. percentage={40} -> "40%" is shown
-    // });
-    //
+    it("shows the percentage as text", () => {
+        // Arrange: draw the component with test data
+        render(<ProgressBar subject="Viltvård" percentage={40} />);
+
+        // Assert: the number is shown with a % sign
+        expect(screen.getByText("40%")).toBeInTheDocument();
+    });
+
     // it("sets the fill width to the percentage", () => {
     //     // Arrange / Act / Assert: the .progress-fill element has width 40%
     // });
