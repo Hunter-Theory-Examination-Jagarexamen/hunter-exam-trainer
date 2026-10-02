@@ -27,19 +27,6 @@ export const loginUser = async (
     return response.json();
 };
 
-export const loginAsGuest = async (): Promise<LoginResponse> => {
-
-    const response = await fetch(`${API_URL}/auth/guest`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json",},
-    });
-
-    if (!response.ok) {
-        throw new Error("Unable to start a guest session");
-    }
-
-    return response.json();
-};
 
 export const checkGoogleLoginEnabled = async (): Promise<boolean> => {
 
