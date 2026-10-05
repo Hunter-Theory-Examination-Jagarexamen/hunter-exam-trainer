@@ -1,0 +1,64 @@
+@import "./card.css";
+
+.question-bank {
+    width: 100%;
+    max-width: 1000px;
+    overflow-wrap: anywhere;
+}
+
+.question-bank-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.question-bank-field input,
+.question-bank-field select {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+}
+
+.question-bank-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.question-bank-list ol {
+    padding-left: 1.5rem;
+}
+
+.question-bank-list li {
+    margin: 0.5rem 0;
+}
+
+.question-bank-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.question-bank-pagination button {
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-primary);
+    color: white;
+    font: inherit;
+    cursor: pointer;
+}
+
+.question-bank-pagination button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
