@@ -1,26 +1,8 @@
 import "../../styles/header.css"
 import logo from "../../assets/images/logo.svg";
-import {useEffect, useState} from "react";
 import type {User} from "../../types/user.ts";
-import apiClient from "../../api/apiClient.ts";
 
-const Header = () => {
-
-    const [user, setUser] = useState<User | null>(null);
-
-    useEffect(() => {
-
-        const fetchUserInfo = async () => {
-            try {
-                const data: User = await apiClient("/api/users/me");
-                setUser(data);
-            }
-            catch (error) {
-                console.error("Failed to load user details:", error);
-            }
-        };
-        void fetchUserInfo();
-    }, []);
+const Header = ({ user }: { user: User | null }) => {
 
     return (
         <header className="header">
