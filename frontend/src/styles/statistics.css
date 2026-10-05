@@ -121,7 +121,21 @@
     font-size: 0.85rem;
     color: var(--color-secondary);
 }
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
 
+.weeks-select {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
 
 @media (max-width: 768px) {
 

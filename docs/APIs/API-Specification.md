@@ -14,6 +14,7 @@
 | GET    | /api/dashboard                | Get dashboard statistics for the logged-in user | Required       |
 | GET    | /api/dashboard/recent         | Get the user's recent mock exam activity        | Required       |
 | GET    | /api/statistics/subjects      | Get the user's practice performance by subject  | Required       |
+| GET    | /api/statistics/progress      | Get the user's weekly accuracy over time        | Required       |
 
 ## Mock exam: request and response
 

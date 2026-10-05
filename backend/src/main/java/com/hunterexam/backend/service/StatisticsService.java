@@ -7,9 +7,16 @@ import com.hunterexam.backend.repository.PracticeResultRepository;
 import com.hunterexam.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import com.hunterexam.backend.dto.ProgressOverTimeResponse;
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
+import java.util.Comparator;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 
 /**
  * Handles calculation of practice performance statistics.
@@ -76,6 +83,52 @@ public class StatisticsService {
                             firstResult.getSubject().getName(),
                             averagePercentage
                     );
+                })
+                .toList();
+    }
+
+    /**
+     * Calculates the user's practice accuracy grouped by ISO week
+     * (Monday–Sunday) for the last N weeks.
+     *
+     * <p>Only weeks in which the user practiced are included in the result,
+     * ordered from oldest to newest.
+     *
+     * @param email user's email
+     * @param weeks number of weeks to look back
+     * @return list of weekly progress points
+     */
+    public List<ProgressOverTimeResponse> getProgressOverTime(String email, int weeks) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        LocalDateTime since = LocalDateTime.now()
+                .minusWeeks(weeks)
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                .toLocalDate()
+                .atStartOfDay();
+
+        List<PracticeResult> results =
+                practiceResultRepository.findByUserAndCompletedAtAfter(user, since);
+
+        // Group by the Monday of the week the result was completed.
+        Map<LocalDate, List<PracticeResult>> byWeek = results.stream()
+                .collect(Collectors.groupingBy(r ->
+                        r.getCompletedAt().toLocalDate()
+                                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                ));
+
+        return byWeek.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .map(entry -> {
+                    long correct = entry.getValue().stream()
+                            .mapToLong(PracticeResult::getCorrectAnswers).sum();
+                    long total = entry.getValue().stream()
+                            .mapToLong(PracticeResult::getTotalQuestions).sum();
+                    long accuracy = total == 0 ? 0 : Math.round(correct * 100.0 / total);
+
+                    return new ProgressOverTimeResponse(entry.getKey(), accuracy, total);
                 })
                 .toList();
     }
