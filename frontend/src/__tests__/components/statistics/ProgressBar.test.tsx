@@ -22,10 +22,17 @@ describe("ProgressBar", () => {
         expect(screen.getByText("40%")).toBeInTheDocument();
     });
 
-    // it("sets the fill width to the percentage", () => {
-    //     // Arrange / Act / Assert: the .progress-fill element has width 40%
-    // });
-    //
+    it("sets the fill width to the percentage", () => {
+        // Arrange: draw the component and keep the "container" (its HTML)
+        const { container } = render(<ProgressBar subject="Viltvård" percentage={40} />);
+
+        // Find the coloured fill by its CSS class (it has no text to search for)
+        const fill = container.querySelector(".progress-fill");
+
+        // Assert: the fill is 40% wide
+        expect(fill).toHaveStyle({ width: "40%" });
+    });
+
     // it("calls onClick when clicked", () => {
     //     // Arrange: a mock function, onClick = vi.fn(), passed as a prop
     //     // Act:     click the button
