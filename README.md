@@ -310,8 +310,8 @@ disclose account existence.
 
 Backend tests use H2 and mocked email boundaries; they need no external database
 or mail server. With Java 25, run `cd backend` then `./mvnw test` (Windows:
-`mvnw.cmd test`). For the frontend run `npm ci` and `npm run build` from `frontend`.
-The repository currently has no frontend test runner.
+`mvnw.cmd test`). For the frontend run `npm ci` and `npm run build` from `frontend`,
+then run the frontend tests as described under [Running the Frontend Tests](#running-the-frontend-tests).
 
 ### 5. Start the Backend
 
@@ -385,6 +385,21 @@ http://localhost:5173
 ```
 
 Open the address in a browser.
+
+### Running the Frontend Tests
+
+The frontend tests use Vitest and React Testing Library. They mock the backend,
+so no server or database needs to be running. From the `frontend` directory
+(after `npm install`):
+
+```bash
+npx vitest run
+```
+
+`npm test` does the same but keeps watching for changes and re-runs the tests.
+Tests live in `frontend/src/__tests__/`, mirroring the folders under `src/`, and
+are named `*.test.tsx`. See `docs/Testing/00-Test-Plan.md` for how testing is
+organised.
 
 ## Project Structure
 
