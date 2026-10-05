@@ -9,6 +9,7 @@ export interface PracticeQuestion {
     subjectArea: string;
     question: string;
     options: PracticeAnswerOption[];
+    imageUrl?: string;
 }
 
 export const practiceQuestions: PracticeQuestion[] = [
@@ -16,6 +17,7 @@ export const practiceQuestions: PracticeQuestion[] = [
         id: "p1",
         subjectArea: "Becoming a hunter",
         question: "What is an important responsibility of a hunter?",
+        imageUrl: "https://example.com/images/hunter-responsibility.jpg",
         options: [
             {
                 id: "a",

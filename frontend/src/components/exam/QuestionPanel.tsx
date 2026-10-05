@@ -24,6 +24,13 @@ const QuestionPanel = ({
         <section className="question-panel">
 
             <div className="question-card">
+                {question.imageUrl && (
+                    <img
+                    src={question.imageUrl}
+                    alt="Question visual representation"
+                    style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px', marginBottom: '1rem' }}
+                    />
+                )}
                 <h3>{question.questionText}</h3>
             </div>
 
