@@ -1,7 +1,8 @@
 // Tests for src/components/statistics/ProgressBar.tsx
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import ProgressBar from "../../../components/statistics/ProgressBar";
 
 describe("ProgressBar", () => {
@@ -33,9 +34,15 @@ describe("ProgressBar", () => {
         expect(fill).toHaveStyle({ width: "40%" });
     });
 
-    // it("calls onClick when clicked", () => {
-    //     // Arrange: a mock function, onClick = vi.fn(), passed as a prop
-    //     // Act:     click the button
-    //     // Assert:  onClick was called once
-    // });
+    it("calls onClick when clicked", async () => {
+        // Arrange: a mock function that records every call, passed as the onClick prop
+        const onClick = vi.fn();
+        render(<ProgressBar subject="Viltvård" percentage={40} onClick={onClick} />);
+
+        // Act: click the button, the way a user would
+        await userEvent.click(screen.getByRole("button"));
+
+        // Assert: the click reached our function exactly once
+        expect(onClick).toHaveBeenCalledTimes(1);
+    });
 });
