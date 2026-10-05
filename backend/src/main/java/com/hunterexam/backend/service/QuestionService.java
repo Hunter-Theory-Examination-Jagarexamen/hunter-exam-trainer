@@ -66,6 +66,7 @@ public class QuestionService {
         question.setOptionD(request.optionD());
         question.setCorrectAnswer(request.correctAnswer());
         question.setExplanation(request.explanation());
+        question.setImageUrl(request.imageUrl());
         question.setSubject(subject);
     }
 
