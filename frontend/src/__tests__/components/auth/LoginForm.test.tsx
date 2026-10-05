@@ -12,7 +12,6 @@ import { loginUser } from "../../../services/authService.ts";
 vi.mock("../../../services/authService.ts", () => ({
     checkGoogleLoginEnabled: vi.fn().mockResolvedValue(false),
     loginUser: vi.fn(),
-    loginAsGuest: vi.fn(),
 }));
 
 // Draw the form inside a test router. The fake /dashboard page lets us
