@@ -6,6 +6,7 @@ export interface Question {
     optionB: string;
     optionC: string;
     optionD: string;
+    imageUrl?: string;
     correctAnswer: string;
     explanation: string;
     subject: {

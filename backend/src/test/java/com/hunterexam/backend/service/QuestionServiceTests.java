@@ -21,7 +21,7 @@ class QuestionServiceTests {
     @Mock SubjectRepository subjects;
 
     private QuestionRequest request(String answer) {
-        return new QuestionRequest("Updated question", "One", "Two", "Three", "Four", answer, "Why", 2L);
+        return new QuestionRequest("Updated question", "One", "Two", "Three", "Four", answer, "Why", null, 2L);
     }
 
     @Test
@@ -47,6 +47,7 @@ class QuestionServiceTests {
         assertEquals("Four", updated.getOptionD());
         assertEquals("Two", updated.getCorrectAnswer());
         assertEquals("Why", updated.getExplanation());
+        assertNull(updated.getImageUrl());
         assertSame(subject, updated.getSubject());
     }
 
