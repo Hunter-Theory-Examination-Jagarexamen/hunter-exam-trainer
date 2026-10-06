@@ -15,6 +15,7 @@
 | GET    | /api/dashboard/recent         | Get the user's recent mock exam activity        | Required       |
 | GET    | /api/statistics/subjects      | Get the user's practice performance by subject  | Required       |
 | GET    | /api/statistics/progress      | Get the user's weekly accuracy over time        | Required       |
+| GET    | /api/admin/learners           | Get aggregated progress for all learners        | Required (ADMIN) |
 
 ## Mock exam: request and response
 
@@ -55,4 +56,4 @@ Response:
 
 ## Roles
 
-Users have a role: `STUDENT` (default for new registrations) or `ADMIN` (#29). Endpoints under `/api/admin/**` require `ADMIN`. No admin endpoints exist yet; the path is reserved for future admin features.
+Users have a role: `STUDENT` (default for new registrations) or `ADMIN` (#29). Endpoints under `/api/admin/**` require `ADMIN`.
