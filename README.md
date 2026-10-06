@@ -302,9 +302,8 @@ WHERE email IN ('<known-google-only-email>');
 ```
 
 New Google-only accounts are marked automatically. Google sign-in for an existing
-password account preserves recovery eligibility. The shared guest account is
-excluded. Existing JWTs retain their current one-hour expiry after a password
-reset. SMTP is synchronous, so response times can vary; deployments should
+password account preserves recovery eligibility. Existing JWTs retain their
+current one-hour expiry after a password reset. SMTP is synchronous, so response times can vary; deployments should
 rate-limit recovery requests at their ingress. Response statuses and bodies never
 disclose account existence.
 

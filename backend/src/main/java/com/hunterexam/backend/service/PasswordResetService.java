@@ -82,7 +82,7 @@ public class PasswordResetService {
     }
 
     private boolean canResetPassword(User user) {
-        return user.isPasswordLoginEnabled() && !"guest@hunterexam.local".equals(user.getEmail());
+        return user.isPasswordLoginEnabled();
     }
 
     private void clearToken(User user) {
