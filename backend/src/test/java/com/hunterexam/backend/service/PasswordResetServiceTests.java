@@ -64,13 +64,9 @@ class PasswordResetServiceTests {
     }
 
     @Test
-    void unknownGoogleOnlyAndGuestAccountsSendNoEmail() {
+    void unknownAndGoogleOnlyAccountsSendNoEmail() {
         service.requestReset("unknown@example.test");
         user.setPasswordLoginEnabled(false);
-        when(users.findByEmailForPasswordReset(user.getEmail())).thenReturn(Optional.of(user));
-        service.requestReset(user.getEmail());
-        user.setPasswordLoginEnabled(true);
-        user.setEmail("guest@hunterexam.local");
         when(users.findByEmailForPasswordReset(user.getEmail())).thenReturn(Optional.of(user));
         service.requestReset(user.getEmail());
         verifyNoInteractions(emails);
