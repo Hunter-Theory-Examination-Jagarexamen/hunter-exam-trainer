@@ -113,4 +113,20 @@ class ExamServiceTests {
         assertEquals(1, result.getUnanswered());
         assertEquals(50, result.getScore());
     }
+
+    @Test
+    void answerThatIsNotALetterAToDCountsAsIncorrect() {
+        // Arrange: Q1 right, Q2 has an invalid letter
+        givenOpenSessionWith(List.of(question(1), question(2)));
+        ExamSubmitRequest request = submission(List.of(1L, 2L),
+                Map.of("1", "B", "2", "X"));
+
+        // Act
+        ExamResultResponse result = examService.submitExam(request, EMAIL);
+
+        // Assert
+        assertEquals(1, result.getCorrectAnswers());
+        assertEquals(1, result.getIncorrectAnswers());
+        assertEquals(0, result.getUnanswered());
+    }
 }
