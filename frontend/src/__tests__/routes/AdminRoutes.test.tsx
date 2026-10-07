@@ -1,5 +1,6 @@
 import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 import {render, screen, waitFor} from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import AppRoutes from "../../routes/AppRoutes";
 import apiClient from "../../api/apiClient";
 import {UserRole} from "../../types/user";
@@ -27,6 +28,16 @@ function mockUser(role: typeof UserRole[keyof typeof UserRole]) {
 }
 
 describe("Admin navigation and routing", () => {
+    it("lets an ADMIN open question creation through the protected route", async () => {
+        vi.mocked(apiClient).mockImplementation(async endpoint => {
+            if (endpoint === "/api/users/me") return {id: 1, fullName: "Admin", role: UserRole.ADMIN};
+            if (endpoint === "/api/subjects") return [{id: 1, name: "Safety", description: "", questionCount: 0}];
+            return [];
+        });
+        render(<AppRoutes />);
+        await userEvent.click(await screen.findByRole("button", {name: "Add question"}, {timeout: 5000}));
+        expect(screen.getByRole("form", {name: "Add question"})).toBeInTheDocument();
+    });
     it("lets an ADMIN access the route and shows admin navigation", async () => {
         mockUser(UserRole.ADMIN);
         render(<AppRoutes />);
@@ -45,6 +56,7 @@ describe("Admin navigation and routing", () => {
         expect(window.location.pathname).toBe("/dashboard");
         expect(screen.queryByRole("link", {name: "Admin"})).not.toBeInTheDocument();
         expect(apiClient).not.toHaveBeenCalledWith("/api/subjects");
+        expect(screen.queryByRole("button", {name: "Add question"})).not.toBeInTheDocument();
     });
 
     it("redirects unauthenticated access to login without requesting admin data", async () => {
