@@ -27,6 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -71,7 +72,12 @@ class ExamServiceTests {
 
     /** Fakes an open session that started now, plus the questions and the user. */
     private void givenOpenSessionWith(List<Question> questions) {
-        ExamSession session = new ExamSession(user, LocalDateTime.now());
+        givenOpenSessionWith(questions, LocalDateTime.now());
+    }
+
+    /** Overloads givenOpenSessionWith: the session started at the given time. */
+    private void givenOpenSessionWith(List<Question> questions, LocalDateTime startedAt) {
+        ExamSession session = new ExamSession(user, startedAt);
         when(examSessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
         when(questionRepository.findAllById(questions.stream().map(Question::getId).toList()))
                 .thenReturn(questions);
@@ -267,5 +273,19 @@ class ExamServiceTests {
         // ...but the late answers are never scored or saved as a result
         verifyNoInteractions(questionRepository);
         verifyNoInteractions(examResultRepository);
+    }
+
+    @Test
+    void submitJustBeforeTheTimeLimitIsAccepted() {
+        // Arrange: the exam started 59 minutes ago (the limit is 60)
+        givenOpenSessionWith(List.of(question(1)), LocalDateTime.now().minusMinutes(59));
+        ExamSubmitRequest request = submission(List.of(1L), Map.of("1", "B"));
+
+        // Act: no exception expected
+        ExamResultResponse result = examService.submitExam(request, EMAIL);
+
+        // Assert: the answer was scored and the result saved
+        assertEquals(1, result.getCorrectAnswers());
+        verify(examResultRepository).save(any(ExamResult.class));
     }
 }
