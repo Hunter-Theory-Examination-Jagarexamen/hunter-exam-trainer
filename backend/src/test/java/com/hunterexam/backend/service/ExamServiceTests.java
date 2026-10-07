@@ -1,6 +1,7 @@
 package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.ExamResultResponse;
+import com.hunterexam.backend.dto.ExamStartResponse;
 import com.hunterexam.backend.dto.ExamSubmitRequest;
 import com.hunterexam.backend.entity.ExamResult;
 import com.hunterexam.backend.entity.ExamSession;
@@ -16,8 +17,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -82,6 +85,15 @@ class ExamServiceTests {
         when(questionRepository.findAllById(questions.stream().map(Question::getId).toList()))
                 .thenReturn(questions);
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+    }
+
+    /** A modifiable list of `count` questions with ids 1..count. */
+    private List<Question> questionBank(int count) {
+        List<Question> bank = new ArrayList<>();
+        for (long id = 1; id <= count; id++) {
+            bank.add(question(id));
+        }
+        return bank;
     }
 
     private ExamSubmitRequest submission(List<Long> questionIds, Map<String, String> answers) {
@@ -287,5 +299,44 @@ class ExamServiceTests {
         // Assert: the answer was scored and the result saved
         assertEquals(1, result.getCorrectAnswers());
         verify(examResultRepository).save(any(ExamResult.class));
+    }
+
+    // ----- Starting an exam -----
+
+    @Test
+    void startExamWithFewerThan70QuestionsIsRejected() {
+        // Arrange: the question bank only has 69 questions
+        when(questionRepository.findAll()).thenReturn(questionBank(69));
+
+        // Act + Assert
+        assertThrows(RuntimeException.class, () -> examService.startExam(user));
+
+        // No exam session may be created for an exam that can't start
+        verifyNoInteractions(examSessionRepository);
+    }
+
+    @Test
+    void startExamGives70DifferentQuestionsAndTheSessionId() {
+        // Arrange: 100 questions in the bank. questionBank returns an ArrayList,
+        // because startExam shuffles the list and List.of(...) can't be changed.
+        when(questionRepository.findAll()).thenReturn(questionBank(100));
+
+        // The real database gives a saved session an id. The fake repository
+        // can't, so we return a session whose id we set by hand.
+        ExamSession savedSession = new ExamSession(user, LocalDateTime.now());
+        ReflectionTestUtils.setField(savedSession, "id", 42L);
+        when(examSessionRepository.save(any(ExamSession.class))).thenReturn(savedSession);
+
+        // Act
+        ExamStartResponse response = examService.startExam(user);
+
+        // Assert
+        assertEquals(42L, response.getSessionId());
+        assertEquals(70, response.getQuestions().size());
+        long differentIds = response.getQuestions().stream()
+                .map(q -> q.getId())
+                .distinct()
+                .count();
+        assertEquals(70, differentIds, "no question should appear twice");
     }
 }
