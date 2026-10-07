@@ -26,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -244,6 +245,26 @@ class ExamServiceTests {
                 () -> examService.submitExam(request, EMAIL));
 
         // No second scoring and no second saved result
+        verifyNoInteractions(questionRepository);
+        verifyNoInteractions(examResultRepository);
+    }
+
+    @Test
+    void submitAfterTheTimeLimitIsRejectedAndClosesTheSession() {
+        // Arrange: the exam started 61 minutes ago (the limit is 60)
+        ExamSession session = new ExamSession(user, LocalDateTime.now().minusMinutes(61));
+        when(examSessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
+        ExamSubmitRequest request = submission(List.of(1L), Map.of("1", "B"));
+
+        // Act + Assert
+        assertThrows(IllegalArgumentException.class,
+                () -> examService.submitExam(request, EMAIL));
+
+        // Side effect: the late session is closed and saved, so it can't be retried
+        assertTrue(session.isCompleted(), "a late session should be closed");
+        verify(examSessionRepository).save(session);
+
+        // ...but the late answers are never scored or saved as a result
         verifyNoInteractions(questionRepository);
         verifyNoInteractions(examResultRepository);
     }
