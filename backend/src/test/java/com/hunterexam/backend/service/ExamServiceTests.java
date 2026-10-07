@@ -95,4 +95,22 @@ class ExamServiceTests {
         assertEquals(0, result.getUnanswered());
         assertEquals(100, result.getScore());
     }
+
+    @Test
+    void mixedAnswersAreCountedAsCorrectIncorrectAndUnanswered() {
+        // Arrange: Q1 right, Q2 wrong, Q3 skipped, Q4 right
+        givenOpenSessionWith(List.of(question(1), question(2), question(3), question(4)));
+        ExamSubmitRequest request = submission(List.of(1L, 2L, 3L, 4L),
+                Map.of("1", "B", "2", "A", "4", "B"));
+
+        // Act
+        ExamResultResponse result = examService.submitExam(request, EMAIL);
+
+        // Assert
+        assertEquals(4, result.getTotalQuestions());
+        assertEquals(2, result.getCorrectAnswers());
+        assertEquals(1, result.getIncorrectAnswers());
+        assertEquals(1, result.getUnanswered());
+        assertEquals(50, result.getScore());
+    }
 }
