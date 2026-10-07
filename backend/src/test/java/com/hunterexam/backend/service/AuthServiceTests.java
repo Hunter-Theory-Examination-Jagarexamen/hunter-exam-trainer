@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -120,5 +121,18 @@ class AuthServiceTests {
 
         // Assert: the token came from JwtService, created for this email and role
         assertEquals("fake-jwt", token);
+    }
+
+    @Test
+    void loginWithTheWrongPasswordIsRejected() {
+        // Arrange: the user exists, but the typed password is wrong
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(existingStudent()));
+
+        // Act + Assert
+        assertThrows(RuntimeException.class,
+                () -> authService.login(login(EMAIL, "wrong-password")));
+
+        // The important part: no token is ever created for a wrong password
+        verifyNoInteractions(jwtService);
     }
 }
