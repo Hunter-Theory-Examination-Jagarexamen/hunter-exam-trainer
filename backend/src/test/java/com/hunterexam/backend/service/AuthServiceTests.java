@@ -1,5 +1,6 @@
 package com.hunterexam.backend.service;
 
+import com.hunterexam.backend.dto.LoginRequest;
 import com.hunterexam.backend.dto.RegisterRequest;
 import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.entity.User;
@@ -54,6 +55,22 @@ class AuthServiceTests {
         return request;
     }
 
+    /** A student already in the database, with the password stored as a BCrypt hash. */
+    private User existingStudent() {
+        User user = new User();
+        user.setEmail(EMAIL);
+        user.setPassword(passwordEncoder.encode(PASSWORD));
+        user.setRole(Role.STUDENT);
+        return user;
+    }
+
+    private LoginRequest login(String email, String password) {
+        LoginRequest request = new LoginRequest();
+        request.setEmail(email);
+        request.setPassword(password);
+        return request;
+    }
+
     // ----- Register -----
 
     @Test
@@ -88,5 +105,20 @@ class AuthServiceTests {
         // findByEmail is called on purpose, so verifyNoInteractions can't be used.
         // The important part: no second account is saved.
         verify(userRepository, never()).save(any());
+    }
+
+    // ----- Login -----
+
+    @Test
+    void loginWithTheRightPasswordReturnsAToken() {
+        // Arrange: the user exists, and the fake JwtService hands out a known token
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(existingStudent()));
+        when(jwtService.generateToken(EMAIL, "STUDENT")).thenReturn("fake-jwt");
+
+        // Act
+        String token = authService.login(login(EMAIL, PASSWORD));
+
+        // Assert: the token came from JwtService, created for this email and role
+        assertEquals("fake-jwt", token);
     }
 }
