@@ -214,4 +214,20 @@ class ExamServiceTests {
         // A rejected exam must never be saved as a result
         verifyNoInteractions(examResultRepository);
     }
+
+    @Test
+    void submitWithUnknownSessionIdIsRejected() {
+        // Arrange: the repository finds no session with this id
+        // (Optional.empty() is how a repository says "nothing found")
+        when(examSessionRepository.findById(SESSION_ID)).thenReturn(Optional.empty());
+        ExamSubmitRequest request = submission(List.of(1L), Map.of("1", "B"));
+
+        // Act + Assert
+        assertThrows(IllegalArgumentException.class,
+                () -> examService.submitExam(request, EMAIL));
+
+        // The service must stop at the session lookup and never start scoring
+        verifyNoInteractions(questionRepository);
+        verifyNoInteractions(examResultRepository);
+    }
 }
