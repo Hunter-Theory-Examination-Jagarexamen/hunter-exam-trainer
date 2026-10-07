@@ -230,4 +230,21 @@ class ExamServiceTests {
         verifyNoInteractions(questionRepository);
         verifyNoInteractions(examResultRepository);
     }
+
+    @Test
+    void sessionThatIsAlreadySubmittedCannotBeSubmittedAgain() {
+        // Arrange: a session that has already been submitted once
+        ExamSession session = new ExamSession(user, LocalDateTime.now());
+        session.setCompleted(true);
+        when(examSessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
+        ExamSubmitRequest request = submission(List.of(1L), Map.of("1", "B"));
+
+        // Act + Assert
+        assertThrows(IllegalArgumentException.class,
+                () -> examService.submitExam(request, EMAIL));
+
+        // No second scoring and no second saved result
+        verifyNoInteractions(questionRepository);
+        verifyNoInteractions(examResultRepository);
+    }
 }
