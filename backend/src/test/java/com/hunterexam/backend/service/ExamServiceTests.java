@@ -129,4 +129,18 @@ class ExamServiceTests {
         assertEquals(1, result.getIncorrectAnswers());
         assertEquals(0, result.getUnanswered());
     }
+
+    @Test
+    void scoreIsRoundedToNearestWholePercent() {
+        // Arrange: 2 of 3 right = 66.67 %
+        givenOpenSessionWith(List.of(question(1), question(2), question(3)));
+        ExamSubmitRequest request = submission(List.of(1L, 2L, 3L),
+                Map.of("1", "B", "2", "B", "3", "A"));
+
+        // Act
+        ExamResultResponse result = examService.submitExam(request, EMAIL);
+
+        // Assert
+        assertEquals(67, result.getScore());
+    }
 }
