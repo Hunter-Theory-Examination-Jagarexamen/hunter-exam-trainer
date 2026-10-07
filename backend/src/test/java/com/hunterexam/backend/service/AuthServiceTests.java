@@ -17,8 +17,11 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -72,5 +75,18 @@ class AuthServiceTests {
         // The password is stored as a BCrypt hash, never as plain text
         assertNotEquals(PASSWORD, created.getPassword());
         assertTrue(passwordEncoder.matches(PASSWORD, created.getPassword()));
+    }
+
+    @Test
+    void registerWithAnEmailThatIsAlreadyUsedIsRejected() {
+        // Arrange: the repository already has a user with this email
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(new User()));
+
+        // Act + Assert
+        assertThrows(RuntimeException.class, () -> authService.register(registration()));
+
+        // findByEmail is called on purpose, so verifyNoInteractions can't be used.
+        // The important part: no second account is saved.
+        verify(userRepository, never()).save(any());
     }
 }
