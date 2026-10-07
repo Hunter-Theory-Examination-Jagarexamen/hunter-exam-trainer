@@ -9,6 +9,7 @@ import com.hunterexam.backend.security.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -149,5 +151,20 @@ class AuthServiceTests {
         // for "invalid" or "password" in the message, so the message matters here
         assertEquals("Invalid email or password", error.getMessage());
         verifyNoInteractions(jwtService);
+    }
+
+    // ----- Google login -----
+
+    @Test
+    void newGoogleAccountsAreMarkedButExistingPasswordAccountsStayEligible() {
+        User user = existingStudent();
+        when(userRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        new AuthService(userRepository, passwordEncoder, jwtService).oAuthLogin("google@example.test", "Google User");
+        ArgumentCaptor<User> created = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(created.capture());
+        assertFalse(created.getValue().isPasswordLoginEnabled());
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
+        new AuthService(userRepository, passwordEncoder, jwtService).oAuthLogin(user.getEmail(), "Student");
+        assertTrue(user.isPasswordLoginEnabled());
     }
 }
