@@ -25,7 +25,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -82,6 +84,8 @@ class ExamServiceTests {
         request.setAnswers(answers);
         return request;
     }
+
+    // ----- Scoring -----
 
     @Test
     void allCorrectAnswersGiveFullScore() {
@@ -149,6 +153,22 @@ class ExamServiceTests {
         assertEquals(67, result.getScore());
     }
 
+    /*
+     * Why this test is needed even though the tests above already check the score:
+     *
+     * submitExam builds TWO separate objects with the same numbers:
+     *   1. ExamResultResponse - returned to the browser and shown right after the exam.
+     *   2. ExamResult         - saved to the database. The statistics and dashboard
+     *                           pages read these saved results later.
+     * The tests above only look at (1). If (2) got a wrong number, or no user, the
+     * student would see the right score after the exam, but the statistics page
+     * would be wrong or the result would not show up for them at all.
+     *
+     * The service doesn't return the ExamResult, so we can't check it directly.
+     * Instead we use an ArgumentCaptor: it "catches" the object the service passes
+     * to examResultRepository.save(...), so we can inspect what would have been
+     * stored in the database.
+     */
     @Test
     void savedResultHasTheScoreAndBelongsToTheUser() {
         // Arrange: same answers as the mixed test (2 right, 1 wrong, 1 skipped)
@@ -171,5 +191,27 @@ class ExamServiceTests {
         assertEquals(1, examResult.getUnanswered());
         assertEquals(50, examResult.getScore());
         assertNotNull(examResult.getCompletedAt());
+    }
+
+    // ----- Session and time-limit rules -----
+
+    @Test
+    void submitWithoutSessionIdIsRejected() {
+        // Arrange: a submission that is missing its session id
+        ExamSubmitRequest request = submission(List.of(1L), Map.of("1", "B"));
+        request.setSessionId(null);
+
+        // Act + Assert: the lambda () -> ... is run by assertThrows, which
+        // passes only if it throws an IllegalArgumentException
+        assertThrows(IllegalArgumentException.class,
+                () -> examService.submitExam(request, EMAIL));
+
+        // The service must stop at the first check, before looking up any session.
+        // Without this line the test would still pass if the null check was removed,
+        // because "session not found" is also an IllegalArgumentException.
+        verifyNoInteractions(examSessionRepository);
+
+        // A rejected exam must never be saved as a result
+        verifyNoInteractions(examResultRepository);
     }
 }
