@@ -2,6 +2,7 @@ package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.ExamResultResponse;
 import com.hunterexam.backend.dto.ExamSubmitRequest;
+import com.hunterexam.backend.entity.ExamResult;
 import com.hunterexam.backend.entity.ExamSession;
 import com.hunterexam.backend.entity.Question;
 import com.hunterexam.backend.entity.User;
@@ -12,6 +13,7 @@ import com.hunterexam.backend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -21,6 +23,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -142,5 +147,29 @@ class ExamServiceTests {
 
         // Assert
         assertEquals(67, result.getScore());
+    }
+
+    @Test
+    void savedResultHasTheScoreAndBelongsToTheUser() {
+        // Arrange: same answers as the mixed test (2 right, 1 wrong, 1 skipped)
+        givenOpenSessionWith(List.of(question(1), question(2), question(3), question(4)));
+        ExamSubmitRequest request = submission(List.of(1L, 2L, 3L, 4L),
+                Map.of("1", "B", "2", "A", "4", "B"));
+
+        // Act
+        examService.submitExam(request, EMAIL);
+
+        // Assert: catch the ExamResult that the service passed to save(...)
+        ArgumentCaptor<ExamResult> saved = ArgumentCaptor.forClass(ExamResult.class);
+        verify(examResultRepository).save(saved.capture());
+        ExamResult examResult = saved.getValue();
+
+        assertSame(user, examResult.getUser());
+        assertEquals(4, examResult.getTotalQuestions());
+        assertEquals(2, examResult.getCorrectAnswers());
+        assertEquals(1, examResult.getIncorrectAnswers());
+        assertEquals(1, examResult.getUnanswered());
+        assertEquals(50, examResult.getScore());
+        assertNotNull(examResult.getCompletedAt());
     }
 }
