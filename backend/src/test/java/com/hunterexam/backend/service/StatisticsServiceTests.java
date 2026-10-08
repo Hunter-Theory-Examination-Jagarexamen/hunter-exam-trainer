@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 /**
@@ -84,5 +86,20 @@ class StatisticsServiceTests {
         assertEquals("Weapons", rowFor(rows, 1).getSubjectName());
         assertEquals(85, rowFor(rows, 1).getPercentage());
         assertEquals(50, rowFor(rows, 2).getPercentage());
+    }
+
+    @Test
+    void newUserWithNoPracticeGetsAnEmptyList() {
+        // Arrange: a brand-new student who hasn't practised anything yet
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(practiceResultRepository.findByUser(user)).thenReturn(List.of());
+
+        // Act
+        List<SubjectPerformanceResponse> rows = statisticsService.getSubjectPerformance(EMAIL);
+
+        // Assert: an empty list (not null, no crash, no made-up 0 % rows),
+        // so the statistics page can show "no results yet"
+        assertNotNull(rows, "must be an empty list, not null");
+        assertTrue(rows.isEmpty());
     }
 }
