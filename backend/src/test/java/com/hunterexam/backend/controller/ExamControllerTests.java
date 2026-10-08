@@ -7,11 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -38,5 +40,17 @@ class ExamControllerTests {
 
         // The request is stopped by security before it reaches the controller
         verifyNoInteractions(examService);
+    }
+
+    @Test
+    void loggedInStudentCanStartAnExam() throws Exception {
+        // Act + Assert: jwt() fakes a request with a valid token for a student,
+        // so we don't need JwtService or the real secret here
+        mvc.perform(post("/api/exam/start")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_STUDENT"))))
+                .andExpect(status().isOk());
+
+        // Together with the test above, this pins the rule from both sides:
+        // logged out is blocked, logged in gets through
     }
 }
