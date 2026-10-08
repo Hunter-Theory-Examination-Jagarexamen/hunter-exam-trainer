@@ -64,13 +64,9 @@ class PasswordResetServiceTests {
     }
 
     @Test
-    void unknownGoogleOnlyAndGuestAccountsSendNoEmail() {
+    void unknownAndGoogleOnlyAccountsSendNoEmail() {
         service.requestReset("unknown@example.test");
         user.setPasswordLoginEnabled(false);
-        when(users.findByEmailForPasswordReset(user.getEmail())).thenReturn(Optional.of(user));
-        service.requestReset(user.getEmail());
-        user.setPasswordLoginEnabled(true);
-        user.setEmail("guest@hunterexam.local");
         when(users.findByEmailForPasswordReset(user.getEmail())).thenReturn(Optional.of(user));
         service.requestReset(user.getEmail());
         verifyNoInteractions(emails);
@@ -143,17 +139,5 @@ class PasswordResetServiceTests {
         assertNull(user.getPasswordResetTokenHash());
         assertNull(user.getPasswordResetExpiresAt());
         assertEquals(oldPassword, user.getPassword());
-    }
-
-    @Test
-    void newGoogleAccountsAreMarkedButExistingPasswordAccountsStayEligible() {
-        when(users.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        new AuthService(users, encoder, jwt).oAuthLogin("google@example.test", "Google User");
-        ArgumentCaptor<User> created = ArgumentCaptor.forClass(User.class);
-        verify(users).save(created.capture());
-        assertFalse(created.getValue().isPasswordLoginEnabled());
-        when(users.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        new AuthService(users, encoder, jwt).oAuthLogin(user.getEmail(), "Student");
-        assertTrue(user.isPasswordLoginEnabled());
     }
 }

@@ -302,15 +302,14 @@ WHERE email IN ('<known-google-only-email>');
 ```
 
 New Google-only accounts are marked automatically. Google sign-in for an existing
-password account preserves recovery eligibility. The shared guest account is
-excluded. Existing JWTs retain their current one-hour expiry after a password
-reset. SMTP is synchronous, so response times can vary; deployments should
+password account preserves recovery eligibility. Existing JWTs retain their
+current one-hour expiry after a password reset. SMTP is synchronous, so response times can vary; deployments should
 rate-limit recovery requests at their ingress. Response statuses and bodies never
 disclose account existence.
 
 Backend tests use H2 and mocked email boundaries; they need no external database
 or mail server. With Java 25, run `cd backend` then `./mvnw test` (Windows:
-`mvnw.cmd test`). For the frontend run `npm ci` and `npm run build` from `frontend`,
+`mvnw.cmd test`); see [Running the Backend Tests](#running-the-backend-tests). For the frontend run `npm ci` and `npm run build` from `frontend`,
 then run the frontend tests as described under [Running the Frontend Tests](#running-the-frontend-tests).
 
 ### 5. Start the Backend
@@ -385,6 +384,27 @@ http://localhost:5173
 ```
 
 Open the address in a browser.
+
+### Running the Backend Tests
+
+The backend tests use JUnit 5, Mockito and Spring Boot Test. They run on an
+in-memory H2 database with test-only settings, so no PostgreSQL, environment
+variables or mail server are needed. From the `backend` directory:
+
+```bash
+./mvnw test                                   # all backend tests
+./mvnw test -Dtest=ExamServiceTests            # one test class
+./mvnw test -Dtest=ExamServiceTests#methodName # one test method
+```
+
+In PowerShell, quote the option: `-D"test=ExamServiceTests"`. In IntelliJ, click
+the green run arrow next to a test class or method.
+
+Tests live in `backend/src/test/java/`, in the same packages as the classes they
+test (`ExamService` → `ExamServiceTests`). Shared test settings are in
+`backend/src/test/resources/application-test.properties`; tests that start
+Spring activate them with `@ActiveProfiles("test")`. See
+`docs/Testing/00-Test-Plan.md` for how testing is organised.
 
 ### Running the Frontend Tests
 
