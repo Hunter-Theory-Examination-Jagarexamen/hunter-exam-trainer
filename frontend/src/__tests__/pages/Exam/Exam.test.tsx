@@ -4,7 +4,7 @@
 // (ExamHeader, QuestionPanel, ExamNavigation). Only the backend is mocked.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import Exam from "../../../pages/Exam/Exam";
@@ -101,4 +101,67 @@ describe("Exam page", () => {
 
         expect(await screen.findByText("Failed to load exam questions. Please try again.")).toBeInTheDocument();
     });
-});
+
+
+
+
+    it("disables Previous on the first question and enables it on subsequent questions", async () => {
+        mockBackend();
+        renderExam();
+
+        await screen.findByText("First question?");
+
+        const prevButton = screen.getByRole("button", { name: "Previous" });
+        expect(prevButton).toBeDisabled();
+
+        await userEvent.click(screen.getByRole("button", { name: "Next" }));
+        expect(screen.getByText("Second question?")).toBeInTheDocument();
+
+        expect(prevButton).not.toBeDisabled();
+    });
+
+    it("displays the timer countdown in the header", async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: true });
+        mockBackend();
+        renderExam();
+
+        await screen.findByText("First question?");
+        expect(screen.getByText(/60:00/i)).toBeInTheDocument();
+
+        await act(async () => {
+            vi.advanceTimersByTime(1000);
+        });
+
+        expect(screen.getByText(/59:59/i)).toBeInTheDocument();
+
+        vi.useRealTimers();
+    });
+
+    it("automatically submits the exam with current answers when time runs out", async () => {
+       vi.useFakeTimers({ shouldAdvanceTime: true });
+
+        mockBackend();
+        renderExam();
+
+        const optionB = await screen.findByRole("radio", { name: "B1" });
+        await userEvent.click(optionB);
+
+        await act(async () => {
+            await vi.advanceTimersByTimeAsync(60 * 60 * 1000);
+        });
+
+        expect(await screen.findByText("Result page")).toBeInTheDocument();
+
+        const submitCall = vi.mocked(apiClient).mock.calls.find(
+            ([endpoint]) => endpoint === "/api/exam/submit"
+        );
+
+        expect(submitCall).toBeDefined();
+
+        const body = JSON.parse(submitCall![1]!.body as string);
+        expect(body.answers).toEqual({ "1": "B" });
+
+        vi.useRealTimers();
+    });
+
+    });

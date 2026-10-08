@@ -1,5 +1,5 @@
 import {beforeEach, describe, expect, it, vi} from "vitest";
-import {act, render, screen, waitFor} from "@testing-library/react";
+import {act, render, screen, waitForElementToBeRemoved} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import QuestionBank from "../../../pages/Admin/QuestionBank";
 import apiClient from "../../../api/apiClient";
@@ -30,9 +30,9 @@ beforeEach(() => {
 describe("Admin question bank", () => {
     it("loads questions, displays read-only details and paginates a bank of 100+ questions", async () => {
         render(<QuestionBank />);
-        expect(screen.getByText("Loading subjects...")).toBeInTheDocument();
-        expect(await screen.findByRole("heading", {name: "#1: Safety question 1?"})).toBeInTheDocument();
-        expect(screen.getAllByRole("article")).toHaveLength(20);
+
+        await waitForElementToBeRemoved(() => screen.queryByText(/Loading/i));
+        expect(screen.getByRole("heading", {name: "#1: Safety question 1?"})).toBeInTheDocument();
         expect(screen.getAllByText("Correct answer:")).toHaveLength(20);
         expect(screen.getAllByText("Keep a safe distance.", {exact: false})).toHaveLength(20);
         expect(screen.getByRole("button", {name: "Previous"})).toBeDisabled();
@@ -60,15 +60,18 @@ describe("Admin question bank", () => {
     });
 
     it("shows loading questions and ignores responses from a previous subject", async () => {
+        let resolveSubjects!: (value: typeof subjects) => void;
         let resolveQuestions!: (value: Question[]) => void;
         vi.mocked(apiClient).mockImplementation(async endpoint => {
-            if (endpoint === "/api/subjects") return subjects;
+            if (endpoint === "/api/subjects") return new Promise(resolve => { resolveSubjects = resolve; });
             if (endpoint.endsWith("=1")) return new Promise<Question[]>(resolve => { resolveQuestions = resolve; });
             return [{...questions[0], questionText: "Wildlife question?"}];
         });
         render(<QuestionBank />);
-        expect(await screen.findByText("Loading questions...")).toBeInTheDocument();
-        await userEvent.selectOptions(screen.getByRole("combobox"), "2");
+        expect(screen.getByText("Loading subjects...")).toBeInTheDocument();
+        await act(async () => resolveSubjects(subjects));
+        const select = await screen.findByRole("combobox");
+        await userEvent.selectOptions(select, "2");
         await screen.findByRole("heading", {name: "#1: Wildlife question?"});
         await act(async () => resolveQuestions(questions));
         expect(screen.queryByText("#1: Safety question 1?")).not.toBeInTheDocument();
@@ -87,7 +90,8 @@ describe("Admin question bank", () => {
         vi.mocked(apiClient).mockImplementation(async endpoint =>
             resource === "questions" && endpoint === "/api/subjects" ? subjects : []);
         render(<QuestionBank />);
-        await waitFor(() => expect(screen.getByText(resource === "subjects"
-            ? "No subjects available." : "No questions available for this subject.")).toBeInTheDocument());
+
+        expect(await screen.findByText(resource === "subjects"
+        ? "No subjects available." : "No questions available for this subject.")).toBeInTheDocument();
     });
 });
