@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -11,6 +12,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import javax.crypto.SecretKey;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Unit tests for {@link JwtService}. No mocks needed: the service only has
@@ -55,5 +57,18 @@ class JwtServiceTests {
 
         long lifetimeMillis = claims.getExpiration().getTime() - claims.getIssuedAt().getTime();
         assertEquals(60 * 60 * 1000, lifetimeMillis, 1000, "token should live for one hour");
+    }
+
+    @Test
+    void tokenCannotBeVerifiedWithAnotherSecret() {
+        // Arrange: a real token, and a secret that is NOT the server's
+        String token = jwtService.generateToken("student@example.test", "STUDENT");
+        String otherSecret =
+                "9876543210987654321098765432109876543210987654321098765432109876";
+
+        // Act + Assert: the signature doesn't match, so the token is refused.
+        // This is what stops someone from making their own token, or editing
+        // "role": "STUDENT" into "ADMIN", without knowing the secret.
+        assertThrows(SignatureException.class, () -> readToken(token, otherSecret));
     }
 }
