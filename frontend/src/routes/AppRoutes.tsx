@@ -16,6 +16,9 @@ import ResetPassword from "../pages/ResetPassword/ResetPassword";
 import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
 import OAuth2Redirect from "../pages/OAuth2Redirect/OAuth2Redirect";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
+import AdminRoute from "../components/auth/AdminRoute";
+import QuestionBank from "../pages/Admin/QuestionBank";
+import LearnerProgress from "../pages/Admin/LearnerProgress";
 
 const AppRoutes = () => {
     return (
@@ -48,6 +51,11 @@ const AppRoutes = () => {
                         <Route path="/statistics" element={<Statistics />} />
 
                         <Route path="/profile" element={<Profile />} />
+
+                        <Route element={<AdminRoute />}>
+                            <Route path="/admin/questions" element={<QuestionBank />} />
+                            <Route path="/admin/learners" element={<LearnerProgress />} />
+                        </Route>
 
                     </Route>
                 </Route>

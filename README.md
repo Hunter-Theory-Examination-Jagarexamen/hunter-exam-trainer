@@ -526,15 +526,16 @@ POST and PUT accept the same JSON body:
   "optionD": "Fourth option",
   "correctAnswer": "First option",
   "explanation": "Optional explanation",
+  "imageUrl": "https//:example.com/images/questions.jpg",
   "subjectId": 1
 }
 ```
 
-All fields except `explanation` are required. Text fields have a maximum length of
-255 characters. `subjectId` must be positive and refer to an existing subject.
+All fields except `explanation` and `imageUrl` are required. Text fields have a maximum length of
+255 characters. `imageUrl` is optional and supports an image illustration URL. `subjectId` must be positive and refer to an existing subject.
 `correctAnswer` must exactly match one of the four option texts. Invalid input
 returns 400; a missing question or subject returns 404. PUT replaces all editable
-fields, including clearing the explanation when omitted.
+fields, including clearing the explanation or image URL when omitted.
 
 ### Practice
 

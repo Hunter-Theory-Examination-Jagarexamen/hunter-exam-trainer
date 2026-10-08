@@ -17,6 +17,7 @@ public class ExamQuestionResponse {
     private String optionB;
     private String optionC;
     private String optionD;
+    private String imageUrl;
 
     public ExamQuestionResponse(
             Long id,
@@ -24,7 +25,8 @@ public class ExamQuestionResponse {
             String optionA,
             String optionB,
             String optionC,
-            String optionD)
+            String optionD,
+    String imageUrl)
     {
         this.id = id;
         this.questionText = questionText;
@@ -32,5 +34,6 @@ public class ExamQuestionResponse {
         this.optionB = optionB;
         this.optionC = optionC;
         this.optionD = optionD;
+        this.imageUrl = imageUrl;
     }
 }
