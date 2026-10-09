@@ -79,6 +79,10 @@ const Sidebar = ({ user, isOpen, onClose }: SidebarProps) => {
                             <Users size={20} />
                             Learner Progress
                         </NavLink>
+                        <NavLink to="/admin/subjects" onClick={onClose}>
+                            <BookOpen size={20} />
+                            Manage Subjects
+                        </NavLink>
                     </>
                 )}
 
