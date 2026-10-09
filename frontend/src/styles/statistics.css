@@ -18,6 +18,13 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem 2rem;
 }
+.subject-performance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
 
 .subject-progress {
     margin-top: 0;
