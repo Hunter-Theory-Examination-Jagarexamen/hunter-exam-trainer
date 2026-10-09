@@ -24,6 +24,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 import javax.crypto.SecretKey;
 import java.util.Arrays;
@@ -33,6 +34,7 @@ import java.util.List;
  * password encryption, and CORS for the application.
  */
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
@@ -110,6 +112,11 @@ public class SecurityConfig {
 
                         // Admin-only endpoints.
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // Subject writes are admin-only; reads (GET) stay open to any authenticated user.
+                        .requestMatchers(HttpMethod.POST,   "/api/subjects").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,    "/api/subjects/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/subjects/**").hasRole("ADMIN")
 
                         // All other endpoints require authentication.
                         .anyRequest().authenticated()
