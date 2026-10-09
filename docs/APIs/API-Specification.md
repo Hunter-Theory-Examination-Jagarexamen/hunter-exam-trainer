@@ -6,7 +6,10 @@
 | POST   | /api/auth/login               | Authenticate user and return JWT                | Public         |
 | GET    | /api/users/me                 | Get logged-in user's profile                    | Required       |
 | PUT    | /api/users/me/password        | Change the logged-in user's password            | Required       |
-| GET    | /api/subjects                 | Get all subjects and question counts            | Required       |
+| GET    | /api/subjects                 | Get all subjects and question counts            | Required          |
+| POST   | /api/subjects                 | Create a new subject                            | Required (ADMIN)  |
+| PUT    | /api/subjects/{id}            | Update an existing subject                      | Required (ADMIN)  |
+| DELETE | /api/subjects/{id}            | Delete a subject                                | Required (ADMIN)  |
 | GET    | /api/questions?subjectId={id} | Get questions for a specific subject            | Required       |
 | POST   | /api/practice/results         | Save a completed practice session result        | Required       |
 | POST   | /api/exam/start               | Start a mock exam and receive 70 questions      | Required       |
