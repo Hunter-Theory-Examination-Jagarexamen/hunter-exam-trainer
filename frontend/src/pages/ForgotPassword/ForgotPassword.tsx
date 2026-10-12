@@ -11,7 +11,7 @@ const ForgotPassword = () => {
 
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
-    const [error, setError] = useState("");
+    const [error, setError] = useState("ACC");
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
