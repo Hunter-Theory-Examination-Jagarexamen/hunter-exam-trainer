@@ -1,9 +1,10 @@
 package com.hunterexam.backend.entity;
 
 import jakarta.persistence.*;
-import jakarta.persistence.GeneratedValue;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "exam_sessions")
@@ -19,6 +20,14 @@ public class ExamSession {
     private LocalDateTime startedAt;
 
     private boolean completed;
+
+    @ElementCollection
+    @CollectionTable(
+            name = "exam_session_questions",
+            joinColumns = @JoinColumn(name = "session_id")
+    )
+    @Column(name = "question_id")
+    private List<Long> questionIds = new ArrayList<>();
 
     public ExamSession() {
     }
@@ -49,4 +58,11 @@ public class ExamSession {
         this.completed = completed;
     }
 
+    public List<Long> getQuestionIds() {
+        return questionIds;
+    }
+
+    public void setQuestionIds(List<Long> questionIds) {
+        this.questionIds = questionIds;
+    }
 }
