@@ -1,5 +1,6 @@
 import "../../styles/practice.css";
 import type { PracticeQuestion as PracticeQuestionType } from "../../types/practiceQuestions";
+import QuestionImage from "../common/QuestionImage";
 
 interface PracticeQuestionProps {
     question: PracticeQuestionType;
@@ -26,6 +27,7 @@ const PracticeQuestion = ({
 
             <div className="practice-question-card">
                 <h2>{question.question}</h2>
+                <QuestionImage imageUrl={question.imageUrl} questionText={question.question} />
 
                 <div className="practice-answer-options">
                     {question.options.map((option) => (
