@@ -9,7 +9,7 @@ export interface PracticeQuestion {
     subjectArea: string;
     question: string;
     options: PracticeAnswerOption[];
-    imageUrl?: string;
+    imageUrl?: string | null;
 }
 
 export const practiceQuestions: PracticeQuestion[] = [
