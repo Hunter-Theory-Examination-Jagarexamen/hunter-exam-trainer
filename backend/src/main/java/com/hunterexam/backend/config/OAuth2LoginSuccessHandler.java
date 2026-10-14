@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.util.Map;
@@ -23,13 +24,15 @@ import java.util.Map;
 @Component
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    private static final String FRONTEND_REDIRECT_URL =
-            "http://localhost:5173/oauth2/redirect?token=";
-
+    private final String frontendUrl;
     private final AuthService authService;
     private final JwtService jwtService;
 
-    public OAuth2LoginSuccessHandler(AuthService authService, JwtService jwtService) {
+    public OAuth2LoginSuccessHandler(
+            @Value("${app.frontend.url:http://localhost:5173}") String frontendUrl,
+            AuthService authService,
+            JwtService jwtService) {
+        this.frontendUrl = frontendUrl;
         this.authService = authService;
         this.jwtService = jwtService;
     }
@@ -55,6 +58,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 name == null ? "User" : name
         );
 
-        response.sendRedirect(FRONTEND_REDIRECT_URL + token);
+        response.sendRedirect(frontendUrl + "/oauth2/redirect?token=" + token);
     }
 }
