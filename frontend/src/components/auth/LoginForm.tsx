@@ -6,7 +6,8 @@ import "../../styles/auth.css";
 import {
     checkGoogleLoginEnabled,
     loginUser
-} from "../../services/authService.ts";
+} from "../../services/authService";
+import { API_BASE_URL } from "../../api/apiClient";
 
 const LoginForm = () => {
 
@@ -63,8 +64,7 @@ const LoginForm = () => {
             return;
         }
 
-        window.location.href =
-            "http://localhost:8080/oauth2/authorization/google";
+        window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
     };
 
     return (
