@@ -6,7 +6,10 @@
 | POST   | /api/auth/login               | Authenticate user and return JWT                | Public         |
 | GET    | /api/users/me                 | Get logged-in user's profile                    | Required       |
 | PUT    | /api/users/me/password        | Change the logged-in user's password            | Required       |
-| GET    | /api/subjects                 | Get all subjects and question counts            | Required       |
+| GET    | /api/subjects                 | Get all subjects and question counts            | Required          |
+| POST   | /api/subjects                 | Create a new subject                            | Required (ADMIN)  |
+| PUT    | /api/subjects/{id}            | Update an existing subject                      | Required (ADMIN)  |
+| DELETE | /api/subjects/{id}            | Delete a subject                                | Required (ADMIN)  |
 | GET    | /api/questions?subjectId={id} | Get questions for a specific subject            | Required       |
 | POST   | /api/practice/results         | Save a completed practice session result        | Required       |
 | POST   | /api/exam/start               | Start a mock exam and receive 70 questions      | Required       |
@@ -53,7 +56,10 @@ Response:
 ```json
 { "totalQuestions": 70, "correctAnswers": 52, "incorrectAnswers": 10, "unanswered": 8, "score": 52 }
 ```
+**Notes:**
 
+- `POST /api/exam/start` links the exam session to the logged-in user. The server records which questions were issued for that session.
+- `POST /api/exam/submit` ignores the `questionIds` field in the request body. The server scores against the questions it issued at `/start`. Only the session's owner may submit; other users receive `403 Forbidden`.
 ## Roles
 
 Users have a role: `STUDENT` (default for new registrations) or `ADMIN` (#29). Endpoints under `/api/admin/**` require `ADMIN`.

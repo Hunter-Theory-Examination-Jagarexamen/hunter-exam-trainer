@@ -5,6 +5,7 @@ import type {Subject} from "../../types/subject";
 import type {Question} from "../../types/question";
 import "../../styles/admin.css";
 import QuestionForm from "./QuestionForm";
+import QuestionImage from "../../components/common/QuestionImage";
 import {deleteQuestion, questionMutationError} from "../../services/adminQuestionService";
 
 const PAGE_SIZE = 20;
@@ -141,6 +142,7 @@ const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onS
             {filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map(question => (
                 <article className="card" key={question.id}>
                     <h2 className="card-title">#{question.id}: {question.questionText}</h2>
+                    <QuestionImage imageUrl={question.imageUrl} questionText={question.questionText} />
                     <ol type="A">
                         {[question.optionA, question.optionB, question.optionC, question.optionD].map((option, index) => (
                             <li key={index}>{option}</li>

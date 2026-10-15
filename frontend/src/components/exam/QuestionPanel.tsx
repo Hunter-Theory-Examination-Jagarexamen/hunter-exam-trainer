@@ -1,5 +1,6 @@
 import "../../styles/exam.css";
 import type { ExamQuestion } from "../../types/examQuestion.ts";
+import QuestionImage from "../common/QuestionImage";
 
 interface QuestionPanelProps {
     question: ExamQuestion;
@@ -24,13 +25,7 @@ const QuestionPanel = ({
         <section className="question-panel">
 
             <div className="question-card">
-                {question.imageUrl && (
-                    <img
-                    src={question.imageUrl}
-                    alt="Question visual representation"
-                    style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px', marginBottom: '1rem' }}
-                    />
-                )}
+                <QuestionImage imageUrl={question.imageUrl} questionText={question.questionText} />
                 <h3>{question.questionText}</h3>
             </div>
 

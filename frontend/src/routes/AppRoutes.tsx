@@ -19,6 +19,7 @@ import ProtectedRoute from "../components/auth/ProtectedRoute";
 import AdminRoute from "../components/auth/AdminRoute";
 import QuestionBank from "../pages/Admin/QuestionBank";
 import LearnerProgress from "../pages/Admin/LearnerProgress";
+import Subjects from "../pages/Admin/Subjects";
 
 const AppRoutes = () => {
     return (
@@ -53,6 +54,7 @@ const AppRoutes = () => {
                         <Route path="/profile" element={<Profile />} />
 
                         <Route element={<AdminRoute />}>
+                            <Route path="/admin/subjects" element={<Subjects />} />
                             <Route path="/admin/questions" element={<QuestionBank />} />
                             <Route path="/admin/learners" element={<LearnerProgress />} />
                         </Route>

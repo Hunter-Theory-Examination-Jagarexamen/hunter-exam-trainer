@@ -45,6 +45,7 @@ const PracticeQuestions = () => {
                             id: question.id.toString(),
                             subjectArea: question.subject.name,
                             question: question.questionText,
+                            imageUrl: question.imageUrl,
 
                             options: [
                                 {

@@ -484,3 +484,59 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* =========================
+   Extra Small Screens
+   ========================= */
+
+@media (max-width: 400px) {
+
+    .auth-page {
+        overflow-x: hidden;
+    }
+
+    .auth-form-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .auth-form-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .auth-form-header p {
+        font-size: 0.9rem;
+    }
+
+    .auth-logo,
+    .auth-mobile-logo {
+        width: 52px;
+        height: 52px;
+        margin-bottom: 1rem;
+    }
+
+    .input-wrapper input {
+        padding: 0.65rem;
+        font-size: 0.95rem;
+    }
+
+    .auth-primary-button,
+    .auth-secondary-button {
+        padding: 0.7rem;
+        font-size: 0.95rem;
+    }
+
+    .forgot-password,
+    .auth-switch {
+        font-size: 0.85rem;
+    }
+
+    .auth-divider {
+        margin: 1rem 0;
+    }
+}
+
+/* Defensive global for auth pages */
+.auth-page,
+.auth-page * {
+    box-sizing: border-box;
+}

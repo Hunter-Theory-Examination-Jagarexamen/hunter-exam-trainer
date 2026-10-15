@@ -42,7 +42,7 @@ public class Question {
     // Optional explanation shown to the user after answering, for learning purposes.
     private String explanation;
 
-    @Column(name = "image_url")
+    @Column(name = "image_url", length = 1000)
     private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)

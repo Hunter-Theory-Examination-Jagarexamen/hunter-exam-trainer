@@ -28,6 +28,23 @@ function mockUser(role: typeof UserRole[keyof typeof UserRole]) {
 }
 
 describe("Admin navigation and routing", () => {
+    it("lets ADMIN navigate to subject management", async () => {
+        mockUser(UserRole.ADMIN);
+        render(<AppRoutes />);
+        await userEvent.click(await screen.findByRole("link", {name: "Manage Subjects"}));
+        expect(await screen.findByRole("heading", {name: "Manage Subjects"})).toBeInTheDocument();
+        expect(window.location.pathname).toBe("/admin/subjects");
+    });
+
+    it("blocks a STUDENT opening subject management directly and hides its link", async () => {
+        window.history.replaceState({}, "", "/admin/subjects");
+        mockUser(UserRole.STUDENT);
+        render(<AppRoutes />);
+        expect(await screen.findByRole("heading", {name: "Dashboard page"})).toBeInTheDocument();
+        expect(screen.queryByRole("link", {name: "Manage Subjects"})).not.toBeInTheDocument();
+        expect(apiClient).not.toHaveBeenCalledWith("/api/subjects");
+        expect(window.location.pathname).toBe("/dashboard");
+    });
     it("lets an ADMIN open question creation through the protected route", async () => {
         vi.mocked(apiClient).mockImplementation(async endpoint => {
             if (endpoint === "/api/users/me") return {id: 1, fullName: "Admin", role: UserRole.ADMIN};

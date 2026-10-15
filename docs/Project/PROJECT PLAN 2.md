@@ -75,7 +75,7 @@ The schedule is divided into four phases. It is deliberately laid out so that a 
 | -------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Week** | **Phase / focus**                          | **Activities and deliverables**                                                                                                                                                                                                                   |
 | 1–2      | Preliminary study and planning             | Gathering requirements (go through the Jägareförbundet's course material and the test's question types), sketch interfaces, choose technology, set up project environment and Git-repo. Deliverable: requirement specification and system sketch. |
-| 3–4      | Basic structure                            | Build data model and database, set up API skeleton, first interface sketches in code, start collecting and categorizing questions for the question bank (goal: at least 150 questions distributed across all subject areas).                      |
+| 3–4      | Basic structure                            | Build data model and database, set up API skeleton, first interface sketches in code, start collecting and categorizing questions for the question bank (distributed across all subject areas).                      |
 | 5–6      | First Working Version (MVP)                | Quiz mode with correction and results, easy login, basic statistics. Deliverable: internal demo and initial coordination with supervisor/test user.                                                                                               |
 | 7–9      | Further development                        | Exam simulation (70 questions, timed), in-depth statistics and progression over time, admin interface to manage the question bank, mobile customization (PWA, installable).                                                                       |
 | 10       | User tests                                 | Have a test group (eg participants in an ongoing hunter exam course) try out the app, collect feedback and bug reports.                                                                                                                           |
@@ -88,7 +88,7 @@ The schedule is divided into four phases. It is deliberately laid out so that a 
 
   - Admin interface for managing questions and following up on results.
 
-  - Question bank with at least 150–200 categorized and quality-reviewed questions.
+  - Question bank with categorized and quality-reviewed questions.
 
   - Technical documentation: requirements specification, system sketch (see section 9), test report and operation/management guide.
 

@@ -39,6 +39,57 @@ async function fillCreate() {
 const mutations = () => vi.mocked(apiClient).mock.calls.filter(([, options]) => options?.method);
 
 describe("Admin question CRUD", () => {
+    it("displays the bank image and handles loading failure", async () => {
+        render(<QuestionBank />);
+        const image = await screen.findByRole("img", {name: "Image for question: Original question?"});
+        expect(image).toHaveAttribute("src", question.imageUrl);
+        fireEvent.error(image);
+        expect(screen.queryByRole("img")).not.toBeInTheDocument();
+        expect(screen.getByText("Question image unavailable.")).toBeInTheDocument();
+        expect(screen.getByRole("heading", {name: "#1: Original question?"})).toBeInTheDocument();
+    });
+
+    it("creates with an image URL and previews it", async () => {
+        await open("create");
+        await fillCreate();
+        const imageUrl = "https://example.com/new.jpg";
+        fireEvent.change(screen.getByLabelText("Image URL (optional)"), {target: {value: ` ${imageUrl} `}});
+        expect(within(screen.getByRole("form")).getByRole("img")).toHaveAttribute("src", imageUrl);
+        vi.mocked(apiClient).mockResolvedValueOnce({...question, id: 2, imageUrl});
+        await userEvent.click(screen.getByRole("button", {name: "Save question"}));
+        expect(JSON.parse(mutations()[0][1]!.body as string)).toEqual({
+            questionText: "New question?", optionA: "Moose", optionB: "Deer", optionC: "Fox", optionD: "Bear",
+            correctAnswer: "Fox", explanation: "", subjectId: 1, imageUrl});
+    });
+
+    it.each(["replace", "remove", "clear"])("can %s an existing image", async mode => {
+        await open("edit");
+        const input = screen.getByLabelText("Image URL (optional)");
+        expect(input).toHaveValue(question.imageUrl);
+        expect(input).toHaveAttribute("maxlength", "1000");
+        if (mode === "remove") await userEvent.click(screen.getByRole("button", {name: "Remove image"}));
+        else fireEvent.change(input, {target: {value: mode === "replace" ? "https://example.com/replaced.jpg" : ""}});
+        const imageUrl = mode === "replace" ? "https://example.com/replaced.jpg" : null;
+        vi.mocked(apiClient).mockResolvedValueOnce({...question, imageUrl});
+        await userEvent.click(screen.getByRole("button", {name: "Save question"}));
+        expect(JSON.parse(mutations()[0][1]!.body as string)).toEqual({
+            questionText: question.questionText, optionA: "Moose", optionB: "Deer", optionC: "Fox", optionD: "Bear",
+            correctAnswer: "Fox", explanation: question.explanation, subjectId: 1, imageUrl});
+        await screen.findByText("Question #1 updated in Safety.");
+        if (imageUrl) expect(screen.getByRole("img")).toHaveAttribute("src", imageUrl);
+        else expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    });
+
+    it.each(["javascript:alert(1)", "not a URL", "https://example.com/" + "a".repeat(1000)])(
+        "rejects invalid image input without sending (%#)", async value => {
+            await open("edit");
+            fireEvent.change(screen.getByLabelText("Image URL (optional)"), {target: {value}});
+            await userEvent.click(screen.getByRole("button", {name: "Save question"}));
+            expect(screen.getByRole("alert")).toHaveTextContent(value.length > 1000
+                ? "Image URL must be at most 1000 characters." : "Enter a complete HTTP or HTTPS image URL.");
+            expect(mutations()).toHaveLength(0);
+        });
+
     it("can add a question to an empty subject and cancel without sending", async () => {
         render(<QuestionBank />);
         await screen.findByRole("heading", {name: "#1: Original question?"}, {timeout: 5000});
@@ -89,7 +140,7 @@ describe("Admin question CRUD", () => {
         await userEvent.click(screen.getByRole("button", {name: "Save question"}));
         expect(apiClient).toHaveBeenCalledWith("/api/admin/questions", {method: "POST", body: JSON.stringify({
             questionText: "New question?", optionA: "Moose", optionB: "Deer", optionC: "Red fox", optionD: "Bear",
-            correctAnswer: "Red fox", explanation: "", subjectId: 1})});
+            correctAnswer: "Red fox", explanation: "", subjectId: 1, imageUrl: null})});
         expect(await screen.findByRole("heading", {name: "#2: New question?"})).toBeInTheDocument();
         expect(screen.getByText("Question #2 created in Safety.")).toBeInTheDocument();
         expect(screen.getByRole("option", {name: "Safety (2)"})).toBeInTheDocument();
