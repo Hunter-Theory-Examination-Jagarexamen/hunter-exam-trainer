@@ -9,6 +9,7 @@ import com.hunterexam.backend.dto.RegisterResponse;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.service.AuthService;
 import com.hunterexam.backend.service.PasswordResetService;
+import com.hunterexam.backend.config.TempTokenStore;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -97,6 +98,16 @@ public class AuthController {
             @Valid @RequestBody ResetPasswordRequest request) {
         passwordResetService.resetPassword(request.getToken(), request.getNewPassword());
         return ResponseEntity.ok(Map.of("message", "Password reset successfully. You can now log in."));
+    }
+
+    @PostMapping("/oauth2/exchange")
+    public ResponseEntity<Map<String, String>> exchangeToken(@RequestBody Map<String, String> request) {
+       String code = request.get("code");
+       String token = TempTokenStore.getToken(code);
+       if (token == null) {
+           return ResponseEntity.badRequest().body(Map.of("error", "Invalid or expired code"));
+       }
+       return ResponseEntity.ok(Map.of("token", token));
     }
 
     /**

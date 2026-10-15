@@ -58,6 +58,18 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 name == null ? "User" : name
         );
 
-        response.sendRedirect(frontendUrl + "/oauth2/redirect?token=" + token);
+        String code = java.util.UUID.randomUUID().toString();
+
+        TempTokenStore.saveToken(code, token);
+
+        response.sendRedirect(frontendUrl + "/oauth2/redirect?code=" + code);
+
+    }
+
+    class TempTokenStore {
+        private static final java.util.Map<String, String> cache = new java.util.concurrent.ConcurrentHashMap<>();
+
+        public static void saveToken(String code, String token) { cache.put(code, token); }
+        public static String getToken(String code) { return cache.remove(code); }
     }
 }
