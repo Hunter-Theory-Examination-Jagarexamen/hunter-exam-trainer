@@ -698,15 +698,16 @@ This deployment is **not production, and not a permanent staging environment.** 
 
 **On Render (backend):**
 
-| Variable | Value / Notes |
-|---|---|
-| `DB_URL` | Neon connection string |
-| `DB_USERNAME` | Neon username |
-| `DB_PASSWORD` | Neon password |
-| `JWT_SECRET` | Same Base64 secret used locally |
-| `ADMIN_EMAIL` | Admin seed email |
-| `ADMIN_PASSWORD` | Admin seed password |
-| `APP_CORS_ALLOWED_ORIGINS` | `http://localhost:5173,https://hunter01-kappa.vercel.app` |
+| Variable                   | Value / Notes                                                                                                                               |
+|----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| `DB_URL`                   | Neon connection string                                                                                                                      |
+| `DB_USERNAME`              | Neon username                                                                                                                               |
+| `DB_PASSWORD`              | Neon password                                                                                                                               |
+| `JWT_SECRET`               | Same Base64 secret used locally                                                                                                             |
+| `ADMIN_EMAIL`              | Admin seed email                                                                                                                            |
+| `ADMIN_PASSWORD`           | Admin seed password                                                                                                                         |
+| `APP_CORS_ALLOWED_ORIGINS` | `http://localhost:5173,https://hunter01-kappa.vercel.app`                                                                                   |
+| `FRONTEND_URL`             | Base URL for frontend redirects after OAuth2 login (e.g. `http://localhost:5173` locally or `https://hunter01-kappa.vercel.app` on staging) |
 
 **On Vercel (frontend):**
 

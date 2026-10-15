@@ -133,7 +133,7 @@ public class SecurityConfig {
         if (googleLoginEnabled) {
             http.oauth2Login(oauth2 -> oauth2
                     .successHandler(oAuth2LoginSuccessHandler)
-                    .failureUrl("http://localhost:5173/login?error=google")
+                    .failureUrl(frontendUrl + "/login?error=google")
             );
         }
 
@@ -141,11 +141,18 @@ public class SecurityConfig {
     }
 
     /*
+    Frontend URL used for redirects (e.g., login failure).
+    */
+    @Value("${app.frontend.url:http://localhost:5173}")
+    private String frontendUrl;
+
+    /*
      * JWT secret used to sign and validate authentication tokens.
      * <p>
      * The value is read from the JWT_SECRET environment variable
      * through application.properties.
      */
+
     @Value("${jwt.secret}")
     private String jwtSecret;
 
