@@ -19,7 +19,7 @@ Every change to `develop` and `main` goes through a pull request, even a one-lin
 
 ## Definition of Done
 
-Before a PR is merged, every item in the Definition of Done in the [PR template](.github/pull_request_template.md) is ticked or marked "n/a". The template is the single source; update it there.
+Before a PR is merged, every item in the Definition of Done in the [PR template](.github/pull_request_template.md) is ticked, or deleted if it doesn't apply to the PR. The template is the single source; update it there.
 
 ## Where things are documented
 
