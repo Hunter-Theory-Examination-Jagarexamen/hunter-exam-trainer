@@ -212,3 +212,19 @@ Both are out of scope for the MVP in the Project Plan; Klas did not answer on 20
 _To ask Klas on 2026-10-16._
 
 ---
+
+### Q-013
+
+**Question**
+
+Who pays for, and owns, the accounts that cost money: e.g. Apple Developer account (about $99/year) and Google Play developer account (about $25 once) for a native app, hosting for the real deployment, and any paid build service for iPhone builds?
+
+**Reason**
+
+A native app is "big priority if we have time" (2026-10-13). The app can be free for users, but publishing needs paid developer accounts, which should be owned by Allez so they outlive the internship.
+
+**Answer**
+
+_To ask Klas on 2026-10-16._
+
+---
