@@ -65,4 +65,4 @@ What do we do with the result?
 ## Current state and known gaps
 
 - Automated tests: the backend has unit tests for services and web-layer tests for security rules (`backend/src/test/java`); the frontend has unit and component tests (`frontend/src/__tests__/`). The test code itself is the list of what is covered; the test logs in this folder record each round of added tests and their results. No end-to-end tests yet, and the tests are not yet run automatically on pull requests.
-- The question bank has 100 questions; the project plan's goal is 150–200 reviewed questions.
+- The question bank has 100 questions; admins can add more. There is no fixed target number (agreed with the project supervisor, 2026-10-13).

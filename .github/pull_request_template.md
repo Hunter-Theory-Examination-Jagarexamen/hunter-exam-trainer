@@ -21,7 +21,10 @@ or drop and recreate your local database."
 
 ## Definition of Done
 
+<!-- Tick what you did. Delete any item that doesn't apply to this PR (e.g. a docs-only or tests-only PR). -->
+
 - [ ] Tested in the running app, not just the endpoint
+- [ ] Tests added or updated for the changed behaviour (unit/component tests in frontend and/or backend), or "How I tested" explains why not
 - [ ] If an API request or response changed, every caller of it is updated (search the endpoint path in frontend and backend)
 - [ ] Error cases checked in the browser: the user actually sees a clear message
 - [ ] README updated if setup changed (e.g. new environment variables)
