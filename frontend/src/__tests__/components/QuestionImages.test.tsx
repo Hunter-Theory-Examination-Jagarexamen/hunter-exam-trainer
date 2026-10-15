@@ -7,6 +7,7 @@ import PracticeQuestions from "../../pages/Practice/PracticeQuestions";
 import apiClient from "../../api/apiClient";
 import type {Question} from "../../types/question";
 import imageStyles from "../../styles/question-image.css?inline";
+import "../../styles/question-image.css";
 
 vi.mock("../../api/apiClient", () => ({default: vi.fn()}));
 const question: Question = {id: 1, questionText: "Which animal?", optionA: "Fox", optionB: "Deer",
