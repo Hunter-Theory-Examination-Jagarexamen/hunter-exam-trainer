@@ -3,6 +3,8 @@ import type {FormEvent} from "react";
 import type {Question} from "../../types/question";
 import type {Subject} from "../../types/subject";
 import {createQuestion, updateQuestion, questionMutationError} from "../../services/adminQuestionService";
+import QuestionImage from "../../components/common/QuestionImage";
+import {isQuestionImageUrl} from "../../utils/questionImageUrl";
 
 const optionKeys = ["optionA", "optionB", "optionC", "optionD"] as const;
 type OptionKey = typeof optionKeys[number];
@@ -22,6 +24,7 @@ export default function QuestionForm({question, subjectId, subjects, onSaved, on
     const [correct, setCorrect] = useState<OptionKey | "">(
         question ? optionKeys.find(key => question[key] === question.correctAnswer) ?? "" : "");
     const [explanation, setExplanation] = useState(question?.explanation ?? "");
+    const [imageUrl, setImageUrl] = useState(question?.imageUrl ?? "");
     const [selectedSubject, setSelectedSubject] = useState(question?.subject.id ?? subjectId);
     const [error, setError] = useState("");
     const [submitting, setSubmitting] = useState(false);
@@ -40,11 +43,17 @@ export default function QuestionForm({question, subjectId, subjects, onSaved, on
         if ([text, ...Object.values(options), explanation].some(value => value.length > 255)) {
             setError("Question text, options and explanation must each be at most 255 characters."); return;
         }
+        if (imageUrl.trim().length > 1000) {
+            setError("Image URL must be at most 1000 characters."); return;
+        }
+        if (imageUrl.trim() && !isQuestionImageUrl(imageUrl.trim())) {
+            setError("Enter a complete HTTP or HTTPS image URL."); return;
+        }
         pending.current = true;
         setSubmitting(true);
         setError("");
         const request = {questionText: text, ...options, correctAnswer: options[correct],
-            explanation, subjectId: selectedSubject, ...(question?.imageUrl ? {imageUrl: question.imageUrl} : {})};
+            explanation, subjectId: selectedSubject, imageUrl: imageUrl.trim() || null};
         try {
             const saved = question ? await updateQuestion(question.id, request) : await createQuestion(request);
             onSaved(saved);
@@ -78,6 +87,14 @@ export default function QuestionForm({question, subjectId, subjects, onSaved, on
                 <select id="edit-subject" value={selectedSubject} onChange={e => setSelectedSubject(Number(e.target.value))}>
                     {subjects.map(subject => <option key={subject.id} value={subject.id}>{subject.name}</option>)}
                 </select>
+            </div>
+            <div className="question-bank-field">
+                <label htmlFor="edit-image-url">Image URL (optional)</label>
+                <input id="edit-image-url" type="url" maxLength={1000} value={imageUrl}
+                    aria-describedby="image-url-help" onChange={e => setImageUrl(e.target.value)} />
+                <p id="image-url-help">Use a complete HTTP or HTTPS URL. Leave blank to save without an image.</p>
+                {imageUrl && <button type="button" onClick={() => setImageUrl("")}>Remove image</button>}
+                <QuestionImage imageUrl={imageUrl} questionText={text.trim() || "New question"} />
             </div>
             <div className="question-bank-field">
                 <label htmlFor="edit-explanation">Explanation (optional)</label>

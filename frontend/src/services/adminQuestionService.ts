@@ -9,7 +9,7 @@ export interface QuestionRequest {
     optionD: string;
     correctAnswer: string;
     explanation: string;
-    imageUrl?: string;
+    imageUrl?: string | null;
     subjectId: number;
 }
 

@@ -1,11 +1,6 @@
 package com.hunterexam.backend.controller;
 
 import com.hunterexam.backend.dto.ExamStartResponse;
-import com.hunterexam.backend.entity.User;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-
-
-import com.hunterexam.backend.dto.ExamQuestionResponse;
 import com.hunterexam.backend.dto.ExamResultResponse;
 import com.hunterexam.backend.dto.ExamSubmitRequest;
 import com.hunterexam.backend.service.ExamService;
@@ -14,8 +9,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 /**
  * REST controller for the mock hunter exam.
@@ -33,21 +26,19 @@ public class ExamController {
         this.examService = examService;
     }
 
-
     /**
      * Starts a new mock exam.
      * <p>
      * The service selects 70 questions and returns them without
      * exposing the correct answers to the client.
      *
-     * @return list of questions for the mock exam
+     * @param authentication authentication info from Spring Security
+     * @return session id and the 70 questions for this attempt
      */
-    @PostMapping("/start") 
-    public ExamStartResponse startExam(@AuthenticationPrincipal User user) {
-
-        return examService.startExam(user);
+    @PostMapping("/start")
+    public ExamStartResponse startExam(Authentication authentication) {
+        return examService.startExam(authentication.getName());
     }
-
 
     /**
      * Submits a completed mock exam for evaluation.
@@ -56,7 +47,7 @@ public class ExamController {
      * The service evaluates the submitted answers and stores the exam result.
      *
      * @param authentication authentication information from Spring Security
-     * @param request submitted question IDs and user answers
+     * @param request submitted answers (the client's question list is ignored)
      * @return calculated exam result
      */
     @PostMapping("/submit")
@@ -64,9 +55,6 @@ public class ExamController {
             Authentication authentication,
             @RequestBody ExamSubmitRequest request
     ) {
-
-        String email = authentication.getName();
-
-        return examService.submitExam(request, email);
+        return examService.submitExam(request, authentication.getName());
     }
 }

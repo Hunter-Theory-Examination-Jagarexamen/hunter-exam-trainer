@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -59,6 +61,11 @@ class ExamServiceTests {
                 userRepository, examSessionRepository);
         user = new User();
         user.setEmail(EMAIL);
+        ReflectionTestUtils.setField(user, "id", 1L);
+
+        // Ownership checks in submitExam and startExam need the user lookup.
+        // lenient() so tests that never reach the lookup don't fail strictness checks.
+        lenient().when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
     }
 
     /** A question whose correct answer is option B ("Two"). */
@@ -81,10 +88,10 @@ class ExamServiceTests {
     /** Overloads givenOpenSessionWith: the session started at the given time. */
     private void givenOpenSessionWith(List<Question> questions, LocalDateTime startedAt) {
         ExamSession session = new ExamSession(user, startedAt);
+        session.setQuestionIds(questions.stream().map(Question::getId).toList());
         when(examSessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
         when(questionRepository.findAllById(questions.stream().map(Question::getId).toList()))
                 .thenReturn(questions);
-        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
     }
 
     /** A modifiable list of `count` questions with ids 1..count. */
@@ -104,19 +111,104 @@ class ExamServiceTests {
         return request;
     }
 
-    // ----- Scoring -----
+    // ----- Security: server-side question list -----
 
     @Test
-    void allCorrectAnswersGiveFullScore() {
-        // Arrange
+    void clientCannotReduceQuestionCountBySendingOnlyCorrectIds() {
+        // Arrange: server issued 4 questions for this session
         givenOpenSessionWith(List.of(question(1), question(2), question(3), question(4)));
-        ExamSubmitRequest request = submission(List.of(1L, 2L, 3L, 4L),
-                Map.of("1", "B", "2", "B", "3", "B", "4", "B"));
+
+        // Client tries to send only question 1 (which it got right)
+        ExamSubmitRequest request = submission(List.of(1L),
+                Map.of("1", "B"));
+
+        // Act: server ignores the client list, uses all 4 session questions
+        ExamResultResponse result = examService.submitExam(request, EMAIL);
+
+        // Assert: total is 4 (not 1), score is 25% (not 100%)
+        assertEquals(4, result.getTotalQuestions());
+        assertEquals(1, result.getCorrectAnswers());
+        assertEquals(3, result.getUnanswered());
+        assertEquals(25, result.getScore());
+    }
+
+    @Test
+    void clientQuestionIdsThatDifferFromSessionAreIgnored() {
+        // Arrange: server issued questions 1, 2, 3 for this session
+        givenOpenSessionWith(List.of(question(1), question(2), question(3)));
+
+        // Client sends different ids entirely (999) — should be ignored
+        ExamSubmitRequest request = submission(List.of(999L),
+                Map.of("1", "B", "2", "B", "3", "B"));
 
         // Act
         ExamResultResponse result = examService.submitExam(request, EMAIL);
 
-        // Assert
+        // Assert: server still scored against 1, 2, 3
+        assertEquals(3, result.getTotalQuestions());
+        assertEquals(3, result.getCorrectAnswers());
+        assertEquals(100, result.getScore());
+    }
+
+    // ----- Security: ownership -----
+
+    @Test
+    void otherUserCannotSubmitSomeonesSession() {
+        // Arrange: session belongs to user (id=1)
+        ExamSession session = new ExamSession(user, LocalDateTime.now());
+        session.setQuestionIds(List.of(1L));
+        when(examSessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
+
+        // A different user is logged in
+        User otherUser = new User();
+        otherUser.setEmail("other@example.test");
+        ReflectionTestUtils.setField(otherUser, "id", 99L);
+        when(userRepository.findByEmail("other@example.test")).thenReturn(Optional.of(otherUser));
+
+        ExamSubmitRequest request = submission(List.of(1L), Map.of("1", "B"));
+
+        // Act + Assert: AccessDeniedException, no scoring, no result saved
+        assertThrows(AccessDeniedException.class,
+                () -> examService.submitExam(request, "other@example.test"));
+
+        verifyNoInteractions(questionRepository);
+        verifyNoInteractions(examResultRepository);
+    }
+
+    // ----- Security: session is linked to user at start -----
+
+    @Test
+    void startExamLinksSessionToTheLoggedInUserAndStoresQuestionIds() {
+        // Arrange
+        when(questionRepository.findAll()).thenReturn(questionBank(100));
+
+        ExamSession savedSession = new ExamSession(user, LocalDateTime.now());
+        ReflectionTestUtils.setField(savedSession, "id", 42L);
+        when(examSessionRepository.save(any(ExamSession.class))).thenReturn(savedSession);
+
+        // Act
+        examService.startExam(EMAIL);
+
+        // Assert: the saved session has the user and 70 question ids
+        ArgumentCaptor<ExamSession> captor = ArgumentCaptor.forClass(ExamSession.class);
+        verify(examSessionRepository).save(captor.capture());
+        ExamSession captured = captor.getValue();
+
+        assertSame(user, captured.getUser());
+        assertEquals(70, captured.getQuestionIds().size());
+        assertEquals(70, captured.getQuestionIds().stream().distinct().count());
+    }
+
+    // ----- Scoring -----
+
+    @Test
+    void allCorrectAnswersGiveFullScore() {
+        givenOpenSessionWith(List.of(question(1), question(2), question(3), question(4)));
+        ExamSubmitRequest request = submission(List.of(1L, 2L, 3L, 4L),
+                Map.of("1", "B", "2", "B", "3", "B", "4", "B"));
+
+        ExamResultResponse result = examService.submitExam(request, EMAIL);
+
         assertEquals(4, result.getTotalQuestions());
         assertEquals(4, result.getCorrectAnswers());
         assertEquals(0, result.getIncorrectAnswers());
@@ -126,15 +218,12 @@ class ExamServiceTests {
 
     @Test
     void mixedAnswersAreCountedAsCorrectIncorrectAndUnanswered() {
-        // Arrange: Q1 right, Q2 wrong, Q3 skipped, Q4 right
         givenOpenSessionWith(List.of(question(1), question(2), question(3), question(4)));
         ExamSubmitRequest request = submission(List.of(1L, 2L, 3L, 4L),
                 Map.of("1", "B", "2", "A", "4", "B"));
 
-        // Act
         ExamResultResponse result = examService.submitExam(request, EMAIL);
 
-        // Assert
         assertEquals(4, result.getTotalQuestions());
         assertEquals(2, result.getCorrectAnswers());
         assertEquals(1, result.getIncorrectAnswers());
@@ -144,15 +233,12 @@ class ExamServiceTests {
 
     @Test
     void answerThatIsNotALetterAToDCountsAsIncorrect() {
-        // Arrange: Q1 right, Q2 has an invalid letter
         givenOpenSessionWith(List.of(question(1), question(2)));
         ExamSubmitRequest request = submission(List.of(1L, 2L),
                 Map.of("1", "B", "2", "X"));
 
-        // Act
         ExamResultResponse result = examService.submitExam(request, EMAIL);
 
-        // Assert
         assertEquals(1, result.getCorrectAnswers());
         assertEquals(1, result.getIncorrectAnswers());
         assertEquals(0, result.getUnanswered());
@@ -160,45 +246,23 @@ class ExamServiceTests {
 
     @Test
     void scoreIsRoundedToNearestWholePercent() {
-        // Arrange: 2 of 3 right = 66.67 %
         givenOpenSessionWith(List.of(question(1), question(2), question(3)));
         ExamSubmitRequest request = submission(List.of(1L, 2L, 3L),
                 Map.of("1", "B", "2", "B", "3", "A"));
 
-        // Act
         ExamResultResponse result = examService.submitExam(request, EMAIL);
 
-        // Assert
         assertEquals(67, result.getScore());
     }
 
-    /*
-     * Why this test is needed even though the tests above already check the score:
-     *
-     * submitExam builds TWO separate objects with the same numbers:
-     *   1. ExamResultResponse - returned to the browser and shown right after the exam.
-     *   2. ExamResult         - saved to the database. The statistics and dashboard
-     *                           pages read these saved results later.
-     * The tests above only look at (1). If (2) got a wrong number, or no user, the
-     * student would see the right score after the exam, but the statistics page
-     * would be wrong or the result would not show up for them at all.
-     *
-     * The service doesn't return the ExamResult, so we can't check it directly.
-     * Instead we use an ArgumentCaptor: it "catches" the object the service passes
-     * to examResultRepository.save(...), so we can inspect what would have been
-     * stored in the database.
-     */
     @Test
     void savedResultHasTheScoreAndBelongsToTheUser() {
-        // Arrange: same answers as the mixed test (2 right, 1 wrong, 1 skipped)
         givenOpenSessionWith(List.of(question(1), question(2), question(3), question(4)));
         ExamSubmitRequest request = submission(List.of(1L, 2L, 3L, 4L),
                 Map.of("1", "B", "2", "A", "4", "B"));
 
-        // Act
         examService.submitExam(request, EMAIL);
 
-        // Assert: catch the ExamResult that the service passed to save(...)
         ArgumentCaptor<ExamResult> saved = ArgumentCaptor.forClass(ExamResult.class);
         verify(examResultRepository).save(saved.capture());
         ExamResult examResult = saved.getValue();
@@ -216,87 +280,64 @@ class ExamServiceTests {
 
     @Test
     void submitWithoutSessionIdIsRejected() {
-        // Arrange: a submission that is missing its session id
         ExamSubmitRequest request = submission(List.of(1L), Map.of("1", "B"));
         request.setSessionId(null);
 
-        // Act + Assert: the lambda () -> ... is run by assertThrows, which
-        // passes only if it throws an IllegalArgumentException
         assertThrows(IllegalArgumentException.class,
                 () -> examService.submitExam(request, EMAIL));
 
-        // The service must stop at the first check, before looking up any session.
-        // Without this line the test would still pass if the null check was removed,
-        // because "session not found" is also an IllegalArgumentException.
         verifyNoInteractions(examSessionRepository);
-
-        // A rejected exam must never be saved as a result
         verifyNoInteractions(examResultRepository);
     }
 
     @Test
     void submitWithUnknownSessionIdIsRejected() {
-        // Arrange: the repository finds no session with this id
-        // (Optional.empty() is how a repository says "nothing found")
         when(examSessionRepository.findById(SESSION_ID)).thenReturn(Optional.empty());
         ExamSubmitRequest request = submission(List.of(1L), Map.of("1", "B"));
 
-        // Act + Assert
         assertThrows(IllegalArgumentException.class,
                 () -> examService.submitExam(request, EMAIL));
 
-        // The service must stop at the session lookup and never start scoring
         verifyNoInteractions(questionRepository);
         verifyNoInteractions(examResultRepository);
     }
 
     @Test
     void sessionThatIsAlreadySubmittedCannotBeSubmittedAgain() {
-        // Arrange: a session that has already been submitted once
         ExamSession session = new ExamSession(user, LocalDateTime.now());
         session.setCompleted(true);
         when(examSessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
         ExamSubmitRequest request = submission(List.of(1L), Map.of("1", "B"));
 
-        // Act + Assert
         assertThrows(IllegalArgumentException.class,
                 () -> examService.submitExam(request, EMAIL));
 
-        // No second scoring and no second saved result
         verifyNoInteractions(questionRepository);
         verifyNoInteractions(examResultRepository);
     }
 
     @Test
     void submitAfterTheTimeLimitIsRejectedAndClosesTheSession() {
-        // Arrange: the exam started 61 minutes ago (the limit is 60)
         ExamSession session = new ExamSession(user, LocalDateTime.now().minusMinutes(61));
         when(examSessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
         ExamSubmitRequest request = submission(List.of(1L), Map.of("1", "B"));
 
-        // Act + Assert
         assertThrows(IllegalArgumentException.class,
                 () -> examService.submitExam(request, EMAIL));
 
-        // Side effect: the late session is closed and saved, so it can't be retried
         assertTrue(session.isCompleted(), "a late session should be closed");
         verify(examSessionRepository).save(session);
-
-        // ...but the late answers are never scored or saved as a result
         verifyNoInteractions(questionRepository);
         verifyNoInteractions(examResultRepository);
     }
 
     @Test
     void submitJustBeforeTheTimeLimitIsAccepted() {
-        // Arrange: the exam started 59 minutes ago (the limit is 60)
         givenOpenSessionWith(List.of(question(1)), LocalDateTime.now().minusMinutes(59));
         ExamSubmitRequest request = submission(List.of(1L), Map.of("1", "B"));
 
-        // Act: no exception expected
         ExamResultResponse result = examService.submitExam(request, EMAIL);
 
-        // Assert: the answer was scored and the result saved
         assertEquals(1, result.getCorrectAnswers());
         verify(examResultRepository).save(any(ExamResult.class));
     }
@@ -305,32 +346,23 @@ class ExamServiceTests {
 
     @Test
     void startExamWithFewerThan70QuestionsIsRejected() {
-        // Arrange: the question bank only has 69 questions
         when(questionRepository.findAll()).thenReturn(questionBank(69));
 
-        // Act + Assert
-        assertThrows(RuntimeException.class, () -> examService.startExam(user));
+        assertThrows(RuntimeException.class, () -> examService.startExam(EMAIL));
 
-        // No exam session may be created for an exam that can't start
         verifyNoInteractions(examSessionRepository);
     }
 
     @Test
     void startExamGives70DifferentQuestionsAndTheSessionId() {
-        // Arrange: 100 questions in the bank. questionBank returns an ArrayList,
-        // because startExam shuffles the list and List.of(...) can't be changed.
         when(questionRepository.findAll()).thenReturn(questionBank(100));
 
-        // The real database gives a saved session an id. The fake repository
-        // can't, so we return a session whose id we set by hand.
         ExamSession savedSession = new ExamSession(user, LocalDateTime.now());
         ReflectionTestUtils.setField(savedSession, "id", 42L);
         when(examSessionRepository.save(any(ExamSession.class))).thenReturn(savedSession);
 
-        // Act
-        ExamStartResponse response = examService.startExam(user);
+        ExamStartResponse response = examService.startExam(EMAIL);
 
-        // Assert
         assertEquals(42L, response.getSessionId());
         assertEquals(70, response.getQuestions().size());
         long differentIds = response.getQuestions().stream()

@@ -14,10 +14,10 @@ import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.repository.ExamResultRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.UserRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +28,10 @@ import java.util.Map;
  * This service generates randomized mock exam questions and evaluates
  * submitted exam answers, calculating the score and saving the result
  * for the logged-in user.
+ * <p>
+ * Security model: the server is the authority. Question ids issued at
+ * start are stored on the session and reused on submit — the client's
+ * list is ignored. Only the session owner may submit.
  */
 @Service
 public class ExamService {
@@ -37,7 +41,6 @@ public class ExamService {
     private final QuestionRepository questionRepository;
     private final ExamResultRepository examResultRepository;
     private final UserRepository userRepository;
-
     private final ExamSessionRepository examSessionRepository;
 
     public ExamService(
@@ -53,14 +56,18 @@ public class ExamService {
     }
 
     /**
-     * Starts a new mock exam.
+     * Starts a new mock exam for the given user.
      * <p>
-     * Selects 70 questions at random from the full question bank.
-     * Throws an exception if fewer than 70 questions are available.
+     * Selects 70 questions at random, records which questions were issued
+     * on the exam session, and returns them without the correct answers.
      *
-     * @return list of exam questions (without the correct answer included)
+     * @param email email of the logged-in user
+     * @return session id and the 70 questions for this attempt
      */
-    public ExamStartResponse startExam(User user) {
+    public ExamStartResponse startExam(String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<Question> questions = questionRepository.findAll();
 
@@ -73,11 +80,14 @@ public class ExamService {
         // Randomize question order so each exam attempt is different.
         Collections.shuffle(questions);
 
+        List<Question> chosen = questions.stream().limit(70).toList();
+        List<Long> chosenIds = chosen.stream().map(Question::getId).toList();
+
         ExamSession session = new ExamSession(user, LocalDateTime.now());
+        session.setQuestionIds(chosenIds);
         ExamSession savedSession = examSessionRepository.save(session);
 
-        List<ExamQuestionResponse> questionDtos = questions.stream()
-                .limit(70)
+        List<ExamQuestionResponse> questionDtos = chosen.stream()
                 .map(question -> new ExamQuestionResponse(
                         question.getId(),
                         question.getQuestionText(),
@@ -96,13 +106,12 @@ public class ExamService {
     /**
      * Submits and evaluates a completed mock exam.
      * <p>
-     * Compares the submitted answers against the correct answers, calculates
-     * the number of correct, incorrect and unanswered questions, computes the
-     * final score, and saves the result for the logged-in user.
+     * The session's stored question ids are used for scoring — the client's
+     * question list is ignored. Only the session's owner may submit.
      *
-     * @param request exam submission containing the question IDs and the user's selected answers
-     * @param email   user's email id
-     * @return the exam result response, including score and answer breakdown
+     * @param request exam submission containing the session id and answers
+     * @param email   email of the logged-in user
+     * @return the exam result, including score and answer breakdown
      */
     public ExamResultResponse submitExam(
             ExamSubmitRequest request,
@@ -114,8 +123,19 @@ public class ExamService {
             throw new IllegalArgumentException("Session ID is required for exam submission.");
         }
 
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         ExamSession session = examSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new IllegalArgumentException("Exam session not found with ID: " + sessionId));
+
+        // Ownership check: only the session owner may submit it.
+        if (session.getUser() == null
+                || !session.getUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException(
+                    "You do not own this exam session."
+            );
+        }
 
         if (session.isCompleted()) {
             throw new IllegalArgumentException("This exam session has already been submitted.");
@@ -126,19 +146,21 @@ public class ExamService {
         if (minutesElapsed > EXAM_TIME_LIMIT_MINUTES) {
             session.setCompleted(true);
             examSessionRepository.save(session);
-            throw new IllegalArgumentException("Exam submission failed: Time limit of " + EXAM_TIME_LIMIT_MINUTES + " minutes exceeded.");
+            throw new IllegalArgumentException(
+                    "Exam submission failed: Time limit of " + EXAM_TIME_LIMIT_MINUTES + " minutes exceeded."
+            );
         }
 
         session.setCompleted(true);
         examSessionRepository.save(session);
 
-        List<Long> questionIds = request.getQuestionIds();
-        Map<String, String> answers = request.getAnswers();
-
+        // Use the questions the server issued the client's list is ignored.
+        List<Long> questionIds = session.getQuestionIds();
         if (questionIds == null || questionIds.isEmpty()) {
-            throw new RuntimeException("No exam questions were submitted");
+            throw new RuntimeException("No exam questions were issued for this session.");
         }
 
+        Map<String, String> answers = request.getAnswers();
         if (answers == null) {
             answers = Collections.emptyMap();
         }
@@ -149,7 +171,7 @@ public class ExamService {
         long correctAnswers = 0;
         long incorrectAnswers = 0;
 
-        for (Question question: questions) {
+        for (Question question : questions) {
 
             String selectedAnswer = answers.get(question.getId().toString());
 
@@ -186,10 +208,6 @@ public class ExamService {
                 ((double) correctAnswers / totalQuestions) * 100
         );
 
-        // Find the logged-in user to associate the result with.
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
         ExamResult examResult = new ExamResult();
 
         examResult.setTotalQuestions((int) totalQuestions);
@@ -198,7 +216,7 @@ public class ExamService {
         examResult.setUnanswered((int) unanswered);
         examResult.setScore((int) score);
         examResult.setCompletedAt(LocalDateTime.now());
-        examResult.setUser(user);
+        examResult.setUser(currentUser);
 
         examResultRepository.save(examResult);
 
