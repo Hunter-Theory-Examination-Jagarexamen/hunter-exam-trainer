@@ -21,7 +21,7 @@ or drop and recreate your local database."
 
 ## Definition of Done
 
-<!-- Tick what you did. If an item doesn't apply to this PR (e.g. a tests-only or docs-only PR), leave it unticked and write "n/a" after it. -->
+<!-- Tick what you did. Delete any item that doesn't apply to this PR (e.g. a docs-only or tests-only PR). -->
 
 - [ ] Tested in the running app, not just the endpoint
 - [ ] Tests added or updated for the changed behaviour (unit/component tests in frontend and/or backend), or "How I tested" explains why not
