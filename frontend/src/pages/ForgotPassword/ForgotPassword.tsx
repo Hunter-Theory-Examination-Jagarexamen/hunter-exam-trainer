@@ -11,7 +11,7 @@ const ForgotPassword = () => {
 
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
-    const [newPassword, setNewPassword] = useState("");
+    const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -24,15 +24,15 @@ const ForgotPassword = () => {
 
         try {
             setIsLoading(true);
+            setError("");
+            setMessage("");
 
             const response = await forgotPassword(email);
 
             setMessage(response.message);
-            setNewPassword(response.newPassword ?? "");
 
         } catch (error) {
-            console.error("Forgot password error:", error);
-            alert("Something went wrong. Please try again.");
+            setError(error instanceof Error ? error.message : "Something went wrong. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -61,7 +61,7 @@ const ForgotPassword = () => {
                     </div>
                     <h2>Forgot password</h2>
                     <p>
-                        Enter your email to generate a new password.
+                        Enter your email to receive a password reset link.
                     </p>
                 </div>
 
@@ -76,6 +76,8 @@ const ForgotPassword = () => {
                             <input
                                 id="email"
                                 type="email"
+                                required
+                                autoComplete="email"
                                 placeholder="Enter your email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -88,23 +90,15 @@ const ForgotPassword = () => {
                         className="auth-primary-button"
                         disabled={isLoading}
                     >
-                        {isLoading ? "Generating..." : "Generate New Password"}
+                        {isLoading ? "Sending..." : "Send Reset Link"}
                     </button>
                 </form>
 
-                {message && (
-                    <div className="forgot-message">
-                        <p>{message}</p>
+                {error && <p role="alert" style={{color: "#e53e3e"}}>{error}</p>}
 
-                        {newPassword && (
-                            <div className="forgot-new-password">
-                                <span>Your new password:</span>
-                                <strong>{newPassword}</strong>
-                                <p>
-                                    Use it to log in, then change it from your profile.
-                                </p>
-                            </div>
-                        )}
+                {message && (
+                    <div className="forgot-message" role="status">
+                        <p>{message}</p>
                     </div>
                 )}
 

@@ -28,4 +28,7 @@ flowchart TD
     J --> L[Manage Users]
 
     J --> M[View Statistics]
+
+    J --> N[View Learner Progress]
+
 ```

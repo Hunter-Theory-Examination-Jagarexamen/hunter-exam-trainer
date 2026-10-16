@@ -6,4 +6,5 @@ export interface ExamQuestion {
     optionB: string;
     optionC: string;
     optionD: string;
+    imageUrl?: string;
 }

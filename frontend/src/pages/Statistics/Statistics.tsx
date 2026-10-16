@@ -9,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 import type { RecentActivity } from "../../types/dashboardInfo.ts";
 import apiClient from "../../api/apiClient.ts";
 import type { SubjectPerformance } from "../../types/subjectPerformance.ts";
+import ProgressOverTimeChart from "../../components/statistics/ProgressOverTimeChart";
+import type { ProgressPoint } from "../../types/progressOverTime.ts";
 
 const Statistics = () => {
 
@@ -21,6 +23,11 @@ const Statistics = () => {
     const [subjectPerformance, setSubjectPerformance] = useState<SubjectPerformance[]>([]);
     const [isLoadingProgress, setIsLoadingProgress] = useState(true);
     const [progressError, setProgressError] = useState("");
+
+    const [progressOverTime, setProgressOverTime] = useState<ProgressPoint[]>([]);
+    const [isLoadingProgressOverTime, setIsLoadingProgressOverTime] = useState(true);
+    const [progressOverTimeError, setProgressOverTimeError] = useState("");
+    const [weeksRange, setWeeksRange] = useState(8);
 
     useEffect(() => {
         const fetchRecentResults = async () => {
@@ -72,6 +79,30 @@ const Statistics = () => {
         void fetchSubjectPerformance();
     }, []);
 
+    useEffect(() => {
+        const fetchProgressOverTime = async () => {
+            try {
+                setIsLoadingProgressOverTime(true);
+                setProgressOverTimeError("");
+
+                const data: ProgressPoint[] = await apiClient(
+                    `/api/statistics/progress?weeks=${weeksRange}`
+                );
+
+                setProgressOverTime(data);
+            } catch (error) {
+                console.error("Failed to load progress over time:", error);
+                setProgressOverTimeError(
+                    "Failed to load progress over time. Please try again."
+                );
+            } finally {
+                setIsLoadingProgressOverTime(false);
+            }
+        };
+
+        void fetchProgressOverTime();
+    }, [weeksRange]);
+
     const strongestSubject =
         subjectPerformance.length > 0
             ? subjectPerformance.reduce((strongest, current) =>
@@ -97,6 +128,33 @@ const Statistics = () => {
                 subtitle="View your learning progress."
             />
             <SummaryCards />
+
+            <section className="dashboard-section">
+                <div className="section-header">
+                    <h2>Progress over Time</h2>
+                    <select
+                        value={weeksRange}
+                        onChange={(e) => setWeeksRange(Number(e.target.value))}
+                        className="weeks-select"
+                    >
+                        <option value={4}>Last 4 weeks</option>
+                        <option value={8}>Last 8 weeks</option>
+                        <option value={12}>Last 12 weeks</option>
+                    </select>
+                </div>
+
+                <div className="statistics-card">
+                    {isLoadingProgressOverTime && <p>Loading progress...</p>}
+
+                    {!isLoadingProgressOverTime && progressOverTimeError && (
+                        <p>{progressOverTimeError}</p>
+                    )}
+
+                    {!isLoadingProgressOverTime && !progressOverTimeError && (
+                        <ProgressOverTimeChart data={progressOverTime} />
+                    )}
+                </div>
+            </section>
 
             <section className="dashboard-section">
                 <h2>Performance by Subject</h2>
