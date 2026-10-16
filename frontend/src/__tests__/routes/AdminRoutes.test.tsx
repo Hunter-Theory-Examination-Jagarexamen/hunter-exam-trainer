@@ -31,7 +31,7 @@ describe("Admin navigation and routing", () => {
     it("lets ADMIN navigate to subject management", async () => {
         mockUser(UserRole.ADMIN);
         render(<AppRoutes />);
-        await userEvent.click(await screen.findByRole("link", {name: "Manage Subjects"}));
+        await userEvent.click(await screen.findByRole("link", {name: "Subjects"}));
         expect(await screen.findByRole("heading", {name: "Manage Subjects"})).toBeInTheDocument();
         expect(window.location.pathname).toBe("/admin/subjects");
     });
@@ -41,7 +41,7 @@ describe("Admin navigation and routing", () => {
         mockUser(UserRole.STUDENT);
         render(<AppRoutes />);
         expect(await screen.findByRole("heading", {name: "Dashboard page"})).toBeInTheDocument();
-        expect(screen.queryByRole("link", {name: "Manage Subjects"})).not.toBeInTheDocument();
+        expect(screen.queryByRole("link", {name: "Subjects"})).not.toBeInTheDocument();
         expect(apiClient).not.toHaveBeenCalledWith("/api/subjects");
         expect(window.location.pathname).toBe("/dashboard");
     });
@@ -61,7 +61,10 @@ describe("Admin navigation and routing", () => {
         expect(screen.getByText("Loading user details...")).toBeInTheDocument();
         expect(screen.queryByRole("link", {name: "Admin"})).not.toBeInTheDocument();
         expect(await screen.findByRole("heading", {name: "Admin Question Bank"})).toBeInTheDocument();
-        expect(screen.getByRole("link", {name: "Admin"})).toHaveAttribute("href", "/admin/questions");
+        expect(screen.getByRole("link", {name: "Admin"})).toHaveAttribute("href", "/admin");
+        expect(screen.getByRole("link", {name: "Questions"})).toHaveAttribute("href", "/admin/questions");
+        expect(screen.getByRole("link", {name: "Subjects"})).toHaveAttribute("href", "/admin/subjects");
+        expect(screen.getByRole("link", {name: "Learners"})).toHaveAttribute("href", "/admin/learners");
         expect(screen.getByText("Welcome, Test User")).toBeInTheDocument();
         expect(vi.mocked(apiClient).mock.calls.filter(([endpoint]) => endpoint === "/api/users/me")).toHaveLength(1);
     });
@@ -74,6 +77,26 @@ describe("Admin navigation and routing", () => {
         expect(screen.queryByRole("link", {name: "Admin"})).not.toBeInTheDocument();
         expect(apiClient).not.toHaveBeenCalledWith("/api/subjects");
         expect(screen.queryByRole("button", {name: "Add question"})).not.toBeInTheDocument();
+    });
+
+    it("lets an ADMIN open the admin start page with links to each tool", async () => {
+        window.history.replaceState({}, "", "/admin");
+        mockUser(UserRole.ADMIN);
+        render(<AppRoutes />);
+        expect(await screen.findByRole("heading", {name: "Admin"})).toBeInTheDocument();
+        // Each tool is linked twice on this page: once in the sidebar, once on the start page.
+        expect(screen.getAllByRole("link", {name: "Questions"})).toHaveLength(2);
+        expect(screen.getAllByRole("link", {name: "Subjects"})).toHaveLength(2);
+        expect(screen.getAllByRole("link", {name: "Learners"})).toHaveLength(2);
+    });
+
+    it("redirects a STUDENT opening the admin start page", async () => {
+        window.history.replaceState({}, "", "/admin");
+        mockUser(UserRole.STUDENT);
+        render(<AppRoutes />);
+        expect(await screen.findByRole("heading", {name: "Dashboard page"})).toBeInTheDocument();
+        expect(window.location.pathname).toBe("/dashboard");
+        expect(screen.queryByRole("link", {name: "Admin"})).not.toBeInTheDocument();
     });
 
     it("redirects unauthenticated access to login without requesting admin data", async () => {
