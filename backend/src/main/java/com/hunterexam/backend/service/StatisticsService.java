@@ -1,5 +1,6 @@
 package com.hunterexam.backend.service;
 
+import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.dto.SubjectPerformanceResponse;
 import com.hunterexam.backend.entity.PracticeResult;
 import com.hunterexam.backend.entity.User;
@@ -53,7 +54,7 @@ public class StatisticsService {
 
         // Find the logged-in user to fetch their practice results.
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         List<PracticeResult> results = practiceResultRepository.findByUser(user);
 
@@ -101,7 +102,7 @@ public class StatisticsService {
     public List<ProgressOverTimeResponse> getProgressOverTime(String email, int weeks) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         LocalDateTime since = LocalDateTime.now()
                 .minusWeeks(weeks)

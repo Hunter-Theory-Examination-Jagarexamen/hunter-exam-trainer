@@ -1,5 +1,7 @@
 package com.hunterexam.backend.service;
 
+import com.hunterexam.backend.exception.ConflictException;
+import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.dto.ExamStartResponse;
 import com.hunterexam.backend.entity.ExamSession;
 import com.hunterexam.backend.repository.ExamSessionRepository;
@@ -67,12 +69,12 @@ public class ExamService {
     public ExamStartResponse startExam(String email) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         List<Question> questions = questionRepository.findAll();
 
         if (questions.size() < 70) {
-            throw new RuntimeException(
+            throw new ConflictException(
                     "Not enough questions available to start the exam."
             );
         }
@@ -124,10 +126,10 @@ public class ExamService {
         }
 
         User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         ExamSession session = examSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new IllegalArgumentException("Exam session not found with ID: " + sessionId));
+                .orElseThrow(() -> new NotFoundException("Exam session not found with ID: " + sessionId));
 
         // Ownership check: only the session owner may submit it.
         if (session.getUser() == null

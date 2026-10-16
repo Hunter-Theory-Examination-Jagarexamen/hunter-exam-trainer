@@ -1,5 +1,6 @@
 package com.hunterexam.backend.service;
 
+import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.dto.PracticeResultRequest;
 import com.hunterexam.backend.entity.PracticeResult;
 import com.hunterexam.backend.entity.Subject;
@@ -49,15 +50,15 @@ public class PracticeResultService {
 
         // Find the logged-in user to associate the result with.
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         // Find the subject this practice session belongs to.
         Subject subject = subjectRepository.findById(request.getSubjectId())
-                .orElseThrow(() -> new RuntimeException("Subject not found"));
+                .orElseThrow(() -> new NotFoundException("Subject not found"));
 
         // Guard against division by zero when calculating the score below.
         if (request.getTotalQuestions() <= 0) {
-            throw new RuntimeException("Total Questions must be greater than zero");
+            throw new IllegalArgumentException("Total Questions must be greater than zero");
         }
 
         // Calculate the score as a percentage of correct answers.

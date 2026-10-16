@@ -1,5 +1,7 @@
 package com.hunterexam.backend.service;
 
+import com.hunterexam.backend.exception.ConflictException;
+import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.dto.ExamResultResponse;
 import com.hunterexam.backend.dto.ExamStartResponse;
 import com.hunterexam.backend.dto.ExamSubmitRequest;
@@ -295,7 +297,7 @@ class ExamServiceTests {
         when(examSessionRepository.findById(SESSION_ID)).thenReturn(Optional.empty());
         ExamSubmitRequest request = submission(List.of(1L), Map.of("1", "B"));
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NotFoundException.class,
                 () -> examService.submitExam(request, EMAIL));
 
         verifyNoInteractions(questionRepository);
@@ -348,7 +350,7 @@ class ExamServiceTests {
     void startExamWithFewerThan70QuestionsIsRejected() {
         when(questionRepository.findAll()).thenReturn(questionBank(69));
 
-        assertThrows(RuntimeException.class, () -> examService.startExam(EMAIL));
+        assertThrows(ConflictException.class, () -> examService.startExam(EMAIL));
 
         verifyNoInteractions(examSessionRepository);
     }

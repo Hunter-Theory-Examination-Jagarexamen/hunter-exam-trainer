@@ -1,13 +1,12 @@
 package com.hunterexam.backend.service;
 
+import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.dto.SubjectRequest;
 import com.hunterexam.backend.dto.SubjectResponse;
 import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -55,7 +54,7 @@ public class SubjectService  {
     // Retrieves a single subject by ID or throws a 404 if not found.
     public SubjectResponse findSubjectById(Long id) {
         Subject subject = subjectRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Subject not found with id: " + id));
+                .orElseThrow(() -> new NotFoundException("Subject not found with id: " + id));
 
         return mapToResponse(subject);
     }
@@ -74,7 +73,7 @@ public class SubjectService  {
     // Updates an existing subject category
     public SubjectResponse updateSubject(Long id, SubjectRequest request) {
         Subject subject = subjectRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Subject not found with id: " + id));
+                .orElseThrow(() -> new NotFoundException("Subject not found with id: " + id));
 
         //Update entity fields from request
         subject.setName(request.getName());
@@ -88,7 +87,7 @@ public class SubjectService  {
     // Deletes a subject category by ID
     public void deleteSubject(Long id) {
         if (!subjectRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Subject not found with id: " + id);
+            throw new NotFoundException("Subject not found with id: " + id);
         }
 
         // Delete entity from database

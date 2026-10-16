@@ -1,5 +1,6 @@
 package com.hunterexam.backend.service;
 
+import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.dto.DashboardResponse;
 import com.hunterexam.backend.dto.RecentActivityResponse;
 import com.hunterexam.backend.entity.ExamResult;
@@ -45,7 +46,7 @@ public class DashboardService {
 
         // Find the user using the email provided during login.
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         List<ExamResult> results = examResultRepository.findByUserOrderByCompletedAtDesc(user);
 
@@ -90,7 +91,7 @@ public class DashboardService {
 
         // Find the user using the email provided during login.
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         List<ExamResult> results = examResultRepository.findByUserOrderByCompletedAtDesc(user);
 

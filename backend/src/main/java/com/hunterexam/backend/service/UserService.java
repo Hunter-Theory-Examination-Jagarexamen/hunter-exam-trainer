@@ -1,5 +1,6 @@
 package com.hunterexam.backend.service;
 
+import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.dto.UserResponse;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.repository.UserRepository;
@@ -36,7 +37,7 @@ public class UserService {
     public UserResponse getUserInfo(String email) {
 
          User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new RuntimeException("Invalid email"));
+                () -> new NotFoundException("User not found"));
 
          return new UserResponse(
                  user.getId(),
@@ -61,12 +62,12 @@ public class UserService {
     public void changePassword(String email, String currentPassword, String newPassword) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
 
         // Verify the current password matches before allowing the change.
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
 
-            throw new RuntimeException("Current password is incorrect");
+            throw new IllegalArgumentException("Current password is incorrect");
         }
 
         // Hash the new password before storing it — never store plain text passwords.
