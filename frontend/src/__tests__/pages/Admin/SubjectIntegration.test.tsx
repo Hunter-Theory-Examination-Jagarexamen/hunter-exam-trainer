@@ -41,7 +41,7 @@ describe("Subject synchronization on navigation", () => {
             await userEvent.click(screen.getByRole("button", {name: "Save subject"}));
         }
         await screen.findByText(new RegExp(`Subject .* ${mode === "create" ? "created" : mode === "edit" ? "updated" : "deleted"}\\.`));
-        await userEvent.click(screen.getByRole("link", {name: "Admin"}));
+        await userEvent.click(screen.getByRole("link", {name: "Questions"}));
         await screen.findByRole("option", {name: `${mode === "delete" ? "Wildlife" : "New subject"} (0)`});
         if (mode !== "create") expect(screen.queryByRole("option", {name: "Safety (0)"})).not.toBeInTheDocument();
         await userEvent.click(screen.getByRole("button", {name: "Add question"}));

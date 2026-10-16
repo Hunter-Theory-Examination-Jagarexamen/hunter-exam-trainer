@@ -2,6 +2,10 @@
     --color-primary: #2F6B3C;
     --color-secondary: #6B8E23;
 
+    /* Sidebar section headers ("Dashboard", "Admin") */
+    --color-section-header: #1E4E79;
+    --color-section-header-active: #2E6DA4;
+
     --color-background: #F5F7F5;
     --color-surface: #FFFFFF;
 

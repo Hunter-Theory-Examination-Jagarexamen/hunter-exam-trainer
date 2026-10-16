@@ -8,6 +8,7 @@ import {
     User,
     ShieldCheck,
     Users,
+    ListChecks,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { UserRole, type User as CurrentUser } from "../../types/user";
@@ -30,10 +31,14 @@ const Sidebar = ({ user, isOpen, onClose }: SidebarProps) => {
 
     const sidebarClass = `sidebar${isOpen ? " open" : ""}`;
 
+    // Section headers ("Dashboard", "Admin") get their own class, plus "active" on their own page.
+    const headerClass = ({ isActive }: { isActive: boolean }) =>
+        `sidebar-section-header${isActive ? " active" : ""}`;
+
     return (
         <aside className={sidebarClass}>
             <nav className="sidebar-nav">
-                <NavLink to="/dashboard" onClick={onClose}>
+                <NavLink to="/dashboard" onClick={onClose} className={headerClass}>
                     <LayoutDashboard size={20} />
                     Dashboard
                 </NavLink>
@@ -70,23 +75,30 @@ const Sidebar = ({ user, isOpen, onClose }: SidebarProps) => {
 
                 {user?.role === UserRole.ADMIN && (
                     <>
-                        <NavLink to="/admin/questions" onClick={onClose}>
+                        {/* "end": only active on /admin itself, not on /admin/questions etc. */}
+                        <NavLink to="/admin" end onClick={onClose} className={headerClass}>
                             <ShieldCheck size={20} />
                             Admin
                         </NavLink>
 
-                        <NavLink to="/admin/learners" onClick={onClose}>
-                            <Users size={20} />
-                            Learner Progress
+                        <NavLink to="/admin/questions" onClick={onClose}>
+                            <ListChecks size={20} />
+                            Questions
                         </NavLink>
+
                         <NavLink to="/admin/subjects" onClick={onClose}>
                             <BookOpen size={20} />
-                            Manage Subjects
+                            Subjects
+                        </NavLink>
+
+                        <NavLink to="/admin/learners" onClick={onClose}>
+                            <Users size={20} />
+                            Learners
                         </NavLink>
                     </>
                 )}
 
-                <button type="button" onClick={handleLogout}>
+                <button type="button" className="sidebar-logout" onClick={handleLogout}>
                     <LogOut size={20} />
                     Logout
                 </button>
