@@ -39,6 +39,23 @@
     font-weight: 600;
 }
 
+/* Section headers: "Dashboard" (everyone) and "Admin" (admins only) */
+.sidebar-nav a.sidebar-section-header {
+    background: var(--color-section-header);
+    font-weight: 600;
+}
+
+.sidebar-nav a.sidebar-section-header:hover,
+.sidebar-nav a.sidebar-section-header.active {
+    background: var(--color-section-header-active);
+}
+
+/* Logout: separated from the links above */
+.sidebar-nav button.sidebar-logout {
+    margin-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
 /* =========================
    Mobile: Burger Menu
    ========================= */
