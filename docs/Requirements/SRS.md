@@ -273,15 +273,17 @@ The system shall provide each user with a personal profile containing account in
 The system shall provide an administration interface that enables instructors to manage the application content and monitor learner performance.
 
 | ID     | Requirement                                                                      | Priority |
-|--------|----------------------------------------------------------------------------------|----------|
-| FR-034 | The system shall provide a secure administrator login.                           | High     |
-| FR-035 | The system shall allow administrators to add new questions.                      | High     |
-| FR-036 | The system shall allow administrators to edit existing questions.                | High     |
-| FR-037 | The system shall allow administrators to delete questions.                       | High     |
-| FR-038 | The system shall allow administrators to assign questions to subject categories. | High     |
-| FR-039 | The system shall allow administrators to search and filter questions.            | Medium   |
-| FR-040 | The system shall display learner performance statistics.                         | Medium   |
-| FR-041 | The system shall display the number of registered users.                         | Low      |
+|--------|----------------------------------------------------------------------------------|---------|
+| FR-034 | The system shall provide a secure administrator login.                           | High    |
+| FR-035 | The system shall allow administrators to add new questions.                      | High    |
+| FR-036 | The system shall allow administrators to edit existing questions.                | High    |
+| FR-037 | The system shall allow administrators to delete questions.                       | High    |
+| FR-038 | The system shall allow administrators to assign questions to subject categories. | High    |
+| FR-039 | The system shall allow administrators to search and filter questions.            | Medium  |
+| FR-040 | The system shall display learner performance statistics.                         | Medium  |
+| FR-041 | The system shall display the number of registered users.                         | Low     |
+| FR-048 | The system shall allow administrators to view each learner's progress across subjects. | Medium  |
+
 
 ## 3.8 General System Functions
 
@@ -650,6 +652,7 @@ The Hunter Exam Trainer shall be considered complete when all mandatory function
 | AC-018 | Error messages are clear and understandable.                     |        |
 | AC-019 | The application performs without major bugs during user testing. |        |
 | AC-020 | All mandatory project documentation has been completed.          |        |
+| AC-021 | Administrators can view each learner's progress across subjects. | |
 
 ## 6.5 Documentation Deliverables
 

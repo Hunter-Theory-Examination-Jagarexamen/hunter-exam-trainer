@@ -7,16 +7,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.util.Base64;
 import java.util.Date;
 
 @Service
 public class JwtService {
 
+    /** How long a token is valid: 1 hour. */
+    private static final long TOKEN_LIFETIME_MILLIS = 1000L * 60 * 60;
+
     @Value("${jwt.secret}")
     private String secret;
-
-    //private final long expirationTime = 1000 * 60 * 60;
 
     public String generateToken(String email, String role) {
 
@@ -24,14 +24,11 @@ public class JwtService {
                 Decoders.BASE64.decode(secret)
         );
 
-        // 1 hour
-        long expirationTime = 1000 * 60 * 60;
-
         return Jwts.builder()
                 .subject(email)
                 .claim("role", role)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expirationTime))
+                .expiration(new Date(System.currentTimeMillis() + TOKEN_LIFETIME_MILLIS))
                 .signWith(key, Jwts.SIG.HS256)
                 .compact();
     }

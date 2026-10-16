@@ -5,11 +5,14 @@ import {
     ClipboardCheck,
     ChartColumnIncreasing,
     LogOut,
-    User
+    User,
+    ShieldCheck,
+    Users,
 } from "lucide-react";
 import {NavLink, useLocation, useNavigate} from "react-router-dom";
+import {UserRole, type User as CurrentUser} from "../../types/user";
 
-const Sidebar = () => {
+const Sidebar = ({ user }: { user: CurrentUser | null }) => {
 
     const location = useLocation();
     const navigate = useNavigate();
@@ -57,6 +60,20 @@ const Sidebar = () => {
                     <User size={20} />
                     Profile
                 </NavLink>
+
+                {user?.role === UserRole.ADMIN && (
+                    <>
+                        <NavLink to="/admin/questions">
+                            <ShieldCheck size={20} />
+                            Admin
+                        </NavLink>
+
+                        <NavLink to="/admin/learners">
+                            <Users size={20} />
+                            Learner Progress
+                        </NavLink>
+                    </>
+                )}
 
                 <button
                     type="button"

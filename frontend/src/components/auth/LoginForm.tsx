@@ -5,7 +5,6 @@ import logo from "../../assets/images/logo.svg";
 import "../../styles/auth.css";
 import {
     checkGoogleLoginEnabled,
-    loginAsGuest,
     loginUser
 } from "../../services/authService.ts";
 
@@ -18,7 +17,6 @@ const LoginForm = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [isGuestLoading, setIsGuestLoading] = useState(false);
     const [googleEnabled, setGoogleEnabled] = useState(false);
 
     useEffect(() => {
@@ -54,31 +52,13 @@ const LoginForm = () => {
 
     };
 
-    const handleGuestLogin = async () => {
-
-        try {
-            setIsGuestLoading(true);
-
-            const response = await loginAsGuest();
-
-            localStorage.setItem("token", response.token);
-
-            navigate("/dashboard");
-
-        } catch (error) {
-            console.error("Guest login error:", error);
-            alert("Unable to start a guest session. Please try again.");
-        } finally {
-            setIsGuestLoading(false);
-        }
-    };
 
     const handleGoogleLogin = () => {
 
         if (!googleEnabled) {
             alert(
                 "Google sign-in is not configured yet. " +
-                "Use your email or continue as a guest."
+                "Use your email and password."
             );
             return;
         }
@@ -159,7 +139,7 @@ const LoginForm = () => {
                 <button
                     type="submit"
                     className="auth-primary-button"
-                    disabled={isLoading || isGuestLoading}
+                    disabled={isLoading}
                 >
                     {isLoading ? "Logging in..." : "Log In"}
                 </button>
@@ -176,14 +156,6 @@ const LoginForm = () => {
                     onClick={handleGoogleLogin}
                 >
                     Continue with Google
-                </button>
-                <button
-                    type="button"
-                    className="auth-secondary-button"
-                    onClick={handleGuestLogin}
-                    disabled={isGuestLoading}
-                >
-                    {isGuestLoading ? "Starting guest session..." : "Continue with Guest"}
                 </button>
             </div>
 

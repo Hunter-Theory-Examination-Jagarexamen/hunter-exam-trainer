@@ -84,7 +84,8 @@ public class ExamService {
                         question.getOptionA(),
                         question.getOptionB(),
                         question.getOptionC(),
-                        question.getOptionD()
+                        question.getOptionD(),
+                        question.getImageUrl()
                 ))
                 .toList();
 

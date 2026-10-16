@@ -116,6 +116,6 @@ Image-based questions require additional support in the database and user interf
 
 **Answer**
 
-_To be discussed._
+Yes (confirmed by Klas, 2026-09-30).
 
 ---

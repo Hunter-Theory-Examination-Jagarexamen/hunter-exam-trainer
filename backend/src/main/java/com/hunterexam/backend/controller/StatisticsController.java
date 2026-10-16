@@ -7,6 +7,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.hunterexam.backend.dto.ProgressOverTimeResponse;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -46,5 +48,29 @@ public class StatisticsController {
                 statisticsService.getSubjectPerformance(email);
 
         return ResponseEntity.ok(responses);
+    }
+
+    /**
+     * Returns the authenticated user's practice accuracy grouped by week,
+     * for the last {@code weeks} weeks (default 8).
+     *
+     * @param authentication authentication info from Spring Security
+     * @param weeks          number of weeks to look back (1–52)
+     * @return weekly progress data, oldest first
+     */
+    @GetMapping("/progress")
+    public ResponseEntity<List<ProgressOverTimeResponse>> getProgressOverTime(
+            Authentication authentication,
+            @RequestParam(defaultValue = "8") int weeks) {
+
+        // Guard against invalid values
+        int safeWeeks = Math.max(1, Math.min(weeks, 52));
+
+        return ResponseEntity.ok(
+                statisticsService.getProgressOverTime(
+                        authentication.getName(),
+                        safeWeeks
+                )
+        );
     }
 }

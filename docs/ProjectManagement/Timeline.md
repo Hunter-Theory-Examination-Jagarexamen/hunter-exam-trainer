@@ -7,7 +7,7 @@ The project runs in two 12-week periods: weeks 1–12 were the previous team's, 
 | Week | Calendar week | Phase | Deliverables | Status |
 |------|---------------|-------|--------------|--------|
 | 13 | 38 | Transition & Onboarding | Handover from the previous team, local setup verified (#7), workflow agreed (branches and PRs, DevLog, Project board) | Done |
-| 14 | 39 | Database & PWA | PostgreSQL migration (#43, #51), installable PWA (#26), exam time limit (#35), decisions on hosting and authentication; Google login, password recovery, guest login and mobile layout (needs review) | In Progress |
+| 14 | 39 | Database & PWA | PostgreSQL migration (#43, #51), installable PWA (#26), exam time limit (#35), decisions on hosting and authentication; Google login, password recovery and mobile layout (needs review) | In Progress |
 | 15 | 40 | Exam Fixes & Test Hosting | Working mock exam (#49), error handling (#44), test deployment online, app install tested on a phone (#47), authentication work reviewed and merged into `develop` | Planned |
 | 16 | 41 | Authentication Extensions | App registered in Google Cloud Console so Google login works for real, email service connected so password recovery sends real emails | Planned |
 | 17–18 | 42–43 | Statistics & Progress | Performance dashboard, quiz history, subject-wise accuracy, and progress visualization | Planned |

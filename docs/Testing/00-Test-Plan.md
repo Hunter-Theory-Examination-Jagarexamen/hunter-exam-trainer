@@ -15,7 +15,7 @@ Out of scope: load and security testing beyond basic checks, and native app-stor
 | Level | What | How |
 |-------|------|-----|
 | Automated, backend | Services and API endpoints | JUnit and Spring Boot Test, run with `./mvnw test` |
-| Automated, frontend | The code builds and follows the lint rules | `npm run build` and `npm run lint` |
+| Automated, frontend | The code builds, follows the lint rules, and key components and flows behave correctly | `npm run build`, `npm run lint` and `npx vitest run` (Vitest + React Testing Library, tests in `frontend/src/__tests__/`) |
 | Manual, per PR | The changed feature works in the browser, including error cases | The author runs the full stack locally and writes "How I tested" in the PR |
 | User testing | Real users try the app and give feedback | Weeks 19–20, see below |
 
@@ -64,5 +64,5 @@ What do we do with the result?
 
 ## Current state and known gaps
 
-- Automated tests are minimal: the backend only has the default test that checks the application starts, and the frontend has no test runner.
+- Automated tests: the backend has unit tests for services and web-layer tests for security rules (`backend/src/test/java`); the frontend has unit and component tests (`frontend/src/__tests__/`). The test code itself is the list of what is covered; the test logs in this folder record each round of added tests and their results. No end-to-end tests yet, and the tests are not yet run automatically on pull requests.
 - The question bank has 100 questions; the project plan's goal is 150–200 reviewed questions.
