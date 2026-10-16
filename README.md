@@ -498,6 +498,24 @@ Logging out removes the JWT token from local storage and redirects the user to t
 
 ## Main API Endpoints
 
+### Error responses
+
+Errors return a JSON body `{"message": "..."}`. The status code depends on the
+kind of error, never on the message text (`GlobalExceptionHandler`):
+
+| Status | When | Thrown as |
+|--------|------|-----------|
+| 400 | Invalid input or request body | `IllegalArgumentException`, `@Valid` failures |
+| 401 | Not logged in, or wrong email/password | `BadCredentialsException` |
+| 403 | Logged in but not allowed (e.g. a student calling an admin endpoint) | `AccessDeniedException` |
+| 404 | The user, subject, question or exam session does not exist | `NotFoundException` |
+| 409 | Clashes with existing data (e.g. email already registered, too few questions for a mock exam) | `ConflictException` |
+| 500 | Unexpected error | anything else |
+
+A 500 response never contains internal details. Its message includes a short generated
+code (e.g. `7F3A2C`) that is also written to the backend log with the full error,
+so a reported code can be looked up there.
+
 ### Authentication
 
 | Method | Endpoint             | Description            |
