@@ -9,8 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+import com.hunterexam.backend.exception.NotFoundException;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -55,18 +54,15 @@ class QuestionServiceTests {
     void rejectsAnswerOutsideOptionsAndUnknownSubject() {
         var service = new QuestionService(questions, subjects);
         assertThrows(IllegalArgumentException.class, () -> service.create(request("A")));
-        assertEquals(HttpStatus.NOT_FOUND, assertThrows(ResponseStatusException.class,
-                () -> service.create(request("One"))).getStatusCode());
+        assertThrows(NotFoundException.class, () -> service.create(request("One")));
         verify(questions, never()).save(any());
     }
 
     @Test
     void updateAndDeleteReturnNotFoundForMissingQuestion() {
         var service = new QuestionService(questions, subjects);
-        assertEquals(HttpStatus.NOT_FOUND, assertThrows(ResponseStatusException.class,
-                () -> service.update(7L, request("One"))).getStatusCode());
-        assertEquals(HttpStatus.NOT_FOUND, assertThrows(ResponseStatusException.class,
-                () -> service.delete(7L)).getStatusCode());
+        assertThrows(NotFoundException.class, () -> service.update(7L, request("One")));
+        assertThrows(NotFoundException.class, () -> service.delete(7L));
         verify(questions, never()).delete(any());
     }
 

@@ -1,13 +1,12 @@
 package com.hunterexam.backend.service;
 
+import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.entity.Question;
 import com.hunterexam.backend.dto.QuestionRequest;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -49,7 +48,7 @@ public class QuestionService {
 
     private Question findQuestion(Long id) {
         return questionRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Question not found"));
+                .orElseThrow(() -> new NotFoundException("Question not found"));
     }
 
     private void applyRequest(Question question, QuestionRequest request) {
@@ -58,7 +57,7 @@ public class QuestionService {
             throw new IllegalArgumentException("Correct answer must match one of the option texts");
         }
         var subject = subjectRepository.findById(request.subjectId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Subject not found"));
+                .orElseThrow(() -> new NotFoundException("Subject not found"));
         question.setQuestionText(request.questionText());
         question.setOptionA(request.optionA());
         question.setOptionB(request.optionB());
@@ -81,7 +80,7 @@ public class QuestionService {
 
         // Subject id must be provided to know which questions to return.
         if(subjectId == null) {
-            throw new RuntimeException("Subject id is required.");
+            throw new IllegalArgumentException("Subject id is required.");
         }
 
         return questionRepository.findBySubjectId(subjectId);
