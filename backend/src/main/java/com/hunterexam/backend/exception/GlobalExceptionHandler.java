@@ -2,6 +2,7 @@ package com.hunterexam.backend.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -70,6 +71,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<Map<String, String>> handleConflict(ConflictException ex) {
         return error(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    // 409: the database refused the change, e.g. a duplicate unique value or deleting
+    // a row that other rows still point to. The database text (table and constraint
+    // names) goes to the log only.
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, String>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        log.warn("Database refused a change: {}", ex.getMostSpecificCause().getMessage());
+        return error(HttpStatus.CONFLICT, "This change conflicts with existing data");
     }
 
     // Everything else

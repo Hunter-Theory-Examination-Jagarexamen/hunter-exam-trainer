@@ -509,7 +509,7 @@ kind of error, never on the message text (`GlobalExceptionHandler`):
 | 401 | Not logged in, or wrong email/password | `BadCredentialsException` |
 | 403 | Logged in but not allowed (e.g. a student calling an admin endpoint) | `AccessDeniedException` |
 | 404 | The user, subject, question or exam session does not exist | `NotFoundException` |
-| 409 | Clashes with existing data (e.g. email already registered, too few questions for a mock exam) | `ConflictException` |
+| 409 | Clashes with existing data (e.g. email already registered, too few questions for a mock exam), or the database refused the change (e.g. duplicate subject name, deleting a subject in use) | `ConflictException`, `DataIntegrityViolationException` |
 | 500 | Unexpected error | anything else |
 
 A 500 response never contains internal details. Its message includes a short generated

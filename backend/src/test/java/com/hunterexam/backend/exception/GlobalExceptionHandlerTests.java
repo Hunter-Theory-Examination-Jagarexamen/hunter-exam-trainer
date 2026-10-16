@@ -1,6 +1,7 @@
 package com.hunterexam.backend.exception;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -58,6 +59,14 @@ class GlobalExceptionHandlerTests {
                 handler.handleConflict(new ConflictException("Email is already registered"));
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
         assertEquals("Email is already registered", response.getBody().get("message"));
+    }
+
+    @Test
+    void databaseRefusalIs409WithoutDatabaseDetails() {
+        ResponseEntity<Map<String, String>> response = handler.handleDataIntegrity(
+                new DataIntegrityViolationException("duplicate key value violates unique constraint \"uk_subject_name\""));
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+        assertEquals("This change conflicts with existing data", response.getBody().get("message"));
     }
 
     @Test
