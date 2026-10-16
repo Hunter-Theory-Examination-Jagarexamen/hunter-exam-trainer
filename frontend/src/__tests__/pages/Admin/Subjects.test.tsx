@@ -5,6 +5,9 @@ import Subjects from "../../../pages/Admin/Subjects";
 import apiClient from "../../../api/apiClient";
 
 vi.mock("../../../api/apiClient", () => ({default: vi.fn()}));
+
+// What apiClient throws for an HTTP error: an Error with the response body as message, plus the status.
+const httpError = (status: number, body: string) => Object.assign(new Error(body), {status});
 const subject = {id: 1, name: "Safety", description: "Safe hunting", questionCount: 0};
 const mutations = () => vi.mocked(apiClient).mock.calls.filter(([, options]) => options?.method);
 beforeEach(() => { vi.resetAllMocks(); vi.mocked(apiClient).mockResolvedValue([subject]); });
@@ -73,20 +76,23 @@ describe("Subject management", () => {
         expect(screen.queryByRole("heading", {name: "Safety"})).not.toBeInTheDocument();
         expect(screen.getByRole("status")).toHaveTextContent("updated");
     });
-    it.each(["create", "edit"] as const)("translates real duplicate-key failures on %s and preserves inputs", async mode => {
+    it.each(["create", "edit"] as const)("translates a 409 duplicate name on %s and preserves inputs", async mode => {
         await open(mode); fill();
-        vi.mocked(apiClient).mockRejectedValueOnce(new Error(JSON.stringify({message: "could not execute statement [Duplicate entry 'Wildlife' for key 'subject.UK_abc'] [insert into subject]"})));
+        vi.mocked(apiClient).mockRejectedValueOnce(httpError(409, '{"message":"This change conflicts with existing data"}'));
         await userEvent.click(screen.getByRole("button", {name: "Save subject"}));
         expect(await screen.findByRole("alert")).toHaveTextContent("A subject with this name already exists. Choose a different name.");
         expect(screen.getByLabelText("Name (required)")).toHaveValue("Wildlife");
-        expect(screen.getByRole("alert")).not.toHaveTextContent("UK_abc");
     });
-    it.each([['{"message":"404 NOT_FOUND Subject not found with id: 1"}', "This subject no longer exists"],
-        ['{"message":"400 BAD_REQUEST Subject not found with id: 1"}', "This subject no longer exists"],
-        ["API request failed: 403", "You do not have permission"], ["Failed to fetch", "Please try again"],
-        ['{"message":"Description is required"}', "Enter a subject description"]])("handles update failure %s", async (error, message) => {
+    it.each([
+        ["404", httpError(404, '{"message":"Subject not found with id: 1"}'), "This subject no longer exists"],
+        ["403", httpError(403, "API request failed: 403"), "You do not have permission"],
+        ["network failure", new Error("Failed to fetch"), "Please try again"],
+        ["400 required", httpError(400, '{"message":"Description is required"}'), "Enter a subject description"],
+        ["400 too long", httpError(400, '{"message":"Name must be at most 255 characters"}'), "Name must be at most 255 characters"],
+        ["500 with code", httpError(500, '{"message":"An unexpected error occurred and has been logged as code 7F3A2C. Please try again."}'), "code 7F3A2C"],
+    ])("handles update failure: %s", async (_label, error, message) => {
         await open("edit"); fill();
-        vi.mocked(apiClient).mockRejectedValueOnce(new Error(error));
+        vi.mocked(apiClient).mockRejectedValueOnce(error);
         await userEvent.click(screen.getByRole("button", {name: "Save subject"}));
         expect(await screen.findByRole("alert")).toHaveTextContent(message);
         expect(screen.getByLabelText("Name (required)")).toHaveValue("Wildlife");
@@ -109,12 +115,11 @@ describe("Subject management", () => {
         expect(screen.queryByRole("heading", {name: "Safety"})).not.toBeInTheDocument();
         expect(screen.getByRole("button", {name: "Create subject"})).toHaveFocus();
     });
-    it.each(["questions", "practice_result"])("preserves subjects on %s foreign-key failures and hides technical details", async table => {
+    it("preserves the subject when deletion is refused with 409 (subject in use)", async () => {
         await open("delete");
-        vi.mocked(apiClient).mockRejectedValueOnce(new Error(JSON.stringify({message: `could not execute statement [Cannot delete or update a parent row: a foreign key constraint fails (${table}, CONSTRAINT FK_secret)] [delete from subject where id=?]`})));
+        vi.mocked(apiClient).mockRejectedValueOnce(httpError(409, '{"message":"This change conflicts with existing data"}'));
         await userEvent.click(screen.getByRole("button", {name: "Confirm deletion"}));
         expect(await screen.findByRole("alert")).toHaveTextContent("in use by questions or practice results");
-        expect(screen.getByRole("alert")).not.toHaveTextContent("FK_secret");
         expect(screen.getByRole("heading", {name: "Safety"})).toBeInTheDocument();
         expect(screen.queryByRole("status")).not.toBeInTheDocument();
     });
