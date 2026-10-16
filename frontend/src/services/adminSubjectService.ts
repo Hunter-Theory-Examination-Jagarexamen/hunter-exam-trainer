@@ -1,4 +1,5 @@
 import apiClient from "../api/apiClient";
+import {backendMessage, errorStatus} from "./apiErrors";
 import type {Subject} from "../types/subject";
 
 export interface SubjectRequest {
@@ -19,15 +20,12 @@ export const deleteSubject = async (id: number): Promise<void> => {
 // not from the wording of the backend's message.
 export function subjectError(error: unknown, operation: "load" | "save" | "delete"): string {
     const fallback = "The request failed. Please try again. If it persists, contact an administrator.";
-    // apiClient throws an ApiError with the HTTP status. Checking for a "status" field
-    // (instead of instanceof) also works in tests that mock apiClient.
-    const status = error instanceof Error && "status" in error && typeof error.status === "number"
-        ? error.status : undefined;
+    const status = errorStatus(error);
     if (status === undefined) {
         // No HTTP response at all, e.g. the network is down.
         return operation === "load" ? "Failed to load subjects. Please try again." : fallback;
     }
-    const message = backendMessage((error as Error).message);
+    const message = backendMessage(error);
 
     switch (status) {
         case 401:
@@ -50,13 +48,3 @@ export function subjectError(error: unknown, operation: "load" | "save" | "delet
     return operation === "load" ? "Failed to load subjects. Please try again." : fallback;
 }
 
-// The backend sends {"message": "..."}; the client passes the raw body on as the error text.
-function backendMessage(text: string): string | undefined {
-    try {
-        const body: unknown = JSON.parse(text);
-        if (typeof body === "object" && body !== null && "message" in body && typeof body.message === "string") {
-            return body.message;
-        }
-    } catch { /* Not JSON, e.g. an empty body. */ }
-    return undefined;
-}

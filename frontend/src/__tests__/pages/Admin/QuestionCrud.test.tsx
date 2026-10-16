@@ -224,11 +224,15 @@ describe("Admin question CRUD", () => {
         expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     });
 
-    it.each([['{"message":"404 NOT_FOUND \\"Question not found\\""}', "This question no longer exists."],
-        ['API request failed: 403', "You do not have permission to manage questions."],
-        ['{"message":"Subject not found"}', "This subject no longer exists."]])("handles existing backend error %s", async (error, message) => {
+    it.each([
+        ["404", 404, '{"message":"Question not found"}', "This question or its subject no longer exists."],
+        ["403", 403, "API request failed: 403", "You do not have permission to manage questions."],
+        ["400", 400, '{"message":"Correct answer must match one of the option texts"}', "Correct answer must match one of the option texts"],
+        ["500 with code", 500, '{"message":"An unexpected error occurred and has been logged as code 7F3A2C. Please try again."}', "code 7F3A2C"],
+    ])("handles backend error %s", async (_label, status, body, message) => {
         await open("edit");
-        vi.mocked(apiClient).mockRejectedValueOnce(new Error(error));
+        // What apiClient throws for an HTTP error: the response body as message, plus the status.
+        vi.mocked(apiClient).mockRejectedValueOnce(Object.assign(new Error(body), {status}));
         await userEvent.click(screen.getByRole("button", {name: "Save question"}));
         expect(await screen.findByRole("alert")).toHaveTextContent(message);
         expect(screen.getByLabelText("Question text (required)")).toHaveValue(question.questionText);
