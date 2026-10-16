@@ -21,6 +21,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
@@ -53,6 +54,20 @@ class SubjectControllerSecurityTests {
                             .content(BODY))
                     .andExpect(status().isForbidden());
         }
+
+        verifyNoInteractions(service);
+    }
+
+    @Test
+    void tooLongNameIsRejectedBeforeCallingService() throws Exception {
+        var admin = jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        String body = "{\"name\":\"" + "a".repeat(256) + "\",\"description\":\"Test description\"}";
+
+        mvc.perform(post("/api/subjects").with(admin)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Name must be at most 255 characters"));
 
         verifyNoInteractions(service);
     }
