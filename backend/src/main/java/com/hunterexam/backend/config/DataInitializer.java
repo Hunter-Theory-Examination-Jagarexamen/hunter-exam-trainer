@@ -43,10 +43,10 @@ public class DataInitializer implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
     private final ObjectMapper objectMapper;
 
-    @Value("${app.admin.email}")
+    @Value("${app.admin.email:}")
     private String adminEmail;
 
-    @Value("${app.admin.password}")
+    @Value("${app.admin.password:}")
     private String adminPassword;
 
     public DataInitializer(
@@ -132,17 +132,34 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         // Seed a single admin user on first startup.
-        if (userRepository.findByEmail(adminEmail).isEmpty()) {
+        if (adminEmail == null || adminEmail.isBlank() || adminPassword.isBlank()) {
+            log.warn("Admin environment variables (app.admin.email / app.admin.password) are missing. Skipping admin user creation/update.");
+        } else {
+            List<User> admins = userRepository.findAll().stream()
+                    .filter(u -> u.getRole() == Role.ADMIN)
+                    .toList();
 
-            User admin = new User();
-            admin.setFullName("Admin");
-            admin.setEmail(adminEmail);
-            admin.setPassword(passwordEncoder.encode(adminPassword));
-            admin.setRole(Role.ADMIN);
-            admin.setCreatedAt(LocalDateTime.now());
+            if (admins.isEmpty()) {
+                User admin = new User();
+                admin.setFullName("Admin");
+                admin.setEmail(adminEmail);
+                admin.setPassword(passwordEncoder.encode(adminPassword));
+                admin.setRole(Role.ADMIN);
+                admin.setCreatedAt(LocalDateTime.now());
 
-            userRepository.save(admin);
-            log.info("Admin user created: {}", adminEmail);
+                userRepository.save(admin);
+                log.info("Admin user created: {}", adminEmail);
+            } else {
+                User admin = admins.get(0);
+                if (!admin.getEmail().equals(adminEmail)) {
+                    admin.setEmail(adminEmail);
+                    userRepository.save(admin);
+                    log.info("Existing admin user updated with new email: {}", adminEmail);
+                }
+            }
+
         }
+
+
     }
 }
