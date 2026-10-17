@@ -109,7 +109,23 @@ The schedule is divided into four phases. It is deliberately laid out so that a 
 
 Below is a general sketch of the main parts of the system and how they work together. More detailed technical documentation is produced during the preliminary study phase (weeks 1–2).
 
-![System sketch](media/media/image1.png)
+```mermaid
+flowchart TB
+    USER["<b>USER</b><br/>Prospective hunters practising for the theory test - mobile or computer"]
+    CLIENT["<b>CLIENT (Frontend / PWA)</b><br/>Web app + mobile adapted (React/Next.js, installable as an app)<br/>Views: Quiz, Practise mode, Test simulation, Statistic, Profile"]
+    BACKEND["<b>BACKEND / API (REST)</b><br/>Node.js/Express (or equivalent) - business logic & authentication<br/>Random questions, correct answer, calculates results & progression<br/>Endpoints: /quiz /results /users /questions"]
+    AUTH["<b>AUTHENTICATION</b><br/>Login/account<br/>(email + password or Bank ID)"]
+    DB[("<b>DATABASE</b><br/>PostgreSQL / Supabase / Firebase<br/>Tables: Questions & answer options (categorized according to the exam's 11 subject areas), User, Test results, Response history, Progress statistics")]
+    ADMIN["<b>ADMIN - INTERFACE</b><br/>For course leader/content manager: add, edit and categorize questions and follow the group's result"]
+
+    USER <-->|"User Interface (HTTPS)"| CLIENT
+    CLIENT <-->|"JSON/REST calls (JWT authentication)"| BACKEND
+    BACKEND <-->|"Stores / retrieves data (SQL / ORM)"| DB
+    BACKEND -->|"Handles question bank & sees statistics"| ADMIN
+    AUTH ~~~ BACKEND
+```
+
+*Communication takes place via HTTPS/JSON. Frontend is built as a Progressive Web App (PWA) - the same code base works in a browser on a computer and can be installed as an app on a mobile/tablet.*
 
 **This is how the system works in brief**
 
