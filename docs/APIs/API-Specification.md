@@ -60,6 +60,13 @@ Response:
 
 - `POST /api/exam/start` links the exam session to the logged-in user. The server records which questions were issued for that session.
 - `POST /api/exam/submit` ignores the `questionIds` field in the request body. The server scores against the questions it issued at `/start`. Only the session's owner may submit; other users receive `403 Forbidden`.
+
+**Note:** `GET /api/admin/learners` returns one entry per learner with:
+- `subjectPerformances` — practice results per subject
+- `mockExams` — mock exam summary (count, latest/best score, latest pass/fail)
+- `lastActivityAt` — latest activity across practice AND mock exams
+
+The `mockExams` field is a separate object so it can be filtered out per student in a future sharing feature (#125).
 ## Roles
 
 Users have a role: `STUDENT` (default for new registrations) or `ADMIN` (#29). Endpoints under `/api/admin/**` require `ADMIN`.

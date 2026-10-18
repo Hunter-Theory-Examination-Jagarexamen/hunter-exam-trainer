@@ -49,20 +49,41 @@ const LearnerProgress = () => {
                 !error &&
                 learners.length > 0 &&
                 learners.map((learner) => (
-                    <section
-                        key={learner.userId}
-                        className="dashboard-section statistics-card"
-                    >
+                    <section key={learner.userId} className="dashboard-section statistics-card">
                         <h2>{learner.fullName}</h2>
                         <p className="learner-email">{learner.email}</p>
 
                         <p>
-                            <strong>Last practiced:</strong>{" "}
-                            {learner.lastPracticedAt
-                                ? new Date(learner.lastPracticedAt).toLocaleDateString("sv-SE")
+                            <strong>Last activity:</strong>{" "}
+                            {learner.lastActivityAt
+                                ? new Date(learner.lastActivityAt).toLocaleDateString("sv-SE")
                                 : "Never"}
                         </p>
 
+                        {/* Mock exam summary */}
+                        <div className="mock-exam-summary">
+                            {learner.mockExams.count === 0 ? (
+                                <p className="mock-exam-empty">No mock exams yet.</p>
+                            ) : (
+                                <>
+                                    <p className="mock-exam-line">
+                                        <strong>Mock exams:</strong> {learner.mockExams.count} taken
+                                    </p>
+                                    <p className="mock-exam-line">
+                                        <strong>Latest:</strong> {learner.mockExams.latestScore}%{" "}
+                                        ({new Date(learner.mockExams.latestAt!).toLocaleDateString("sv-SE")})
+                                        {learner.mockExams.latestPassed
+                                            ? <span className="mock-exam-pass"> · Passed</span>
+                                            : <span className="mock-exam-fail"> · Not passed</span>}
+                                    </p>
+                                    <p className="mock-exam-line">
+                                        <strong>Best:</strong> {learner.mockExams.bestScore}%
+                                    </p>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Practice subjects */}
                         {learner.subjectPerformances.length === 0 ? (
                             <p>No practice results yet.</p>
                         ) : (
