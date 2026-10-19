@@ -75,7 +75,11 @@ describe("Exam page", () => {
         await userEvent.click(await screen.findByRole("radio", { name: "B1" }));
         await userEvent.click(screen.getByRole("button", { name: "Next" }));
         await userEvent.click(screen.getByRole("radio", { name: "C2" }));
+
         await userEvent.click(screen.getByRole("button", { name: "Submit Exam" }));
+
+        const confirmButtons = await screen.findAllByRole("button", {name: "Submit Exam" });
+        await userEvent.click(confirmButtons[confirmButtons.length - 1]);
 
         // Assert: the result page shows
         expect(await screen.findByText("Result page")).toBeInTheDocument();
