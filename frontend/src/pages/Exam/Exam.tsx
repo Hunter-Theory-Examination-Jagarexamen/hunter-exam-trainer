@@ -199,30 +199,31 @@ const Exam = () => {
             />
 
             {showConfirmModal && (
-                <div className="modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center p-4">
-                    <div className="modal-content bg-white p-6 rounded-lg max-w-md w-full shadow-lg text-center">
-                        <h3 className="text-xl font-bold mb-3">Submit Exam?</h3>
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                    <div className="question-card text-center max-w-md w-full">                        <h3 className="text-xl font-bold mb-3 text-[var(--color-text)]">Submit Exam?</h3>
                         {unansweredCount > 0 ? (
-                            <p className="text-gray-600 mb-6">
+                            <p className="text-[var(--color-text)] opacity-80 mb-6">
                                 You have <strong>{unansweredCount}</strong> unanswered question{unansweredCount > 1 ? "s" : ""}. Are you sure you want to submit?
                             </p>
                         ) : (
-                            <p className="text-gray-600 mb-6">
+                            <p className="text-[var(--color-text)] opacity-80 mb-6">
                                 You have answered all questions. Are you sure you want to submit?
                             </p>
                         )}
-                        <div className="flex justify-center space-x-4">
+                        <div className="flex justify-center">
                             <button
                                 onClick={handleCancelSubmit}
-                                className="btn-secondary px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-                                >
-                                    Go back
+                                className="previous-button"
+                                style={{ borderRadius: "8px", padding: "0.5rem 1rem", fontSize: "0.9rem", fontWeight: 600, marginRight: "12px" }}
+                            >
+                                Go back
                             </button>
                             <button
                                 onClick={handleConfirmSubmit}
-                                className="btn-primary px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                                >
-                                    Submit Exam
+                                className="next-button"
+                                style={{ borderRadius: "8px", padding: "0.5rem 1rem", fontSize: "0.9rem", fontWeight: 600 }}
+                            >
+                                Submit Exam
                             </button>
                         </div>
                     </div>
