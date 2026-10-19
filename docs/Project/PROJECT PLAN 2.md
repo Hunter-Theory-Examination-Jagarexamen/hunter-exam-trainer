@@ -34,11 +34,11 @@ The purpose of this project is to develop a digital practice app where participa
 
 **2.2 Delimitations (out of scope for MVP)**
 
-  - Built-in payment function or course booking is not handled in this version.
+  - Built-in payment function or course booking is not handled in this version (payment confirmed out of scope by the supervisor, 2026-10-16).
 
   - Practical elements (shooting test, search test) are not included - the app only trains the theoretical part.
 
-  - Full native mobile app (App Store/Google Play) is not prioritized; an installable web app (PWA) is considered to provide the best benefit in relation to time and resources.
+  - Full native mobile app (App Store/Google Play) is not prioritized; an installable web app (PWA) is considered to provide the best benefit in relation to time and resources (confirmed by the supervisor, 2026-10-16: no native app).
 
 ## 3. Target group and benefit
 

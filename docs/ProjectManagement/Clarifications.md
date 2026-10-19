@@ -173,7 +173,9 @@ The questions are in Swedish and the app is in English; English as an extra lang
 
 **Answer**
 
-_To ask Klas on 2026-10-16._
+Partly answered (Klas, 2026-10-16): Swedish is prioritised, since most people taking the exam are Swedish.
+
+_Follow-up pending: should the app's menus and buttons (English today) be in Swedish?_
 
 ---
 
@@ -209,7 +211,9 @@ Both are out of scope for the MVP in the Project Plan; Klas did not answer on 20
 
 **Answer**
 
-_To ask Klas on 2026-10-16._
+Partly answered (Klas, 2026-10-16): payment does not need to be handled in this app.
+
+_Follow-up pending: course booking and the practical parts._
 
 ---
 
@@ -225,6 +229,8 @@ A native app is "big priority if we have time" (2026-10-13). The app can be free
 
 **Answer**
 
-_To ask Klas on 2026-10-16._
+Partly answered (Klas, 2026-10-16): no native app; maintenance would be too expensive. App store developer accounts are therefore not needed.
+
+_Follow-up pending: who pays for and owns hosting for the real deployment._
 
 ---
