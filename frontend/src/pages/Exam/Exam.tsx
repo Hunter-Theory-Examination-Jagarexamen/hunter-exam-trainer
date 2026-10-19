@@ -20,6 +20,7 @@ const Exam = () => {
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [timeLeft, setTimeLeft] = useState(60 * 60);
 
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     const submitExam = useCallback(async () => {
 
@@ -107,8 +108,17 @@ const Exam = () => {
     }, [timeLeft, submitExam, questions]);
 
     const handleSubmit = () => {
+        setShowConfirmModal(true);
+    }
+
+    const handleConfirmSubmit = () => {
+        setShowConfirmModal(false);
         void submitExam();
     };
+
+    const handleCancelSubmit = () => {
+        setShowConfirmModal(false);
+    }
 
     const currentQuestion = questions[currentQuestionIndex];
 
@@ -155,8 +165,19 @@ const Exam = () => {
         );
     }
 
+    const answeredCount = Object.keys(answers).length;
+    const totalQuestions = questions.length;
+    const unansweredCount = totalQuestions - answeredCount;
+
     return (
         <div className="exam">
+
+            <div className="exam-progress-bar text-center my-2">
+                <span className="font-semibold text-gray-700">
+                    Answered {answeredCount} / {totalQuestions}
+                </span>
+            </div>
+
             <ExamHeader
                 currentQuestion={currentQuestionIndex + 1}
                 totalQuestions={questions.length}
@@ -176,6 +197,38 @@ const Exam = () => {
                 isFirstQuestion={currentQuestionIndex === 0}
                 isLastQuestion={currentQuestionIndex === questions.length - 1}
             />
+
+            {showConfirmModal && (
+                <div className="modal-overlay fixed inset-0 bg-black/50 flex items-center justify-center p-4">
+                    <div className="modal-content bg-white p-6 rounded-lg max-w-md w-full shadow-lg text-center">
+                        <h3 className="text-xl font-bold mb-3">Submit Exam?</h3>
+                        {unansweredCount > 0 ? (
+                            <p className="text-gray-600 mb-6">
+                                You have <strong>{unansweredCount}</strong> unanswered question{unansweredCount > 1 ? "s" : ""}. Are you sure you want to submit?
+                            </p>
+                        ) : (
+                            <p className="text-gray-600 mb-6">
+                                You have answered all questions. Are you sure you want to submit?
+                            </p>
+                        )}
+                        <div className="flex justify-center space-x-4">
+                            <button
+                                onClick={handleCancelSubmit}
+                                className="btn-secondary px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                                >
+                                    Go back
+                            </button>
+                            <button
+                                onClick={handleConfirmSubmit}
+                                className="btn-primary px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                >
+                                    Submit Exam
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };
