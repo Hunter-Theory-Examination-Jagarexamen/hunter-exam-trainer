@@ -38,6 +38,9 @@ class PasswordResetPersistenceTests {
     @Autowired PasswordEncoder encoder;
     @Autowired PlatformTransactionManager transactionManager;
     @MockitoBean PasswordResetEmailService emails;
+    // Rate limiting is covered by dedicated tests with a controlled clock; here the
+    // focus is transactional persistence, so the limiter must never refuse a request.
+    @MockitoBean PasswordResetRateLimiter rateLimiter;
     private final String token = "a".repeat(43);
     private Long userId;
 

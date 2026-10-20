@@ -26,6 +26,7 @@ import static org.mockito.Mockito.*;
 class PasswordResetServiceTests {
     @Mock UserRepository users;
     @Mock PasswordResetEmailService emails;
+    @Mock PasswordResetRateLimiter rateLimiter;
     @Mock JwtService jwt;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     private PasswordResetService service;
@@ -33,7 +34,7 @@ class PasswordResetServiceTests {
 
     @BeforeEach
     void setUp() {
-        service = new PasswordResetService(users, encoder, emails);
+        service = new PasswordResetService(users, encoder, emails, rateLimiter);
         user = new User();
         user.setEmail("student@example.test");
         user.setRole(Role.STUDENT);
