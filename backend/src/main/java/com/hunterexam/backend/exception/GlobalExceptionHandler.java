@@ -82,6 +82,14 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.CONFLICT, "This change conflicts with existing data");
     }
 
+    // 429: too many requests in a short time, e.g. repeated password reset emails
+    // for one address. The message is fixed by the caller and never contains the
+    // requested address, so it is safe to return as-is.
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<Map<String, String>> handleTooManyRequests(TooManyRequestsException ex) {
+        return error(HttpStatus.TOO_MANY_REQUESTS, ex.getMessage());
+    }
+
     // Everything else
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleUnexpected(Exception ex) {
