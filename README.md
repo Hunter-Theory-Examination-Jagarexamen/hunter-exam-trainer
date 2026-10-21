@@ -496,6 +496,18 @@ Unauthenticated users are redirected to the login page.
 
 Logging out removes the JWT token from local storage and redirects the user to the login page.
 
+### Session expiry
+
+JWTs expire after 1 hour (see `JwtService.generateToken`). When a token expires:
+
+- The next authenticated API call returns `401`
+- The frontend clears the token from `localStorage`
+- The user is redirected to `/login?expired=1` and shown "Your session has expired. Please log in again."
+
+There are no refresh tokens: users must log in again after expiry.
+
+**Note:** a `401` from `/api/auth/login` is **not** treated as session expiry it just means wrong credentials. A `403` (forbidden) also does not log the user out.
+
 ## Main API Endpoints
 
 ### Error responses
@@ -510,6 +522,7 @@ kind of error, never on the message text (`GlobalExceptionHandler`):
 | 403 | Logged in but not allowed (e.g. a student calling an admin endpoint) | `AccessDeniedException` |
 | 404 | The user, subject, question or exam session does not exist | `NotFoundException` |
 | 409 | Clashes with existing data (e.g. email already registered, too few questions for a mock exam), or the database refused the change (e.g. duplicate subject name, deleting a subject in use) | `ConflictException`, `DataIntegrityViolationException` |
+| 429 | Too many requests in a short time (e.g. repeating a password reset request for one email address) | `TooManyRequestsException` |
 | 500 | Unexpected error | anything else |
 
 A 500 response never contains internal details. Its message includes a short generated
@@ -525,6 +538,27 @@ so a reported code can be looked up there.
 | POST   | `/api/auth/forgot-password` | Request a password reset email |
 | POST   | `/api/auth/reset-password` | Set a new password using a reset token |
 | GET    | `/api/auth/google/status` | Whether Google login is enabled |
+
+#### Password reset rate limit
+
+`POST /api/auth/forgot-password` accepts **at most one request per email address
+every 60 seconds** (`app.password-reset.rate-limit-window-seconds`). Further
+requests are answered with `429` and the standard `{"message": "..."}` body,
+identically for registered and unregistered addresses, and before any token is
+created or any email is sent. The endpoint never reveals whether an address
+belongs to an account. Addresses are trimmed and lower-cased before counting, so
+`Student@Example.test` and `student@example.test` share one slot.
+
+The counter is held **in memory**, so it is **per backend instance** and is
+cleared on application restart. Up to `app.password-reset.rate-limit-max-tracked-emails`
+(default 10000) addresses are remembered at a time; expired entries are dropped
+and, if the cap is reached, the oldest entry is forgotten first. If several
+instances run behind a load balancer, each counts its own requests.
+
+Remaining limitation: only per-address counting is implemented, so one client can
+still request resets for many *different* addresses. There is no per-IP limit, and
+`X-Forwarded-For` is deliberately not used to identify clients because arbitrary
+values in that header cannot be trusted.
 
 ### User
 
@@ -871,7 +905,6 @@ Backend:  http://localhost:8080
 ```
 
 Also check the browser console and backend logs for errors.
-
 
 ## Handover Notes
 

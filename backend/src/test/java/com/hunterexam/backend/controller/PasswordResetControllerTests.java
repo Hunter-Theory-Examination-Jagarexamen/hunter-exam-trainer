@@ -2,6 +2,7 @@ package com.hunterexam.backend.controller;
 
 import com.hunterexam.backend.config.OAuth2LoginSuccessHandler;
 import com.hunterexam.backend.config.SecurityConfig;
+import com.hunterexam.backend.exception.TooManyRequestsException;
 import com.hunterexam.backend.service.AuthService;
 import com.hunterexam.backend.service.PasswordResetService;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,19 @@ class PasswordResetControllerTests {
                     .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").isString());
         }
         verifyNoInteractions(resets);
+    }
+
+    @Test
+    void rateLimitedAddressesGetTheSame429BodyWhetherRegisteredOrNot() throws Exception {
+        String message = "Too many password reset requests. Please try again later.";
+        for (String email : new String[]{"student@example.test", "unknown@example.test"}) {
+            doThrow(new TooManyRequestsException(message)).when(resets).requestReset(email);
+            mvc.perform(post("/api/auth/forgot-password").contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"email\":\"" + email + "\"}"))
+                    .andExpect(status().isTooManyRequests())
+                    .andExpect(content().json("{\"message\":\"" + message + "\"}"))
+                    .andExpect(jsonPath("$.newPassword").doesNotExist());
+        }
     }
 
     @Test
