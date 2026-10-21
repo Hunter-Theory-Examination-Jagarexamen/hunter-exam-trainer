@@ -10,6 +10,10 @@ import userEvent from "@testing-library/user-event";
 import PracticeQuestion from "../../../components/practice/PracticeQuestion";
 import type { PracticeQuestion as PracticeQuestionType } from "../../../types/practiceQuestions";
 
+vi.mock("../../../api/apiClient.ts", () => ({
+    default: vi.fn(),
+}));
+
 // A small made-up question. Option "b" is the correct one.
 const question: PracticeQuestionType = {
     id: "q1",
