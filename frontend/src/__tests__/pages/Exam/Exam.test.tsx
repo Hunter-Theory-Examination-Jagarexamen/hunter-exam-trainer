@@ -168,4 +168,15 @@ describe("Exam page", () => {
         vi.useRealTimers();
     });
 
+
+    it("shows a clear message when there are too few questions (409 conflict)", async () => {
+        vi.mocked(apiClient).mockRejectedValue({
+            status: 409,
+            message: "Not enough questions available to start the exam."
+        });
+        renderExam();
+
+        expect(await screen.findByText("Not enough questions available to start the exam.")).toBeInTheDocument();
+    });
+
     });

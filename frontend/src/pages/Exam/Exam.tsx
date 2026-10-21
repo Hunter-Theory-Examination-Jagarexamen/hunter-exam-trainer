@@ -71,9 +71,14 @@ const Exam = () => {
                 setQuestions(data.questions);
             }
 
-            catch (err) {
+            catch (err: unknown) {
                 console.error("Failed to load exam questions.", err);
-                setError("Failed to load exam questions. Please try again.");
+                const errorObj = err as { status?: number; message?: string };
+                if (errorObj.status === 409 || (errorObj?.message && errorObj.message.includes("Not enough questions"))) {
+                    setError(errorObj.message || "Not enough questions available to start the exam.");
+                } else {
+                    setError("Failed to load exam questions. Please try again.");
+                }
             }
             finally {
                 setIsLoading(false);

@@ -79,9 +79,14 @@ const PracticeQuestions = () => {
                 setShowFeedback(false);
                 setCorrectAnswers(0);
             }
-            catch (error) {
+            catch (error: unknown) {
                 console.error("Failed to fetch questions: ", error);
-                setError("Failed to load questions. Please try again");
+                const errorObj = error as { status?: number; message?: string };
+                if (errorObj?.status === 409 || (errorObj?.message && errorObj.message.includes("Not enough questions"))) {
+                    setError(errorObj.message || "Not enough questions available for this subject.");
+                } else {
+                    setError("Failed to load questions. Please try again.");
+                }
             }
             finally {
                 setIsLoading(false);
