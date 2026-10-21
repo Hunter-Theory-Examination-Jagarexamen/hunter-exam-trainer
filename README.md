@@ -496,6 +496,18 @@ Unauthenticated users are redirected to the login page.
 
 Logging out removes the JWT token from local storage and redirects the user to the login page.
 
+### Session expiry
+
+JWTs expire after 1 hour (see `JwtService.generateToken`). When a token expires:
+
+- The next authenticated API call returns `401`
+- The frontend clears the token from `localStorage`
+- The user is redirected to `/login?expired=1` and shown "Your session has expired. Please log in again."
+
+There are no refresh tokens: users must log in again after expiry.
+
+**Note:** a `401` from `/api/auth/login` is **not** treated as session expiry it just means wrong credentials. A `403` (forbidden) also does not log the user out.
+
 ## Main API Endpoints
 
 ### Error responses
@@ -893,7 +905,6 @@ Backend:  http://localhost:8080
 ```
 
 Also check the browser console and backend logs for errors.
-
 
 ## Handover Notes
 

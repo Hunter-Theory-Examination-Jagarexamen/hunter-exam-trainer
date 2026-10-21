@@ -9,22 +9,33 @@ export class ApiError extends Error {
     }
 }
 
+const isAuthEndpoint = (endpoint: string): boolean =>
+    endpoint.startsWith("/api/auth/login")
+    || endpoint.startsWith("/auth/login")
+    || endpoint.startsWith("/api/auth/register")
+    || endpoint.startsWith("/auth/register");
+
+const handleSessionExpired = (): void => {
+    localStorage.removeItem("token");
+    if (!window.location.pathname.startsWith("/login")) {
+        window.location.href = "/login?expired=1";
+    }
+};
+
 const apiClient = async (
     endpoint: string,
     options: RequestInit = {}
-)=> {
+): Promise<any> => {
 
     const token = localStorage.getItem("token");
 
     const headers = new Headers(options.headers);
 
     if (!headers.has("Content-Type")) {
-
         headers.set("Content-Type", "application/json");
     }
 
     if (token) {
-
         headers.set("Authorization", `Bearer ${token}`);
     }
 
@@ -33,11 +44,16 @@ const apiClient = async (
         headers,
     });
 
-    if (!response.ok) {
+    if (response.status === 401 && !isAuthEndpoint(endpoint)) {
+        handleSessionExpired();
+        throw new ApiError("Session expired. Please log in again.", 401);
+    }
 
+    if (!response.ok) {
         const errorMessage = await response.text();
         throw new ApiError(
-            errorMessage || `API request failed: ${response.status}`, response.status
+            errorMessage || `API request failed: ${response.status}`,
+            response.status
         );
     }
 
@@ -47,7 +63,7 @@ const apiClient = async (
 
     const contentType = response.headers.get("content-type");
 
-    if(contentType?.includes("application/json")) {
+    if (contentType?.includes("application/json")) {
         return response.json();
     }
 
