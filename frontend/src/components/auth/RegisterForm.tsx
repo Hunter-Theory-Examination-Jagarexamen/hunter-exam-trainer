@@ -58,8 +58,12 @@ const RegisterForm = () => {
             });
     // Redirects user to login page after successful registration
             navigate("/login");
-        } catch (err: any) {
-            setError(err.message || "Registration failed. Please try again.");
+        } catch (err) {
+            setError(
+                err instanceof Error && err.message
+                    ? err.message
+                    : "Registration failed. Please try again."
+            );
         } finally {
             setIsLoading(false);
         }
