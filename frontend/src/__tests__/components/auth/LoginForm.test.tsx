@@ -5,7 +5,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import LoginForm from "../../../components/auth/LoginForm";
-import { loginUser } from "../../../services/authService.ts";
+import { checkGoogleLoginEnabled, loginUser } from "../../../services/authService.ts";
 
 // Replace the real authService (which calls the backend) with mock functions.
 // checkGoogleLoginEnabled must return a Promise, because LoginForm calls .then() on it.
@@ -36,6 +36,24 @@ describe("LoginForm", () => {
     afterEach(() => {
         vi.restoreAllMocks(); // undo vi.spyOn (alert, console.error)
         localStorage.clear(); // remove any saved token
+    });
+
+    it("hides the Google button when Google login is not configured", async () => {
+        // Arrange: the mock at the top answers "not configured" (false)
+        renderLoginForm();
+
+        // Assert: wait until the check has run, then the button should be missing
+        await waitFor(() => expect(checkGoogleLoginEnabled).toHaveBeenCalled());
+        expect(screen.queryByRole("button", { name: "Continue with Google" })).not.toBeInTheDocument();
+    });
+
+    it("shows the Google button when Google login is configured", async () => {
+        // Arrange: this time the check answers "configured" (true), for one call only
+        vi.mocked(checkGoogleLoginEnabled).mockResolvedValueOnce(true);
+        renderLoginForm();
+
+        // Assert: findByRole waits until the button appears (or times out)
+        expect(await screen.findByRole("button", { name: "Continue with Google" })).toBeInTheDocument();
     });
 
     it("shows an alert and does not log in when the fields are empty", async () => {
