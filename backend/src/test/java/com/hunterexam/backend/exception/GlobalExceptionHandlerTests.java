@@ -70,6 +70,15 @@ class GlobalExceptionHandlerTests {
     }
 
     @Test
+    void tooManyRequestsIs429WithItsMessage() {
+        ResponseEntity<Map<String, String>> response = handler.handleTooManyRequests(
+                new TooManyRequestsException("Too many password reset requests. Please try again later."));
+        assertEquals(HttpStatus.TOO_MANY_REQUESTS, response.getStatusCode());
+        assertEquals("Too many password reset requests. Please try again later.",
+                response.getBody().get("message"));
+    }
+
+    @Test
     void aMessageContainingPasswordNoLongerBecomes401() {
         // Before #98 the handler searched the text for "password" and answered 401.
         ResponseEntity<Map<String, String>> response =
