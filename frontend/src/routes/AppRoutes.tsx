@@ -1,3 +1,4 @@
+import NotFound from "../pages/NotFound/NotFound"
 import { lazy, Suspense } from "react";
 import {BrowserRouter, Navigate, Route, Routes} from "react-router-dom";
 import Login from "../pages/Login/Login";
@@ -82,7 +83,7 @@ const AppRoutes = () => {
                 {/* Unknown route */}
                 <Route
                     path="*"
-                    element={<Navigate to="/dashboard" replace /> }
+                    element={<NotFound />}
                 />
 
             </Routes>
