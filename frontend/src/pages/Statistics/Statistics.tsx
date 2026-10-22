@@ -136,6 +136,7 @@ const Statistics = () => {
                         value={weeksRange}
                         onChange={(e) => setWeeksRange(Number(e.target.value))}
                         className="weeks-select"
+                        aria-label="Time range for progress over time"
                     >
                         <option value={4}>Last 4 weeks</option>
                         <option value={8}>Last 8 weeks</option>
