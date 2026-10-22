@@ -188,7 +188,7 @@ const RegisterForm = () => {
                 </div>
 
                 {error && (
-                    <p style={{ color: "#e53e3e", marginBottom: "1rem", fontSize: "0.875rem" }}>
+                    <p role="alert" style={{ color: "#e53e3e", marginBottom: "1rem", fontSize: "0.875rem" }}>
                         {error}
                     </p>
                 )}

@@ -147,7 +147,7 @@ const Statistics = () => {
                     {isLoadingProgressOverTime && <p>Loading progress...</p>}
 
                     {!isLoadingProgressOverTime && progressOverTimeError && (
-                        <p>{progressOverTimeError}</p>
+                        <p role="alert">{progressOverTimeError}</p>
                     )}
 
                     {!isLoadingProgressOverTime && !progressOverTimeError && (
@@ -163,7 +163,7 @@ const Statistics = () => {
                 )}
 
                 {!isLoadingProgress && progressError && (
-                    <p>{progressError}</p>
+                    <p role="alert">{progressError}</p>
                 )}
 
                 {!isLoadingProgress &&
@@ -200,7 +200,7 @@ const Statistics = () => {
                     )}
 
                     {recentError && (
-                        <p>{recentError}</p>
+                        <p role="alert">{recentError}</p>
                     )}
 
                     {!isLoadingRecent &&
