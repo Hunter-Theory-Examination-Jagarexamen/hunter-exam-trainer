@@ -82,4 +82,12 @@ describe("PracticeQuestion", () => {
         expect(screen.getByText(/Incorrect/)).toHaveTextContent("The correct answer is: Roe deer");
         expect(screen.queryByText("Correct!")).not.toBeInTheDocument();
     });
+
+    it("puts the feedback in a status region so screen readers announce it", () => {
+        renderQuestion({ selectedAnswer: "b", showFeedback: true });
+
+        // role="status" is a "live region": screen readers read out new text in it.
+        // If someone removes it, sighted users see no difference, so this test guards it.
+        expect(screen.getByRole("status")).toHaveTextContent("Correct!");
+    });
 });
