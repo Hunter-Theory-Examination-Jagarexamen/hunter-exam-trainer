@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import {BrowserRouter, Navigate, Route, Routes} from "react-router-dom";
 import Login from "../pages/Login/Login";
 import Dashboard from "../pages/Dashboard/Dashboard";
@@ -5,7 +6,6 @@ import Layout from "../components/layout/Layout";
 import Practice from "../pages/Practice/Practice";
 import MockExam from "../pages/MockExam/MockExam";
 import Profile from "../pages/Profile/Profile";
-import Statistics from "../pages/Statistics/Statistics";
 import Result from "../pages/Results/Result";
 import Exam from "../pages/Exam/Exam";
 import PracticeSubjects from "../pages/Practice/PracticeSubjects";
@@ -21,6 +21,8 @@ import QuestionBank from "../pages/Admin/QuestionBank";
 import LearnerProgress from "../pages/Admin/LearnerProgress";
 import Subjects from "../pages/Admin/Subjects";
 import AdminHome from "../pages/Admin/AdminHome";
+
+const Statistics = lazy(() => import("../pages/Statistics/Statistics"));
 
 const AppRoutes = () => {
     return (
@@ -50,7 +52,14 @@ const AppRoutes = () => {
                         <Route path="/exam" element={<Exam />} />
                         <Route path="/result" element={<Result />} />
 
-                        <Route path="/statistics" element={<Statistics />} />
+                        <Route
+                            path="/statistics"
+                            element={
+                                <Suspense fallback={<div>Loading...</div>}>
+                                    <Statistics />
+                                </Suspense>
+                            }
+                        />
 
                         <Route path="/profile" element={<Profile />} />
 
