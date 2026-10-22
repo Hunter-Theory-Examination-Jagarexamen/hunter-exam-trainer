@@ -67,29 +67,31 @@ const PracticeQuestion = ({
                     Check Answer
                 </button>
 
-                {showFeedback && selectedOption && (
-                    <div
-                        className={
-                            selectedOption.isCorrect
-                                ? "answer-feedback correct"
-                                : "answer-feedback incorrect"
-                        }
-                    >
-                        {
-                            selectedOption.isCorrect ?
-                                (<p>Correct!</p>):
-                                (<p>Incorrect. The correct answer is: {" "}
-                                    <strong>
-                                        {
-                                            question.options.find(
-                                                (option) => option.isCorrect
-                                            )?.answer
-                                        }
-                                    </strong>
-                                </p>)
-                        }
-                    </div>
-                )}
+                <div role="status">
+                    {showFeedback && selectedOption && (
+                        <div
+                            className={
+                                selectedOption.isCorrect
+                                    ? "answer-feedback correct"
+                                    : "answer-feedback incorrect"
+                            }
+                        >
+                            {
+                                selectedOption.isCorrect ?
+                                    (<p>Correct!</p>):
+                                    (<p>Incorrect. The correct answer is: {" "}
+                                        <strong>
+                                            {
+                                                question.options.find(
+                                                    (option) => option.isCorrect
+                                                )?.answer
+                                            }
+                                        </strong>
+                                    </p>)
+                            }
+                        </div>
+                    )}
+                </div>
 
             </div>
 
