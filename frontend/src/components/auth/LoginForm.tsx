@@ -55,15 +55,6 @@ const LoginForm = () => {
 
 
     const handleGoogleLogin = () => {
-
-        if (!googleEnabled) {
-            alert(
-                "Google sign-in is not configured yet. " +
-                "Use your email and password."
-            );
-            return;
-        }
-
         window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
     };
 
@@ -145,19 +136,24 @@ const LoginForm = () => {
                 </button>
             </form>
 
-            <div className="auth-divider">
-                <span>or</span>
-            </div>
+            {/* Google login is only shown when the backend has it configured (#61). */}
+            {googleEnabled && (
+                <>
+                    <div className="auth-divider">
+                        <span>or</span>
+                    </div>
 
-            <div className="auth-secondary-actions">
-                <button
-                    type="button"
-                    className="auth-secondary-button"
-                    onClick={handleGoogleLogin}
-                >
-                    Continue with Google
-                </button>
-            </div>
+                    <div className="auth-secondary-actions">
+                        <button
+                            type="button"
+                            className="auth-secondary-button"
+                            onClick={handleGoogleLogin}
+                        >
+                            Continue with Google
+                        </button>
+                    </div>
+                </>
+            )}
 
             <p className="auth-switch">
                 Don't have an account?{" "}
