@@ -34,7 +34,7 @@ describe("LoginForm", () => {
     });
 
     afterEach(() => {
-        vi.restoreAllMocks(); // undo vi.spyOn (alert, console.error)
+        vi.restoreAllMocks(); // undo vi.spyOn (console.error)
         localStorage.clear(); // remove any saved token
     });
 
@@ -56,16 +56,16 @@ describe("LoginForm", () => {
         expect(await screen.findByRole("button", { name: "Continue with Google" })).toBeInTheDocument();
     });
 
-    it("shows an alert and does not log in when the fields are empty", async () => {
-        // Arrange: catch alert() calls instead of showing a real pop-up
-        const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    it("shows an error message and does not log in when the fields are empty", async () => {
+        // Arrange
         renderLoginForm();
 
         // Act: click "Log In" without typing anything
         await userEvent.click(screen.getByRole("button", { name: "Log In" }));
 
         // Assert: the user is told what is missing, and the backend is never called
-        expect(alertSpy).toHaveBeenCalledWith("Please enter your email and password");
+        // role="alert" is how screen readers (and this test) find the error message
+        expect(screen.getByRole("alert")).toHaveTextContent("Please enter your email and password");
         expect(loginUser).not.toHaveBeenCalled();
     });
 
@@ -85,10 +85,9 @@ describe("LoginForm", () => {
         expect(localStorage.getItem("token")).toBe("test-token");
     });
 
-    it("shows an alert and saves no token when the login fails", async () => {
+    it("shows an error message and saves no token when the login fails", async () => {
         // Arrange: the fake backend rejects the login
         vi.mocked(loginUser).mockRejectedValue(new Error("401"));
-        const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
         vi.spyOn(console, "error").mockImplementation(() => {}); // keep test output clean
         renderLoginForm();
 
@@ -97,8 +96,8 @@ describe("LoginForm", () => {
         await userEvent.type(screen.getByLabelText("Password"), "wrong-password");
         await userEvent.click(screen.getByRole("button", { name: "Log In" }));
 
-        // Assert: waitFor retries until the alert has appeared (or times out)
-        await waitFor(() => expect(alertSpy).toHaveBeenCalledWith("Invalid email or password"));
+        // Assert: findByRole waits until the error message has appeared (or times out)
+        expect(await screen.findByRole("alert")).toHaveTextContent("Invalid email or password");
         expect(localStorage.getItem("token")).toBeNull();
     });
 });

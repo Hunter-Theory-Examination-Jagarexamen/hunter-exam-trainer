@@ -19,6 +19,7 @@ const LoginForm = () => {
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [googleEnabled, setGoogleEnabled] = useState(false);
+    const [error, setError] = useState("");
 
     useEffect(() => {
         checkGoogleLoginEnabled().then(setGoogleEnabled);
@@ -26,9 +27,10 @@ const LoginForm = () => {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(""); // clear the message from the previous attempt
 
         if(!email || !password) {
-            alert("Please enter your email and password");
+            setError("Please enter your email and password");
             return;
         }
 
@@ -46,7 +48,7 @@ const LoginForm = () => {
 
         } catch (error) {
             console.error("Login/API error:", error);
-            alert("Invalid email or password");
+            setError("Invalid email or password");
         } finally {
             setIsLoading(false);
         }
@@ -126,6 +128,12 @@ const LoginForm = () => {
                         Forgot Password?
                     </button>
                 </div>
+
+                {error && (
+                    <p role="alert" style={{ color: "#e53e3e", marginBottom: "1rem", fontSize: "0.875rem" }}>
+                        {error}
+                    </p>
+                )}
 
                 <button
                     type="submit"
