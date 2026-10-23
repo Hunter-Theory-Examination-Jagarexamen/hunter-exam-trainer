@@ -308,8 +308,8 @@ rate-limit recovery requests at their ingress. Response statuses and bodies neve
 disclose account existence.
 
 Backend tests use H2 and mocked email boundaries; they need no external database
-or mail server. With Java 25, run `cd backend` then `./mvnw test` (Windows:
-`mvnw.cmd test`); see [Running the Backend Tests](#running-the-backend-tests). For the frontend run `npm ci` and `npm run build` from `frontend`,
+or mail server. With Java 25, run `cd backend` then `./mvnw test` (PowerShell/cmd:
+`mvnw.cmd test`; in Git Bash on Windows, use `./mvnw test`); see [Running the Backend Tests](#running-the-backend-tests). For the frontend run `npm ci` and `npm run build` from `frontend`,
 then run the frontend tests as described under [Running the Frontend Tests](#running-the-frontend-tests).
 
 ### 5. Start the Backend
@@ -397,7 +397,8 @@ variables or mail server are needed. From the `backend` directory:
 ./mvnw test -Dtest=ExamServiceTests#methodName # one test method
 ```
 
-In PowerShell, quote the option: `-D"test=ExamServiceTests"`. In IntelliJ, click
+In PowerShell or cmd, use `mvnw.cmd` instead of `./mvnw`, and in PowerShell quote the
+option: `-D"test=ExamServiceTests"`. In Git Bash, `./mvnw` works as shown, even on Windows. In IntelliJ, click
 the green run arrow next to a test class or method.
 
 Tests live in `backend/src/test/java/`, in the same packages as the classes they
