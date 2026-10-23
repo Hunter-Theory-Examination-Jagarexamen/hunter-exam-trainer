@@ -599,7 +599,7 @@ POST and PUT accept the same JSON body:
   "optionD": "Fourth option",
   "correctAnswer": "First option",
   "explanation": "Optional explanation",
-  "imageUrl": "https//:example.com/images/questions.jpg",
+  "imageUrl": "https://example.com/images/questions.jpg",
   "subjectId": 1
 }
 ```

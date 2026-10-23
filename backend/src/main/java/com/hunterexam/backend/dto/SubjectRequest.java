@@ -12,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class SubjectRequest {
 
-    // Ensures subject name is not null or bland
+    // Ensures subject name is not null or blank
 @NotBlank(message = "Name is required")
 @Size(max = 255, message = "Name must be at most 255 characters")
     private String name;
