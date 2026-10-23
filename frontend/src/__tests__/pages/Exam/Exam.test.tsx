@@ -106,9 +106,6 @@ describe("Exam page", () => {
         expect(await screen.findByText("Failed to load exam questions. Please try again.")).toBeInTheDocument();
     });
 
-
-
-
     it("disables Previous on the first question and enables it on subsequent questions", async () => {
         mockBackend();
         renderExam();
@@ -142,7 +139,7 @@ describe("Exam page", () => {
     });
 
     it("automatically submits the exam with current answers when time runs out", async () => {
-       vi.useFakeTimers({ shouldAdvanceTime: true });
+        vi.useFakeTimers({ shouldAdvanceTime: true });
 
         mockBackend();
         renderExam();
@@ -167,7 +164,6 @@ describe("Exam page", () => {
 
         vi.useRealTimers();
     });
-
 
     it("shows a clear message when there are too few questions (409 conflict)", async () => {
         vi.mocked(apiClient).mockRejectedValue({
