@@ -105,7 +105,6 @@ public class AuthService {
         );
     }
 
-
     /**
      * Authenticates a user coming from Google OAuth2.
      * <p>

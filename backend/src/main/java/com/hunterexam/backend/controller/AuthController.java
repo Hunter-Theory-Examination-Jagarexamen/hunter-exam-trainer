@@ -35,7 +35,6 @@ public class AuthController {
         this.passwordResetService = passwordResetService;
     }
 
-
     /**
      * Registers a new user.
      * <p>
@@ -63,7 +62,6 @@ public class AuthController {
                 .body(response);
     }
 
-
     /**
      * Authenticates an existing user.
      * <p>
@@ -82,8 +80,6 @@ public class AuthController {
 
         return ResponseEntity.ok(response);
     }
-
-
 
     @PostMapping("/forgot-password")
     public ResponseEntity<Map<String, String>> forgotPassword(

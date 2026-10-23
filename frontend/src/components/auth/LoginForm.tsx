@@ -55,7 +55,6 @@ const LoginForm = () => {
 
     };
 
-
     const handleGoogleLogin = () => {
         window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
     };
