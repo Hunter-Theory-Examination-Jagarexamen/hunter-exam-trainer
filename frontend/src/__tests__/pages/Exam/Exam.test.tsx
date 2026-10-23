@@ -56,6 +56,8 @@ describe("Exam page", () => {
 
     afterEach(() => {
         vi.restoreAllMocks();
+        // Switch back to the real clock even if a timer test failed halfway.
+        vi.useRealTimers();
     });
 
     it("shows a loading message, then the first question", async () => {
@@ -67,7 +69,7 @@ describe("Exam page", () => {
         expect(apiClient).toHaveBeenCalledWith("/api/exam/start", { method: "POST" });
     });
 
-    it("submits the session id, question ids and answers, then shows the result page", async () => {
+    it("submits the session id and answers, then shows the result page", async () => {
         mockBackend();
         renderExam();
 
@@ -94,7 +96,6 @@ describe("Exam page", () => {
         const body = JSON.parse(submitCall![1]!.body as string);
         expect(body).toEqual({
             sessionId: "session-1",
-            questionIds: [1, 2],
             answers: { "1": "B", "2": "C" },
         });
     });
@@ -134,8 +135,6 @@ describe("Exam page", () => {
         });
 
         expect(screen.getByText(/59:59/i)).toBeInTheDocument();
-
-        vi.useRealTimers();
     });
 
     it("automatically submits the exam with current answers when time runs out", async () => {
@@ -161,8 +160,6 @@ describe("Exam page", () => {
 
         const body = JSON.parse(submitCall![1]!.body as string);
         expect(body.answers).toEqual({ "1": "B" });
-
-        vi.useRealTimers();
     });
 
     it("shows a clear message when there are too few questions (409 conflict)", async () => {

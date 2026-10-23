@@ -25,14 +25,10 @@ const Exam = () => {
     const submitExam = useCallback(async () => {
 
         try {
-            const questionIds = questions.map(
-                (question) => question.id);
-
             const result = await apiClient("/api/exam/submit", {
                 method: "POST",
                 body: JSON.stringify({
                     sessionId,
-                    questionIds,
                     answers
                 })
             });
@@ -46,7 +42,7 @@ const Exam = () => {
             console.error("Failed to submit exam: ", err);
             alert("Failed to submit exam. Please try again");
         }
-    }, [sessionId, questions, answers, navigate]);
+    }, [sessionId, answers, navigate]);
 
 
     //Load exam questions
