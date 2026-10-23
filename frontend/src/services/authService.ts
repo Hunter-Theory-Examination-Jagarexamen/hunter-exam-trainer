@@ -27,7 +27,6 @@ export const loginUser = async (
     return response.json();
 };
 
-
 export const checkGoogleLoginEnabled = async (): Promise<boolean> => {
 
     try {

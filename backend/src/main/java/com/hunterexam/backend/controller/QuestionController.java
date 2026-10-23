@@ -2,7 +2,6 @@ package com.hunterexam.backend.controller;
 
 import com.hunterexam.backend.entity.Question;
 import com.hunterexam.backend.service.QuestionService;
-import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;

@@ -26,7 +26,7 @@ public class ExamQuestionResponse {
             String optionB,
             String optionC,
             String optionD,
-    String imageUrl)
+            String imageUrl)
     {
         this.id = id;
         this.questionText = questionText;
