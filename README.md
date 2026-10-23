@@ -118,6 +118,20 @@ should not be committed.
 
 Follow these steps when setting up the project on a new computer:
 
+**Local environment variables at a glance.** The backend reads these from its IntelliJ
+Run/Debug configuration (Spring Boot does not read `.env` files). The steps below explain each one.
+
+| Variable | Required? | Example | Details |
+|----------|-----------|---------|---------|
+| `DB_URL` | No, defaults to `jdbc:postgresql://localhost:5432/hunter_exam` | | [Step 3](#3-configure-database-credentials) |
+| `DB_USERNAME` | Yes | `postgres` | [Step 3](#3-configure-database-credentials) |
+| `DB_PASSWORD` | Yes | Your PostgreSQL password | [Step 3](#3-configure-database-credentials) |
+| `JWT_SECRET` | Yes, at least 32 characters | Output of `openssl rand -base64 32` | [Step 4](#4-configure-jwt-secret) |
+| `ADMIN_EMAIL` | Recommended: without it, no admin account is created | `admin@example.com` | [Step 4](#4-configure-jwt-secret) |
+| `ADMIN_PASSWORD` | Recommended, together with `ADMIN_EMAIL` | A password you choose | [Step 4](#4-configure-jwt-secret) |
+| `GOOGLE_LOGIN_ENABLED`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | No, Google login is off by default | | [Optional: Google Login](#optional-google-login) |
+| `MAIL_*` | No, local defaults work | | [Password recovery email](#password-recovery-email-smtp) |
+
 ### 1. Clone the repository
 
 Clone the repository and open the project in IntelliJ IDEA.
