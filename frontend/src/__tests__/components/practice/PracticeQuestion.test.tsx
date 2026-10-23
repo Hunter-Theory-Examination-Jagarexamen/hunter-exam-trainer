@@ -83,11 +83,13 @@ describe("PracticeQuestion", () => {
         expect(screen.queryByText("Correct!")).not.toBeInTheDocument();
     });
 
-    it("puts the feedback in a status region so screen readers announce it", () => {
+    it("moves focus to the feedback so screen readers read it", () => {
         renderQuestion({ selectedAnswer: "b", showFeedback: true });
 
-        // role="status" is a "live region": screen readers read out new text in it.
-        // If someone removes it, sighted users see no difference, so this test guards it.
-        expect(screen.getByRole("status")).toHaveTextContent("Correct!");
+        // document.activeElement is the element that has focus right now.
+        // Screen readers read the focused element, so the feedback must have it.
+        // If someone removes the focus code, sighted users see no difference,
+        // so this test guards it.
+        expect(document.activeElement).toHaveTextContent("Correct!");
     });
 });

@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import "../../styles/practice.css";
 import type { PracticeQuestion as PracticeQuestionType } from "../../types/practiceQuestions";
 import QuestionImage from "../common/QuestionImage";
@@ -17,6 +18,18 @@ const PracticeQuestion = ({
                               onAnswerSelect,
                               onCheckAnswer
                           }: PracticeQuestionProps) => {
+
+    // A handle to the feedback box on the page, so we can move focus to it.
+    const feedbackRef = useRef<HTMLDivElement>(null);
+
+    // When the feedback appears, move focus to it. The Check Answer button is
+    // disabled at that moment, so without this, focus falls back to the whole page
+    // and screen readers announce the page title instead of the feedback.
+    useEffect(() => {
+        if (showFeedback) {
+            feedbackRef.current?.focus();
+        }
+    }, [showFeedback]);
 
     const selectedOption = question.options.find(
         (option) => option.id === selectedAnswer
@@ -67,31 +80,31 @@ const PracticeQuestion = ({
                     Check Answer
                 </button>
 
-                <div role="status">
-                    {showFeedback && selectedOption && (
-                        <div
-                            className={
-                                selectedOption.isCorrect
-                                    ? "answer-feedback correct"
-                                    : "answer-feedback incorrect"
-                            }
-                        >
-                            {
-                                selectedOption.isCorrect ?
-                                    (<p>Correct!</p>):
-                                    (<p>Incorrect. The correct answer is: {" "}
-                                        <strong>
-                                            {
-                                                question.options.find(
-                                                    (option) => option.isCorrect
-                                                )?.answer
-                                            }
-                                        </strong>
-                                    </p>)
-                            }
-                        </div>
-                    )}
-                </div>
+                {showFeedback && selectedOption && (
+                    <div
+                        ref={feedbackRef}
+                        tabIndex={-1}
+                        className={
+                            selectedOption.isCorrect
+                                ? "answer-feedback correct"
+                                : "answer-feedback incorrect"
+                        }
+                    >
+                        {
+                            selectedOption.isCorrect ?
+                                (<p>Correct!</p>):
+                                (<p>Incorrect. The correct answer is: {" "}
+                                    <strong>
+                                        {
+                                            question.options.find(
+                                                (option) => option.isCorrect
+                                            )?.answer
+                                        }
+                                    </strong>
+                                </p>)
+                        }
+                    </div>
+                )}
 
             </div>
 
