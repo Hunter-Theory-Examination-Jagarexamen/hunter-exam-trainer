@@ -210,8 +210,14 @@ In IntelliJ IDEA:
 2. Select the Spring Boot backend configuration.
 3. Find Environment variables.
 4. Add JWT_SECRET, ADMIN_EMAIL, and ADMIN_PASSWORD.
-5. Paste the generated values.
+5. For `JWT_SECRET`, paste the value generated above. For `ADMIN_EMAIL` and
+   `ADMIN_PASSWORD`, choose your own: they are the login for your local admin account.
 6. Apply the changes and restart the backend.
+
+On startup, the backend creates an admin account with `ADMIN_EMAIL` and `ADMIN_PASSWORD`
+only if the database has no admin yet. If an admin already exists, changing `ADMIN_PASSWORD`
+later does not change that admin's password. If the variables are missing, the backend still
+starts and logs a warning, but no admin is created.
 
 The JWT secret is used only by the local backend and should not be added to `application.properties` or committed to GitHub.
 
