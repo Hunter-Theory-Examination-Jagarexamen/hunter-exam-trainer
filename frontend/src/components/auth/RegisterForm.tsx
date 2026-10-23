@@ -58,8 +58,12 @@ const RegisterForm = () => {
             });
     // Redirects user to login page after successful registration
             navigate("/login");
-        } catch (err: any) {
-            setError(err.message || "Registration failed. Please try again.");
+        } catch (err) {
+            setError(
+                err instanceof Error && err.message
+                    ? err.message
+                    : "Registration failed. Please try again."
+            );
         } finally {
             setIsLoading(false);
         }
@@ -188,7 +192,7 @@ const RegisterForm = () => {
                 </div>
 
                 {error && (
-                    <p style={{ color: "#e53e3e", marginBottom: "1rem", fontSize: "0.875rem" }}>
+                    <p role="alert" style={{ color: "#e53e3e", marginBottom: "1rem", fontSize: "0.875rem" }}>
                         {error}
                     </p>
                 )}

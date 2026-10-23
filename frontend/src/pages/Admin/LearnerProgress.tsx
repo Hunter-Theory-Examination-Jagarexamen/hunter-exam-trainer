@@ -39,7 +39,7 @@ const LearnerProgress = () => {
 
             {isLoading && <p>Loading learners...</p>}
 
-            {!isLoading && error && <p>{error}</p>}
+            {!isLoading && error && <p role="alert">{error}</p>}
 
             {!isLoading && !error && learners.length === 0 && (
                 <p>No learners yet.</p>

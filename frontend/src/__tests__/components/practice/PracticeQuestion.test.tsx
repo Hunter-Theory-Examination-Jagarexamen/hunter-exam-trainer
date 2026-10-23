@@ -82,4 +82,14 @@ describe("PracticeQuestion", () => {
         expect(screen.getByText(/Incorrect/)).toHaveTextContent("The correct answer is: Roe deer");
         expect(screen.queryByText("Correct!")).not.toBeInTheDocument();
     });
+
+    it("moves focus to the feedback so screen readers read it", () => {
+        renderQuestion({ selectedAnswer: "b", showFeedback: true });
+
+        // document.activeElement is the element that has focus right now.
+        // Screen readers read the focused element, so the feedback must have it.
+        // If someone removes the focus code, sighted users see no difference,
+        // so this test guards it.
+        expect(document.activeElement).toHaveTextContent("Correct!");
+    });
 });
