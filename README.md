@@ -118,6 +118,20 @@ should not be committed.
 
 Follow these steps when setting up the project on a new computer:
 
+**Local environment variables at a glance.** The backend reads these from its IntelliJ
+Run/Debug configuration (Spring Boot does not read `.env` files). The steps below explain each one.
+
+| Variable | Required? | Example | Details |
+|----------|-----------|---------|---------|
+| `DB_URL` | No, defaults to `jdbc:postgresql://localhost:5432/hunter_exam` | | [Step 3](#3-configure-database-credentials) |
+| `DB_USERNAME` | Yes | `postgres` | [Step 3](#3-configure-database-credentials) |
+| `DB_PASSWORD` | Yes | Your PostgreSQL password | [Step 3](#3-configure-database-credentials) |
+| `JWT_SECRET` | Yes, at least 32 characters | Output of `openssl rand -base64 32` | [Step 4](#4-configure-jwt-secret) |
+| `ADMIN_EMAIL` | Recommended: without it, no admin account is created | `admin@example.com` | [Step 4](#4-configure-jwt-secret) |
+| `ADMIN_PASSWORD` | Recommended, together with `ADMIN_EMAIL` | A password you choose | [Step 4](#4-configure-jwt-secret) |
+| `GOOGLE_LOGIN_ENABLED`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | No, Google login is off by default | | [Optional: Google Login](#optional-google-login) |
+| `MAIL_*` | No, local defaults work | | [Password recovery email](#password-recovery-email-smtp) |
+
 ### 1. Clone the repository
 
 Clone the repository and open the project in IntelliJ IDEA.
@@ -210,8 +224,14 @@ In IntelliJ IDEA:
 2. Select the Spring Boot backend configuration.
 3. Find Environment variables.
 4. Add JWT_SECRET, ADMIN_EMAIL, and ADMIN_PASSWORD.
-5. Paste the generated values.
+5. For `JWT_SECRET`, paste the value generated above. For `ADMIN_EMAIL` and
+   `ADMIN_PASSWORD`, choose your own: they are the login for your local admin account.
 6. Apply the changes and restart the backend.
+
+On startup, the backend creates an admin account with `ADMIN_EMAIL` and `ADMIN_PASSWORD`
+only if the database has no admin yet. If an admin already exists, changing `ADMIN_PASSWORD`
+later does not change that admin's password. If the variables are missing, the backend still
+starts and logs a warning, but no admin is created.
 
 The JWT secret is used only by the local backend and should not be added to `application.properties` or committed to GitHub.
 
@@ -308,8 +328,8 @@ rate-limit recovery requests at their ingress. Response statuses and bodies neve
 disclose account existence.
 
 Backend tests use H2 and mocked email boundaries; they need no external database
-or mail server. With Java 25, run `cd backend` then `./mvnw test` (Windows:
-`mvnw.cmd test`); see [Running the Backend Tests](#running-the-backend-tests). For the frontend run `npm ci` and `npm run build` from `frontend`,
+or mail server. With Java 25, run `cd backend` then `./mvnw test` (PowerShell/cmd:
+`mvnw.cmd test`; in Git Bash on Windows, use `./mvnw test`); see [Running the Backend Tests](#running-the-backend-tests). For the frontend run `npm ci` and `npm run build` from `frontend`,
 then run the frontend tests as described under [Running the Frontend Tests](#running-the-frontend-tests).
 
 ### 5. Start the Backend
@@ -397,7 +417,8 @@ variables or mail server are needed. From the `backend` directory:
 ./mvnw test -Dtest=ExamServiceTests#methodName # one test method
 ```
 
-In PowerShell, quote the option: `-D"test=ExamServiceTests"`. In IntelliJ, click
+In PowerShell or cmd, use `mvnw.cmd` instead of `./mvnw`, and in PowerShell quote the
+option: `-D"test=ExamServiceTests"`. In Git Bash, `./mvnw` works as shown, even on Windows. In IntelliJ, click
 the green run arrow next to a test class or method.
 
 Tests live in `backend/src/test/java/`, in the same packages as the classes they
