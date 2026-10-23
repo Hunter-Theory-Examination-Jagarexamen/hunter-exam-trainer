@@ -1,17 +1,17 @@
 import { useEffect, useRef } from "react";
 import "../../styles/practice.css";
-import type { PracticeQuestion as PracticeQuestionType } from "../../types/practiceQuestions";
+import type { PracticeQuestion } from "../../types/practiceQuestions";
 import QuestionImage from "../common/QuestionImage";
 
 interface PracticeQuestionProps {
-    question: PracticeQuestionType;
+    question: PracticeQuestion;
     selectedAnswer: string | null;
     showFeedback: boolean;
     onAnswerSelect: (answerId: string) => void;
     onCheckAnswer: () => void;
 }
 
-const PracticeQuestion = ({
+const PracticeQuestionCard = ({
                               question,
                               selectedAnswer,
                               showFeedback,
@@ -112,4 +112,4 @@ const PracticeQuestion = ({
     );
 };
 
-export default PracticeQuestion;
+export default PracticeQuestionCard;

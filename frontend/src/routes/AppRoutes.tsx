@@ -19,7 +19,7 @@ import OAuth2Redirect from "../pages/OAuth2Redirect/OAuth2Redirect";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import AdminRoute from "../components/auth/AdminRoute";
 import QuestionBank from "../pages/Admin/QuestionBank";
-import LearnerProgress from "../pages/Admin/LearnerProgress";
+import LearnerProgressPage from "../pages/Admin/LearnerProgressPage";
 import Subjects from "../pages/Admin/Subjects";
 import AdminHome from "../pages/Admin/AdminHome";
 
@@ -68,7 +68,7 @@ const AppRoutes = () => {
                             <Route path="/admin" element={<AdminHome />} />
                             <Route path="/admin/subjects" element={<Subjects />} />
                             <Route path="/admin/questions" element={<QuestionBank />} />
-                            <Route path="/admin/learners" element={<LearnerProgress />} />
+                            <Route path="/admin/learners" element={<LearnerProgressPage />} />
                         </Route>
 
                     </Route>

@@ -1,8 +1,8 @@
 import { useNavigate, useParams } from "react-router-dom";
 import PageTitle from "../../components/common/PageTitle";
-import PracticeQuestion from "../../components/practice/PracticeQuestion";
+import PracticeQuestionCard from "../../components/practice/PracticeQuestionCard";
 import PracticeNavigation from "../../components/practice/PracticeNavigation";
-import type { PracticeQuestion as PracticeQuestionType } from "../../types/practiceQuestions";
+import type { PracticeQuestion } from "../../types/practiceQuestions";
 import {useEffect, useState} from "react";
 import type {Question} from "../../types/question.ts";
 import apiClient from "../../api/apiClient.ts";
@@ -12,7 +12,7 @@ const PracticeQuestions = () => {
     const navigate = useNavigate();
     const { subject } = useParams();
 
-    const [questions, setQuestions] = useState<PracticeQuestionType[]>([]);
+    const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -38,7 +38,7 @@ const PracticeQuestions = () => {
 
                 const data: Question[]= await apiClient(`/api/questions?subjectId=${subject}`);
 
-                const mappedQuestions: PracticeQuestionType[] =
+                const mappedQuestions: PracticeQuestion[] =
                     data.map((question) => {
 
                         return {
@@ -205,7 +205,7 @@ const PracticeQuestions = () => {
                 Question {currentQuestionIndex + 1} of {questions.length}
             </div>
 
-            <PracticeQuestion
+            <PracticeQuestionCard
                 question={currentQuestion}
                 selectedAnswer={selectedAnswer}
                 showFeedback={showFeedback}

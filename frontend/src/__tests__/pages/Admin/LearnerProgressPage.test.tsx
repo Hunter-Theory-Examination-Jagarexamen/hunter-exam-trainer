@@ -1,17 +1,17 @@
-// Tests for src/pages/Admin/LearnerProgress.tsx
+// Tests for src/pages/Admin/LearnerProgressPage.tsx
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import LearnerProgress from "../../../pages/Admin/LearnerProgress";
+import LearnerProgressPage from "../../../pages/Admin/LearnerProgressPage";
 import apiClient from "../../../api/apiClient.ts";
-import type { LearnerProgress as LearnerProgressType } from "../../../types/learnerProgress.ts";
+import type { LearnerProgress } from "../../../types/learnerProgress.ts";
 
 vi.mock("../../../api/apiClient.ts", () => ({
     default: vi.fn(),
 }));
 
-const baseLearner: Omit<LearnerProgressType, "mockExams" | "subjectPerformances" | "lastActivityAt"> = {
+const baseLearner: Omit<LearnerProgress, "mockExams" | "subjectPerformances" | "lastActivityAt"> = {
     userId: 1,
     fullName: "Test Learner",
     email: "test@learner.com",
@@ -29,12 +29,12 @@ const emptyMockExams = {
 function renderPage() {
     render(
         <MemoryRouter>
-            <LearnerProgress />
+            <LearnerProgressPage />
         </MemoryRouter>
     );
 }
 
-describe("LearnerProgress", () => {
+describe("LearnerProgressPage", () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
