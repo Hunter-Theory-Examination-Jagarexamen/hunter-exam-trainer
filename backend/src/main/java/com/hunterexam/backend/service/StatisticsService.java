@@ -1,23 +1,21 @@
 package com.hunterexam.backend.service;
 
-import com.hunterexam.backend.exception.NotFoundException;
+import com.hunterexam.backend.dto.ProgressOverTimeResponse;
 import com.hunterexam.backend.dto.SubjectPerformanceResponse;
 import com.hunterexam.backend.entity.PracticeResult;
 import com.hunterexam.backend.entity.User;
+import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.repository.PracticeResultRepository;
 import com.hunterexam.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
-import com.hunterexam.backend.dto.ProgressOverTimeResponse;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Comparator;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 
 /**
  * Handles calculation of practice performance statistics.
