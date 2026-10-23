@@ -56,6 +56,8 @@ describe("Exam page", () => {
 
     afterEach(() => {
         vi.restoreAllMocks();
+        // Switch back to the real clock even if a timer test failed halfway.
+        vi.useRealTimers();
     });
 
     it("shows a loading message, then the first question", async () => {
@@ -134,8 +136,6 @@ describe("Exam page", () => {
         });
 
         expect(screen.getByText(/59:59/i)).toBeInTheDocument();
-
-        vi.useRealTimers();
     });
 
     it("automatically submits the exam with current answers when time runs out", async () => {
@@ -161,8 +161,6 @@ describe("Exam page", () => {
 
         const body = JSON.parse(submitCall![1]!.body as string);
         expect(body.answers).toEqual({ "1": "B" });
-
-        vi.useRealTimers();
     });
 
     it("shows a clear message when there are too few questions (409 conflict)", async () => {
