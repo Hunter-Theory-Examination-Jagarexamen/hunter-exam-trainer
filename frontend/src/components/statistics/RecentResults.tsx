@@ -1,9 +1,9 @@
 import {Check} from "lucide-react";
 import "../../styles/statistics.css"
-import type { RecentActivity as RecentActivityType} from "../../types/dashboardInfo.ts";
+import type { RecentActivity } from "../../types/dashboardInfo.ts";
 
 interface RecentResultsProps {
-    activity: RecentActivityType;
+    activity: RecentActivity;
 }
 
 const RecentResults = (

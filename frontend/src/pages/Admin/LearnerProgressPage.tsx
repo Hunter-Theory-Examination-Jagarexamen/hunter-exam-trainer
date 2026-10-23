@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import PageTitle from "../../components/common/PageTitle";
 import apiClient from "../../api/apiClient.ts";
-import type { LearnerProgress as LearnerProgressType } from "../../types/learnerProgress.ts";
+import type { LearnerProgress } from "../../types/learnerProgress.ts";
 import "../../styles/statistics.css";
 
-const LearnerProgress = () => {
-    const [learners, setLearners] = useState<LearnerProgressType[]>([]);
+const LearnerProgressPage = () => {
+    const [learners, setLearners] = useState<LearnerProgress[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -15,7 +15,7 @@ const LearnerProgress = () => {
                 setIsLoading(true);
                 setError("");
 
-                const data: LearnerProgressType[] =
+                const data: LearnerProgress[] =
                     await apiClient("/api/admin/learners");
 
                 setLearners(data);
@@ -113,4 +113,4 @@ const LearnerProgress = () => {
     );
 };
 
-export default LearnerProgress;
+export default LearnerProgressPage;

@@ -1,11 +1,11 @@
 import "../../styles/dashboard.css";
 import {useEffect, useState} from "react";
-import type { RecentActivity as RecentActivityType } from "../../types/dashboardInfo.ts";
+import type { RecentActivity } from "../../types/dashboardInfo.ts";
 import apiClient from "../../api/apiClient.ts";
 
-const RecentActivity = () => {
+const RecentActivityList = () => {
 
-    const [activities, setActivities] = useState<RecentActivityType[]>([]);
+    const [activities, setActivities] = useState<RecentActivity[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -16,7 +16,7 @@ const RecentActivity = () => {
                 setIsLoading(true);
                 setError("");
 
-                const recentInfo: RecentActivityType[] = await apiClient("/api/dashboard/recent");
+                const recentInfo: RecentActivity[] = await apiClient("/api/dashboard/recent");
                 setActivities(recentInfo);
             }
             catch (error) {
@@ -84,4 +84,4 @@ const RecentActivity = () => {
     );
 };
 
-export default RecentActivity;
+export default RecentActivityList;

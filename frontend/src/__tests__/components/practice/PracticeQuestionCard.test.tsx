@@ -1,21 +1,21 @@
-// Tests for src/components/practice/PracticeQuestion.tsx
+// Tests for src/components/practice/PracticeQuestionCard.tsx
 //
-// PracticeQuestion is a "controlled" component: the parent page decides which
+// PracticeQuestionCard is a "controlled" component: the parent page decides which
 // answer is selected and whether feedback is shown, and passes that in as props.
 // So each test draws it with the props it wants and checks what the user sees.
 
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import PracticeQuestion from "../../../components/practice/PracticeQuestion";
-import type { PracticeQuestion as PracticeQuestionType } from "../../../types/practiceQuestions";
+import PracticeQuestionCard from "../../../components/practice/PracticeQuestionCard";
+import type { PracticeQuestion } from "../../../types/practiceQuestions";
 
 vi.mock("../../../api/apiClient.ts", () => ({
     default: vi.fn(),
 }));
 
 // A small made-up question. Option "b" is the correct one.
-const question: PracticeQuestionType = {
+const question: PracticeQuestion = {
     id: "q1",
     subjectArea: "Test subject",
     question: "Which animal is a deer?",
@@ -28,9 +28,9 @@ const question: PracticeQuestionType = {
 
 // Draw the component. Defaults: nothing selected, no feedback, mock callbacks.
 // A test overrides only the props it cares about.
-function renderQuestion(props: Partial<React.ComponentProps<typeof PracticeQuestion>> = {}) {
+function renderQuestion(props: Partial<React.ComponentProps<typeof PracticeQuestionCard>> = {}) {
     render(
-        <PracticeQuestion
+        <PracticeQuestionCard
             question={question}
             selectedAnswer={null}
             showFeedback={false}
@@ -41,7 +41,7 @@ function renderQuestion(props: Partial<React.ComponentProps<typeof PracticeQuest
     );
 }
 
-describe("PracticeQuestion", () => {
+describe("PracticeQuestionCard", () => {
 
     it("shows the question and all answer choices", () => {
         renderQuestion();
