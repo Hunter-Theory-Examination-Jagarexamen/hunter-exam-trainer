@@ -105,10 +105,9 @@ class ExamServiceTests {
         return bank;
     }
 
-    private ExamSubmitRequest submission(List<Long> questionIds, Map<String, String> answers) {
+    private ExamSubmitRequest submission(Map<String, String> answers) {
         ExamSubmitRequest request = new ExamSubmitRequest();
         request.setSessionId(SESSION_ID);
-        request.setQuestionIds(questionIds);
         request.setAnswers(answers);
         return request;
     }
@@ -116,15 +115,14 @@ class ExamServiceTests {
     // ----- Security: server-side question list -----
 
     @Test
-    void clientCannotReduceQuestionCountBySendingOnlyCorrectIds() {
+    void scoresAllIssuedQuestionsNotOnlyTheAnsweredOnes() {
         // Arrange: server issued 4 questions for this session
         givenOpenSessionWith(List.of(question(1), question(2), question(3), question(4)));
 
-        // Client tries to send only question 1 (which it got right)
-        ExamSubmitRequest request = submission(List.of(1L),
-                Map.of("1", "B"));
+        // Client only answers question 1 (which it got right)
+        ExamSubmitRequest request = submission(Map.of("1", "B"));
 
-        // Act: server ignores the client list, uses all 4 session questions
+        // Act: server scores all 4 session questions
         ExamResultResponse result = examService.submitExam(request, EMAIL);
 
         // Assert: total is 4 (not 1), score is 25% (not 100%)
@@ -132,24 +130,6 @@ class ExamServiceTests {
         assertEquals(1, result.getCorrectAnswers());
         assertEquals(3, result.getUnanswered());
         assertEquals(25, result.getScore());
-    }
-
-    @Test
-    void clientQuestionIdsThatDifferFromSessionAreIgnored() {
-        // Arrange: server issued questions 1, 2, 3 for this session
-        givenOpenSessionWith(List.of(question(1), question(2), question(3)));
-
-        // Client sends different ids entirely (999) — should be ignored
-        ExamSubmitRequest request = submission(List.of(999L),
-                Map.of("1", "B", "2", "B", "3", "B"));
-
-        // Act
-        ExamResultResponse result = examService.submitExam(request, EMAIL);
-
-        // Assert: server still scored against 1, 2, 3
-        assertEquals(3, result.getTotalQuestions());
-        assertEquals(3, result.getCorrectAnswers());
-        assertEquals(100, result.getScore());
     }
 
     // ----- Security: ownership -----
@@ -167,7 +147,7 @@ class ExamServiceTests {
         ReflectionTestUtils.setField(otherUser, "id", 99L);
         when(userRepository.findByEmail("other@example.test")).thenReturn(Optional.of(otherUser));
 
-        ExamSubmitRequest request = submission(List.of(1L), Map.of("1", "B"));
+        ExamSubmitRequest request = submission(Map.of("1", "B"));
 
         // Act + Assert: AccessDeniedException, no scoring, no result saved
         assertThrows(AccessDeniedException.class,
@@ -206,8 +186,7 @@ class ExamServiceTests {
     @Test
     void allCorrectAnswersGiveFullScore() {
         givenOpenSessionWith(List.of(question(1), question(2), question(3), question(4)));
-        ExamSubmitRequest request = submission(List.of(1L, 2L, 3L, 4L),
-                Map.of("1", "B", "2", "B", "3", "B", "4", "B"));
+        ExamSubmitRequest request = submission(Map.of("1", "B", "2", "B", "3", "B", "4", "B"));
 
         ExamResultResponse result = examService.submitExam(request, EMAIL);
 
@@ -221,8 +200,7 @@ class ExamServiceTests {
     @Test
     void mixedAnswersAreCountedAsCorrectIncorrectAndUnanswered() {
         givenOpenSessionWith(List.of(question(1), question(2), question(3), question(4)));
-        ExamSubmitRequest request = submission(List.of(1L, 2L, 3L, 4L),
-                Map.of("1", "B", "2", "A", "4", "B"));
+        ExamSubmitRequest request = submission(Map.of("1", "B", "2", "A", "4", "B"));
 
         ExamResultResponse result = examService.submitExam(request, EMAIL);
 
@@ -236,8 +214,7 @@ class ExamServiceTests {
     @Test
     void answerThatIsNotALetterAToDCountsAsIncorrect() {
         givenOpenSessionWith(List.of(question(1), question(2)));
-        ExamSubmitRequest request = submission(List.of(1L, 2L),
-                Map.of("1", "B", "2", "X"));
+        ExamSubmitRequest request = submission(Map.of("1", "B", "2", "X"));
 
         ExamResultResponse result = examService.submitExam(request, EMAIL);
 
@@ -249,8 +226,7 @@ class ExamServiceTests {
     @Test
     void scoreIsRoundedToNearestWholePercent() {
         givenOpenSessionWith(List.of(question(1), question(2), question(3)));
-        ExamSubmitRequest request = submission(List.of(1L, 2L, 3L),
-                Map.of("1", "B", "2", "B", "3", "A"));
+        ExamSubmitRequest request = submission(Map.of("1", "B", "2", "B", "3", "A"));
 
         ExamResultResponse result = examService.submitExam(request, EMAIL);
 
@@ -260,8 +236,7 @@ class ExamServiceTests {
     @Test
     void savedResultHasTheScoreAndBelongsToTheUser() {
         givenOpenSessionWith(List.of(question(1), question(2), question(3), question(4)));
-        ExamSubmitRequest request = submission(List.of(1L, 2L, 3L, 4L),
-                Map.of("1", "B", "2", "A", "4", "B"));
+        ExamSubmitRequest request = submission(Map.of("1", "B", "2", "A", "4", "B"));
 
         examService.submitExam(request, EMAIL);
 
@@ -282,7 +257,7 @@ class ExamServiceTests {
 
     @Test
     void submitWithoutSessionIdIsRejected() {
-        ExamSubmitRequest request = submission(List.of(1L), Map.of("1", "B"));
+        ExamSubmitRequest request = submission(Map.of("1", "B"));
         request.setSessionId(null);
 
         assertThrows(IllegalArgumentException.class,
@@ -295,7 +270,7 @@ class ExamServiceTests {
     @Test
     void submitWithUnknownSessionIdIsRejected() {
         when(examSessionRepository.findById(SESSION_ID)).thenReturn(Optional.empty());
-        ExamSubmitRequest request = submission(List.of(1L), Map.of("1", "B"));
+        ExamSubmitRequest request = submission(Map.of("1", "B"));
 
         assertThrows(NotFoundException.class,
                 () -> examService.submitExam(request, EMAIL));
@@ -309,7 +284,7 @@ class ExamServiceTests {
         ExamSession session = new ExamSession(user, LocalDateTime.now());
         session.setCompleted(true);
         when(examSessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
-        ExamSubmitRequest request = submission(List.of(1L), Map.of("1", "B"));
+        ExamSubmitRequest request = submission(Map.of("1", "B"));
 
         assertThrows(IllegalArgumentException.class,
                 () -> examService.submitExam(request, EMAIL));
@@ -322,7 +297,7 @@ class ExamServiceTests {
     void submitAfterTheTimeLimitIsRejectedAndClosesTheSession() {
         ExamSession session = new ExamSession(user, LocalDateTime.now().minusMinutes(61));
         when(examSessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
-        ExamSubmitRequest request = submission(List.of(1L), Map.of("1", "B"));
+        ExamSubmitRequest request = submission(Map.of("1", "B"));
 
         assertThrows(IllegalArgumentException.class,
                 () -> examService.submitExam(request, EMAIL));
@@ -336,7 +311,7 @@ class ExamServiceTests {
     @Test
     void submitJustBeforeTheTimeLimitIsAccepted() {
         givenOpenSessionWith(List.of(question(1)), LocalDateTime.now().minusMinutes(59));
-        ExamSubmitRequest request = submission(List.of(1L), Map.of("1", "B"));
+        ExamSubmitRequest request = submission(Map.of("1", "B"));
 
         ExamResultResponse result = examService.submitExam(request, EMAIL);
 

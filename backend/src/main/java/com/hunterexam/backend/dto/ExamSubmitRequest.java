@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,8 +15,6 @@ import java.util.Map;
 public class ExamSubmitRequest {
 
     private Long sessionId;
-
-    private List<Long> questionIds;
 
     private Map<String, String> answers;
 }

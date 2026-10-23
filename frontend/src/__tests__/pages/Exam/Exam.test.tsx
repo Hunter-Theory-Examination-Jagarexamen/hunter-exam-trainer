@@ -69,7 +69,7 @@ describe("Exam page", () => {
         expect(apiClient).toHaveBeenCalledWith("/api/exam/start", { method: "POST" });
     });
 
-    it("submits the session id, question ids and answers, then shows the result page", async () => {
+    it("submits the session id and answers, then shows the result page", async () => {
         mockBackend();
         renderExam();
 
@@ -96,7 +96,6 @@ describe("Exam page", () => {
         const body = JSON.parse(submitCall![1]!.body as string);
         expect(body).toEqual({
             sessionId: "session-1",
-            questionIds: [1, 2],
             answers: { "1": "B", "2": "C" },
         });
     });

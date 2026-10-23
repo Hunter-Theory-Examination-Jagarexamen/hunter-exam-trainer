@@ -42,7 +42,6 @@ No request body. Creates an exam session for the logged-in user and returns 70 r
 ```json
 {
   "sessionId": 12,
-  "questionIds": [5, 17, 42],
   "answers": { "5": "A", "17": "C" }
 }
 ```
@@ -59,7 +58,7 @@ Response:
 **Notes:**
 
 - `POST /api/exam/start` links the exam session to the logged-in user. The server records which questions were issued for that session.
-- `POST /api/exam/submit` ignores the `questionIds` field in the request body. The server scores against the questions it issued at `/start`. Only the session's owner may submit; other users receive `403 Forbidden`.
+- `POST /api/exam/submit` scores against the questions the server issued at `/start`; the client doesn't send a question list. Only the session's owner may submit; other users receive `403 Forbidden`.
 
 **MockExams notes:**
 
