@@ -1,14 +1,14 @@
 package com.hunterexam.backend.service;
 
-import org.springframework.security.authentication.BadCredentialsException;
-import com.hunterexam.backend.exception.ConflictException;
 import com.hunterexam.backend.dto.LoginRequest;
 import com.hunterexam.backend.dto.RegisterRequest;
 import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.entity.User;
+import com.hunterexam.backend.exception.ConflictException;
 import com.hunterexam.backend.repository.UserRepository;
 import com.hunterexam.backend.security.JwtService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 

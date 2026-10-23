@@ -1,8 +1,14 @@
 package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.LearnerProgressResponse;
-import com.hunterexam.backend.entity.*;
-import com.hunterexam.backend.repository.*;
+import com.hunterexam.backend.entity.ExamResult;
+import com.hunterexam.backend.entity.PracticeResult;
+import com.hunterexam.backend.entity.Role;
+import com.hunterexam.backend.entity.Subject;
+import com.hunterexam.backend.entity.User;
+import com.hunterexam.backend.repository.ExamResultRepository;
+import com.hunterexam.backend.repository.PracticeResultRepository;
+import com.hunterexam.backend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +18,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)

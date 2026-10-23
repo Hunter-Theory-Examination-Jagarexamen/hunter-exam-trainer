@@ -1,6 +1,5 @@
 package com.hunterexam.backend.dto;
 
-import com.hunterexam.backend.entity.ExamSession;
 import lombok.Getter;
 
 import java.util.List;

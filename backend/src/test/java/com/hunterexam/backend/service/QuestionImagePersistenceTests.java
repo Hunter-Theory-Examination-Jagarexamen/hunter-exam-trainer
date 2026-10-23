@@ -1,9 +1,9 @@
 package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.QuestionRequest;
+import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
-import com.hunterexam.backend.entity.Subject;
 import jakarta.persistence.EntityManager;
 import jakarta.validation.Validation;
 import org.junit.jupiter.api.Test;
@@ -12,7 +12,10 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest(showSql = false)
 @ActiveProfiles("test")

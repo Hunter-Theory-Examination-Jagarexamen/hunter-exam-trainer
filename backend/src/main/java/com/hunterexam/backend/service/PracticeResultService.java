@@ -1,10 +1,10 @@
 package com.hunterexam.backend.service;
 
-import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.dto.PracticeResultRequest;
 import com.hunterexam.backend.entity.PracticeResult;
 import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.User;
+import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.repository.PracticeResultRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
 import com.hunterexam.backend.repository.UserRepository;

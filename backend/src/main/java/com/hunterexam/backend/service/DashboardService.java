@@ -1,10 +1,10 @@
 package com.hunterexam.backend.service;
 
-import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.dto.DashboardResponse;
 import com.hunterexam.backend.dto.RecentActivityResponse;
 import com.hunterexam.backend.entity.ExamResult;
 import com.hunterexam.backend.entity.User;
+import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.repository.ExamResultRepository;
 import com.hunterexam.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
