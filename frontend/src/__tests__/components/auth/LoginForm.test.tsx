@@ -100,4 +100,27 @@ describe("LoginForm", () => {
         expect(await screen.findByRole("alert")).toHaveTextContent("Invalid email or password");
         expect(localStorage.getItem("token")).toBeNull();
     });
+
+    it("shows the account creation success message when navigated from registration", async () => {
+        // Arrange: render with initialEntries that include state
+        render (
+            <MemoryRouter initialEntries={[{ pathname: "/login", state: { accountCreated: true } }]}>
+                <Routes>
+                    <Route path="/login" element={<LoginForm />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        // Assert: the success message is shown
+        expect(await screen.findByRole("status")).toHaveTextContent("Account created successfully! You can now log in.");
+    });
+
+    it("does not show the account creation success message when opened directly", async () => {
+        // Arrange: render normally without state
+        renderLoginForm();
+
+        // Assert: no status role message should be present
+        expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
 });
