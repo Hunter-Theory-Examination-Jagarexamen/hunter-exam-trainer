@@ -133,7 +133,7 @@ public class DataInitializer implements CommandLineRunner {
 
         // Seed a single admin user on first startup.
         if (adminEmail == null || adminEmail.isBlank() || adminPassword.isBlank()) {
-            log.warn("Admin environment variables (app.admin.email / app.admin.password) are missing. Skipping admin user creation/update.");
+            log.warn("Admin environment variables (app.admin.email / app.admin.password) are missing. Skipping admin user creation.");
         } else {
             List<User> admins = userRepository.findAll().stream()
                     .filter(u -> u.getRole() == Role.ADMIN)
@@ -149,12 +149,6 @@ public class DataInitializer implements CommandLineRunner {
 
                 userRepository.save(admin);
                 log.info("Admin user created: {}", adminEmail);
-            } else {
-                User admin = admins.get(0);
-                if (!admin.getEmail().equals(adminEmail)) {
-                    admin.setEmail(adminEmail);
-                    userRepository.save(admin);
-                    log.info("Existing admin user updated with new email: {}", adminEmail);
                 }
             }
 
@@ -162,4 +156,3 @@ public class DataInitializer implements CommandLineRunner {
 
 
     }
-}
