@@ -1,5 +1,6 @@
 package com.hunterexam.backend.service;
 
+import com.hunterexam.backend.dto.AdminStatsResponse;
 import com.hunterexam.backend.dto.LearnerProgressResponse;
 import com.hunterexam.backend.dto.MockExamSummary;
 import com.hunterexam.backend.dto.SubjectPerformanceResponse;
@@ -9,6 +10,8 @@ import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.repository.ExamResultRepository;
 import com.hunterexam.backend.repository.PracticeResultRepository;
+import com.hunterexam.backend.repository.QuestionRepository;
+import com.hunterexam.backend.repository.SubjectRepository;
 import com.hunterexam.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -28,15 +31,33 @@ public class AdminService {
     private final UserRepository userRepository;
     private final PracticeResultRepository practiceResultRepository;
     private final ExamResultRepository examResultRepository;
+    private final QuestionRepository questionRepository;
+    private final SubjectRepository subjectRepository;
 
     public AdminService(
             UserRepository userRepository,
             PracticeResultRepository practiceResultRepository,
-            ExamResultRepository examResultRepository
+            ExamResultRepository examResultRepository,
+            QuestionRepository questionRepository,
+            SubjectRepository subjectRepository
     ) {
         this.userRepository = userRepository;
         this.practiceResultRepository = practiceResultRepository;
         this.examResultRepository = examResultRepository;
+        this.questionRepository = questionRepository;
+        this.subjectRepository = subjectRepository;
+    }
+
+    /**
+     * Counts for the overview cards. Students are counted by role only, so
+     * accounts that cannot use password login are included.
+     */
+    public AdminStatsResponse getStats() {
+        return new AdminStatsResponse(
+                questionRepository.count(),
+                subjectRepository.count(),
+                userRepository.countByRole(Role.STUDENT)
+        );
     }
 
     public List<LearnerProgressResponse> getLearnerProgress() {

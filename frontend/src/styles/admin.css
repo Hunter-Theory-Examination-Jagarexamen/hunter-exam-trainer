@@ -128,3 +128,69 @@
     color: var(--color-text-muted);
     font-style: italic;
 }
+
+/* Admin overview cards (/admin) */
+.admin-overview {
+    width: 100%;
+    max-width: 1000px;
+}
+
+.admin-overview-cards {
+    list-style: none;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Reuses .card (card.css, imported above) so the cards match the dashboard ones. */
+.admin-overview-card {
+    box-sizing: border-box;
+    min-height: 170px;
+    padding: 1.5rem;
+    gap: 0.75rem;
+    color: var(--color-text);
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-overview-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.admin-overview-card:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+.admin-overview-card .card-title {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.admin-overview-card-count {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--color-primary);
+    text-align: left;
+}
+
+.admin-overview-card-caption {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .admin-overview-cards {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .admin-overview-card {
+        min-height: 140px;
+        padding: 1.25rem;
+    }
+}
