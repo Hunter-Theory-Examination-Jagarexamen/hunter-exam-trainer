@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {Eye, EyeOff, Lock, Mail} from "lucide-react";
 import logo from "../../assets/images/logo.svg";
 import "../../styles/auth.css";
@@ -12,6 +12,12 @@ import { API_BASE_URL } from "../../api/apiClient";
 const LoginForm = () => {
 
     const navigate = useNavigate();
+    const location = useLocation();
+    const [successMessage] = useState(
+        (location.state as { accountCreated?: boolean })?.accountCreated
+        ? "Account created successfully! You can now log in."
+            : ""
+    );
 
     const [showPassword, setShowPassword] = useState(false);
 
@@ -69,6 +75,12 @@ const LoginForm = () => {
                 <h2>Welcome back!</h2>
                 <p>Log in to continue your practice.</p>
             </div>
+
+            {successMessage && (
+                <p role="status" style={{ color: "#38a169", marginBottom: "1rem", fontSize: "0.875rem", fontWeight: 500 }}>
+                    {successMessage}
+                </p>
+            )}
 
             <form onSubmit={handleLogin}>
                 <div className="form-field">
