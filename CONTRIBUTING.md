@@ -11,6 +11,11 @@ How we work in this repository. Short on purpose: if something here is unclear o
 5. Merge when the checklist is done. Self-merging is allowed: you may merge your own PR yourself, so a review by a teammate is optional. Asking someone to review is still welcome, especially for bigger or risky changes.
 6. Delete your branch after merging (GitHub offers this on the merged PR). Don't delete other people's branches without asking them.
 
+## Code Style
+
+- **Formatting:** Code formatting is standardized via the root `.editorconfig` file. If you are using VS Code, make sure to install the [EditorConfig extension](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig).
+- **Styling:** Frontend styling uses plain CSS files located in `src/styles/`. Tailwind CSS is not installed or supported.
+
 ## Shared branches only change through PRs
 
 Every change to `develop` and `main` goes through a pull request, even a one-line docs fix. There is no "small enough to commit directly".

@@ -57,7 +57,7 @@ const RegisterForm = () => {
                 }),
             });
     // Redirects user to login page after successful registration
-            navigate("/login");
+            navigate("/login", { state: { accountCreated: true } });
         } catch (err) {
             setError(
                 err instanceof Error && err.message
