@@ -1,5 +1,6 @@
 package com.hunterexam.backend.service;
 
+import com.hunterexam.backend.dto.AdminStatsResponse;
 import com.hunterexam.backend.dto.LearnerProgressResponse;
 import com.hunterexam.backend.entity.ExamResult;
 import com.hunterexam.backend.entity.PracticeResult;
@@ -8,6 +9,8 @@ import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.repository.ExamResultRepository;
 import com.hunterexam.backend.repository.PracticeResultRepository;
+import com.hunterexam.backend.repository.QuestionRepository;
+import com.hunterexam.backend.repository.SubjectRepository;
 import com.hunterexam.backend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,13 +34,16 @@ class AdminServiceTests {
     @Mock UserRepository userRepository;
     @Mock PracticeResultRepository practiceResultRepository;
     @Mock ExamResultRepository examResultRepository;
+    @Mock QuestionRepository questionRepository;
+    @Mock SubjectRepository subjectRepository;
 
     private AdminService adminService;
     private User learner;
 
     @BeforeEach
     void setUp() {
-        adminService = new AdminService(userRepository, practiceResultRepository, examResultRepository);
+        adminService = new AdminService(userRepository, practiceResultRepository, examResultRepository,
+                questionRepository, subjectRepository);
         learner = new User();
         learner.setFullName("Test Learner");
         learner.setEmail("learner@test.com");
@@ -158,5 +165,33 @@ class AdminServiceTests {
         LearnerProgressResponse lr = adminService.getLearnerProgress().getFirst();
 
         assertFalse(lr.mockExams().latestPassed());
+    }
+
+    @Test
+    void statsCountQuestionsSubjectsAndEveryStudent() {
+        when(questionRepository.count()).thenReturn(42L);
+        when(subjectRepository.count()).thenReturn(5L);
+        when(userRepository.countByRole(Role.STUDENT)).thenReturn(17L);
+
+        AdminStatsResponse stats = adminService.getStats();
+
+        assertEquals(42L, stats.questionCount());
+        assertEquals(5L, stats.subjectCount());
+        assertEquals(17L, stats.studentCount());
+        // Students are counted by role alone, so inactive accounts stay included.
+        verify(userRepository).countByRole(Role.STUDENT);
+    }
+
+    @Test
+    void statsAreZeroWhenTheRepositoriesAreEmpty() {
+        when(questionRepository.count()).thenReturn(0L);
+        when(subjectRepository.count()).thenReturn(0L);
+        when(userRepository.countByRole(Role.STUDENT)).thenReturn(0L);
+
+        AdminStatsResponse stats = adminService.getStats();
+
+        assertEquals(0L, stats.questionCount());
+        assertEquals(0L, stats.subjectCount());
+        assertEquals(0L, stats.studentCount());
     }
 }

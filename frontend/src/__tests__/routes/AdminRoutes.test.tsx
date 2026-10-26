@@ -23,6 +23,7 @@ function mockUser(role: typeof UserRole[keyof typeof UserRole]) {
     vi.mocked(apiClient).mockImplementation(async endpoint => {
         if (endpoint === "/api/users/me") return {id: 1, fullName: "Test User", email: "test@example.com", role, createdAt: "2026-10-05"};
         if (endpoint === "/api/subjects") return [];
+        if (endpoint === "/api/admin/stats") return {questionCount: 42, subjectCount: 5, studentCount: 17};
         throw new Error(`Unexpected endpoint: ${endpoint}`);
     });
 }
@@ -79,24 +80,28 @@ describe("Admin navigation and routing", () => {
         expect(screen.queryByRole("button", {name: "Add question"})).not.toBeInTheDocument();
     });
 
-    it("lets an ADMIN open the admin start page with links to each tool", async () => {
+    it("lets an ADMIN open the admin start page with count cards linking to each tool", async () => {
         window.history.replaceState({}, "", "/admin");
         mockUser(UserRole.ADMIN);
         render(<AppRoutes />);
         expect(await screen.findByRole("heading", {name: "Admin"})).toBeInTheDocument();
-        // Each tool is linked twice on this page: once in the sidebar, once on the start page.
-        expect(screen.getAllByRole("link", {name: "Questions"})).toHaveLength(2);
-        expect(screen.getAllByRole("link", {name: "Subjects"})).toHaveLength(2);
-        expect(screen.getAllByRole("link", {name: "Learners"})).toHaveLength(2);
+        const questionsCard = await screen.findByRole("link", {name: /Open the question bank/});
+        expect(questionsCard).toHaveAttribute("href", "/admin/questions");
+        expect(questionsCard).toHaveTextContent("42");
+        // Each tool is linked twice on this page: once in the sidebar, once on the overview card.
+        expect(screen.getAllByRole("link", {name: /^Questions/})).toHaveLength(2);
+        expect(screen.getAllByRole("link", {name: /^Subjects/})).toHaveLength(2);
+        expect(screen.getAllByRole("link", {name: /^Learners/})).toHaveLength(2);
     });
 
-    it("redirects a STUDENT opening the admin start page", async () => {
+    it("redirects a STUDENT opening the admin start page without requesting the counts", async () => {
         window.history.replaceState({}, "", "/admin");
         mockUser(UserRole.STUDENT);
         render(<AppRoutes />);
         expect(await screen.findByRole("heading", {name: "Dashboard page"})).toBeInTheDocument();
         expect(window.location.pathname).toBe("/dashboard");
         expect(screen.queryByRole("link", {name: "Admin"})).not.toBeInTheDocument();
+        expect(apiClient).not.toHaveBeenCalledWith("/api/admin/stats");
     });
 
     it("redirects unauthenticated access to login without requesting admin data", async () => {

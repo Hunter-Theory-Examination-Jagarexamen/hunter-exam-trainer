@@ -24,4 +24,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByPasswordResetTokenHash(@Param("hash") String hash);
 
     List<User> findByRole(Role role);
+
+    /** Counts every user with the role, regardless of login flags such as passwordLoginEnabled. */
+    long countByRole(Role role);
 }
