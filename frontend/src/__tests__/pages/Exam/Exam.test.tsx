@@ -4,7 +4,7 @@
 // (ExamHeader, QuestionPanel, ExamNavigation). Only the backend is mocked.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, act } from "@testing-library/react";
+import { render, screen, act, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import Exam from "../../../pages/Exam/Exam";
@@ -13,6 +13,14 @@ import type { ExamQuestion } from "../../../types/examQuestion.ts";
 
 vi.mock("../../../api/apiClient.ts", () => ({
     default: vi.fn(),
+    ApiError: class ApiError extends Error {
+        status: number;
+        constructor(message: string, status: number) {
+            super(message);
+            this.status = status;
+        }
+    },
+
 }));
 
 // Two made-up questions, as /api/exam/start would return them.
@@ -26,6 +34,9 @@ function mockBackend() {
     vi.mocked(apiClient).mockImplementation(async (endpoint: string) => {
         if (endpoint === "/api/exam/start") {
             return { sessionId: "session-1", questions };
+        }
+        if (endpoint.match(/^\/api\/exam\/[^/]+\/answer$/)) {
+            return null;  // 204
         }
         if (endpoint === "/api/exam/submit") {
             return { totalQuestions: 2, correctAnswers: 1, incorrectAnswers: 1, unanswered: 0, score: 50 };
@@ -67,6 +78,41 @@ describe("Exam page", () => {
         expect(screen.getByText("Loading exam questions...")).toBeInTheDocument();
         expect(await screen.findByText("First question?")).toBeInTheDocument();
         expect(apiClient).toHaveBeenCalledWith("/api/exam/start", { method: "POST" });
+    });
+
+    it("saves each answer to the server as it is given", async () => {
+        mockBackend();
+        renderExam();
+
+        await screen.findByText("First question?");
+        await userEvent.click(screen.getByRole("radio", { name: "B1" }));
+
+        // The answer POST should fire
+        await waitFor(() => {
+            const answerCall = vi.mocked(apiClient).mock.calls.find(
+                ([endpoint]) => endpoint === "/api/exam/session-1/answer"
+            );
+            expect(answerCall).toBeDefined();
+            const body = JSON.parse(answerCall![1]!.body as string);
+            expect(body).toEqual({ questionId: 1, answer: "B" });
+        });
+    });
+
+    it("does not save the same answer twice", async () => {
+        mockBackend();
+        renderExam();
+
+        await screen.findByText("First question?");
+        const option = screen.getByRole("radio", { name: "B1" });
+        await userEvent.click(option);
+        await userEvent.click(option);  // same option again
+
+        await waitFor(() => {
+            const answerCalls = vi.mocked(apiClient).mock.calls.filter(
+                ([endpoint]) => endpoint === "/api/exam/session-1/answer"
+            );
+            expect(answerCalls).toHaveLength(1);
+        });
     });
 
     it("submits the session id and answers, then shows the result page", async () => {

@@ -13,6 +13,7 @@
 | GET    | /api/questions?subjectId={id} | Get questions for a specific subject            | Required         |
 | POST   | /api/practice/results         | Save a completed practice session result        | Required         |
 | POST   | /api/exam/start               | Start a mock exam and receive 70 questions      | Required         |
+| POST   | /api/exam/{sessionId}/answer | Save a single answer on the current exam session | Required |
 | POST   | /api/exam/submit              | Submit a mock exam answers and save the result  | Required         |
 | GET    | /api/dashboard                | Get dashboard statistics for the logged-in user | Required         |
 | GET    | /api/dashboard/recent         | Get the user's recent mock exam activity        | Required         |
@@ -59,6 +60,9 @@ Response:
 
 - `POST /api/exam/start` links the exam session to the logged-in user. The server records which questions were issued for that session.
 - `POST /api/exam/submit` scores against the questions the server issued at `/start`; the client doesn't send a question list. Only the session's owner may submit; other users receive `403 Forbidden`.
+
+**Exams notes:**
+- `POST /api/exam/{sessionId}/answer` saves an individual answer as the user gives it. Called by the frontend on each selection. Answers are stored on the session and used at submit time, so a lost connection, expired token, or closed tab does not lose the attempt.
 
 **MockExams notes:**
 
