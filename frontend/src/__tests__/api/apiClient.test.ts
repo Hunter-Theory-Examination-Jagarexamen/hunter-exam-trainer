@@ -1,7 +1,8 @@
 // Tests for src/api/apiClient.ts
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import apiClient, { ApiError, REQUEST_TIMEOUT_MS, ServerUnreachableError } from "../../api/apiClient.ts";
+import apiClient, { ApiError, REQUEST_TIMEOUT_MS, STARTING_MESSAGE_AFTER_MS, ServerUnreachableError } from "../../api/apiClient.ts";
+import { getServerStatus, setServerStatus } from "../../api/serverStatus.ts";
 import { isServerUnreachable } from "../../services/apiErrors.ts";
 
 describe("apiClient — session expiry handling", () => {
@@ -158,5 +159,54 @@ describe("apiClient — backend can't be reached", () => {
     it("isServerUnreachable is false for other errors", () => {
         expect(isServerUnreachable(new ApiError("Forbidden", 403))).toBe(false);
         expect(isServerUnreachable("not an error")).toBe(false);
+    });
+});
+
+describe("apiClient — slow backend (\"server is starting\")", () => {
+
+    // A fetch that answers only when the test calls answer().
+    function slowFetch() {
+        const pending: ((response: Response) => void)[] = [];
+        vi.stubGlobal("fetch", vi.fn(() => new Promise<Response>(resolve => pending.push(resolve))));
+        return (index = 0) => pending[index](new Response(null, { status: 204 }));
+    }
+
+    beforeEach(() => {
+        vi.useFakeTimers();
+        setServerStatus("ok");
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+        vi.unstubAllGlobals();
+    });
+
+    it("sets \"starting\" after STARTING_MESSAGE_AFTER_MS without an answer, and \"ok\" when it comes", async () => {
+        const answer = slowFetch();
+        const request = apiClient("/api/users/me");
+
+        await vi.advanceTimersByTimeAsync(STARTING_MESSAGE_AFTER_MS - 1);
+        expect(getServerStatus()).toBe("ok");
+
+        await vi.advanceTimersByTimeAsync(1);
+        expect(getServerStatus()).toBe("starting");
+
+        answer();
+        await request;
+        expect(getServerStatus()).toBe("ok");
+    });
+
+    it("does not set \"starting\" when another request got an answer meanwhile", async () => {
+        const answer = slowFetch();
+        const slowRequest = apiClient("/api/dashboard");
+        const fastRequest = apiClient("/api/users/me");
+
+        answer(1);
+        await fastRequest;
+        await vi.advanceTimersByTimeAsync(STARTING_MESSAGE_AFTER_MS);
+        expect(getServerStatus()).toBe("ok");
+
+        answer(0);
+        await slowRequest;
     });
 });

@@ -2,7 +2,9 @@
 // after every request; ServerStatusBanner shows it. A tiny "store": a value
 // plus a list of listeners to call when it changes (used with useSyncExternalStore).
 
-export type ServerStatus = "ok" | "unreachable";
+// "starting": a request has waited a few seconds without an answer, so the
+// backend is probably waking up (Render puts it to sleep when unused).
+export type ServerStatus = "ok" | "starting" | "unreachable";
 
 let status: ServerStatus = "ok";
 const listeners = new Set<() => void>();

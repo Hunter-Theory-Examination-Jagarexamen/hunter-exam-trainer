@@ -15,6 +15,13 @@ describe("ServerStatusBanner", () => {
         expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     });
 
+    it("says the server is starting while a request waits", () => {
+        render(<ServerStatusBanner />);
+        act(() => setServerStatus("starting"));
+        expect(screen.getByRole("status")).toHaveTextContent("The server is starting");
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+
     it("appears when a request gets no answer, and disappears when the next one does", async () => {
         render(<ServerStatusBanner />);
 

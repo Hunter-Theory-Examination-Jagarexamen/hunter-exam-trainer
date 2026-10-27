@@ -15,6 +15,14 @@ export class ApiError extends Error {
 // Render can take about a minute to wake up.
 export const REQUEST_TIMEOUT_MS = 90_000;
 
+// How long a request may wait before we tell the user the server is starting.
+export const STARTING_MESSAGE_AFTER_MS = 5_000;
+
+// Counts answers from the backend. A slow request compares it with the count
+// from when it started: if another request got an answer meanwhile, the
+// server is clearly awake, so we don't show "starting".
+let answerCount = 0;
+
 // Thrown when no usable answer comes from the backend: the request failed
 // (offline, server down, blocked by CORS), took longer than
 // REQUEST_TIMEOUT_MS, or the host answered that the server is unavailable.
@@ -62,6 +70,11 @@ const apiClient = async (
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
+    const answersBefore = answerCount;
+    const startingId = setTimeout(() => {
+        if (answerCount === answersBefore) setServerStatus("starting");
+    }, STARTING_MESSAGE_AFTER_MS);
+
     let response: Response;
     try {
         response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -75,12 +88,14 @@ const apiClient = async (
         throw new ServerUnreachableError();
     } finally {
         clearTimeout(timeoutId);
+        clearTimeout(startingId);
     }
 
     if (SERVER_UNAVAILABLE_STATUSES.includes(response.status)) {
         setServerStatus("unreachable");
         throw new ServerUnreachableError();
     }
+    answerCount++;
     setServerStatus("ok");
 
     if (response.status === 401 && !isAuthEndpoint(endpoint)) {

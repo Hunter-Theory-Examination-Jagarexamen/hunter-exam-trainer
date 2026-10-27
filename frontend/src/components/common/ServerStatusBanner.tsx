@@ -2,13 +2,22 @@ import { useSyncExternalStore } from "react";
 import { getServerStatus, subscribeServerStatus } from "../../api/serverStatus";
 import "../../styles/server-status.css";
 
-// One shared message for the whole app when the backend can't be reached.
-// The pages keep their own "Failed to load …" messages; this explains why.
+// One shared message for the whole app when the backend is slow to answer
+// or can't be reached. The pages keep their own "Loading…" and
+// "Failed to load …" messages; this explains why.
 const ServerStatusBanner = () => {
     // Re-renders this component whenever the server status changes.
     const status = useSyncExternalStore(subscribeServerStatus, getServerStatus);
 
     if (status === "ok") return null;
+
+    if (status === "starting") {
+        return (
+            <div className="server-status-banner server-status-banner--starting" role="status">
+                The server is starting. This can take up to a minute…
+            </div>
+        );
+    }
 
     return (
         <div className="server-status-banner" role="alert">
