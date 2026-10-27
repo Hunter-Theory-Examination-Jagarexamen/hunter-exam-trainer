@@ -1,3 +1,5 @@
+import { setServerStatus } from "./serverStatus";
+
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 export class ApiError extends Error {
@@ -26,11 +28,11 @@ export class ServerUnreachableError extends Error {
 // Answers from the host (e.g. Render) when the backend itself is down or restarting.
 const SERVER_UNAVAILABLE_STATUSES = [502, 503, 504];
 
+// Login, register, password reset etc. These work without a login, so they get
+// no token (an old token makes the backend answer 401 even here), and a 401
+// from them means wrong input, not an expired login.
 const isAuthEndpoint = (endpoint: string): boolean =>
-    endpoint.startsWith("/api/auth/login")
-    || endpoint.startsWith("/auth/login")
-    || endpoint.startsWith("/api/auth/register")
-    || endpoint.startsWith("/auth/register");
+    endpoint.startsWith("/api/auth/") || endpoint.startsWith("/auth/");
 
 const handleSessionExpired = (): void => {
     localStorage.removeItem("token");
@@ -52,7 +54,7 @@ const apiClient = async (
         headers.set("Content-Type", "application/json");
     }
 
-    if (token) {
+    if (token && !isAuthEndpoint(endpoint)) {
         headers.set("Authorization", `Bearer ${token}`);
     }
 
@@ -69,14 +71,17 @@ const apiClient = async (
         });
     } catch {
         // fetch only throws when no answer came at all, or when we aborted it.
+        setServerStatus("unreachable");
         throw new ServerUnreachableError();
     } finally {
         clearTimeout(timeoutId);
     }
 
     if (SERVER_UNAVAILABLE_STATUSES.includes(response.status)) {
+        setServerStatus("unreachable");
         throw new ServerUnreachableError();
     }
+    setServerStatus("ok");
 
     if (response.status === 401 && !isAuthEndpoint(endpoint)) {
         handleSessionExpired();
