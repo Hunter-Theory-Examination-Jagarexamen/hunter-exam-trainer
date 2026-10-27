@@ -5,10 +5,11 @@ import AppRoutes from "../../../routes/AppRoutes";
 import apiClient from "../../../api/apiClient";
 import {UserRole} from "../../../types/user";
 import type {Subject} from "../../../types/subject";
+import {fakeToken} from "../../fakeToken";
 
 vi.mock("../../../api/apiClient", () => ({default: vi.fn()}));
 beforeEach(() => {
-    vi.resetAllMocks(); localStorage.setItem("token", "test-token");
+    vi.resetAllMocks(); localStorage.setItem("token", fakeToken());
     window.history.replaceState({}, "", "/admin/subjects");
 });
 afterEach(() => localStorage.clear());
