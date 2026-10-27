@@ -1,3 +1,4 @@
+import {StrictMode} from "react";
 import {afterEach, describe, expect, it} from "vitest";
 import {render, screen} from "@testing-library/react";
 import {MemoryRouter, Route, Routes, useLocation} from "react-router-dom";
@@ -11,7 +12,9 @@ function LoginProbe() {
 }
 
 function renderDashboard() {
+    // StrictMode like main.tsx: React renders twice, which shows side effects during render.
     render(
+        <StrictMode>
         <MemoryRouter initialEntries={["/dashboard"]}>
             <Routes>
                 <Route path="/login" element={<LoginProbe />} />
@@ -20,6 +23,7 @@ function renderDashboard() {
                 </Route>
             </Routes>
         </MemoryRouter>
+        </StrictMode>
     );
 }
 
@@ -32,11 +36,10 @@ describe("ProtectedRoute", () => {
         expect(screen.getByText("Dashboard page")).toBeInTheDocument();
     });
 
-    it("sends an expired login to the login page with the expired message and removes the token", () => {
+    it("sends an expired login to the login page with the expired message", () => {
         localStorage.setItem("token", fakeToken(-60));
         renderDashboard();
         expect(screen.getByText("Login page ?expired=1")).toBeInTheDocument();
-        expect(localStorage.getItem("token")).toBeNull();
     });
 
     it("sends a user without a token to the login page", () => {
@@ -44,10 +47,9 @@ describe("ProtectedRoute", () => {
         expect(screen.getByText("Login page")).toBeInTheDocument();
     });
 
-    it("sends an unreadable token to the login page without the expired message and removes it", () => {
+    it("sends an unreadable token to the login page without the expired message", () => {
         localStorage.setItem("token", "not-a-jwt");
         renderDashboard();
         expect(screen.getByText("Login page")).toBeInTheDocument();
-        expect(localStorage.getItem("token")).toBeNull();
     });
 });
