@@ -1,7 +1,8 @@
 // Tests for src/api/apiClient.ts
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import apiClient, { ApiError } from "../../api/apiClient.ts";
+import apiClient, { ApiError, REQUEST_TIMEOUT_MS, ServerUnreachableError } from "../../api/apiClient.ts";
+import { isServerUnreachable } from "../../services/apiErrors.ts";
 
 describe("apiClient — session expiry handling", () => {
 
@@ -101,5 +102,61 @@ describe("apiClient — session expiry handling", () => {
         // Token still cleared, but no redirect since already on /login
         expect(localStorage.getItem("token")).toBeNull();
         expect(window.location.href).toBe("");
+    });
+});
+
+describe("apiClient — backend can't be reached", () => {
+
+    afterEach(() => {
+        vi.useRealTimers();
+        vi.unstubAllGlobals();
+    });
+
+    it("throws ServerUnreachableError when fetch fails (offline, server down, CORS)", async () => {
+        vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
+
+        const error = await apiClient("/api/users/me").catch(e => e);
+
+        expect(error).toBeInstanceOf(ServerUnreachableError);
+        expect(isServerUnreachable(error)).toBe(true);
+    });
+
+    it.each([502, 503, 504])("throws ServerUnreachableError when the host answers %i", async status => {
+        vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status, text: async () => "" }));
+
+        await expect(apiClient("/api/users/me")).rejects.toBeInstanceOf(ServerUnreachableError);
+    });
+
+    it("gives up after REQUEST_TIMEOUT_MS when no answer comes", async () => {
+        vi.useFakeTimers();
+        // A fetch that never answers, but stops when the request is aborted.
+        vi.stubGlobal("fetch", vi.fn((_url: string, init: RequestInit) => new Promise((_resolve, reject) => {
+            init.signal?.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")));
+        })));
+
+        let settled = false;
+        const result = apiClient("/api/users/me").catch(e => { settled = true; return e; });
+
+        await vi.advanceTimersByTimeAsync(REQUEST_TIMEOUT_MS - 1);
+        expect(settled).toBe(false);
+
+        await vi.advanceTimersByTimeAsync(1);
+        expect(await result).toBeInstanceOf(ServerUnreachableError);
+    });
+
+    it("clears the time limit when the answer comes in time", async () => {
+        vi.useFakeTimers();
+        vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+            ok: true, status: 204, headers: new Headers(), text: async () => "",
+        }));
+
+        await apiClient("/api/users/me");
+
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it("isServerUnreachable is false for other errors", () => {
+        expect(isServerUnreachable(new ApiError("Forbidden", 403))).toBe(false);
+        expect(isServerUnreachable("not an error")).toBe(false);
     });
 });

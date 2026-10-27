@@ -9,6 +9,23 @@ export class ApiError extends Error {
     }
 }
 
+// How long to wait for an answer before giving up. A sleeping backend on
+// Render can take about a minute to wake up.
+export const REQUEST_TIMEOUT_MS = 90_000;
+
+// Thrown when no usable answer comes from the backend: the request failed
+// (offline, server down, blocked by CORS), took longer than
+// REQUEST_TIMEOUT_MS, or the host answered that the server is unavailable.
+export class ServerUnreachableError extends Error {
+    constructor() {
+        super("The server can't be reached. Please try again later.");
+        this.name = "ServerUnreachableError";
+    }
+}
+
+// Answers from the host (e.g. Render) when the backend itself is down or restarting.
+const SERVER_UNAVAILABLE_STATUSES = [502, 503, 504];
+
 const isAuthEndpoint = (endpoint: string): boolean =>
     endpoint.startsWith("/api/auth/login")
     || endpoint.startsWith("/auth/login")
@@ -39,10 +56,27 @@ const apiClient = async (
         headers.set("Authorization", `Bearer ${token}`);
     }
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        ...options,
-        headers,
-    });
+    // AbortController lets us cancel the request ourselves when it takes too long.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    let response: Response;
+    try {
+        response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            ...options,
+            headers,
+            signal: controller.signal,
+        });
+    } catch {
+        // fetch only throws when no answer came at all, or when we aborted it.
+        throw new ServerUnreachableError();
+    } finally {
+        clearTimeout(timeoutId);
+    }
+
+    if (SERVER_UNAVAILABLE_STATUSES.includes(response.status)) {
+        throw new ServerUnreachableError();
+    }
 
     if (response.status === 401 && !isAuthEndpoint(endpoint)) {
         handleSessionExpired();
