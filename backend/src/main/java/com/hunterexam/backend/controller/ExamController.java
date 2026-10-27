@@ -4,6 +4,10 @@ import com.hunterexam.backend.dto.ExamResultResponse;
 import com.hunterexam.backend.dto.ExamStartResponse;
 import com.hunterexam.backend.dto.ExamSubmitRequest;
 import com.hunterexam.backend.service.ExamService;
+import com.hunterexam.backend.dto.ExamAnswerRequest;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * REST controller for the mock hunter exam.
  * <p>
- * Provides endpoints for starting a mock exam and submitting
- * the completed exam for evaluation.
+ * Provides endpoints for starting a mock exam, saving answers as they are
+ * given, and submitting the completed exam for evaluation.
  */
 @RestController
 @RequestMapping("/api/exam")
@@ -41,15 +45,32 @@ public class ExamController {
     }
 
     /**
-     * Submits a completed mock exam for evaluation.
+     * Saves a single answer on the current exam session.
      * <p>
-     * The user's email is obtained from the JWT authentication context.
-     * The service evaluates the submitted answers and stores the exam result.
+     * Called as the user answers each question, so a lost connection,
+     * expired token, or closed tab does not lose the attempt. Protected
+     * by the same ownership rules as submit.
      *
-     * @param authentication authentication information from Spring Security
-     * @param request submitted answers (the client's question list is ignored)
-     * @return calculated exam result
+     * @param authentication authentication info from Spring Security
+     * @param sessionId      exam session id
+     * @param request        the question id and chosen answer
+     * @return 204 No Content on success
      */
+    @PostMapping("/{sessionId}/answer")
+    public ResponseEntity<Void> saveAnswer(
+        Authentication authentication,
+        @PathVariable Long sessionId,
+        @Valid @RequestBody ExamAnswerRequest request
+    ) {
+        examService.saveAnswer(
+            sessionId,
+            request.getQuestionId(),
+            request.getAnswer(),
+            authentication.getName()
+        );
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/submit")
     public ExamResultResponse submitExam(
             Authentication authentication,
