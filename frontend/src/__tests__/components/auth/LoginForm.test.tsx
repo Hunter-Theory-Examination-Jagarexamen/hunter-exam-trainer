@@ -6,6 +6,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import LoginForm from "../../../components/auth/LoginForm";
 import { checkGoogleLoginEnabled, loginUser } from "../../../services/authService.ts";
+import { ApiError, ServerUnreachableError } from "../../../api/apiClient";
 
 // Replace the real authService (which calls the backend) with mock functions.
 // checkGoogleLoginEnabled must return a Promise, because LoginForm calls .then() on it.
@@ -99,6 +100,21 @@ describe("LoginForm", () => {
         // Assert: findByRole waits until the error message has appeared (or times out)
         expect(await screen.findByRole("alert")).toHaveTextContent("Invalid email or password");
         expect(localStorage.getItem("token")).toBeNull();
+    });
+
+    it.each([
+        ["the server can't be reached", new ServerUnreachableError(), "Can't reach the server"],
+        ["the server answers with an error", new ApiError("", 500), "Something went wrong on the server"],
+    ])("says so instead of 'Invalid email or password' when %s", async (_case, error, message) => {
+        vi.mocked(loginUser).mockRejectedValue(error);
+        vi.spyOn(console, "error").mockImplementation(() => {});
+        renderLoginForm();
+
+        await userEvent.type(screen.getByLabelText("Email"), "anna@example.com");
+        await userEvent.type(screen.getByLabelText("Password"), "password");
+        await userEvent.click(screen.getByRole("button", { name: "Log In" }));
+
+        expect(await screen.findByRole("alert")).toHaveTextContent(message);
     });
 
     it("shows the account creation success message when navigated from registration", async () => {

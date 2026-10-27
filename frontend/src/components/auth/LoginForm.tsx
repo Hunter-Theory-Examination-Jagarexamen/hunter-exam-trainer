@@ -8,6 +8,7 @@ import {
     loginUser
 } from "../../services/authService";
 import { API_BASE_URL } from "../../api/apiClient";
+import { errorStatus, isServerUnreachable } from "../../services/apiErrors";
 
 const LoginForm = () => {
 
@@ -54,7 +55,13 @@ const LoginForm = () => {
 
         } catch (error) {
             console.error("Login/API error:", error);
-            setError("Invalid email or password");
+            if (isServerUnreachable(error)) {
+                setError("Can't reach the server. Please try again in a few minutes.");
+            } else if ((errorStatus(error) ?? 0) >= 500) {
+                setError("Something went wrong on the server. Please try again later.");
+            } else {
+                setError("Invalid email or password");
+            }
         } finally {
             setIsLoading(false);
         }

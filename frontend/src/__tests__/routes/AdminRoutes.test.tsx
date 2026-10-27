@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import AppRoutes from "../../routes/AppRoutes";
 import apiClient from "../../api/apiClient";
 import {UserRole} from "../../types/user";
+import {fakeToken} from "../fakeToken";
 
 vi.mock("../../api/apiClient", () => ({default: vi.fn()}));
 vi.mock("../../services/authService", () => ({
@@ -14,7 +15,7 @@ vi.mock("../../pages/Dashboard/Dashboard", () => ({default: () => <h1>Dashboard 
 
 beforeEach(() => {
     vi.resetAllMocks();
-    localStorage.setItem("token", "test-token");
+    localStorage.setItem("token", fakeToken());
     window.history.replaceState({}, "", "/admin/questions");
 });
 afterEach(() => localStorage.clear());

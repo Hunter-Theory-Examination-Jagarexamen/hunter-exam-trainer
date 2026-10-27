@@ -1,3 +1,5 @@
+import { setServerStatus } from "./serverStatus";
+
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 export class ApiError extends Error {
@@ -9,11 +11,36 @@ export class ApiError extends Error {
     }
 }
 
+// How long to wait for an answer before giving up. A sleeping backend on
+// Render can take about a minute to wake up.
+export const REQUEST_TIMEOUT_MS = 90_000;
+
+// How long a request may wait before we tell the user the server is starting.
+export const STARTING_MESSAGE_AFTER_MS = 5_000;
+
+// Counts answers from the backend. A slow request compares it with the count
+// from when it started: if another request got an answer meanwhile, the
+// server is clearly awake, so we don't show "starting".
+let answerCount = 0;
+
+// Thrown when no usable answer comes from the backend: the request failed
+// (offline, server down, blocked by CORS), took longer than
+// REQUEST_TIMEOUT_MS, or the host answered that the server is unavailable.
+export class ServerUnreachableError extends Error {
+    constructor() {
+        super("The server can't be reached. Please try again later.");
+        this.name = "ServerUnreachableError";
+    }
+}
+
+// Answers from the host (e.g. Render) when the backend itself is down or restarting.
+const SERVER_UNAVAILABLE_STATUSES = [502, 503, 504];
+
+// Login, register, password reset etc. These work without a login, so they get
+// no token (an old token makes the backend answer 401 even here), and a 401
+// from them means wrong input, not an expired login.
 const isAuthEndpoint = (endpoint: string): boolean =>
-    endpoint.startsWith("/api/auth/login")
-    || endpoint.startsWith("/auth/login")
-    || endpoint.startsWith("/api/auth/register")
-    || endpoint.startsWith("/auth/register");
+    endpoint.startsWith("/api/auth/") || endpoint.startsWith("/auth/");
 
 const handleSessionExpired = (): void => {
     localStorage.removeItem("token");
@@ -35,14 +62,41 @@ const apiClient = async (
         headers.set("Content-Type", "application/json");
     }
 
-    if (token) {
+    if (token && !isAuthEndpoint(endpoint)) {
         headers.set("Authorization", `Bearer ${token}`);
     }
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        ...options,
-        headers,
-    });
+    // AbortController lets us cancel the request ourselves when it takes too long.
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+    const answersBefore = answerCount;
+    const startingId = setTimeout(() => {
+        if (answerCount === answersBefore) setServerStatus("starting");
+    }, STARTING_MESSAGE_AFTER_MS);
+
+    let response: Response;
+    try {
+        response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            ...options,
+            headers,
+            signal: controller.signal,
+        });
+    } catch {
+        // fetch only throws when no answer came at all, or when we aborted it.
+        setServerStatus("unreachable");
+        throw new ServerUnreachableError();
+    } finally {
+        clearTimeout(timeoutId);
+        clearTimeout(startingId);
+    }
+
+    if (SERVER_UNAVAILABLE_STATUSES.includes(response.status)) {
+        setServerStatus("unreachable");
+        throw new ServerUnreachableError();
+    }
+    answerCount++;
+    setServerStatus("ok");
 
     if (response.status === 401 && !isAuthEndpoint(endpoint)) {
         handleSessionExpired();

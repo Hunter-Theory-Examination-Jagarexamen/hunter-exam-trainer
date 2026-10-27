@@ -20,3 +20,9 @@ export function backendMessage(error: unknown): string | undefined {
     } catch { /* Not JSON, e.g. an empty body. */ }
     return undefined;
 }
+
+// True when the backend gave no usable answer (see ServerUnreachableError in apiClient.ts).
+// Checks the name instead of instanceof, which also works with mocks.
+export function isServerUnreachable(error: unknown): boolean {
+    return error instanceof Error && error.name === "ServerUnreachableError";
+}
