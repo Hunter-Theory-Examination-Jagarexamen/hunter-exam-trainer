@@ -1,0 +1,21 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "back": "Back"
+  },
+  "errors": {
+    "EMAIL_TAKEN": "Email already registered.",
+    "INVALID_CREDENTIALS": "Invalid email or password",
+    "PASSWORD_TOO_SHORT": "Password is too short.",
+    "PASSWORD_TOO_LONG": "Password is too long.",
+    "INVALID_CURRENT_PASSWORD": "Current password is incorrect.",
+    "TOO_MANY_RESET_REQUESTS": "Too many password reset requests. Please try again later.",
+    "EXAM_ALREADY_SUBMITTED": "Exam has already been submitted.",
+    "NOT_FOUND": "Resource is not found",
+    "UNKNOWN_ERROR": "An unexpected error occurred. Please try again."
+  }
+}
