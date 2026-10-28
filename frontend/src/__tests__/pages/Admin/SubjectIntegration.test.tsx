@@ -27,7 +27,7 @@ describe("Subject synchronization on navigation", () => {
             }
             if (options?.method === "DELETE") { subjects = subjects.filter(item => item.id !== 1); return null; }
             if (endpoint === "/api/subjects") return subjects;
-            if (endpoint.startsWith("/api/questions?")) return [];
+            if (endpoint.startsWith("/api/admin/questions?")) return [];
             throw new Error(`Unexpected endpoint ${endpoint}`);
         });
         render(<AppRoutes />);
