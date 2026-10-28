@@ -1,12 +1,14 @@
 import { useEffect, useRef } from "react";
 import "../../styles/practice.css";
 import type { PracticeQuestion } from "../../types/practiceQuestions";
+import type { PracticeAnswerResponse } from "../../types/practiceAttempt";
 import QuestionImage from "../common/QuestionImage";
 
 interface PracticeQuestionProps {
     question: PracticeQuestion;
     selectedAnswer: string | null;
-    showFeedback: boolean;
+    // The server's check of the answer; null until the answer is checked.
+    feedback: PracticeAnswerResponse | null;
     onAnswerSelect: (answerId: string) => void;
     onCheckAnswer: () => void;
 }
@@ -14,13 +16,14 @@ interface PracticeQuestionProps {
 const PracticeQuestionCard = ({
                               question,
                               selectedAnswer,
-                              showFeedback,
+                              feedback,
                               onAnswerSelect,
                               onCheckAnswer
                           }: PracticeQuestionProps) => {
 
     // A handle to the feedback box on the page, so we can move focus to it.
     const feedbackRef = useRef<HTMLDivElement>(null);
+    const showFeedback = feedback !== null;
 
     // When the feedback appears, move focus to it. The Check Answer button is
     // disabled at that moment, so without this, focus falls back to the whole page
@@ -31,9 +34,8 @@ const PracticeQuestionCard = ({
         }
     }, [showFeedback]);
 
-    const selectedOption = question.options.find(
-        (option) => option.id === selectedAnswer
-    );
+    // Which option the server says is correct (option ids are the letters A-D).
+    const isCorrectOption = (optionId: string) => feedback?.correctOption === optionId;
 
     return (
         <section className="practice-question">
@@ -49,13 +51,13 @@ const PracticeQuestionCard = ({
                             key={option.id}
                             className={`practice-answer ${
                                 selectedAnswer === option.id 
-                                    ? showFeedback 
-                                        ? option.isCorrect 
-                                            ? "correct" 
+                                    ? showFeedback
+                                        ? feedback.correct
+                                            ? "correct"
                                             : "incorrect"
                                         : "selected"
-                                    : showFeedback && option.isCorrect 
-                                        ? "correct" 
+                                    : isCorrectOption(option.id)
+                                        ? "correct"
                                         : ""
                             }`}
                         >
@@ -80,24 +82,24 @@ const PracticeQuestionCard = ({
                     Check Answer
                 </button>
 
-                {showFeedback && selectedOption && (
+                {feedback && (
                     <div
                         ref={feedbackRef}
                         tabIndex={-1}
                         className={
-                            selectedOption.isCorrect
+                            feedback.correct
                                 ? "answer-feedback correct"
                                 : "answer-feedback incorrect"
                         }
                     >
                         {
-                            selectedOption.isCorrect ?
+                            feedback.correct ?
                                 (<p>Correct!</p>):
                                 (<p>Incorrect. The correct answer is: {" "}
                                     <strong>
                                         {
                                             question.options.find(
-                                                (option) => option.isCorrect
+                                                (option) => isCorrectOption(option.id)
                                             )?.answer
                                         }
                                     </strong>

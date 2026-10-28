@@ -6,6 +6,7 @@ import type { PracticeQuestion } from "../../types/practiceQuestions";
 import {useEffect, useState} from "react";
 import type {Question} from "../../types/question.ts";
 import apiClient from "../../api/apiClient.ts";
+import type {OptionLetter, PracticeAnswerResponse} from "../../types/practiceAttempt";
 
 const PracticeQuestions = () => {
 
@@ -18,7 +19,7 @@ const PracticeQuestions = () => {
 
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-    const [showFeedback, setShowFeedback] = useState(false);
+    const [feedback, setFeedback] = useState<PracticeAnswerResponse | null>(null);
     const [correctAnswers, setCorrectAnswers] = useState(0);
 
     useEffect(() => {
@@ -76,7 +77,7 @@ const PracticeQuestions = () => {
                 // Start from the first question whenever a subject is loaded
                 setCurrentQuestionIndex(0);
                 setSelectedAnswer(null);
-                setShowFeedback(false);
+                setFeedback(null);
                 setCorrectAnswers(0);
             }
             catch (error: unknown) {
@@ -114,7 +115,9 @@ const PracticeQuestions = () => {
             setCorrectAnswers((previous) => previous + 1);
         }
 
-        setShowFeedback(true);
+        // Temporary: built in the browser until the next step asks the server.
+        const correctOption = currentQuestion.options.find((option) => option.isCorrect)?.id as OptionLetter;
+        setFeedback({correct: selectedOption?.isCorrect ?? false, correctOption, explanation: null});
     };
 
     const handleNext = async () => {
@@ -123,7 +126,7 @@ const PracticeQuestions = () => {
 
             setCurrentQuestionIndex(currentQuestionIndex + 1);
             setSelectedAnswer(null);
-            setShowFeedback(false);
+            setFeedback(null);
 
         } else {
 
@@ -157,7 +160,7 @@ const PracticeQuestions = () => {
 
             setCurrentQuestionIndex(currentQuestionIndex - 1);
             setSelectedAnswer(null);
-            setShowFeedback(false);
+            setFeedback(null);
         }
     };
 
@@ -208,7 +211,7 @@ const PracticeQuestions = () => {
             <PracticeQuestionCard
                 question={currentQuestion}
                 selectedAnswer={selectedAnswer}
-                showFeedback={showFeedback}
+                feedback={feedback}
                 onAnswerSelect={handleAnswerSelect}
                 onCheckAnswer={handleCheckAnswer}
             />
@@ -218,7 +221,7 @@ const PracticeQuestions = () => {
                 onNext={handleNext}
                 isFirstQuestion={currentQuestionIndex === 0}
                 isLastQuestion={currentQuestionIndex === questions.length - 1}
-                canGoNext={showFeedback}
+                canGoNext={feedback !== null}
             />
         </div>
     );

@@ -14,17 +14,23 @@ vi.mock("../../../api/apiClient.ts", () => ({
     default: vi.fn(),
 }));
 
-// A small made-up question. Option "b" is the correct one.
+// A small made-up question. Option ids are letters, as on the practice page.
+// Which option is correct comes from the server's reply (see the feedback objects below).
 const question: PracticeQuestion = {
     id: "q1",
     subjectArea: "Test subject",
     question: "Which animal is a deer?",
     options: [
-        { id: "a", answer: "Wild boar", isCorrect: false },
-        { id: "b", answer: "Roe deer", isCorrect: true },
-        { id: "c", answer: "Fox", isCorrect: false },
+        { id: "A", answer: "Wild boar", isCorrect: false },
+        { id: "B", answer: "Roe deer", isCorrect: false },
+        { id: "C", answer: "Fox", isCorrect: false },
     ],
 };
+
+// Server replies: B is the correct option. isCorrect above is false everywhere on
+// purpose, to prove the card uses the server's reply and not the option data.
+const rightAnswer = { correct: true, correctOption: "B", explanation: null } as const;
+const wrongAnswer = { correct: false, correctOption: "B", explanation: null } as const;
 
 // Draw the component. Defaults: nothing selected, no feedback, mock callbacks.
 // A test overrides only the props it cares about.
@@ -33,7 +39,7 @@ function renderQuestion(props: Partial<React.ComponentProps<typeof PracticeQuest
         <PracticeQuestionCard
             question={question}
             selectedAnswer={null}
-            showFeedback={false}
+            feedback={null}
             onAnswerSelect={vi.fn()}
             onCheckAnswer={vi.fn()}
             {...props}
@@ -58,7 +64,7 @@ describe("PracticeQuestionCard", () => {
 
         await userEvent.click(screen.getByRole("radio", { name: "Roe deer" }));
 
-        expect(onAnswerSelect).toHaveBeenCalledWith("b");
+        expect(onAnswerSelect).toHaveBeenCalledWith("B");
     });
 
     it("disables Check Answer while no answer is selected", () => {
@@ -68,13 +74,13 @@ describe("PracticeQuestionCard", () => {
     });
 
     it("shows Correct! when the selected answer is right", () => {
-        renderQuestion({ selectedAnswer: "b", showFeedback: true });
+        renderQuestion({ selectedAnswer: "B", feedback: rightAnswer });
 
         expect(screen.getByText("Correct!")).toBeInTheDocument();
     });
 
     it("shows Incorrect and the right answer when the selected answer is wrong", () => {
-        renderQuestion({ selectedAnswer: "a", showFeedback: true });
+        renderQuestion({ selectedAnswer: "A", feedback: wrongAnswer });
 
         // /Incorrect/ is a regular expression: it finds the text that *contains* "Incorrect".
         // toHaveTextContent then checks the whole sentence the user reads, including
@@ -84,7 +90,7 @@ describe("PracticeQuestionCard", () => {
     });
 
     it("moves focus to the feedback so screen readers read it", () => {
-        renderQuestion({ selectedAnswer: "b", showFeedback: true });
+        renderQuestion({ selectedAnswer: "B", feedback: rightAnswer });
 
         // document.activeElement is the element that has focus right now.
         // Screen readers read the focused element, so the feedback must have it.
