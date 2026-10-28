@@ -36,9 +36,9 @@ class AdminQuestionControllerTests {
     @MockitoBean OAuth2LoginSuccessHandler loginHandler;
 
     private static final String BODY = """
-            {"questionText":"Which option?","optionA":"One","optionB":"Two",
-             "optionC":"Three","optionD":"Four","correctAnswer":"One","subjectId":1}
-            """;
+        {"questionText":"Which option?","optionA":"One","optionB":"Two",
+         "optionC":"Three","optionD":"Four","correctAnswer":"A","subjectId":1}
+        """;
 
     @Test
     void anonymousAndRegularUsersCannotManageQuestions() throws Exception {

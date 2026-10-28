@@ -97,7 +97,7 @@ class PracticeAttemptServiceTests {
         q.setOptionB("Two");
         q.setOptionC("Three");
         q.setOptionD("Four");
-        q.setCorrectAnswer("Two");
+        q.setCorrectAnswer("B");
         q.setExplanation("Because two.");
         q.setSubject(subject);
         return q;

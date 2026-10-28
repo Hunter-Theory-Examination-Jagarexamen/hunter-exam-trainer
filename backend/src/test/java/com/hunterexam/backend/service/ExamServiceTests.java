@@ -80,7 +80,7 @@ class ExamServiceTests {
         question.setOptionB("Two");
         question.setOptionC("Three");
         question.setOptionD("Four");
-        question.setCorrectAnswer("Two");
+        question.setCorrectAnswer("B");
         return question;
     }
 
