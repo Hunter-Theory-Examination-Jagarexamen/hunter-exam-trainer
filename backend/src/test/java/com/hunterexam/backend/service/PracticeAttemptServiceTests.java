@@ -170,6 +170,29 @@ class PracticeAttemptServiceTests {
     }
 
     @Test
+    void start_closesEarlierRunningRound_andSavesItsBridgeResult() {
+        Attempt leftRound = runningAttempt(user);
+        AttemptQuestion answered = new AttemptQuestion(leftRound, question(100L), 0);
+        answered.recordAnswer("B", true, LocalDateTime.now());
+
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(subjectRepository.findById(5L)).thenReturn(Optional.of(subject));
+        when(questionRepository.findBySubjectId(5L)).thenReturn(List.of(question(100L)));
+        when(attemptRepository.findByUserAndFinishedAtIsNullAndTypeIn(eq(user), any()))
+                .thenReturn(List.of(leftRound));
+        when(attemptQuestionRepository.findByAttemptIdOrderByPosition(ATTEMPT_ID)).thenReturn(List.of(answered));
+        when(attemptRepository.save(any(Attempt.class))).thenAnswer(call -> call.getArgument(0));
+        when(subjectStatsRepository.existsByUserAndSubject(user, subject)).thenReturn(true);
+
+        service.start(5L, EMAIL);
+
+        assertTrue(leftRound.isFinished());
+        ArgumentCaptor<PracticeResult> result = ArgumentCaptor.forClass(PracticeResult.class);
+        verify(practiceResultRepository).save(result.capture());
+        assertEquals(1, result.getValue().getCorrectAnswers());
+    }
+
+    @Test
     void start_throwsNotFound_whenSubjectDoesNotExist() {
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
         when(subjectRepository.findById(99L)).thenReturn(Optional.empty());

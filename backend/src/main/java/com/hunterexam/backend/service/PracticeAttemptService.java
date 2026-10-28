@@ -37,6 +37,10 @@ import java.util.Set;
 @Service
 public class PracticeAttemptService {
 
+    // The round types this service handles. Mock exams are not included.
+    private static final Set<AttemptType> PRACTICE_TYPES =
+            Set.of(AttemptType.SUBJECT_PRACTICE, AttemptType.RANDOM_PRACTICE);
+
     private final AttemptRepository attemptRepository;
     private final AttemptQuestionRepository attemptQuestionRepository;
     private final PracticeResultRepository practiceResultRepository;
@@ -85,6 +89,13 @@ public class PracticeAttemptService {
         List<Question> questions = questionRepository.findBySubjectId(subjectId);
         if (questions.isEmpty()) {
             throw new ConflictException("This subject has no questions yet.");
+        }
+
+        // One open practice round per student: close any earlier round that
+        // was left without finishing (tab closed, lost connection, ...).
+        // No timer needed: starting a new round is what closes the old one.
+        for (Attempt leftRound : attemptRepository.findByUserAndFinishedAtIsNullAndTypeIn(user, PRACTICE_TYPES)) {
+            close(leftRound);
         }
 
         Attempt attempt = attemptRepository.save(
@@ -160,6 +171,15 @@ public class PracticeAttemptService {
     public PracticeFinishResponse finish(Long attemptId, String email) {
 
         Attempt attempt = findOwnRunningAttempt(attemptId, email);
+        return close(attempt);
+    }
+
+    /**
+     * Closes a round: sets {@code finishedAt}, counts the totals from the saved
+     * answers and saves the bridge result. Used by {@link #finish} and by
+     * {@link #start} for rounds that were left without finishing.
+     */
+    private PracticeFinishResponse close(Attempt attempt) {
         attempt.setFinishedAt(LocalDateTime.now());
         attemptRepository.save(attempt);
 
