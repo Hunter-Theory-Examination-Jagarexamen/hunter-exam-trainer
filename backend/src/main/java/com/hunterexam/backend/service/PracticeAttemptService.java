@@ -260,8 +260,8 @@ public class PracticeAttemptService {
      * Done at start so that {@link #answer} only ever updates and never inserts:
      * an insert there could clash with another answer arriving at the same moment.
      * Two starts at the same moment (e.g. a double click) can still clash here;
-     * the unique constraint rejects the second with 409 and the student can
-     * simply start again.
+     * the unique constraint rejects the second, and
+     * {@code PracticeAttemptController.start} retries it once.
      */
     private void ensureSubjectStatsExist(User user, Set<Subject> subjects) {
         for (Subject subject : subjects) {

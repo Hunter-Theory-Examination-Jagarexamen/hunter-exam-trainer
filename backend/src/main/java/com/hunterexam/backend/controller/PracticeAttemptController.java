@@ -7,6 +7,7 @@ import com.hunterexam.backend.dto.PracticeStartRequest;
 import com.hunterexam.backend.dto.PracticeStartResponse;
 import com.hunterexam.backend.service.PracticeAttemptService;
 import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,7 +43,15 @@ public class PracticeAttemptController {
             Authentication authentication,
             @Valid @RequestBody PracticeStartRequest request
     ) {
-        return practiceAttemptService.start(request.getSubjectId(), authentication.getName());
+        try {
+            return practiceAttemptService.start(request.getSubjectId(), authentication.getName());
+        } catch (DataIntegrityViolationException e) {
+            // Two starts at the same moment (double click, two tabs, React StrictMode
+            // in development) can both try to create the student's SubjectStats row.
+            // The losing start's transaction is rolled back, so it is retried once here,
+            // outside it, in a new transaction; this time the row exists.
+            return practiceAttemptService.start(request.getSubjectId(), authentication.getName());
+        }
     }
 
     /**

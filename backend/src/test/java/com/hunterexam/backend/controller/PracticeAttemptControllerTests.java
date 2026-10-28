@@ -10,6 +10,7 @@ import com.hunterexam.backend.exception.ConflictException;
 import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.service.PracticeAttemptService;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -24,6 +25,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -66,6 +68,22 @@ class PracticeAttemptControllerTests {
                 .andExpect(status().isUnauthorized());
 
         verifyNoInteractions(practiceAttemptService);
+    }
+
+    @Test
+    void start_retriesOnce_whenTwoStartsClashOnTheTotalsRow() throws Exception {
+        // First call loses the race for the SubjectStats row, the retry succeeds.
+        when(practiceAttemptService.start(5L, EMAIL))
+                .thenThrow(new DataIntegrityViolationException("duplicate subject_stats row"))
+                .thenReturn(new PracticeStartResponse(10L, "Viltvård", List.of()));
+
+        mvc.perform(post("/api/practice/attempts").with(student())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"subjectId\": 5}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.attemptId").value(10));
+
+        verify(practiceAttemptService, times(2)).start(5L, EMAIL);
     }
 
     @Test
