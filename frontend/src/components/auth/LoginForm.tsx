@@ -1,5 +1,6 @@
 import {useEffect, useState} from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {Eye, EyeOff, Lock, Mail} from "lucide-react";
 import logo from "../../assets/images/logo.svg";
 import "../../styles/auth.css";
@@ -11,11 +12,12 @@ import { API_BASE_URL } from "../../api/apiClient";
 
 const LoginForm = () => {
 
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const [successMessage] = useState(
         (location.state as { accountCreated?: boolean })?.accountCreated
-        ? "Account created successfully! You can now log in."
+        ? t("auth.accountCreatedSuccess", "Account created successfully! You can now log in.")
             : ""
     );
 
@@ -36,7 +38,7 @@ const LoginForm = () => {
         setError(""); // clear the message from the previous attempt
 
         if(!email || !password) {
-            setError("Please enter your email and password");
+            setError(t("errors.MISSING_CREDENTIALS", "Please enter your email and password"));
             return;
         }
 
@@ -52,9 +54,10 @@ const LoginForm = () => {
 
             navigate("/dashboard");
 
-        } catch (error) {
-            console.error("Login/API error:", error);
-            setError("Invalid email or password");
+        } catch (err: any) {
+            console.error("Login/API error:", err);
+            const errorCode = err?.code || "INVALID_CREDENTIALS";
+            setError(t(`errors.${errorCode}`,t("errors.UNKNOWN_ERROR", "An unexpected error occurred.")));
         } finally {
             setIsLoading(false);
         }
@@ -72,8 +75,8 @@ const LoginForm = () => {
                 <div className="auth-mobile-logo">
                     <img src={logo} alt="Hunter Exam Trainer" />
                 </div>
-                <h2>Welcome back!</h2>
-                <p>Log in to continue your practice.</p>
+                <h2>{t("auth.loginTitle", "Welcome back!")}</h2>
+                <p>{t("auth.loginSubtitle", "Log in to continue your practice.")}</p>
             </div>
 
             {successMessage && (
@@ -85,7 +88,7 @@ const LoginForm = () => {
             <form onSubmit={handleLogin}>
                 <div className="form-field">
                     <label htmlFor="email">
-                        Email
+                        {t("auth.emailLabel", "Email")}
                     </label>
 
                     <div className="input-wrapper">
@@ -94,7 +97,7 @@ const LoginForm = () => {
                         <input
                             id="email"
                             type="email"
-                            placeholder="Enter your email"
+                            placeholder={t("auth.emailPlaceholder", "Enter your email")}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
@@ -104,7 +107,7 @@ const LoginForm = () => {
 
                 <div className="form-field">
                     <label htmlFor="password">
-                        Password
+                        {t("auth.passwordLabel", "Password")}
                     </label>
 
                     <div className="input-wrapper">
@@ -113,7 +116,7 @@ const LoginForm = () => {
                         <input
                             id="password"
                             type={showPassword ? "text" : "password"}
-                            placeholder="Enter your password"
+                            placeholder={t("auth.passwordPlaceholder", "Enter your password")}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
@@ -122,7 +125,7 @@ const LoginForm = () => {
                             type="button"
                             className="password-toggle"
                             onClick={() => setShowPassword(!showPassword)}
-                            aria-label={showPassword ? "Hide Password" : "Show Password"}
+                            aria-label={showPassword ? t("auth.hidePassword", "Hide Password") : t("auth.showPassword", "Show Password")}
                         >
                             {showPassword ? <EyeOff size={18} /> : <Eye size={18} /> }
                         </button>
@@ -136,7 +139,7 @@ const LoginForm = () => {
                         type="button"
                         onClick={() => navigate("/forgot-password")}
                     >
-                        Forgot Password?
+                        {t("auth.forgotPassword", "Forgot Password?")}
                     </button>
                 </div>
 
@@ -151,7 +154,7 @@ const LoginForm = () => {
                     className="auth-primary-button"
                     disabled={isLoading}
                 >
-                    {isLoading ? "Logging in..." : "Log In"}
+                    {isLoading ? t("auth.loggingIn", "Logging in...") : t("auth.loginButton", "Log In")}
                 </button>
             </form>
 
@@ -159,7 +162,7 @@ const LoginForm = () => {
             {googleEnabled && (
                 <>
                     <div className="auth-divider">
-                        <span>or</span>
+                        <span>{t("auth.or", "or")}</span>
                     </div>
 
                     <div className="auth-secondary-actions">
@@ -168,19 +171,19 @@ const LoginForm = () => {
                             className="auth-secondary-button"
                             onClick={handleGoogleLogin}
                         >
-                            Continue with Google
+                            {t("auth.googleLogin", "Continue with Google")}
                         </button>
                     </div>
                 </>
             )}
 
             <p className="auth-switch">
-                Don't have an account?{" "}
+                {t("auth.noAccount", "Don't have an account?")}{" "}
                 <button
                     type="button"
                     onClick={() => navigate("/register")}
                 >
-                    Sign Up
+                    {t("auth.signUp", "Sign Up")}
                 </button>
             </p>
         </div>

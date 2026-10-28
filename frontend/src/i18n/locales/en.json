@@ -7,6 +7,18 @@
     "save": "Save",
     "back": "Back"
   },
+  "auth": {
+    "loginTitle": "Log In",
+    "registerTitle": "Register",
+    "emailLabel": "Email Address",
+    "passwordLabel": "Password",
+    "loginButton": "Log In",
+    "registerButton": "Register",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "registerLink": "Register here",
+    "loginLink": "Log in here"
+  },
   "errors": {
     "EMAIL_TAKEN": "Email already registered.",
     "INVALID_CREDENTIALS": "Invalid email or password",

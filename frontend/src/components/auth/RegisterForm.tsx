@@ -2,11 +2,13 @@ import apiClient from "../../api/apiClient";
 import "../../styles/auth.css";
 import {useState} from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Eye, EyeOff } from "lucide-react";
 import logo from "../../assets/images/logo.svg";
 
 const RegisterForm = () => {
 
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const [showPassword, setShowPassword] = useState(false);
@@ -26,22 +28,22 @@ const RegisterForm = () => {
         e.preventDefault();
     // Validates that all form fields are populated
         if (!fullName || !email || !password || !confirmPassword) {
-            setError("Please fill in all the fields.");
+            setError(t("errors.MISSING_FIELDS", "Please fill in all the fields."));
             return;
         }
     // Validates that password matches confirm password
         if (password !== confirmPassword) {
-            setError("Passwords do not match.");
+            setError(t("errors.PASSWORD_MISMATCH", "Passwords do not match."));
             return;
         }
     // Validates minimum password length requirement of 8 characters
         if(password.length < 8) {
-            setError("Password must be at least 8 characters long.");
+            setError(t("errors.PASSWORD_TOO_SHORT", "Password must be at least 8 characters long."));
             return;
         }
     // Validates that the user accepted terms and conditions
         if (!acceptedTerms) {
-            setError("Please accept the Terms of Use and Privacy Policy.");
+            setError(t("errors.TERMS_REQUIRED", "Please accept the Terms of Use and Privacy Policy."));
             return;
         }
     // Sets loading state to true during API request
@@ -58,11 +60,14 @@ const RegisterForm = () => {
             });
     // Redirects user to login page after successful registration
             navigate("/login", { state: { accountCreated: true } });
-        } catch (err) {
+        } catch (err: unknown) {
+            const errorCode = (err as { code?: string })?.code || "UNKNOWN_ERROR";
             setError(
-                err instanceof Error && err.message
-                    ? err.message
-                    : "Registration failed. Please try again."
+                t(`errors.${errorCode}`,
+                    err instanceof Error && err.message
+                        ? err.message
+                        : t("errors.UNKNOWN_ERROR", "Registration failed. Please try again.")
+                )
             );
         } finally {
             setIsLoading(false);
@@ -77,15 +82,15 @@ const RegisterForm = () => {
                     <img src={logo} alt="Hunter Exam Trainer" />
                 </div>
 
-                <h2>Create Account</h2>
+                <h2>{t("auth.registerTitle", "Create Account")}</h2>
 
                 <p className="">
-                    Already have an account?{" "}
+                    {t("auth.hasAccount", "Already have an account?")}{" "}
                     <button
                         type="button"
                         onClick={() => navigate("/login")}
                     >
-                        Log In
+                        {t("auth.loginLink", "Log In")}
                     </button>
                 </p>
             </div>
@@ -95,13 +100,13 @@ const RegisterForm = () => {
                     {/* Full Name */}
                     <div className="form-field">
                         <label htmlFor="fullName">
-                            Full Name
+                            {t("auth.fullNameLabel", "Full Name")}
                         </label>
                         <div className="input-wrapper">
                             <input
                                 id="fullName"
                                 type="text"
-                                placeholder="Enter your full name"
+                                placeholder={t("auth.fullNamePlaceHolder", "Enter your full name")}
                                 value={fullName}
                                 onChange={(e) => setFullName(e.target.value)}
                             />
@@ -111,13 +116,13 @@ const RegisterForm = () => {
                     {/* Email */}
                     <div className="form-field">
                         <label htmlFor="email">
-                            Email
+                            {t("auth.emailLabel", "Email")}
                         </label>
                         <div className="input-wrapper">
                             <input
                                 id="email"
                                 type="email"
-                                placeholder="Enter your email"
+                                placeholder={t("auth.emailPlaceholder", "Enter your email")}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
@@ -127,13 +132,13 @@ const RegisterForm = () => {
                     {/* Password */}
                     <div className="form-field">
                         <label htmlFor="password">
-                            Password
+                            {t("auth.passwordLabel", "Password")}
                         </label>
                         <div className="input-wrapper">
                             <input
                                 id="password"
                                 type={showPassword ? "text" : "password"}
-                                placeholder="Create a password"
+                                placeholder={t("auth.passwordPlaceholder", "Create a password")}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
@@ -141,7 +146,7 @@ const RegisterForm = () => {
                                 type="button"
                                 className="password-toggle"
                                 onClick={() => setShowPassword(!showPassword)}
-                                aria-label={showPassword ? "Hide Password" : "Show Password"}
+                                aria-label={showPassword ? t("auth.hidePassword", "Hide Password") : t("auth.showPassword", "Show Password")}
                             >
                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} /> }
                             </button>
@@ -151,13 +156,13 @@ const RegisterForm = () => {
                     {/* Confirm Password */}
                     <div className="form-field">
                         <label htmlFor="confirmPassword">
-                            Confirm Password
+                            {t("auth.confirmPasswordLabel", "Confirm Password")}
                         </label>
                         <div className="input-wrapper">
                             <input
                                 id="confirmPassword"
                                 type={showConfirmPassword ? "text" : "password"}
-                                placeholder="Confirm your password"
+                                placeholder={t("auth.confirmPasswordPlaceholder", "Confirm your password")}
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                             />
@@ -165,7 +170,7 @@ const RegisterForm = () => {
                                 type="button"
                                 className="password-toggle"
                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                aria-label={showConfirmPassword ? "Hide Password" : "Show Password"}
+                                aria-label={showConfirmPassword ? t("auth.hidePassword", "Hide Password") : t("auth.showPassword", "Show Password")}
                             >
                                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} /> }
                             </button>
@@ -183,10 +188,10 @@ const RegisterForm = () => {
                             onChange={(e) => setAcceptedTerms(e.target.checked)}
                         />
                         <span>
-                            I agree to the{" "}
-                            <a href="/terms">Terms of Use</a>{" "}
-                            and{" "}
-                            <a href="/privacy">Privacy Policy</a>
+                            {t("auth.termsAgreement", "I agree to the")}{" "}
+                            <a href="/terms">{t("auth.termsOfUse", "Terms  of Use")}</a>{" "}
+                            {t("auth.and", "and")}{" "}
+                            <a href="/privacy">{t("auth.privacyPolicy", "Privacy Policy")}</a>
                         </span>
                     </label>
                 </div>
@@ -203,7 +208,7 @@ const RegisterForm = () => {
                     className="auth-primary-button"
                     disabled={isLoading}
                 >
-                    {isLoading ? "Creating Account..." : "Create Account"}
+                    {isLoading ? t("auth.creatingAccount", "Creating Account...") : t("auth.registerButton", "Create Account")}
                 </button>
             </form>
         </div>

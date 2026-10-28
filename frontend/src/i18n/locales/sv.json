@@ -7,7 +7,18 @@
     "save": "Spara",
     "back": "Tillbaka"
   },
-
+  "auth": {
+    "loginTitle": "Logga in",
+    "registerTitle": "Skapa konto",
+    "emailLabel": "E-postadress",
+    "passwordLabel": "Lösenord",
+    "loginButton": "Logga in",
+    "registerButton": "Registrera",
+    "noAccount": "Har du inget konto?",
+    "hasAccount": "Har du redan ett konto?",
+    "registerLink": "Registrera dig här",
+    "loginLink": "Logga in här"
+  },
   "errors": {
     "EMAIL_TAKEN": "E-postadressen är redan registrerad.",
     "INVALID_CREDENTIALS": "Fel e-postadress eller lösenord.",
