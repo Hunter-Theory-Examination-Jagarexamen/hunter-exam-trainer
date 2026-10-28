@@ -2,10 +2,12 @@ package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.ExamQuestionResponse;
 import com.hunterexam.backend.dto.PracticeAnswerResponse;
+import com.hunterexam.backend.dto.PracticeFinishResponse;
 import com.hunterexam.backend.dto.PracticeStartResponse;
 import com.hunterexam.backend.entity.Attempt;
 import com.hunterexam.backend.entity.AttemptQuestion;
 import com.hunterexam.backend.entity.AttemptType;
+import com.hunterexam.backend.entity.PracticeResult;
 import com.hunterexam.backend.entity.Question;
 import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.SubjectStats;
@@ -14,6 +16,7 @@ import com.hunterexam.backend.exception.ConflictException;
 import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.repository.AttemptQuestionRepository;
 import com.hunterexam.backend.repository.AttemptRepository;
+import com.hunterexam.backend.repository.PracticeResultRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
 import com.hunterexam.backend.repository.SubjectStatsRepository;
@@ -36,6 +39,7 @@ public class PracticeAttemptService {
 
     private final AttemptRepository attemptRepository;
     private final AttemptQuestionRepository attemptQuestionRepository;
+    private final PracticeResultRepository practiceResultRepository;
     private final QuestionRepository questionRepository;
     private final SubjectRepository subjectRepository;
     private final SubjectStatsRepository subjectStatsRepository;
@@ -44,6 +48,7 @@ public class PracticeAttemptService {
     public PracticeAttemptService(
             AttemptRepository attemptRepository,
             AttemptQuestionRepository attemptQuestionRepository,
+            PracticeResultRepository practiceResultRepository,
             QuestionRepository questionRepository,
             SubjectRepository subjectRepository,
             SubjectStatsRepository subjectStatsRepository,
@@ -51,6 +56,7 @@ public class PracticeAttemptService {
     ) {
         this.attemptRepository = attemptRepository;
         this.attemptQuestionRepository = attemptQuestionRepository;
+        this.practiceResultRepository = practiceResultRepository;
         this.questionRepository = questionRepository;
         this.subjectRepository = subjectRepository;
         this.subjectStatsRepository = subjectStatsRepository;
@@ -138,6 +144,56 @@ public class PracticeAttemptService {
         addToSubjectStats(attempt.getUser(), question.getSubject(), correct, now);
 
         return new PracticeAnswerResponse(correct, correctOption, question.getExplanation());
+    }
+
+    /**
+     * Finishes a practice round and returns its totals, counted from the saved answers.
+     * <p>
+     * Unanswered questions count as not correct; {@code totalQuestions} is the
+     * number of questions in the round.
+     *
+     * @param attemptId the round
+     * @param email     email of the logged-in user
+     * @return correct answers and total questions
+     */
+    @Transactional
+    public PracticeFinishResponse finish(Long attemptId, String email) {
+
+        Attempt attempt = findOwnRunningAttempt(attemptId, email);
+        attempt.setFinishedAt(LocalDateTime.now());
+        attemptRepository.save(attempt);
+
+        List<AttemptQuestion> rows = attemptQuestionRepository.findByAttemptIdOrderByPosition(attempt.getId());
+        long total = rows.size();
+        long answered = rows.stream().filter(AttemptQuestion::isAnswered).count();
+        long correct = rows.stream().filter(row -> Boolean.TRUE.equals(row.getCorrect())).count();
+
+        if (answered > 0) {
+            savePracticeResultBridge(attempt, rows.get(0).getQuestion().getSubject(), correct, total);
+        }
+
+        return new PracticeFinishResponse(correct, total);
+    }
+
+    /**
+     * Temporary: keeps the old statistics working until they read from
+     * SubjectStats (issue 4 of the refactor plan), then remove this and
+     * PracticeResult (issue 5).
+     * <p>
+     * Saves the same one-row summary the old practice page sent itself, but
+     * with totals counted by the server. A subject practice round has one
+     * subject, so the first question's subject is the round's subject.
+     * Rounds with no answers are skipped, so they don't show up as 0 %.
+     */
+    private void savePracticeResultBridge(Attempt attempt, Subject subject, long correct, long total) {
+        PracticeResult result = new PracticeResult();
+        result.setUser(attempt.getUser());
+        result.setSubject(subject);
+        result.setCorrectAnswers(correct);
+        result.setTotalQuestions(total);
+        result.setScore(Math.round((double) correct / total * 100));
+        result.setCompletedAt(attempt.getFinishedAt());
+        practiceResultRepository.save(result);
     }
 
     /**
