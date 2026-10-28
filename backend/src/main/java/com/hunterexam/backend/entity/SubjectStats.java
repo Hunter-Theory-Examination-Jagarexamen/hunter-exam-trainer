@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 
 /**
  * Running totals per student and subject, kept so statistics don't have to
- * count every {@link AttemptAnswer} on each page load.
+ * count every {@link AttemptQuestion} on each page load.
  * <p>
  * Updated in the same transaction as each saved answer. Stores counts, not
  * percentages: the percentage is calculated when read. The answers remain the
