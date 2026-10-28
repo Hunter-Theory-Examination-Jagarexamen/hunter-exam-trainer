@@ -235,20 +235,10 @@ public class ExamService {
                 continue;
             }
 
-            // Map the selected option letter (A/B/C/D) to its answer text.
-            String selectedAnswerText = switch (selectedAnswer) {
-                case "A" -> question.getOptionA();
-                case "B" -> question.getOptionB();
-                case "C" -> question.getOptionC();
-                case "D" -> question.getOptionD();
-                default -> null;
-            };
+            // Both selectedAnswer (from the client: "A"/"B"/"C"/"D") and
+            // correctAnswer (from the question) are letters.
 
-            if (selectedAnswerText == null) {
-                // Selected answer did not match any known option (e.g. invalid value submitted).
-                incorrectAnswers++;
-            }
-            else if (selectedAnswerText.equals(question.getCorrectAnswer())) {
+            if (selectedAnswer.equals(question.getCorrectAnswer())) {
                 correctAnswers++;
             }
             else {

@@ -42,7 +42,8 @@ public class Question {
     @Column(nullable = false)
     private String optionD;
 
-    // Stores the correct option's text (not the letter A/B/C/D).
+    // Stores the correct option as a letter: "A", "B", "C", or "D".
+    // Column kept as varchar(255) so the migration to letters doesn't need a schema change.
     @Column(nullable = false)
     private String correctAnswer;
 

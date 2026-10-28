@@ -6,7 +6,7 @@
     "optionB": "70 frågor",
     "optionC": "60 frågor",
     "optionD": "80 frågor",
-    "correctAnswer": "70 frågor",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -16,7 +16,7 @@
     "optionB": "Minst 55 av 70",
     "optionC": "Minst 65 av 70",
     "optionD": "Minst 60 av 70",
-    "correctAnswer": "Minst 60 av 70",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -26,7 +26,7 @@
     "optionB": "Hagelgevär (lerduvor), grundprov kula och högviltsprov",
     "optionC": "Gevär, pistol och eftersök",
     "optionD": "Hagelgevär, kulgevär och jaktprov",
-    "correctAnswer": "Hagelgevär (lerduvor), grundprov kula och högviltsprov",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -36,7 +36,7 @@
     "optionB": "Jakträtten ges automatiskt till alla jägare",
     "optionC": "Jakträtten följer med ägd eller arrenderad mark",
     "optionD": "Jakträtten kräver alltid tillstånd från kommunen",
-    "correctAnswer": "Jakträtten följer med ägd eller arrenderad mark",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -46,7 +46,7 @@
     "optionB": "Ett statligt naturreservat",
     "optionC": "En kommunal jaktmark öppen för allmänheten",
     "optionD": "Ett område där all jakt är förbjuden",
-    "correctAnswer": "En frivillig sammanslutning av markägare för gemensam jakt och viltförvaltning",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -56,7 +56,7 @@
     "optionB": "Jaktpass",
     "optionC": "Jakttillstånd",
     "optionD": "Jaktkort",
-    "correctAnswer": "Jaktkort",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -66,7 +66,7 @@
     "optionB": "Svenska Jägareförbundet",
     "optionC": "Länsstyrelsen",
     "optionD": "Jordbruksverket",
-    "correctAnswer": "Svenska Jägareförbundet",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -76,7 +76,7 @@
     "optionB": "Jakten ska ge maximal köttmängd",
     "optionC": "Djuret ska dö snabbt och utan onödigt lidande",
     "optionD": "Djuret ska alltid jagas med hund",
-    "correctAnswer": "Djuret ska dö snabbt och utan onödigt lidande",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -86,7 +86,7 @@
     "optionB": "Eftersöka och avliva det skadade djuret",
     "optionC": "Anmäla till Jägareförbundet och avvakta",
     "optionD": "Skjuta igen omedelbart utan att byta position",
-    "correctAnswer": "Eftersöka och avliva det skadade djuret",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -96,7 +96,7 @@
     "optionB": "Att skjuta så fort djuret är inom räckhåll",
     "optionC": "Att alltid vänta till gryningen",
     "optionD": "Att skjuta bara när man kan ta ett rent och säkert skott",
-    "correctAnswer": "Att skjuta bara när man kan ta ett rent och säkert skott",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -106,7 +106,7 @@
     "optionB": "Alltid jaga ensam",
     "optionC": "Aldrig använda hund",
     "optionD": "Enbart jaga på helgerna",
-    "correctAnswer": "Informera grannar, respektera friluftsliv och undvika störning",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -116,7 +116,7 @@
     "optionB": "Undvika bilder och inlägg som kan ge en negativ bild av jakt",
     "optionC": "Enbart publicera på privata konton",
     "optionD": "Sociala medier är irrelevanta för jägare",
-    "correctAnswer": "Undvika bilder och inlägg som kan ge en negativ bild av jakt",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -126,7 +126,7 @@
     "optionB": "Att jaga lika många djur som föds varje år",
     "optionC": "Att alltid jaga i grupp",
     "optionD": "Att ge viltet rimliga chanser och inte använda otillbörliga hjälpmedel",
-    "correctAnswer": "Att ge viltet rimliga chanser och inte använda otillbörliga hjälpmedel",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -136,7 +136,7 @@
     "optionB": "För att träffa fler djur per jaktdag",
     "optionC": "För att imponera på andra jägare",
     "optionD": "Skytte-träning är inte etiskt relevant",
-    "correctAnswer": "För att minska risken för skadeskjutning och säkerställa snabb död",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -146,7 +146,7 @@
     "optionB": "Föda, vatten, skydd och predatorer",
     "optionC": "Årstider, väder, terräng och konkurrens",
     "optionD": "Födslar (natalitet), dödsfall (mortalitet), immigration och emigration",
-    "correctAnswer": "Födslar (natalitet), dödsfall (mortalitet), immigration och emigration",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -156,7 +156,7 @@
     "optionB": "Reviret försvaras aktivt mot artfränder, hemområdet gör det inte",
     "optionC": "Det finns ingen skillnad",
     "optionD": "Reviret är ett årstidsbundet hemområde",
-    "correctAnswer": "Reviret försvaras aktivt mot artfränder, hemområdet gör det inte",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -166,7 +166,7 @@
     "optionB": "Det lever i flock",
     "optionC": "Det vandrar långa sträckor",
     "optionD": "Det är nattaktivt",
-    "correctAnswer": "Det försvarar ett område mot andra individer av samma art",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -176,7 +176,7 @@
     "optionB": "Småvilt lever längre och reproducerar sig mer sällan",
     "optionC": "Småvilt har hög reproduktion men också hög dödlighet",
     "optionD": "Småvilt och högvilt har identisk populationsdynamik",
-    "correctAnswer": "Småvilt har hög reproduktion men också hög dödlighet",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -186,7 +186,7 @@
     "optionB": "Jakt på begränsat antal djur av reglerad art med tilldelning från myndighet",
     "optionC": "Jakt enbart tillåten för markägare",
     "optionD": "Jakt på fredade arter med dispens",
-    "correctAnswer": "Jakt på begränsat antal djur av reglerad art med tilldelning från myndighet",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -196,7 +196,7 @@
     "optionB": "Att enbart skydda utrotningshotade arter",
     "optionC": "Att hålla viltpopulationer så låga som möjligt",
     "optionD": "Att maximera antalet fällda djur per jaktdag",
-    "correctAnswer": "Att förbättra viltets livsmiljö och säkerställa hållbara populationer",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -206,7 +206,7 @@
     "optionB": "Habitat",
     "optionC": "Ekosystem",
     "optionD": "Biodiversitet",
-    "correctAnswer": "Ekosystem",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -216,7 +216,7 @@
     "optionB": "200–300 kg",
     "optionC": "350–650 kg",
     "optionD": "700–900 kg",
-    "correctAnswer": "350–650 kg",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -226,7 +226,7 @@
     "optionB": "Råbock (eller rådjurshorn)",
     "optionC": "Palett",
     "optionD": "Krona",
-    "correctAnswer": "Råbock (eller rådjurshorn)",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -236,7 +236,7 @@
     "optionB": "Vart annat år",
     "optionC": "Två gånger per år",
     "optionD": "En gång per år",
-    "correctAnswer": "En gång per år",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -246,7 +246,7 @@
     "optionB": "Vikten efter att inälvor tagits bort, ca 70 % av levande vikt",
     "optionC": "Vikten av det rena köttet, ca 50 %",
     "optionD": "Vikten med inälvor men utan huvud",
-    "correctAnswer": "Vikten efter att inälvor tagits bort, ca 70 % av levande vikt",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -256,7 +256,7 @@
     "optionB": "Pansarhornsdjur",
     "optionC": "Hjortdjur",
     "optionD": "Årshornsdjur",
-    "correctAnswer": "Slidhornsdjur (t.ex. getter och kor)",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -266,7 +266,7 @@
     "optionB": "Vit fläck i pannan, lång svans",
     "optionC": "Svart päls, stor nos, alltid i flock",
     "optionD": "Kraftig framkropp, gles borstig päls, trynflikar och betar hos galten",
-    "correctAnswer": "Kraftig framkropp, gles borstig päls, trynflikar och betar hos galten",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -276,7 +276,7 @@
     "optionB": "Mufflonfår",
     "optionC": "Rådjur",
     "optionD": "Kronhjort",
-    "correctAnswer": "Rådjur",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -286,7 +286,7 @@
     "optionB": "Grenade horn med en 'krona' av taggar i toppen hos gamla djur",
     "optionC": "Enkla spetsiga horn utan grenar",
     "optionD": "Spiralvridna horn",
-    "correctAnswer": "Grenade horn med en 'krona' av taggar i toppen hos gamla djur",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -296,7 +296,7 @@
     "optionB": "Björn, varg, räv och utter",
     "optionC": "Varg, lo, mårdhund och grävling",
     "optionD": "Björn, lo, lodjur och kungsörn",
-    "correctAnswer": "Björn, varg, lo och järv",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -306,7 +306,7 @@
     "optionB": "Minken har ränder längs ryggen",
     "optionC": "Minken har orange päls",
     "optionD": "Minken har en karaktäristisk vit haklapp",
-    "correctAnswer": "Minken har en karaktäristisk vit haklapp",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -316,7 +316,7 @@
     "optionB": "Den är en invasiv art som hotar inhemsk fauna, framför allt fågelägg",
     "optionC": "Den bär på farlig smitta för nötkreatur",
     "optionD": "Den är en skadegörare på skog",
-    "correctAnswer": "Den är en invasiv art som hotar inhemsk fauna, framför allt fågelägg",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -326,7 +326,7 @@
     "optionB": "Lo har lång svans och randigt mönster",
     "optionC": "Lo och tamkatt är svåra att skilja åt",
     "optionD": "Lo har vit päls på vintern",
-    "correctAnswer": "Lo är mycket större, har tofsöron, kort svans och kraftiga tassar",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -336,7 +336,7 @@
     "optionB": "Randig päls och kort nos",
     "optionC": "Bred, kraftig kropp med ljusa sidofläckar och lång päls",
     "optionD": "Pansarlika hornplattor på ryggen",
-    "correctAnswer": "Bred, kraftig kropp med ljusa sidofläckar och lång päls",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -346,7 +346,7 @@
     "optionB": "Kanadagåsen",
     "optionC": "Bläsgåsen",
     "optionD": "Snögåsen",
-    "correctAnswer": "Grågåsen",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -356,7 +356,7 @@
     "optionB": "Den vandrar in naturligt från grannländer",
     "optionC": "Den är introducerad utanför sitt naturliga utbredningsområde och påverkar ekosystemet negativt",
     "optionD": "Den lever enbart i odlingslandskapet",
-    "correctAnswer": "Den är introducerad utanför sitt naturliga utbredningsområde och påverkar ekosystemet negativt",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -366,7 +366,7 @@
     "optionB": "Rakt upp ur vattnet",
     "optionC": "De dyker och dyker upp igen på en annan plats",
     "optionD": "De springer på land och lyfter",
-    "correctAnswer": "Rakt upp ur vattnet",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -376,7 +376,7 @@
     "optionB": "Vit kropp med svarta vingar",
     "optionC": "Brun kropp med röd näbb",
     "optionD": "Stor fågel med grå fjäderdräkt och orange näbb",
-    "correctAnswer": "Stor fågel med grå fjäderdräkt och orange näbb",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -386,7 +386,7 @@
     "optionB": "Vit kropp med svart stjärt",
     "optionC": "Grön huvud, vit halsring och gul näbb",
     "optionD": "Röd hjässa och grå kropp",
-    "correctAnswer": "Grön huvud, vit halsring och gul näbb",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -396,7 +396,7 @@
     "optionB": "Det finns ingen skillnad",
     "optionC": "Simänder är bättre dykare",
     "optionD": "Dykänder dyker bara vid fara",
-    "correctAnswer": "Simänder dyker sällan; dykänder dyker regelbundet för att söka föda",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -406,7 +406,7 @@
     "optionB": "Branta",
     "optionC": "Bläsanden",
     "optionD": "Gräsanden",
-    "correctAnswer": "Gräsanden",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -416,7 +416,7 @@
     "optionB": "De springer på vattenytan en bit innan de lyfter",
     "optionC": "De lyfter alltid mot vinden",
     "optionD": "De tar sats från land",
-    "correctAnswer": "De springer på vattenytan en bit innan de lyfter",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -426,7 +426,7 @@
     "optionB": "Spegeln (ett blankt färgat fältmönster på armpennorna)",
     "optionC": "Armspetsen",
     "optionD": "Täckfjädrarna",
-    "correctAnswer": "Spegeln (ett blankt färgat fältmönster på armpennorna)",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -436,7 +436,7 @@
     "optionB": "Han gör ett kraftfullt dykande flykt",
     "optionC": "Han visar sin vita buk mot honorna",
     "optionD": "Han sprider stjärten som en solfjäder och har röda ögonrosor",
-    "correctAnswer": "Han sprider stjärten som en solfjäder och har röda ögonrosor",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -446,7 +446,7 @@
     "optionB": "Vit kropp med svarta vingar",
     "optionC": "Svart med blågrön glans, lyrformad stjärt och röda ögonrosor",
     "optionD": "Randig brun och vit fjäderdräkt",
-    "correctAnswer": "Svart med blågrön glans, lyrformad stjärt och röda ögonrosor",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -456,7 +456,7 @@
     "optionB": "I Skåne på 1700-talet",
     "optionC": "I Norrland på 1600-talet",
     "optionD": "I Blekinge på 1900-talet",
-    "correctAnswer": "I Skåne på 1700-talet",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -466,7 +466,7 @@
     "optionB": "Det finns ingen säker skillnad",
     "optionC": "Kajan har vita vingar",
     "optionD": "Kajan är mindre, har grå nacke och ljusa ögon",
-    "correctAnswer": "Kajan är mindre, har grå nacke och ljusa ögon",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -476,7 +476,7 @@
     "optionB": "Måsar, tärnor och labbar",
     "optionC": "Duvor, trastar och starar",
     "optionD": "Hönsfåglar och vadare",
-    "correctAnswer": "Kråka, kaja, råka, skata, nötskrika och nötkråka",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -486,7 +486,7 @@
     "optionB": "Orren är dubbelt så stor som tjädern",
     "optionC": "Tjädertuppenväger 3–5 kg, orrhanen ca 1–1,5 kg",
     "optionD": "Tjädern väger 10–12 kg",
-    "correctAnswer": "Tjädertuppenväger 3–5 kg, orrhanen ca 1–1,5 kg",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -496,7 +496,7 @@
     "optionB": "Glidflygten",
     "optionC": "Stormseglingen",
     "optionD": "Termikflygten",
-    "correctAnswer": "Vingklappandet – de klappar vingarna mot varandra vid start",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -506,7 +506,7 @@
     "optionB": "12, 20, 28 och .410",
     "optionC": "6, 8, 10 och 12",
     "optionD": "12, 16, 20 och .410",
-    "correctAnswer": "12, 16, 20 och .410",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -516,7 +516,7 @@
     "optionB": "Krutladdningens storlek",
     "optionC": "Choken – trångborrningen i pipans mynning",
     "optionD": "Pipans längd",
-    "correctAnswer": "Choken – trångborrningen i pipans mynning",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -526,7 +526,7 @@
     "optionB": "Öppen, smal, trång och extra trång",
     "optionC": "Fri, kvart, trekvart och full",
     "optionD": "Öppen, halv, trekvart och sluten",
-    "correctAnswer": "Cylinder, kvart, halv och helt trång (full)",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -536,7 +536,7 @@
     "optionB": "Ca 10 meter",
     "optionC": "Ca 25 meter",
     "optionD": "Ca 75 meter",
-    "correctAnswer": "Ca 25 meter",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -546,7 +546,7 @@
     "optionB": "Spridningen minskar – svärmen hålls tätare länge",
     "optionC": "Spridningen påverkas inte av choken",
     "optionD": "Haglen flyger snabbare",
-    "correctAnswer": "Spridningen minskar – svärmen hålls tätare länge",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -556,7 +556,7 @@
     "optionB": "I ett godkänt låst vapenförvaringsskåp, ammunition separat",
     "optionC": "I ett olåst skåp om man bor ensam",
     "optionD": "Vapnet behöver inte förvaras låst om man har jaktkort",
-    "correctAnswer": "I ett godkänt låst vapenförvaringsskåp, ammunition separat",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -566,7 +566,7 @@
     "optionB": "Peka alltid mot marken",
     "optionC": "Ladda ur vapnet vid varje rörelsepaus",
     "optionD": "Behandla alltid vapnet som om det är laddat",
-    "correctAnswer": "Behandla alltid vapnet som om det är laddat",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -576,7 +576,7 @@
     "optionB": "3–9 gångers förstoring och 50 mm objektivdiameter",
     "optionC": "3 till 9 meters räckvidd vid 50 m",
     "optionD": "3–9 mm röreöppning och 50 mm totallängd",
-    "correctAnswer": "3–9 gångers förstoring och 50 mm objektivdiameter",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -586,7 +586,7 @@
     "optionB": "1 500–2 000 m/s",
     "optionC": "700–900 m/s",
     "optionD": "100–200 m/s",
-    "correctAnswer": "700–900 m/s",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -596,7 +596,7 @@
     "optionB": "Kulans anslagsenergi mätt 100 meter från mynningen, i joule",
     "optionC": "Energin vid 50 meters avstånd",
     "optionD": "Rekylenergikraft mot skyttens axel",
-    "correctAnswer": "Kulans anslagsenergi mätt 100 meter från mynningen, i joule",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -606,7 +606,7 @@
     "optionB": "Att ställa in säkringen",
     "optionC": "Att kontrollera att magasinet är tomt",
     "optionD": "Att justera siktet så att träffpunkten stämmer på ett bestämt avstånd",
-    "correctAnswer": "Att justera siktet så att träffpunkten stämmer på ett bestämt avstånd",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -616,7 +616,7 @@
     "optionB": "Fyra klasser efter kulvikt, konstruktion och anslagsenergi (E100)",
     "optionC": "Två klasser: jakt- och tävlingsammunition",
     "optionD": "Klassindelning finns inte i Sverige",
-    "correctAnswer": "Fyra klasser efter kulvikt, konstruktion och anslagsenergi (E100)",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -626,7 +626,7 @@
     "optionB": "Enbart luftmotstånd och gravitation",
     "optionC": "Hastighet, kulvikt, luftmotstånd, vind och gravitation",
     "optionD": "Temperaturen och luftfuktigheten är de enda faktorerna",
-    "correctAnswer": "Hastighet, kulvikt, luftmotstånd, vind och gravitation",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -636,7 +636,7 @@
     "optionB": "Kulans vikt i gram",
     "optionC": "Ammunitioens hållbarhetsgrad",
     "optionD": "Kulans förmåga att behålla sin hastighet mot luftmotståndet",
-    "correctAnswer": "Kulans förmåga att behålla sin hastighet mot luftmotståndet",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -646,7 +646,7 @@
     "optionB": "Hjärta-/lungregionen bakom frambenets överkant",
     "optionC": "Bakdelen och ryggraden",
     "optionD": "Magen och buken",
-    "correctAnswer": "Hjärta-/lungregionen bakom frambenets överkant",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -656,7 +656,7 @@
     "optionB": "Helmantlad expanderar mer än expanderande",
     "optionC": "Det finns ingen skillnad i effekt",
     "optionD": "Helmantlad är snabbare och mer humanär",
-    "correctAnswer": "Expanderande svampar upp och ger större sårkanal; helmantlad behåller sin form",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -666,7 +666,7 @@
     "optionB": "Djuret faller alltid på stället",
     "optionC": "Sidoskott ger mest kött",
     "optionD": "Störst träffyta mot vitala organ och minst risk för skadeskjutning",
-    "correctAnswer": "Störst träffyta mot vitala organ och minst risk för skadeskjutning",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -676,7 +676,7 @@
     "optionB": "Blodets färg",
     "optionC": "Djurets reaktion i skottögonblicket som visar var det träffades",
     "optionD": "Lukten från djuret",
-    "correctAnswer": "Djurets reaktion i skottögonblicket som visar var det träffades",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -686,7 +686,7 @@
     "optionB": "Risken minskar eftersom skottvägen är längre",
     "optionC": "Sneda skott är alltid mer humana",
     "optionD": "Det spelar ingen roll för träffresultatet",
-    "correctAnswer": "Risken ökar – träffytan mot vitala organ minskar",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -696,7 +696,7 @@
     "optionB": "Ryggmärg, hjärna och ögon",
     "optionC": "Hjärta, lungor och stora blodkärl i brösthålan",
     "optionD": "Skelett, muskler och senor",
-    "correctAnswer": "Hjärta, lungor och stora blodkärl i brösthålan",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -706,7 +706,7 @@
     "optionB": "Alltid söka efter djuret noggrant och anlita eftersökshund vid behov",
     "optionC": "Rapportera till Jägareförbundet och gå hem",
     "optionD": "Skjuta en gång till om man ser djuret igen",
-    "correctAnswer": "Alltid söka efter djuret noggrant och anlita eftersökshund vid behov",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -716,7 +716,7 @@
     "optionB": "Ställare",
     "optionC": "Spanare",
     "optionD": "Stövare",
-    "correctAnswer": "Stövare (t.ex. hamiltonstövare, drever och tax)",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -726,7 +726,7 @@
     "optionB": "Drevaren är större och behöver mer mark",
     "optionC": "Stövare ca 30–35 kg och behöver 200 ha; drever ca 15 kg och behöver 100 ha",
     "optionD": "Taxen är störst av drevhundarna",
-    "correctAnswer": "Stövare ca 30–35 kg och behöver 200 ha; drever ca 15 kg och behöver 100 ha",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -736,7 +736,7 @@
     "optionB": "Att hunden skäller vid starten av en jaktdag",
     "optionC": "Att hunden skäller på jägaren för att meddela träff",
     "optionD": "Att hunden är tyst men markerar med kroppen",
-    "correctAnswer": "Att hunden skäller för att markera att viltet har stannat (ej flykt)",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -746,7 +746,7 @@
     "optionB": "Att vakta fällt vilt mot predatorer",
     "optionC": "Att söka upp och hämta (apportera) skjutet vilt",
     "optionD": "Att ställa upp vilt på pass",
-    "correctAnswer": "Att söka upp och hämta (apportera) skjutet vilt",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -756,7 +756,7 @@
     "optionB": "Drevjakt",
     "optionC": "Vaktjakt",
     "optionD": "Vallning",
-    "correctAnswer": "Drevjakt",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -766,7 +766,7 @@
     "optionB": "Retrievers och spaniels",
     "optionC": "Vinthundar och terrierr",
     "optionD": "Ställande och stötande raser",
-    "correctAnswer": "Ställande och stötande raser, t.ex. setter och pointer",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -776,7 +776,7 @@
     "optionB": "Ringa till Jägareförbundet",
     "optionC": "Ta ögonmärke – notera exakt var djuret stod och åt vilket håll det försvann",
     "optionD": "Vänta 24 timmar och börja sedan söka",
-    "correctAnswer": "Ta ögonmärke – notera exakt var djuret stod och åt vilket håll det försvann",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -786,7 +786,7 @@
     "optionB": "Djuret ska hinna lägga sig och lugna ned sig – för tidig störning driver det vidare",
     "optionC": "Man behöver hämta hunden hemma",
     "optionD": "Det spelar ingen roll när man söker",
-    "correctAnswer": "Djuret ska hinna lägga sig och lugna ned sig – för tidig störning driver det vidare",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -796,7 +796,7 @@
     "optionB": "Inom 12 timmar",
     "optionC": "Inom 24 timmar",
     "optionD": "Inom 2 timmar",
-    "correctAnswer": "Inom 2 timmar",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -806,7 +806,7 @@
     "optionB": "Jägaren/den inblandade ska rädda djuret om möjligt och anmäla till polisen",
     "optionC": "Det finns ingen anmälningsplikt",
     "optionD": "Man anmäler enbart om det är en älg",
-    "correctAnswer": "Jägaren/den inblandade ska rädda djuret om möjligt och anmäla till polisen",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -816,7 +816,7 @@
     "optionB": "Svansen",
     "optionC": "Löpan",
     "optionD": "Märket",
-    "correctAnswer": "Svansen",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -826,7 +826,7 @@
     "optionB": "Ljust blod indikerar magträff",
     "optionC": "Blodfärgen är irrelevant vid eftersök",
     "optionD": "Klart rött skummigt blod tyder på lungträff; mörkt blod kan indikera leverträff",
-    "correctAnswer": "Klart rött skummigt blod tyder på lungträff; mörkt blod kan indikera leverträff",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -836,7 +836,7 @@
     "optionB": "Vikten efter att inälvor tagits bort, ca 70 %",
     "optionC": "Hela djurets vikt inklusive skinn",
     "optionD": "Vikten av enbart köttbitarna exklusive ben",
-    "correctAnswer": "Vikten av köttet utan skinn och inälvor, ca 50–55 % av levande vikt",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -846,7 +846,7 @@
     "optionB": "Hängtiden räknas i timmar multiplicerat med luftfuktigheten",
     "optionC": "Temperatur (°C) × antal dygn ska uppgå till ca 40 dygnsgrader för optimal mörning",
     "optionD": "Köttet ska alltid frysas direkt",
-    "correctAnswer": "Temperatur (°C) × antal dygn ska uppgå till ca 40 dygnsgrader för optimal mörning",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -856,7 +856,7 @@
     "optionB": "Älg och rådjur",
     "optionC": "Räv och grävling",
     "optionD": "Alla däggdjur utan undantag",
-    "correctAnswer": "Björn och vildsvin",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -866,7 +866,7 @@
     "optionB": "För att förhindra bakterietillväxt",
     "optionC": "Köttet ska frysas direkt för bästa resultat",
     "optionD": "För snabb nedkylning hindrar mörningsprocessen och ger segt kött",
-    "correctAnswer": "För snabb nedkylning hindrar mörningsprocessen och ger segt kött",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -876,7 +876,7 @@
     "optionB": "Slakt",
     "optionC": "Urtagning",
     "optionD": "Flåning",
-    "correctAnswer": "Urtagning (eller grovtagning)",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -886,7 +886,7 @@
     "optionB": "Köttet ska hanteras hygieniskt, kylas korrekt och trikinprovas vid behov",
     "optionC": "Köttet får enbart användas för eget bruk",
     "optionD": "Det finns inga lagkrav på vilthantering",
-    "correctAnswer": "Köttet ska hanteras hygieniskt, kylas korrekt och trikinprovas vid behov",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -896,7 +896,7 @@
     "optionB": "Jägareförbundet → Länsstyrelsen → Polisen",
     "optionC": "EU → Riksdag → Länsstyrelsen",
     "optionD": "Riksdag (jaktlag) → Regering (jaktförordning) → Naturvårdsverket (föreskrifter)",
-    "correctAnswer": "Riksdag (jaktlag) → Regering (jaktförordning) → Naturvårdsverket (föreskrifter)",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -906,7 +906,7 @@
     "optionB": "Att skydda markägare från obehörig jakt",
     "optionC": "Att skydda viltet under känsliga perioder, framför allt reproduktionstid",
     "optionD": "Att begränsa antalet jaktkort",
-    "correctAnswer": "Att skydda viltet under känsliga perioder, framför allt reproduktionstid",
+    "correctAnswer": "C",
     "explanation": ""
   },
   {
@@ -916,7 +916,7 @@
     "optionB": "Jakt utan tillstånd, på annans mark eller utanför jakttid",
     "optionC": "Jakt utan eftersökshund",
     "optionD": "Jakt utan orange väst",
-    "correctAnswer": "Jakt utan tillstånd, på annans mark eller utanför jakttid",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -926,7 +926,7 @@
     "optionB": "Jägareförbundet",
     "optionC": "Länsstyrelsen",
     "optionD": "Naturvårdsverket",
-    "correctAnswer": "Naturvårdsverket",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -936,7 +936,7 @@
     "optionB": "Vapentillstånd (licens) utfärdat av polismyndigheten",
     "optionC": "Godkänd jägarexamen räcker",
     "optionD": "Tillstånd söks hos länsstyrelsen",
-    "correctAnswer": "Vapentillstånd (licens) utfärdat av polismyndigheten",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -946,7 +946,7 @@
     "optionB": "Det är tillåtet om man har jaktkort",
     "optionC": "Det är tillåtet under allmän jakttid",
     "optionD": "Det är tillåtet på statlig mark",
-    "correctAnswer": "Det är förbjudet och klassas som olaga jakt",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -956,7 +956,7 @@
     "optionB": "Hagelgevär kaliber 12 duger",
     "optionC": "Alla vapenkaliber är tillåtna vid älgjakt",
     "optionD": "Klass 1-ammunition med minst 2 700 joule anslagsenergi vid 100 m (E100)",
-    "correctAnswer": "Klass 1-ammunition med minst 2 700 joule anslagsenergi vid 100 m (E100)",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -966,7 +966,7 @@
     "optionB": "Lagen",
     "optionC": "Ekologi",
     "optionD": "Artkännedom",
-    "correctAnswer": "Artkännedom",
+    "correctAnswer": "D",
     "explanation": ""
   },
   {
@@ -976,7 +976,7 @@
     "optionB": "En mobiltelefon med GPS",
     "optionC": "Minst två jägare",
     "optionD": "En förbandslåda",
-    "correctAnswer": "Eftersökshund (ska kunna kallas inom 2 timmar)",
+    "correctAnswer": "A",
     "explanation": ""
   },
   {
@@ -986,7 +986,7 @@
     "optionB": "Att säkerställa att jägare har tillräckliga kunskaper om vilt, vapen, lag och etik",
     "optionC": "Att finansiera Jägareförbundets verksamhet",
     "optionD": "Att ta ut en statlig avgift för jaktutövande",
-    "correctAnswer": "Att säkerställa att jägare har tillräckliga kunskaper om vilt, vapen, lag och etik",
+    "correctAnswer": "B",
     "explanation": ""
   },
   {
@@ -996,7 +996,7 @@
     "optionB": "Ammunition behöver inte låsas in",
     "optionC": "Vapnet ska förvaras i godkänt låst skåp och ammunition ska förvaras separat",
     "optionD": "Vapenskåp krävs bara om man har fler än 5 vapen",
-    "correctAnswer": "Vapnet ska förvaras i godkänt låst skåp och ammunition ska förvaras separat",
+    "correctAnswer": "C",
     "explanation": ""
   }
 ]

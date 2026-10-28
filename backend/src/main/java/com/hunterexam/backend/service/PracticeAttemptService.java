@@ -239,19 +239,12 @@ public class PracticeAttemptService {
     /**
      * The correct option as a letter (A–D).
      * <p>
-     * Questions still store the correct option's text. Until #155 changes that,
-     * the letter is found by matching the text against the four options.
-     * After #155 this becomes a single read of the stored letter.
+     * As of #155, {@code Question.correctAnswer} stores the letter directly.
      */
     private String correctOptionOf(Question question) {
-        String correctText = question.getCorrectAnswer();
-        if (correctText.equals(question.getOptionA())) return "A";
-        if (correctText.equals(question.getOptionB())) return "B";
-        if (correctText.equals(question.getOptionC())) return "C";
-        if (correctText.equals(question.getOptionD())) return "D";
-        throw new IllegalStateException(
-                "Question " + question.getId() + " has a correct answer that matches no option.");
+        return question.getCorrectAnswer();
     }
+
 
     /**
      * Creates the student's totals row (0 answered, 0 correct) for each subject
