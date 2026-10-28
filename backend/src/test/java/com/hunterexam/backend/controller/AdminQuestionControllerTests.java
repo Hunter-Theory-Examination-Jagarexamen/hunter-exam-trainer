@@ -21,6 +21,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -42,7 +43,8 @@ class AdminQuestionControllerTests {
 
     @Test
     void anonymousAndRegularUsersCannotManageQuestions() throws Exception {
-        for (var request : java.util.List.of(post("/api/admin/questions"),
+        for (var request : java.util.List.of(get("/api/admin/questions?subjectId=1"),
+                post("/api/admin/questions"),
                 put("/api/admin/questions/1"), delete("/api/admin/questions/1"))) {
             mvc.perform(request.contentType(MediaType.APPLICATION_JSON).content(BODY))
                     .andExpect(status().isUnauthorized());
@@ -69,6 +71,19 @@ class AdminQuestionControllerTests {
         mvc.perform(delete("/api/admin/questions/7").with(admin))
                 .andExpect(status().isNoContent());
         verify(service).delete(7L);
+    }
+
+    @Test
+    void adminGetsQuestionsWithCorrectAnswer() throws Exception {
+        Question question = new Question();
+        question.setId(7L);
+        question.setCorrectAnswer("One");
+        when(service.findBySubjectId(1L)).thenReturn(java.util.List.of(question));
+        mvc.perform(get("/api/admin/questions?subjectId=1")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(7))
+                .andExpect(jsonPath("$[0].correctAnswer").value("One"));
     }
 
     @Test
