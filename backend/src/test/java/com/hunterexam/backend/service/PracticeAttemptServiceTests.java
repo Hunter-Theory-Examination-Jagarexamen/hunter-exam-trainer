@@ -1,10 +1,12 @@
 package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.PracticeAnswerResponse;
+import com.hunterexam.backend.dto.PracticeFinishResponse;
 import com.hunterexam.backend.dto.PracticeStartResponse;
 import com.hunterexam.backend.entity.Attempt;
 import com.hunterexam.backend.entity.AttemptQuestion;
 import com.hunterexam.backend.entity.AttemptType;
+import com.hunterexam.backend.entity.PracticeResult;
 import com.hunterexam.backend.entity.Question;
 import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.SubjectStats;
@@ -43,7 +45,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for {@link PracticeAttemptService}: start and answer.
+ * Unit tests for {@link PracticeAttemptService}: start, answer and finish.
  * <p>
  * The repositories are Mockito mocks, so no database is used.
  */
@@ -264,5 +266,90 @@ class PracticeAttemptServiceTests {
         when(subjectStatsRepository.addAnswer(eq(user), eq(subject), eq(1L), any())).thenReturn(0);
 
         assertThrows(IllegalStateException.class, () -> service.answer(ATTEMPT_ID, 100L, "B", EMAIL));
+    }
+
+    // ---------- finish ----------
+
+    // 4 questions: 2 correct, 1 wrong, 1 skipped.
+    private List<AttemptQuestion> roundRows(Attempt attempt) {
+        AttemptQuestion correct1 = new AttemptQuestion(attempt, question(100L), 0);
+        AttemptQuestion correct2 = new AttemptQuestion(attempt, question(101L), 1);
+        AttemptQuestion wrong = new AttemptQuestion(attempt, question(102L), 2);
+        AttemptQuestion skipped = new AttemptQuestion(attempt, question(103L), 3);
+        correct1.recordAnswer("B", true, LocalDateTime.now());
+        correct2.recordAnswer("B", true, LocalDateTime.now());
+        wrong.recordAnswer("A", false, LocalDateTime.now());
+        return List.of(correct1, correct2, wrong, skipped);
+    }
+
+    @Test
+    void finish_closesRound_andCountsCorrectOutOfAllQuestions() {
+        Attempt attempt = runningAttempt(user);
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(attemptRepository.findById(ATTEMPT_ID)).thenReturn(Optional.of(attempt));
+        when(attemptQuestionRepository.findByAttemptIdOrderByPosition(ATTEMPT_ID)).thenReturn(roundRows(attempt));
+
+        PracticeFinishResponse response = service.finish(ATTEMPT_ID, EMAIL);
+
+        // Wrong and skipped answers add nothing, and never subtract.
+        assertEquals(2, response.getCorrectAnswers());
+        assertEquals(4, response.getTotalQuestions());
+        assertTrue(attempt.isFinished());
+        verify(attemptRepository).save(attempt);
+    }
+
+    @Test
+    void finish_savesBridgePracticeResult_withServerCountedTotals() {
+        Attempt attempt = runningAttempt(user);
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(attemptRepository.findById(ATTEMPT_ID)).thenReturn(Optional.of(attempt));
+        when(attemptQuestionRepository.findByAttemptIdOrderByPosition(ATTEMPT_ID)).thenReturn(roundRows(attempt));
+
+        service.finish(ATTEMPT_ID, EMAIL);
+
+        ArgumentCaptor<PracticeResult> result = ArgumentCaptor.forClass(PracticeResult.class);
+        verify(practiceResultRepository).save(result.capture());
+        assertEquals(user, result.getValue().getUser());
+        assertEquals(subject, result.getValue().getSubject());
+        assertEquals(2, result.getValue().getCorrectAnswers());
+        assertEquals(4, result.getValue().getTotalQuestions());
+        assertEquals(50, result.getValue().getScore());
+        assertEquals(attempt.getFinishedAt(), result.getValue().getCompletedAt());
+    }
+
+    @Test
+    void finish_withNoAnswers_closesRoundButSavesNoBridgeResult() {
+        Attempt attempt = runningAttempt(user);
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(attemptRepository.findById(ATTEMPT_ID)).thenReturn(Optional.of(attempt));
+        when(attemptQuestionRepository.findByAttemptIdOrderByPosition(ATTEMPT_ID))
+                .thenReturn(List.of(new AttemptQuestion(attempt, question(100L), 0)));
+
+        PracticeFinishResponse response = service.finish(ATTEMPT_ID, EMAIL);
+
+        assertEquals(0, response.getCorrectAnswers());
+        assertEquals(1, response.getTotalQuestions());
+        assertTrue(attempt.isFinished());
+        verify(practiceResultRepository, never()).save(any());
+    }
+
+    @Test
+    void finish_throwsConflict_whenRoundAlreadyFinished() {
+        Attempt finished = runningAttempt(user);
+        finished.setFinishedAt(LocalDateTime.now());
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(attemptRepository.findById(ATTEMPT_ID)).thenReturn(Optional.of(finished));
+
+        assertThrows(ConflictException.class, () -> service.finish(ATTEMPT_ID, EMAIL));
+        verify(practiceResultRepository, never()).save(any());
+    }
+
+    @Test
+    void finish_throwsAccessDenied_whenRoundBelongsToSomeoneElse() {
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(attemptRepository.findById(ATTEMPT_ID)).thenReturn(Optional.of(runningAttempt(user(2L))));
+
+        assertThrows(AccessDeniedException.class, () -> service.finish(ATTEMPT_ID, EMAIL));
+        verify(attemptRepository, never()).save(any());
     }
 }
