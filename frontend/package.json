@@ -11,10 +11,12 @@
     "test": "vitest"
   },
   "dependencies": {
+    "i18next": "^26.5.11",
     "lucide": "^1.27.0",
     "lucide-react": "^1.27.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "react-i18next": "^17.1.9",
     "react-router-dom": "^7.18.1",
     "recharts": "^3.10.1"
   },
