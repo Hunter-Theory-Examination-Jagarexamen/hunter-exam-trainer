@@ -137,6 +137,7 @@ class PracticeAttemptServiceTests {
         PracticeStartResponse response = service.start(5L, EMAIL);
 
         assertEquals(ATTEMPT_ID, response.getAttemptId());
+        assertEquals("Viltvård", response.getSubjectName());
         assertEquals(2, response.getQuestions().size());
         // ExamQuestionResponse has no correctAnswer field at all; the ids prove the order.
         assertEquals(100L, response.getQuestions().get(0).getId());

@@ -113,7 +113,7 @@ public class PracticeAttemptService {
                 .map(this::toQuestionResponse)
                 .toList();
 
-        return new PracticeStartResponse(attempt.getId(), questionDtos);
+        return new PracticeStartResponse(attempt.getId(), subject.getName(), questionDtos);
     }
 
     /**

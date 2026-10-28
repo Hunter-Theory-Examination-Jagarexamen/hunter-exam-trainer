@@ -5,6 +5,7 @@ export type OptionLetter = "A" | "B" | "C" | "D";
 // Response from POST /api/practice/attempts (no correct answers).
 export interface PracticeStartResponse {
     attemptId: number;
+    subjectName: string;
     questions: ExamQuestion[];
 }
 

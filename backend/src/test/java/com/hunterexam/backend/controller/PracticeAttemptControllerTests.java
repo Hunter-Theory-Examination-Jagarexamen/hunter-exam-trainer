@@ -73,13 +73,14 @@ class PracticeAttemptControllerTests {
         ExamQuestionResponse question = new ExamQuestionResponse(
                 100L, "Question?", "One", "Two", "Three", "Four", null);
         when(practiceAttemptService.start(5L, EMAIL))
-                .thenReturn(new PracticeStartResponse(10L, List.of(question)));
+                .thenReturn(new PracticeStartResponse(10L, "Viltvård", List.of(question)));
 
         mvc.perform(post("/api/practice/attempts").with(student())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"subjectId\": 5}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.attemptId").value(10))
+                .andExpect(jsonPath("$.subjectName").value("Viltvård"))
                 .andExpect(jsonPath("$.questions[0].id").value(100))
                 .andExpect(jsonPath("$.questions[0].optionB").value("Two"))
                 // The whole point of the refactor: these never reach the browser in advance
