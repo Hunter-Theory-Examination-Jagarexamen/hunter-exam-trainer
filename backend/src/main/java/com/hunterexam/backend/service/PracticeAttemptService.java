@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Practice rounds stored per question (#168): start a round, answer one
@@ -72,9 +73,8 @@ public class PracticeAttemptService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        if (!subjectRepository.existsById(subjectId)) {
-            throw new NotFoundException("Subject not found with ID: " + subjectId);
-        }
+        Subject subject = subjectRepository.findById(subjectId)
+                .orElseThrow(() -> new NotFoundException("Subject not found with ID: " + subjectId));
 
         List<Question> questions = questionRepository.findBySubjectId(subjectId);
         if (questions.isEmpty()) {
@@ -89,6 +89,8 @@ public class PracticeAttemptService {
             rows.add(new AttemptQuestion(attempt, questions.get(position), position));
         }
         attemptQuestionRepository.saveAll(rows);
+
+        ensureSubjectStatsExist(user, Set.of(subject));
 
         List<ExamQuestionResponse> questionDtos = questions.stream()
                 .map(this::toQuestionResponse)
@@ -176,24 +178,39 @@ public class PracticeAttemptService {
     }
 
     /**
+     * Creates the student's totals row (0 answered, 0 correct) for each subject
+     * in the round that doesn't have one yet.
+     * <p>
+     * Done at start so that {@link #answer} only ever updates and never inserts:
+     * an insert there could clash with another answer arriving at the same moment.
+     * Two starts at the same moment (e.g. a double click) can still clash here;
+     * the unique constraint rejects the second with 409 and the student can
+     * simply start again.
+     */
+    private void ensureSubjectStatsExist(User user, Set<Subject> subjects) {
+        for (Subject subject : subjects) {
+            if (!subjectStatsRepository.existsByUserAndSubject(user, subject)) {
+                subjectStatsRepository.save(new SubjectStats(user, subject));
+            }
+        }
+    }
+
+    /**
      * Adds one answer to the student's totals for the subject.
      * <p>
      * The update adds 1 inside the database, so two answers at the same time
-     * can't overwrite each other. If the student has no row for the subject yet,
-     * one is created. (If two first answers for a subject arrive at exactly the
-     * same moment, the unique constraint rejects the second insert with 409 and
-     * nothing from that request is saved; the client can send it again.)
+     * can't overwrite each other. The row always exists, because
+     * {@link #start} creates it.
      */
     private void addToSubjectStats(User user, Subject subject, boolean correct, LocalDateTime answeredAt) {
         long correctIncrement = correct ? 1 : 0;
         int updated = subjectStatsRepository.addAnswer(user, subject, correctIncrement, answeredAt);
 
+        // 0 rows updated means start didn't create the row: a bug. Fail loudly
+        // instead of inserting here, which could clash with a parallel answer.
         if (updated == 0) {
-            SubjectStats stats = new SubjectStats(user, subject);
-            stats.setAnswered(1);
-            stats.setCorrect(correctIncrement);
-            stats.setLastAnsweredAt(answeredAt);
-            subjectStatsRepository.save(stats);
+            throw new IllegalStateException(
+                    "No totals row for subject " + subject.getId() + "; it should have been created at start.");
         }
     }
 

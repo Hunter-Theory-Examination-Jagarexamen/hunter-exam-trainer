@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 
 public interface SubjectStatsRepository extends JpaRepository<SubjectStats, Long> {
 
+    boolean existsByUserAndSubject(User user, Subject subject);
+
     /**
      * Adds one answer to the totals, letting the database do the adding
      * ({@code answered = answered + 1}) so two answers saved at the same time
