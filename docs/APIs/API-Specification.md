@@ -11,7 +11,10 @@
 | PUT    | /api/subjects/{id}            | Update an existing subject                      | Required (ADMIN) |
 | DELETE | /api/subjects/{id}            | Delete a subject                                | Required (ADMIN) |
 | GET    | /api/questions?subjectId={id} | Get questions for a specific subject            | Required         |
-| POST   | /api/practice/results         | Save a completed practice session result        | Required         |
+| POST   | /api/practice/attempts        | Start a practice round for a subject            | Required         |
+| POST   | /api/practice/attempts/{id}/answers | Answer one question in a practice round (checked by the server) | Required |
+| POST   | /api/practice/attempts/{id}/finish | Finish a practice round and get its totals | Required         |
+| POST   | /api/practice/results         | Save a completed practice session result (old; to be replaced by the attempts endpoints) | Required |
 | POST   | /api/exam/start               | Start a mock exam and receive 70 questions      | Required         |
 | POST   | /api/exam/{sessionId}/answer | Save a single answer on the current exam session | Required |
 | POST   | /api/exam/submit              | Submit a mock exam answers and save the result  | Required         |
@@ -72,6 +75,57 @@ Response:
 - `lastActivityAt` — latest activity across practice AND mock exams
 
 The `mockExams` field is a separate object so it can be filtered out per student in a future sharing feature (#125).
+
+## Practice rounds: request and response
+
+Practice rounds are stored per question (#168). The server checks each answer, so
+the client never gets the correct answers in advance and never sends its own score.
+
+### `POST /api/practice/attempts`
+
+```json
+{ "subjectId": 2 }
+```
+
+Starts a round with all questions of the subject. Response (no `correctAnswer` or `explanation`):
+
+```json
+{
+  "attemptId": 10,
+  "questions": [
+    { "id": 8, "questionText": "...", "optionA": "...", "optionB": "...", "optionC": "...", "optionD": "...", "imageUrl": null }
+  ]
+}
+```
+
+- `400` if `subjectId` is missing, `404` if the subject doesn't exist, `409` if it has no questions.
+- Starting a round closes the student's earlier unfinished practice round (one open practice round per student).
+
+### `POST /api/practice/attempts/{id}/answers`
+
+```json
+{ "questionId": 8, "chosenOption": "A" }
+```
+
+Response:
+
+```json
+{ "correct": false, "correctOption": "B", "explanation": "..." }
+```
+
+- `chosenOption` must be `A`, `B`, `C` or `D` (otherwise `400`). `explanation` may be `null`.
+- `403` if the round belongs to another user, `409` if the round is finished or the question was already answered, `400` if the question isn't part of the round.
+
+### `POST /api/practice/attempts/{id}/finish`
+
+No request body. Response:
+
+```json
+{ "correctAnswers": 5, "totalQuestions": 7 }
+```
+
+- `totalQuestions` is all questions in the round; skipped questions count as not correct (nothing is subtracted).
+- `409` if the round is already finished, `403` if it belongs to another user.
 
 **Authentication notes:**
 
