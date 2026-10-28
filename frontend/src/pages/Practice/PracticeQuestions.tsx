@@ -4,27 +4,39 @@ import PracticeQuestionCard from "../../components/practice/PracticeQuestionCard
 import PracticeNavigation from "../../components/practice/PracticeNavigation";
 import type { PracticeQuestion } from "../../types/practiceQuestions";
 import {useEffect, useState} from "react";
-import type {Question} from "../../types/question.ts";
-import apiClient from "../../api/apiClient.ts";
 import type {OptionLetter, PracticeAnswerResponse} from "../../types/practiceAttempt";
+import {
+    answerPracticeQuestion,
+    finishPracticeRound,
+    startPracticeRound
+} from "../../services/practiceAttemptService";
 
 const PracticeQuestions = () => {
 
     const navigate = useNavigate();
     const { subject } = useParams();
 
+    const [attemptId, setAttemptId] = useState<number | null>(null);
+    const [subjectName, setSubjectName] = useState("");
     const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
 
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-    const [feedback, setFeedback] = useState<PracticeAnswerResponse | null>(null);
-    const [correctAnswers, setCorrectAnswers] = useState(0);
+    // The option picked on the current question, before it is checked.
+    const [selectedAnswer, setSelectedAnswer] = useState<OptionLetter | null>(null);
+    // The server's replies, by question index, so Previous can show them again.
+    const [answers, setAnswers] = useState<Record<number, { chosen: OptionLetter; check: PracticeAnswerResponse }>>({});
+    // True while an answer is on its way to the server (blocks a second click).
+    const [isChecking, setIsChecking] = useState(false);
 
     useEffect(() => {
 
-        const fetchQuestions = async () => {
+        // If the subject changes or the page closes before the server answers,
+        // the old answer must not overwrite the new state.
+        let active = true;
+
+        const startRound = async () => {
 
             if (!subject) {
                 setError("Subject not found");
@@ -37,119 +49,118 @@ const PracticeQuestions = () => {
                 setIsLoading(true);
                 setError("");
 
-                const data: Question[]= await apiClient(`/api/questions?subjectId=${subject}`);
+                const round = await startPracticeRound(Number(subject));
+                if (!active) {
+                    return;
+                }
 
-                const mappedQuestions: PracticeQuestion[] =
-                    data.map((question) => {
+                // Option ids are the letters A-D, the same letters the server checks.
+                const mappedQuestions: PracticeQuestion[] = round.questions.map((question) => ({
+                    id: question.id.toString(),
+                    subjectArea: round.subjectName,
+                    question: question.questionText,
+                    imageUrl: question.imageUrl,
+                    options: [
+                        { id: "A", answer: question.optionA },
+                        { id: "B", answer: question.optionB },
+                        { id: "C", answer: question.optionC },
+                        { id: "D", answer: question.optionD }
+                    ]
+                }));
 
-                        return {
-                            id: question.id.toString(),
-                            subjectArea: question.subject.name,
-                            question: question.questionText,
-                            imageUrl: question.imageUrl,
-
-                            options: [
-                                {
-                                    id: "A",
-                                    answer: question.optionA,
-                                    isCorrect: question.optionA === question.correctAnswer
-                                },
-                                {
-                                    id: "B",
-                                    answer: question.optionB,
-                                    isCorrect: question.optionB === question.correctAnswer
-                                },
-                                {
-                                    id: "C",
-                                    answer: question.optionC,
-                                    isCorrect: question.optionC === question.correctAnswer
-                                },
-                                {
-                                    id: "D",
-                                    answer: question.optionD,
-                                    isCorrect: question.optionD === question.correctAnswer
-                                }
-                            ]
-                        };
-                });
+                setAttemptId(round.attemptId);
+                setSubjectName(round.subjectName);
                 setQuestions(mappedQuestions);
 
                 // Start from the first question whenever a subject is loaded
                 setCurrentQuestionIndex(0);
                 setSelectedAnswer(null);
-                setFeedback(null);
-                setCorrectAnswers(0);
+                setAnswers({});
             }
             catch (error: unknown) {
-                console.error("Failed to fetch questions: ", error);
+                if (!active) {
+                    return;
+                }
+                console.error("Failed to start practice round: ", error);
                 const errorObj = error as { status?: number; message?: string };
-                if (errorObj?.status === 409 || (errorObj?.message && errorObj.message.includes("Not enough questions"))) {
-                    setError(errorObj.message || "Not enough questions available for this subject.");
+                if (errorObj?.status === 409) {
+                    setError("There are no questions in this subject yet.");
                 } else {
                     setError("Failed to load questions. Please try again.");
                 }
             }
             finally {
-                setIsLoading(false);
+                if (active) {
+                    setIsLoading(false);
+                }
             }
         };
-        fetchQuestions();
+        startRound();
+
+        return () => {
+            active = false;
+        };
 
     }, [subject]);
 
     const currentQuestion = questions[currentQuestionIndex];
+    const currentAnswer = answers[currentQuestionIndex];
 
     const handleAnswerSelect = (answerId: string) => {
-        setSelectedAnswer(answerId);
-    }
-
-    const handleCheckAnswer = () => {
-        if (!selectedAnswer) {
+        // An answered question is read-only: the server keeps the first answer.
+        if (currentAnswer) {
             return;
         }
-        const selectedOption = currentQuestion.options.find(
-            (option) => option.id === selectedAnswer
-        );
+        setSelectedAnswer(answerId as OptionLetter);
+    }
 
-        if (selectedOption?.isCorrect) {
-            setCorrectAnswers((previous) => previous + 1);
+    const handleCheckAnswer = async () => {
+        if (!selectedAnswer || attemptId === null || isChecking) {
+            return;
         }
 
-        // Temporary: built in the browser until the next step asks the server.
-        const correctOption = currentQuestion.options.find((option) => option.isCorrect)?.id as OptionLetter;
-        setFeedback({correct: selectedOption?.isCorrect ?? false, correctOption, explanation: null});
+        setIsChecking(true);
+        try {
+            const check = await answerPracticeQuestion(attemptId, Number(currentQuestion.id), selectedAnswer);
+            setAnswers((previous) => ({
+                ...previous,
+                [currentQuestionIndex]: { chosen: selectedAnswer, check }
+            }));
+        } catch (error) {
+            // A visible message with "Try again" comes in a later step (#170).
+            console.error("Failed to save answer:", error);
+        } finally {
+            setIsChecking(false);
+        }
+    };
+
+    const goToQuestion = (index: number) => {
+        setCurrentQuestionIndex(index);
+        setSelectedAnswer(null);
     };
 
     const handleNext = async () => {
 
         if (currentQuestionIndex < questions.length - 1) {
 
-            setCurrentQuestionIndex(currentQuestionIndex + 1);
-            setSelectedAnswer(null);
-            setFeedback(null);
+            goToQuestion(currentQuestionIndex + 1);
 
         } else {
 
-            if (!subject) {
+            if (attemptId === null) {
                 return;
             }
 
             try {
 
-                await apiClient("/api/practice/results", {
-                    method: "POST",
-                    body: JSON.stringify({
-                        subjectId: Number(subject),
-                        correctAnswers: correctAnswers,
-                        totalQuestions: questions.length
-                    })
-                });
+                await finishPracticeRound(attemptId);
 
                 navigate("/practice/subjects");
 
             } catch (error) {
 
-                console.error("Failed to save practice result:", error);
+                // A visible message with "Try again" comes in a later step (#170).
+                console.error("Failed to finish practice round:", error);
             }
         }
     };
@@ -158,9 +169,7 @@ const PracticeQuestions = () => {
 
         if (currentQuestionIndex > 0) {
 
-            setCurrentQuestionIndex(currentQuestionIndex - 1);
-            setSelectedAnswer(null);
-            setFeedback(null);
+            goToQuestion(currentQuestionIndex - 1);
         }
     };
 
@@ -200,7 +209,7 @@ const PracticeQuestions = () => {
     return (
         <div className="practice-questions">
             <PageTitle
-                title={currentQuestion.subjectArea}
+                title={subjectName}
                 subtitle="Answer the questions and improve your knowledge."
             />
 
@@ -210,8 +219,9 @@ const PracticeQuestions = () => {
 
             <PracticeQuestionCard
                 question={currentQuestion}
-                selectedAnswer={selectedAnswer}
-                feedback={feedback}
+                selectedAnswer={currentAnswer?.chosen ?? selectedAnswer}
+                feedback={currentAnswer?.check ?? null}
+                isChecking={isChecking}
                 onAnswerSelect={handleAnswerSelect}
                 onCheckAnswer={handleCheckAnswer}
             />
@@ -221,7 +231,7 @@ const PracticeQuestions = () => {
                 onNext={handleNext}
                 isFirstQuestion={currentQuestionIndex === 0}
                 isLastQuestion={currentQuestionIndex === questions.length - 1}
-                canGoNext={feedback !== null}
+                canGoNext={currentAnswer !== undefined}
             />
         </div>
     );

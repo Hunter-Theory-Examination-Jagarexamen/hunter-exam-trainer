@@ -21,14 +21,14 @@ const question: PracticeQuestion = {
     subjectArea: "Test subject",
     question: "Which animal is a deer?",
     options: [
-        { id: "A", answer: "Wild boar", isCorrect: false },
-        { id: "B", answer: "Roe deer", isCorrect: false },
-        { id: "C", answer: "Fox", isCorrect: false },
+        { id: "A", answer: "Wild boar" },
+        { id: "B", answer: "Roe deer" },
+        { id: "C", answer: "Fox" },
     ],
 };
 
-// Server replies: B is the correct option. isCorrect above is false everywhere on
-// purpose, to prove the card uses the server's reply and not the option data.
+// Server replies: B is the correct option. The options above don't say which one
+// is correct, so the card can only know it from the server's reply.
 const rightAnswer = { correct: true, correctOption: "B", explanation: null } as const;
 const wrongAnswer = { correct: false, correctOption: "B", explanation: null } as const;
 

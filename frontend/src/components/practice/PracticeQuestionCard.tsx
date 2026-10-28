@@ -9,6 +9,8 @@ interface PracticeQuestionProps {
     selectedAnswer: string | null;
     // The server's check of the answer; null until the answer is checked.
     feedback: PracticeAnswerResponse | null;
+    // True while the answer is on its way to the server.
+    isChecking?: boolean;
     onAnswerSelect: (answerId: string) => void;
     onCheckAnswer: () => void;
 }
@@ -17,6 +19,7 @@ const PracticeQuestionCard = ({
                               question,
                               selectedAnswer,
                               feedback,
+                              isChecking = false,
                               onAnswerSelect,
                               onCheckAnswer
                           }: PracticeQuestionProps) => {
@@ -66,6 +69,7 @@ const PracticeQuestionCard = ({
                                 name="practice-answer"
                                 value={option.id}
                                 checked={selectedAnswer === option.id}
+                                disabled={showFeedback}
                                 onChange={() => onAnswerSelect(option.id)}
                             />
                             <span>{option.answer}</span>
@@ -77,7 +81,7 @@ const PracticeQuestionCard = ({
                 <button
                     className="check-answer-button"
                     onClick={onCheckAnswer}
-                    disabled={!selectedAnswer || showFeedback}
+                    disabled={!selectedAnswer || showFeedback || isChecking}
                 >
                     Check Answer
                 </button>
