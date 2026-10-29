@@ -9,7 +9,7 @@ vi.mock("../../../api/apiClient", () => ({default: vi.fn()}));
 const subjects = [{id: 1, name: "Safety", description: "Safety", questionCount: 1},
     {id: 2, name: "Wildlife", description: "Wildlife", questionCount: 0}];
 const question: Question = {id: 1, questionText: "Original question?", optionA: "Moose", optionB: "Deer",
-    optionC: "Fox", optionD: "Bear", correctAnswer: "Fox", explanation: "An explanation",
+    optionC: "Fox", optionD: "Bear", correctAnswer: "C", explanation: "An explanation",
     imageUrl: "https://example.com/existing.jpg", subject: subjects[0]};
 
 beforeEach(() => {
@@ -59,7 +59,7 @@ describe("Admin question CRUD", () => {
         await userEvent.click(screen.getByRole("button", {name: "Save question"}));
         expect(JSON.parse(mutations()[0][1]!.body as string)).toEqual({
             questionText: "New question?", optionA: "Moose", optionB: "Deer", optionC: "Fox", optionD: "Bear",
-            correctAnswer: "Fox", explanation: "", subjectId: 1, imageUrl});
+            correctAnswer: "C", explanation: "", subjectId: 1, imageUrl});
     });
 
     it.each(["replace", "remove", "clear"])("can %s an existing image", async mode => {
@@ -74,7 +74,7 @@ describe("Admin question CRUD", () => {
         await userEvent.click(screen.getByRole("button", {name: "Save question"}));
         expect(JSON.parse(mutations()[0][1]!.body as string)).toEqual({
             questionText: question.questionText, optionA: "Moose", optionB: "Deer", optionC: "Fox", optionD: "Bear",
-            correctAnswer: "Fox", explanation: question.explanation, subjectId: 1, imageUrl});
+            correctAnswer: "C", explanation: question.explanation, subjectId: 1, imageUrl});
         await screen.findByText("Question #1 updated in Safety.");
         if (imageUrl) expect(screen.getByRole("img")).toHaveAttribute("src", imageUrl);
         else expect(screen.queryByRole("img")).not.toBeInTheDocument();
@@ -136,11 +136,11 @@ describe("Admin question CRUD", () => {
         await fillCreate();
         await userEvent.clear(screen.getByLabelText("Option C (required)"));
         await userEvent.type(screen.getByLabelText("Option C (required)"), "Red fox");
-        vi.mocked(apiClient).mockResolvedValueOnce({...question, id: 2, questionText: "New question?", optionC: "Red fox", correctAnswer: "Red fox"});
+        vi.mocked(apiClient).mockResolvedValueOnce({...question, id: 2, questionText: "New question?", optionC: "Red fox", correctAnswer: "C"});
         await userEvent.click(screen.getByRole("button", {name: "Save question"}));
         expect(apiClient).toHaveBeenCalledWith("/api/admin/questions", {method: "POST", body: JSON.stringify({
             questionText: "New question?", optionA: "Moose", optionB: "Deer", optionC: "Red fox", optionD: "Bear",
-            correctAnswer: "Red fox", explanation: "", subjectId: 1, imageUrl: null})});
+            correctAnswer: "C", explanation: "", subjectId: 1, imageUrl: null})});
         expect(await screen.findByRole("heading", {name: "#2: New question?"})).toBeInTheDocument();
         expect(screen.getByText("Question #2 created in Safety.")).toBeInTheDocument();
         expect(screen.getByRole("option", {name: "Safety (2)"})).toBeInTheDocument();
@@ -160,13 +160,13 @@ describe("Admin question CRUD", () => {
         await userEvent.type(screen.getByLabelText("Option C (required)"), "Arctic fox");
         await userEvent.clear(screen.getByLabelText("Question text (required)"));
         await userEvent.type(screen.getByLabelText("Question text (required)"), "Updated question?");
-        vi.mocked(apiClient).mockResolvedValueOnce({...question, questionText: "Updated question?", optionC: "Arctic fox", correctAnswer: "Arctic fox"});
+        vi.mocked(apiClient).mockResolvedValueOnce({...question, questionText: "Updated question?", optionC: "Arctic fox", correctAnswer: "C"});
         await userEvent.click(screen.getByRole("button", {name: "Save question"}));
         expect(apiClient).toHaveBeenCalledWith("/api/admin/questions/1", {method: "PUT", body: JSON.stringify({
             questionText: "Updated question?", optionA: "Moose", optionB: "Deer", optionC: "Arctic fox", optionD: "Bear",
-            correctAnswer: "Arctic fox", explanation: question.explanation, subjectId: 1, imageUrl: question.imageUrl})});
+            correctAnswer: "C", explanation: question.explanation, subjectId: 1, imageUrl: question.imageUrl})});
         const card = (await screen.findByRole("heading", {name: "#1: Updated question?"})).closest("article")!;
-        expect(within(card).getByText(/Correct answer:/).parentElement).toHaveTextContent("Arctic fox");
+        expect(within(card).getByText(/Correct answer:/).parentElement).toHaveTextContent("C");
         expect(screen.queryByRole("heading", {name: "#1: Original question?"})).not.toBeInTheDocument();
     });
 

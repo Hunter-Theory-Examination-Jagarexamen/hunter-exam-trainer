@@ -14,7 +14,7 @@ const subjects = [
 const questions: Question[] = Array.from({length: 101}, (_, index) => ({
     id: index + 1, questionText: `Safety question ${index + 1}?`,
     optionA: "Safe answer", optionB: "Second answer", optionC: "Third answer", optionD: "Fourth answer",
-    correctAnswer: "Safe answer", explanation: "Keep a safe distance.", subject: subjects[0],
+    correctAnswer: "A", explanation: "Keep a safe distance.", subject: subjects[0],
 }));
 
 beforeEach(() => {

@@ -11,7 +11,7 @@ import "../../styles/question-image.css";
 
 vi.mock("../../api/apiClient", () => ({default: vi.fn()}));
 const question: Question = {id: 1, questionText: "Which animal?", optionA: "Fox", optionB: "Deer",
-    optionC: "Moose", optionD: "Bear", correctAnswer: "Fox", explanation: "",
+    optionC: "Moose", optionD: "Bear", correctAnswer: "C", explanation: "",
     subject: {id: 1, name: "Wildlife", description: ""}, imageUrl: "https://example.com/fox.jpg"};
 
 describe("Question images", () => {
