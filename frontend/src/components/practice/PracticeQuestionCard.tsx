@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import "../../styles/practice.css";
 import type { PracticeQuestion } from "../../types/practiceQuestions";
 import type { PracticeAnswerResponse } from "../../types/practiceAttempt";
@@ -23,6 +24,8 @@ const PracticeQuestionCard = ({
                               onAnswerSelect,
                               onCheckAnswer
                           }: PracticeQuestionProps) => {
+
+    const { t } = useTranslation();
 
     // A handle to the feedback box on the page, so we can move focus to it.
     const feedbackRef = useRef<HTMLDivElement>(null);
@@ -83,7 +86,7 @@ const PracticeQuestionCard = ({
                     onClick={onCheckAnswer}
                     disabled={!selectedAnswer || showFeedback || isChecking}
                 >
-                    Check Answer
+                    {t("practice.checkAnswer")}
                 </button>
 
                 {feedback && (
@@ -98,8 +101,8 @@ const PracticeQuestionCard = ({
                     >
                         {
                             feedback.correct ?
-                                (<p>Correct!</p>):
-                                (<p>Incorrect. The correct answer is: {" "}
+                                (<p>{t("practice.correct")}</p>):
+                                (<p>{t("practice.incorrect")}{" "}
                                     <strong>
                                         {
                                             question.options.find(

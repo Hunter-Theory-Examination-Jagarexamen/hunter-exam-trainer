@@ -1,4 +1,5 @@
 import "../../styles/practice.css";
+import { useTranslation } from "react-i18next";
 
 interface PracticeNavigationProps {
     onPrevious: () => void;
@@ -11,6 +12,8 @@ interface PracticeNavigationProps {
 const PracticeNavigation = (
     { onPrevious, onNext, isFirstQuestion, isLastQuestion, canGoNext }: PracticeNavigationProps) => {
 
+    const { t } = useTranslation();
+
     return (
         <div className="practice-navigation">
 
@@ -18,14 +21,14 @@ const PracticeNavigation = (
                 onClick={onPrevious}
                 disabled={isFirstQuestion}
             >
-                Previous
+                {t("practice.previous")}
             </button>
 
             <button
                 onClick={onNext}
                 disabled={!canGoNext}
             >
-                {isLastQuestion ? "Finish" : "Next"}
+                {isLastQuestion ? t("practice.finish") : t("practice.next")}
             </button>
         </div>
     );

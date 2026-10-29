@@ -4,6 +4,7 @@ import PracticeQuestionCard from "../../components/practice/PracticeQuestionCard
 import PracticeNavigation from "../../components/practice/PracticeNavigation";
 import type { PracticeQuestion } from "../../types/practiceQuestions";
 import {useEffect, useState} from "react";
+import { useTranslation } from "react-i18next";
 import type {OptionLetter, PracticeAnswerResponse} from "../../types/practiceAttempt";
 import {
     answerPracticeQuestion,
@@ -14,12 +15,15 @@ import {
 const PracticeQuestions = () => {
 
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const { subject } = useParams();
 
     const [attemptId, setAttemptId] = useState<number | null>(null);
     const [subjectName, setSubjectName] = useState("");
     const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    // A translation key (e.g. "practice.loadFailed"), translated when drawn, so the
+    // effect below doesn't depend on t().
     const [error, setError] = useState("");
 
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -39,7 +43,7 @@ const PracticeQuestions = () => {
         const startRound = async () => {
 
             if (!subject) {
-                setError("Subject not found");
+                setError("practice.subjectNotFound");
                 setIsLoading(false);
                 return;
             }
@@ -84,9 +88,9 @@ const PracticeQuestions = () => {
                 console.error("Failed to start practice round: ", error);
                 const errorObj = error as { status?: number; message?: string };
                 if (errorObj?.status === 409) {
-                    setError("There are no questions in this subject yet.");
+                    setError("practice.noQuestionsYet");
                 } else {
-                    setError("Failed to load questions. Please try again.");
+                    setError("practice.loadFailed");
                 }
             }
             finally {
@@ -177,8 +181,8 @@ const PracticeQuestions = () => {
         return (
             <div>
                 <PageTitle
-                    title="Practice"
-                    subtitle="Loading questions..."
+                    title={t("practice.title")}
+                    subtitle={t("practice.loadingQuestions")}
                 />
             </div>
         );
@@ -188,8 +192,8 @@ const PracticeQuestions = () => {
         return (
             <div>
                 <PageTitle
-                    title="Practice"
-                    subtitle={error}
+                    title={t("practice.title")}
+                    subtitle={t(error)}
                 />
             </div>
         );
@@ -199,8 +203,8 @@ const PracticeQuestions = () => {
         return (
             <div>
                 <PageTitle
-                    title="Practice"
-                    subtitle="No questions available for this subject."
+                    title={t("practice.title")}
+                    subtitle={t("practice.noQuestionsYet")}
                 />
             </div>
         );
@@ -210,11 +214,11 @@ const PracticeQuestions = () => {
         <div className="practice-questions">
             <PageTitle
                 title={subjectName}
-                subtitle="Answer the questions and improve your knowledge."
+                subtitle={t("practice.subtitle")}
             />
 
             <div className="practice-progress">
-                Question {currentQuestionIndex + 1} of {questions.length}
+                {t("practice.progress", { current: currentQuestionIndex + 1, total: questions.length })}
             </div>
 
             <PracticeQuestionCard

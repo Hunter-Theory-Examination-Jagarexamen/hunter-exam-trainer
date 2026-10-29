@@ -59,7 +59,7 @@ function renderPage() {
 // Pick an option and check it, as the user would.
 async function answer(optionText: string) {
     await userEvent.click(await screen.findByRole("radio", { name: optionText }));
-    await userEvent.click(screen.getByRole("button", { name: "Check Answer" }));
+    await userEvent.click(screen.getByRole("button", { name: "Kontrollera svar" }));
 }
 
 // All endpoints the page called, in order.
@@ -77,7 +77,7 @@ describe("PracticeQuestions", () => {
 
         expect(await screen.findByText("First question?")).toBeInTheDocument();
         expect(screen.getByText("Viltvård")).toBeInTheDocument();
-        expect(screen.getByText("Question 1 of 2")).toBeInTheDocument();
+        expect(screen.getByText("Fråga 1 av 2")).toBeInTheDocument();
         expect(apiClientMock).toHaveBeenCalledWith("/api/practice/attempts",
             { method: "POST", body: JSON.stringify({ subjectId: 3 }) });
     });
@@ -90,19 +90,19 @@ describe("PracticeQuestions", () => {
         expect(apiClientMock).toHaveBeenCalledWith("/api/practice/attempts/10/answers",
             { method: "POST", body: JSON.stringify({ questionId: 1, chosenOption: "A" }) });
         // The correct answer (B1) is only known from the server's reply.
-        expect(await screen.findByText(/Incorrect/)).toHaveTextContent("The correct answer is: B1");
+        expect(await screen.findByText(/Fel/)).toHaveTextContent("Rätt svar är: B1");
     });
 
     it("shows an answered question read-only after going back", async () => {
         renderPage();
 
         await answer("B1");
-        await userEvent.click(await screen.findByRole("button", { name: "Next" }));
+        await userEvent.click(await screen.findByRole("button", { name: "Nästa" }));
         expect(await screen.findByText("Second question?")).toBeInTheDocument();
 
-        await userEvent.click(screen.getByRole("button", { name: "Previous" }));
+        await userEvent.click(screen.getByRole("button", { name: "Föregående" }));
 
-        expect(await screen.findByText("Correct!")).toBeInTheDocument();
+        expect(await screen.findByText("Rätt!")).toBeInTheDocument();
         expect(screen.getByRole("radio", { name: "B1" })).toBeChecked();
         expect(screen.getByRole("radio", { name: "A1" })).toBeDisabled();
         // Still only one answer sent: going back doesn't send it again.
@@ -113,9 +113,9 @@ describe("PracticeQuestions", () => {
         renderPage();
 
         await answer("B1");
-        await userEvent.click(await screen.findByRole("button", { name: "Next" }));
+        await userEvent.click(await screen.findByRole("button", { name: "Nästa" }));
         await answer("A2");
-        await userEvent.click(await screen.findByRole("button", { name: "Finish" }));
+        await userEvent.click(await screen.findByRole("button", { name: "Slutför" }));
 
         expect(await screen.findByText("Subject list")).toBeInTheDocument();
         expect(apiClientMock).toHaveBeenCalledWith("/api/practice/attempts/10/finish", { method: "POST" });
@@ -125,9 +125,9 @@ describe("PracticeQuestions", () => {
         renderPage();
 
         await answer("B1");
-        await userEvent.click(await screen.findByRole("button", { name: "Next" }));
+        await userEvent.click(await screen.findByRole("button", { name: "Nästa" }));
         await answer("B2");
-        await userEvent.click(await screen.findByRole("button", { name: "Finish" }));
+        await userEvent.click(await screen.findByRole("button", { name: "Slutför" }));
         await screen.findByText("Subject list");
 
         // /api/questions returned every correct answer; /api/practice/results
@@ -140,6 +140,6 @@ describe("PracticeQuestions", () => {
         apiClientMock.mockRejectedValue(Object.assign(new Error("No questions"), { status: 409 }));
         renderPage();
 
-        expect(await screen.findByText("There are no questions in this subject yet.")).toBeInTheDocument();
+        expect(await screen.findByText("Det finns inga frågor i det här ämnet än.")).toBeInTheDocument();
     });
 });

@@ -29,5 +29,20 @@
     "EXAM_ALREADY_SUBMITTED": "Exam has already been submitted.",
     "NOT_FOUND": "Resource is not found",
     "UNKNOWN_ERROR": "An unexpected error occurred. Please try again."
+  },
+  "practice": {
+    "title": "Practice",
+    "loadingQuestions": "Loading questions...",
+    "subjectNotFound": "Subject not found.",
+    "noQuestionsYet": "There are no questions in this subject yet.",
+    "loadFailed": "Failed to load questions. Please try again.",
+    "subtitle": "Answer the questions and improve your knowledge.",
+    "progress": "Question {{current}} of {{total}}",
+    "checkAnswer": "Check Answer",
+    "correct": "Correct!",
+    "incorrect": "Incorrect. The correct answer is:",
+    "previous": "Previous",
+    "next": "Next",
+    "finish": "Finish"
   }
 }

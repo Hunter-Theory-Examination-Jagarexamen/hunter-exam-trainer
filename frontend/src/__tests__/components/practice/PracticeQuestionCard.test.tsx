@@ -70,23 +70,23 @@ describe("PracticeQuestionCard", () => {
     it("disables Check Answer while no answer is selected", () => {
         renderQuestion({ selectedAnswer: null });
 
-        expect(screen.getByRole("button", { name: "Check Answer" })).toBeDisabled();
+        expect(screen.getByRole("button", { name: "Kontrollera svar" })).toBeDisabled();
     });
 
-    it("shows Correct! when the selected answer is right", () => {
+    it("shows Rätt! (correct) when the selected answer is right", () => {
         renderQuestion({ selectedAnswer: "B", feedback: rightAnswer });
 
-        expect(screen.getByText("Correct!")).toBeInTheDocument();
+        expect(screen.getByText("Rätt!")).toBeInTheDocument();
     });
 
-    it("shows Incorrect and the right answer when the selected answer is wrong", () => {
+    it("shows Fel (incorrect) and the right answer when the selected answer is wrong", () => {
         renderQuestion({ selectedAnswer: "A", feedback: wrongAnswer });
 
-        // /Incorrect/ is a regular expression: it finds the text that *contains* "Incorrect".
+        // /Fel/ is a regular expression: it finds the text that *contains* "Fel".
         // toHaveTextContent then checks the whole sentence the user reads, including
         // the bold part, without depending on which HTML tag makes it bold.
-        expect(screen.getByText(/Incorrect/)).toHaveTextContent("The correct answer is: Roe deer");
-        expect(screen.queryByText("Correct!")).not.toBeInTheDocument();
+        expect(screen.getByText(/Fel/)).toHaveTextContent("Rätt svar är: Roe deer");
+        expect(screen.queryByText("Rätt!")).not.toBeInTheDocument();
     });
 
     it("moves focus to the feedback so screen readers read it", () => {
@@ -96,6 +96,6 @@ describe("PracticeQuestionCard", () => {
         // Screen readers read the focused element, so the feedback must have it.
         // If someone removes the focus code, sighted users see no difference,
         // so this test guards it.
-        expect(document.activeElement).toHaveTextContent("Correct!");
+        expect(document.activeElement).toHaveTextContent("Rätt!");
     });
 });

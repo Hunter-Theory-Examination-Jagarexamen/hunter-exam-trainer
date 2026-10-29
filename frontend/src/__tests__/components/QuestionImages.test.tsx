@@ -49,7 +49,10 @@ describe("Question images", () => {
     });
 
     it.each([question.imageUrl, null])("maps API images through the practice page: %s", async imageUrl => {
-        vi.mocked(apiClient).mockResolvedValueOnce([{...question, imageUrl}]);
+        // POST /api/practice/attempts returns a round; its questions have no correct answer.
+        const {id, questionText, optionA, optionB, optionC, optionD} = question;
+        vi.mocked(apiClient).mockResolvedValueOnce({attemptId: 10, subjectName: "Wildlife",
+            questions: [{id, questionText, optionA, optionB, optionC, optionD, imageUrl}]});
         render(<MemoryRouter initialEntries={["/practice/1"]}><Routes>
             <Route path="/practice/:subject" element={<PracticeQuestions />} />
         </Routes></MemoryRouter>);
