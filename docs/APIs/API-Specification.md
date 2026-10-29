@@ -10,11 +10,10 @@
 | POST   | /api/subjects                 | Create a new subject                            | Required (ADMIN) |
 | PUT    | /api/subjects/{id}            | Update an existing subject                      | Required (ADMIN) |
 | DELETE | /api/subjects/{id}            | Delete a subject                                | Required (ADMIN) |
-| GET    | /api/questions?subjectId={id} | Get questions for a specific subject            | Required         |
 | POST   | /api/practice/attempts        | Start a practice round for a subject            | Required         |
 | POST   | /api/practice/attempts/{id}/answers | Answer one question in a practice round (checked by the server) | Required |
 | POST   | /api/practice/attempts/{id}/finish | Finish a practice round and get its totals | Required         |
-| POST   | /api/practice/results         | Save a completed practice session result (old; to be replaced by the attempts endpoints) | Required |
+| POST   | /api/practice/results         | Save a completed practice session result (old; no longer used by the frontend since #170, removed later) | Required |
 | POST   | /api/exam/start               | Start a mock exam and receive 70 questions      | Required         |
 | POST   | /api/exam/{sessionId}/answer | Save a single answer on the current exam session | Required |
 | POST   | /api/exam/submit              | Submit a mock exam answers and save the result  | Required         |
@@ -23,6 +22,7 @@
 | GET    | /api/statistics/subjects      | Get the user's practice performance by subject  | Required         |
 | GET    | /api/statistics/progress      | Get the user's weekly accuracy over time        | Required         |
 | GET    | /api/admin/learners           | Get aggregated progress for all learners        | Required (ADMIN) |
+| GET    | /api/admin/questions?subjectId={id} | Get a subject's questions, including the correct answer (admin Question Bank) | Required (ADMIN) |
 
 ## Mock exam: request and response
 
@@ -92,6 +92,7 @@ Starts a round with all questions of the subject. Response (no `correctAnswer` o
 ```json
 {
   "attemptId": 10,
+  "subjectName": "Viltvård",
   "questions": [
     { "id": 8, "questionText": "...", "optionA": "...", "optionB": "...", "optionC": "...", "optionD": "...", "imageUrl": null }
   ]
