@@ -12,12 +12,15 @@ import java.util.List;
 public class PracticeStartResponse {
 
     private final Long attemptId;
+    // For the page title; the questions don't carry their subject.
+    private final String subjectName;
 
     // Reuses the mock exam's question shape, which already leaves out the correct answer.
     private final List<ExamQuestionResponse> questions;
 
-    public PracticeStartResponse(Long attemptId, List<ExamQuestionResponse> questions) {
+    public PracticeStartResponse(Long attemptId, String subjectName, List<ExamQuestionResponse> questions) {
         this.attemptId = attemptId;
+        this.subjectName = subjectName;
         this.questions = questions;
     }
 }

@@ -21,8 +21,8 @@ beforeEach(() => {
     vi.resetAllMocks();
     vi.mocked(apiClient).mockImplementation(async endpoint => {
         if (endpoint === "/api/subjects") return subjects;
-        if (endpoint === "/api/questions?subjectId=1") return questions;
-        if (endpoint === "/api/questions?subjectId=2") return [{...questions[0], id: 102, questionText: "Identify wildlife?"}];
+        if (endpoint === "/api/admin/questions?subjectId=1") return questions;
+        if (endpoint === "/api/admin/questions?subjectId=2") return [{...questions[0], id: 102, questionText: "Identify wildlife?"}];
         throw new Error(`Unexpected endpoint: ${endpoint}`);
     });
 });

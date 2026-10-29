@@ -29,5 +29,33 @@
     "EXAM_ALREADY_SUBMITTED": "Provet har redan lämnats in.",
     "NOT_FOUND": "Resursen hittades inte.",
     "UNKNOWN_ERROR": "Ett oväntat fel uppstod."
+  },
+  "practice": {
+    "title": "Övning",
+    "loadingQuestions": "Laddar frågor...",
+    "subjectNotFound": "Ämnet hittades inte.",
+    "noQuestionsYet": "Det finns inga frågor i det här ämnet än.",
+    "loadFailed": "Det gick inte att ladda frågorna. Försök igen.",
+    "subtitle": "Svara på frågorna och förbättra dina kunskaper.",
+    "progress": "Fråga {{current}} av {{total}}",
+    "checkAnswer": "Kontrollera svar",
+    "correct": "Rätt!",
+    "incorrect": "Fel. Rätt svar är:",
+    "previous": "Föregående",
+    "next": "Nästa",
+    "finish": "Slutför",
+    "quitRound": "Avsluta omgången",
+    "quitTitle": "Avsluta omgången?",
+    "quitText": "Dina svar är redan sparade.",
+    "quitConfirm": "Avsluta",
+    "quitCancel": "Fortsätt öva",
+    "resultTitle": "Resultat",
+    "resultAll": "Du fick {{correct}} av {{total}} rätt.",
+    "resultPartial": "Du svarade på {{answered}} av {{total}} frågor och fick {{correct}} rätt.",
+    "backToSubjects": "Tillbaka till ämnen",
+    "answerFailed": "Det gick inte att spara svaret. Försök igen.",
+    "finishFailed": "Det gick inte att avsluta omgången. Försök igen.",
+    "roundClosed": "Omgången är redan avslutad, till exempel i en annan flik. Dina svar är sparade.",
+    "tryAgain": "Försök igen"
   }
 }

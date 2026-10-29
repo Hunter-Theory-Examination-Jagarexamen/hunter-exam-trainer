@@ -16,8 +16,8 @@ beforeEach(() => {
     vi.resetAllMocks();
     vi.mocked(apiClient).mockImplementation(async endpoint => {
         if (endpoint === "/api/subjects") return subjects;
-        if (endpoint === "/api/questions?subjectId=1") return [question];
-        if (endpoint === "/api/questions?subjectId=2") return [];
+        if (endpoint === "/api/admin/questions?subjectId=1") return [question];
+        if (endpoint === "/api/admin/questions?subjectId=2") return [];
         throw new Error("Unexpected request");
     });
 });

@@ -72,6 +72,9 @@ public class QuestionService {
 
     /**
      * Fetches all questions belonging to a given subject.
+     * <p>
+     * The questions include the correct answer, so only admin endpoints may
+     * return them (students get questions from the practice and mock exam endpoints).
      *
      * @param subjectId id of the subject to fetch questions for
      * @return list of questions for the specified subject

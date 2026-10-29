@@ -10,6 +10,7 @@ import com.hunterexam.backend.exception.ConflictException;
 import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.service.PracticeAttemptService;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -24,6 +25,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -69,17 +71,34 @@ class PracticeAttemptControllerTests {
     }
 
     @Test
+    void start_retriesOnce_whenTwoStartsClashOnTheTotalsRow() throws Exception {
+        // First call loses the race for the SubjectStats row, the retry succeeds.
+        when(practiceAttemptService.start(5L, EMAIL))
+                .thenThrow(new DataIntegrityViolationException("duplicate subject_stats row"))
+                .thenReturn(new PracticeStartResponse(10L, "Viltvård", List.of()));
+
+        mvc.perform(post("/api/practice/attempts").with(student())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"subjectId\": 5}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.attemptId").value(10));
+
+        verify(practiceAttemptService, times(2)).start(5L, EMAIL);
+    }
+
+    @Test
     void start_returnsRoundAndQuestions_withoutCorrectAnswers() throws Exception {
         ExamQuestionResponse question = new ExamQuestionResponse(
                 100L, "Question?", "One", "Two", "Three", "Four", null);
         when(practiceAttemptService.start(5L, EMAIL))
-                .thenReturn(new PracticeStartResponse(10L, List.of(question)));
+                .thenReturn(new PracticeStartResponse(10L, "Viltvård", List.of(question)));
 
         mvc.perform(post("/api/practice/attempts").with(student())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"subjectId\": 5}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.attemptId").value(10))
+                .andExpect(jsonPath("$.subjectName").value("Viltvård"))
                 .andExpect(jsonPath("$.questions[0].id").value(100))
                 .andExpect(jsonPath("$.questions[0].optionB").value("Two"))
                 // The whole point of the refactor: these never reach the browser in advance
@@ -173,11 +192,12 @@ class PracticeAttemptControllerTests {
 
     @Test
     void finish_returnsServerCountedTotals() throws Exception {
-        when(practiceAttemptService.finish(10L, EMAIL)).thenReturn(new PracticeFinishResponse(2, 4));
+        when(practiceAttemptService.finish(10L, EMAIL)).thenReturn(new PracticeFinishResponse(2, 3, 4));
 
         mvc.perform(post("/api/practice/attempts/10/finish").with(student()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.correctAnswers").value(2))
+                .andExpect(jsonPath("$.answeredQuestions").value(3))
                 .andExpect(jsonPath("$.totalQuestions").value(4));
     }
 
