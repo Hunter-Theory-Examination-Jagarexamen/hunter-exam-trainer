@@ -27,7 +27,8 @@ class QuestionImagePersistenceTests {
     @Autowired EntityManager entityManager;
 
     private QuestionRequest request(Long subjectId, String url) {
-        return new QuestionRequest("Which animal?", "Fox", "Deer", "Moose", "Bear", "Fox", "", url, subjectId);
+        // Correct answer "A" (Fox): since #155 it's a letter, not the option text.
+        return new QuestionRequest("Which animal?", "Fox", "Deer", "Moose", "Bear", "A", "", url, subjectId);
     }
 
     @Test
