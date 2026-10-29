@@ -52,6 +52,10 @@
     "resultTitle": "Resultat",
     "resultAll": "Du fick {{correct}} av {{total}} rätt.",
     "resultPartial": "Du svarade på {{answered}} av {{total}} frågor och fick {{correct}} rätt.",
-    "backToSubjects": "Tillbaka till ämnen"
+    "backToSubjects": "Tillbaka till ämnen",
+    "answerFailed": "Det gick inte att spara svaret. Försök igen.",
+    "finishFailed": "Det gick inte att avsluta omgången. Försök igen.",
+    "roundClosed": "Omgången är redan avslutad, till exempel i en annan flik. Dina svar är sparade.",
+    "tryAgain": "Försök igen"
   }
 }

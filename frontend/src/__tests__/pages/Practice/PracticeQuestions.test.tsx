@@ -72,6 +72,20 @@ async function answer(optionText: string) {
     await userEvent.click(screen.getByRole("button", { name: "Kontrollera svar" }));
 }
 
+// Makes the next call to an endpoint fail with an HTTP status, like apiClient's
+// ApiError; later calls go to the normal fake backend again.
+function failOnce(endpoint: string, status: number) {
+    const normal = apiClientMock.getMockImplementation()!;
+    let failed = false;
+    apiClientMock.mockImplementation(async (url: string, options?: RequestInit) => {
+        if (url === endpoint && !failed) {
+            failed = true;
+            throw Object.assign(new Error(JSON.stringify({ message: "Failed" })), { status });
+        }
+        return normal(url, options);
+    });
+}
+
 // All endpoints the page called, in order.
 const calledEndpoints = () => apiClientMock.mock.calls.map(([endpoint]) => endpoint);
 
@@ -226,6 +240,49 @@ describe("PracticeQuestions", () => {
         await act(() => router.navigate("/statistics"));
 
         expect(await screen.findByText("Statistics page")).toBeInTheDocument();
+    });
+
+    it("shows a message when saving an answer fails, and Försök igen sends it again", async () => {
+        failOnce("/api/practice/attempts/10/answers", 500);
+        renderPage();
+
+        await answer("B1");
+        expect(await screen.findByRole("alert")).toHaveTextContent("Det gick inte att spara svaret. Försök igen.");
+
+        await userEvent.click(screen.getByRole("button", { name: "Försök igen" }));
+
+        expect(await screen.findByText("Rätt!")).toBeInTheDocument();
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+
+    it("shows a message when finishing fails, and Försök igen finishes", async () => {
+        failOnce("/api/practice/attempts/10/finish", 500);
+        renderPage();
+
+        await answer("B1");
+        await userEvent.click(await screen.findByRole("button", { name: "Nästa" }));
+        await answer("B2");
+        await userEvent.click(await screen.findByRole("button", { name: "Slutför" }));
+        expect(await screen.findByRole("alert")).toHaveTextContent("Det gick inte att avsluta omgången. Försök igen.");
+
+        await userEvent.click(screen.getByRole("button", { name: "Försök igen" }));
+
+        expect(await screen.findByText("Du fick 2 av 2 rätt.")).toBeInTheDocument();
+    });
+
+    it("explains when the round was closed meanwhile, and goes back without asking", async () => {
+        failOnce("/api/practice/attempts/10/answers", 409);
+        const router = renderPage();
+
+        await answer("B1");
+        expect(await screen.findByRole("alert")).toHaveTextContent("Omgången är redan avslutad");
+        // Trying again can't help, so there is no Försök igen.
+        expect(screen.queryByRole("button", { name: "Försök igen" })).not.toBeInTheDocument();
+
+        await userEvent.click(screen.getByRole("button", { name: "Tillbaka till ämnen" }));
+
+        expect(await screen.findByText("Subject list")).toBeInTheDocument();
+        expect(router.state.location.pathname).toBe("/practice/subjects");
     });
 
     it("shows a message when the subject has no questions", async () => {

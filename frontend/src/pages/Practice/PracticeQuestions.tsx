@@ -4,6 +4,8 @@ import PracticeQuestionCard from "../../components/practice/PracticeQuestionCard
 import PracticeNavigation from "../../components/practice/PracticeNavigation";
 import QuitRoundDialog from "../../components/practice/QuitRoundDialog";
 import PracticeRoundResult from "../../components/practice/PracticeRoundResult";
+import PracticeErrorMessage from "../../components/practice/PracticeErrorMessage";
+import { errorStatus } from "../../services/apiErrors";
 import type { PracticeQuestion } from "../../types/practiceQuestions";
 import {useEffect, useRef, useState} from "react";
 import { useTranslation } from "react-i18next";
@@ -45,6 +47,9 @@ const PracticeQuestions = () => {
     // True while the "Quit this round?" box is shown.
     const [isConfirmingQuit, setIsConfirmingQuit] = useState(false);
     const [isQuitting, setIsQuitting] = useState(false);
+    // What failed last (saving an answer, finishing, quitting), and whether the
+    // server said the round is already closed (409); null when nothing failed.
+    const [actionError, setActionError] = useState<{ action: "answer" | "finish" | "quit"; roundClosed: boolean } | null>(null);
 
     // The start request for this page visit. Starting a round changes data on the
     // server (it closes the student's other open round), so it must be sent only
@@ -145,6 +150,13 @@ const PracticeQuestions = () => {
     const currentQuestion = questions[currentQuestionIndex];
     const currentAnswer = answers[currentQuestionIndex];
 
+    // A 409 means the server already closed the round, so leaving shouldn't ask.
+    const markRoundClosedIfConflict = (error: unknown) => {
+        if (errorStatus(error) === 409) {
+            isRoundOpen.current = false;
+        }
+    };
+
     const handleAnswerSelect = (answerId: string) => {
         // An answered question is read-only: the server keeps the first answer.
         if (currentAnswer) {
@@ -159,6 +171,7 @@ const PracticeQuestions = () => {
         }
 
         setIsChecking(true);
+        setActionError(null);
         try {
             const check = await answerPracticeQuestion(attemptId, Number(currentQuestion.id), selectedAnswer);
             setAnswers((previous) => ({
@@ -166,8 +179,10 @@ const PracticeQuestions = () => {
                 [currentQuestionIndex]: { chosen: selectedAnswer, check }
             }));
         } catch (error) {
-            // A visible message with "Try again" comes in a later step (#170).
             console.error("Failed to save answer:", error);
+            // 409: the round was closed meanwhile (e.g. a new round in another tab).
+            markRoundClosedIfConflict(error);
+            setActionError({ action: "answer", roundClosed: errorStatus(error) === 409 });
         } finally {
             setIsChecking(false);
         }
@@ -176,22 +191,40 @@ const PracticeQuestions = () => {
     const goToQuestion = (index: number) => {
         setCurrentQuestionIndex(index);
         setSelectedAnswer(null);
+        setActionError(null);
     };
+
+    // "Försök igen" repeats what failed.
+    const retryFailedAction = () => {
+        if (actionError?.action === "answer") {
+            handleCheckAnswer();
+        } else if (actionError?.action === "finish") {
+            finishRound("finish");
+        } else if (actionError?.action === "quit") {
+            handleQuitConfirmed();
+        }
+    };
+
+    const errorMessageKey = actionError?.roundClosed
+        ? "practice.roundClosed"
+        : actionError?.action === "answer" ? "practice.answerFailed" : "practice.finishFailed";
 
     // Finishes the round on the server and shows its result. Returns the totals,
     // or null if it failed.
-    const finishRound = async (): Promise<PracticeFinishResponse | null> => {
+    const finishRound = async (action: "finish" | "quit"): Promise<PracticeFinishResponse | null> => {
         if (attemptId === null) {
             return null;
         }
+        setActionError(null);
         try {
             const totals = await finishPracticeRound(attemptId);
             isRoundOpen.current = false;
             setResult(totals);
             return totals;
         } catch (error) {
-            // A visible message with "Try again" comes in a later step (#170).
             console.error("Failed to finish practice round:", error);
+            markRoundClosedIfConflict(error);
+            setActionError({ action, roundClosed: errorStatus(error) === 409 });
             return null;
         }
     };
@@ -206,13 +239,13 @@ const PracticeQuestions = () => {
 
         } else {
 
-            await finishRound();
+            await finishRound("finish");
         }
     };
 
     const handleQuitConfirmed = async () => {
         setIsQuitting(true);
-        const totals = await finishRound();
+        const totals = await finishRound("quit");
         setIsQuitting(false);
         setIsConfirmingQuit(false);
         // Nothing answered: no result to show, back to the subject list.
@@ -226,7 +259,7 @@ const PracticeQuestions = () => {
     // saved, so the user leaves even if finishing fails (the next start closes it).
     const handleLeaveConfirmed = async () => {
         setIsQuitting(true);
-        await finishRound();
+        await finishRound("quit");
         isRoundOpen.current = false;
         setIsQuitting(false);
         blocker.proceed?.();
@@ -324,6 +357,15 @@ const PracticeQuestions = () => {
                 onAnswerSelect={handleAnswerSelect}
                 onCheckAnswer={handleCheckAnswer}
             />
+
+            {actionError && (
+                <PracticeErrorMessage
+                    message={t(errorMessageKey)}
+                    // Trying again can't help once the round is closed.
+                    onRetry={actionError.roundClosed ? undefined : retryFailedAction}
+                    onBack={actionError.roundClosed ? backToSubjects : undefined}
+                />
+            )}
 
             <PracticeNavigation
                 onPrevious={handlePrevious}

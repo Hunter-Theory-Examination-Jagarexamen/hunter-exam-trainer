@@ -52,6 +52,10 @@
     "resultTitle": "Result",
     "resultAll": "You got {{correct}} of {{total}} correct.",
     "resultPartial": "You answered {{answered}} of {{total}} questions and got {{correct}} correct.",
-    "backToSubjects": "Back to subjects"
+    "backToSubjects": "Back to subjects",
+    "answerFailed": "Your answer couldn't be saved. Please try again.",
+    "finishFailed": "The round couldn't be finished. Please try again.",
+    "roundClosed": "This round is already finished, for example in another tab. Your answers are saved.",
+    "tryAgain": "Try again"
   }
 }
