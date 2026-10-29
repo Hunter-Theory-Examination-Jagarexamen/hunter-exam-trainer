@@ -22,7 +22,7 @@ export default function QuestionForm({question, subjectId, subjects, onSaved, on
     const [options, setOptions] = useState({optionA: question?.optionA ?? "", optionB: question?.optionB ?? "",
         optionC: question?.optionC ?? "", optionD: question?.optionD ?? ""});
     const [correct, setCorrect] = useState<OptionKey | "">(
-        question ? optionKeys.find(key => question[key] === question.correctAnswer) ?? "" : "");
+        question ? (`option${question.correctAnswer}` as OptionKey) : "");
     const [explanation, setExplanation] = useState(question?.explanation ?? "");
     const [imageUrl, setImageUrl] = useState(question?.imageUrl ?? "");
     const [selectedSubject, setSelectedSubject] = useState(question?.subject.id ?? subjectId);
@@ -52,7 +52,7 @@ export default function QuestionForm({question, subjectId, subjects, onSaved, on
         pending.current = true;
         setSubmitting(true);
         setError("");
-        const request = {questionText: text, ...options, correctAnswer: options[correct],
+        const request = {questionText: text, ...options, correctAnswer: correct.slice(-1),
             explanation, subjectId: selectedSubject, imageUrl: imageUrl.trim() || null};
         try {
             const saved = question ? await updateQuestion(question.id, request) : await createQuestion(request);
