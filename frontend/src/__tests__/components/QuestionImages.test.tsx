@@ -1,6 +1,6 @@
 import {describe, expect, it, vi} from "vitest";
 import {fireEvent, render, screen} from "@testing-library/react";
-import {MemoryRouter, Route, Routes} from "react-router-dom";
+import {createMemoryRouter, RouterProvider} from "react-router-dom";
 import QuestionImage from "../../components/common/QuestionImage";
 import QuestionPanel from "../../components/exam/QuestionPanel";
 import PracticeQuestions from "../../pages/Practice/PracticeQuestions";
@@ -53,9 +53,9 @@ describe("Question images", () => {
         const {id, questionText, optionA, optionB, optionC, optionD} = question;
         vi.mocked(apiClient).mockResolvedValueOnce({attemptId: 10, subjectName: "Wildlife",
             questions: [{id, questionText, optionA, optionB, optionC, optionD, imageUrl}]});
-        render(<MemoryRouter initialEntries={["/practice/1"]}><Routes>
-            <Route path="/practice/:subject" element={<PracticeQuestions />} />
-        </Routes></MemoryRouter>);
+        // A data router, because the practice page uses useBlocker.
+        render(<RouterProvider router={createMemoryRouter(
+            [{path: "/practice/:subject", element: <PracticeQuestions />}], {initialEntries: ["/practice/1"]})} />);
         await screen.findByRole("heading", {name: question.questionText});
         if (imageUrl) {
             expect(screen.getByRole("img", {name: "Image for question: Which animal?"})).toHaveAttribute("src", imageUrl);

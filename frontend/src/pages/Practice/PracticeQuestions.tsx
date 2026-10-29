@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useBlocker, useNavigate, useParams } from "react-router-dom";
 import PageTitle from "../../components/common/PageTitle";
 import PracticeQuestionCard from "../../components/practice/PracticeQuestionCard";
 import PracticeNavigation from "../../components/practice/PracticeNavigation";
@@ -53,6 +53,16 @@ const PracticeQuestions = () => {
     // A new visit (leaving and coming back) is a new component, so a new round.
     const startRequest = useRef<{ subject: string; promise: Promise<PracticeStartResponse> } | null>(null);
 
+    // True while a round is running (started, not finished). A ref, not state, so
+    // the blocker below sees the change at once, e.g. when quitting navigates
+    // right after finishing.
+    const isRoundOpen = useRef(false);
+
+    // Leaving the page while a round is running (menu, back button, any link)
+    // asks first, with the same box as the quit button.
+    const blocker = useBlocker(({ currentLocation, nextLocation }) =>
+        isRoundOpen.current && currentLocation.pathname !== nextLocation.pathname);
+
     useEffect(() => {
 
         // If the subject changes or the page closes before the server answers,
@@ -95,6 +105,7 @@ const PracticeQuestions = () => {
                 }));
 
                 setAttemptId(round.attemptId);
+                isRoundOpen.current = true;
                 setSubjectName(round.subjectName);
                 setQuestions(mappedQuestions);
 
@@ -175,6 +186,7 @@ const PracticeQuestions = () => {
         }
         try {
             const totals = await finishPracticeRound(attemptId);
+            isRoundOpen.current = false;
             setResult(totals);
             return totals;
         } catch (error) {
@@ -207,6 +219,17 @@ const PracticeQuestions = () => {
         if (totals && totals.answeredQuestions === 0) {
             backToSubjects();
         }
+    };
+
+    // Confirmed in the box shown when leaving through the menu or back button:
+    // finish the round, then go where the user was going. The answers are already
+    // saved, so the user leaves even if finishing fails (the next start closes it).
+    const handleLeaveConfirmed = async () => {
+        setIsQuitting(true);
+        await finishRound();
+        isRoundOpen.current = false;
+        setIsQuitting(false);
+        blocker.proceed?.();
     };
 
     const handlePrevious = () => {
@@ -277,6 +300,14 @@ const PracticeQuestions = () => {
                 <QuitRoundDialog
                     onConfirm={handleQuitConfirmed}
                     onCancel={() => setIsConfirmingQuit(false)}
+                    isQuitting={isQuitting}
+                />
+            )}
+
+            {blocker.state === "blocked" && (
+                <QuitRoundDialog
+                    onConfirm={handleLeaveConfirmed}
+                    onCancel={() => blocker.reset?.()}
                     isQuitting={isQuitting}
                 />
             )}

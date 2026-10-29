@@ -6,9 +6,9 @@
 
 import { StrictMode } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import PracticeQuestions from "../../../pages/Practice/PracticeQuestions";
 import apiClient from "../../../api/apiClient";
 
@@ -49,17 +49,21 @@ function mockBackend() {
     });
 }
 
-// Draw the page at /practice/subjects/3, plus a stand-in for the subject list
-// so the test can see where Finish navigates to.
+// A memory "data router" (the page's useBlocker needs one) at /practice/subjects/3,
+// plus stand-ins for the subject list and another page, so tests can see where
+// the user ends up. Returns the router so a test can navigate like the menu does.
+function createRouter() {
+    return createMemoryRouter([
+        { path: "/practice/subjects/:subject", element: <PracticeQuestions /> },
+        { path: "/practice/subjects", element: <p>Subject list</p> },
+        { path: "/statistics", element: <p>Statistics page</p> },
+    ], { initialEntries: ["/practice/subjects/3"] });
+}
+
 function renderPage() {
-    render(
-        <MemoryRouter initialEntries={["/practice/subjects/3"]}>
-            <Routes>
-                <Route path="/practice/subjects/:subject" element={<PracticeQuestions />} />
-                <Route path="/practice/subjects" element={<p>Subject list</p>} />
-            </Routes>
-        </MemoryRouter>
-    );
+    const router = createRouter();
+    render(<RouterProvider router={router} />);
+    return router;
 }
 
 // Pick an option and check it, as the user would.
@@ -180,18 +184,48 @@ describe("PracticeQuestions", () => {
 
     it("starts only one round under StrictMode, which runs effects twice", async () => {
         // Two starts would each close the other's round on the server (#170).
-        render(
-            <StrictMode>
-                <MemoryRouter initialEntries={["/practice/subjects/3"]}>
-                    <Routes>
-                        <Route path="/practice/subjects/:subject" element={<PracticeQuestions />} />
-                    </Routes>
-                </MemoryRouter>
-            </StrictMode>
-        );
+        render(<StrictMode><RouterProvider router={createRouter()} /></StrictMode>);
 
         expect(await screen.findByText("First question?")).toBeInTheDocument();
         expect(calledEndpoints().filter((e) => e === "/api/practice/attempts")).toHaveLength(1);
+    });
+
+    it("asks before leaving through the menu, and stays on cancel", async () => {
+        const router = renderPage();
+        await screen.findByText("First question?");
+
+        // Same as clicking "Statistics" in the menu.
+        await act(() => router.navigate("/statistics"));
+
+        expect(await screen.findByRole("dialog", { name: "Avsluta omgången?" })).toBeInTheDocument();
+        await userEvent.click(screen.getByRole("button", { name: "Fortsätt öva" }));
+
+        expect(screen.getByText("First question?")).toBeInTheDocument();
+        expect(router.state.location.pathname).toBe("/practice/subjects/3");
+        expect(calledEndpoints()).not.toContain("/api/practice/attempts/10/finish");
+    });
+
+    it("finishes the round and goes on when leaving is confirmed", async () => {
+        const router = renderPage();
+        await answer("B1");
+
+        await act(() => router.navigate("/statistics"));
+        await userEvent.click(await screen.findByRole("button", { name: "Avsluta" }));
+
+        expect(await screen.findByText("Statistics page")).toBeInTheDocument();
+        expect(apiClientMock).toHaveBeenCalledWith("/api/practice/attempts/10/finish", { method: "POST" });
+    });
+
+    it("doesn't ask again once the round is finished", async () => {
+        const router = renderPage();
+        await answer("B1");
+        await userEvent.click(await screen.findByRole("button", { name: "Avsluta omgången" }));
+        await userEvent.click(screen.getByRole("button", { name: "Avsluta" }));
+        await screen.findByText("Resultat");
+
+        await act(() => router.navigate("/statistics"));
+
+        expect(await screen.findByText("Statistics page")).toBeInTheDocument();
     });
 
     it("shows a message when the subject has no questions", async () => {
