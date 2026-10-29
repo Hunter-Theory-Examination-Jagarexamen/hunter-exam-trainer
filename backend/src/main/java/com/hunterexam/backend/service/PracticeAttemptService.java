@@ -160,12 +160,13 @@ public class PracticeAttemptService {
     /**
      * Finishes a practice round and returns its totals, counted from the saved answers.
      * <p>
-     * Unanswered questions count as not correct; {@code totalQuestions} is the
-     * number of questions in the round.
+     * {@code totalQuestions} is the number of questions in the round and
+     * {@code answeredQuestions} how many of them were answered, so the page can
+     * show e.g. "3 of 7 answered, 2 correct".
      *
      * @param attemptId the round
      * @param email     email of the logged-in user
-     * @return correct answers and total questions
+     * @return correct, answered and total questions
      */
     @Transactional
     public PracticeFinishResponse finish(Long attemptId, String email) {
@@ -189,10 +190,10 @@ public class PracticeAttemptService {
         long correct = rows.stream().filter(row -> Boolean.TRUE.equals(row.getCorrect())).count();
 
         if (answered > 0) {
-            savePracticeResultBridge(attempt, rows.get(0).getQuestion().getSubject(), correct, total);
+            savePracticeResultBridge(attempt, rows.get(0).getQuestion().getSubject(), correct, answered);
         }
 
-        return new PracticeFinishResponse(correct, total);
+        return new PracticeFinishResponse(correct, answered, total);
     }
 
     /**
@@ -204,14 +205,18 @@ public class PracticeAttemptService {
      * with totals counted by the server. A subject practice round has one
      * subject, so the first question's subject is the round's subject.
      * Rounds with no answers are skipped, so they don't show up as 0 %.
+     * <p>
+     * Only answered questions count (2026-10-29): a round left after 3 of 7
+     * questions, 2 right, is saved as 2 of 3, not 2 of 7. Practice is for
+     * learning; "skipped counts as wrong" belongs to the mock exam.
      */
-    private void savePracticeResultBridge(Attempt attempt, Subject subject, long correct, long total) {
+    private void savePracticeResultBridge(Attempt attempt, Subject subject, long correct, long answered) {
         PracticeResult result = new PracticeResult();
         result.setUser(attempt.getUser());
         result.setSubject(subject);
         result.setCorrectAnswers(correct);
-        result.setTotalQuestions(total);
-        result.setScore(Math.round((double) correct / total * 100));
+        result.setTotalQuestions(answered);
+        result.setScore(Math.round((double) correct / answered * 100));
         result.setCompletedAt(attempt.getFinishedAt());
         practiceResultRepository.save(result);
     }

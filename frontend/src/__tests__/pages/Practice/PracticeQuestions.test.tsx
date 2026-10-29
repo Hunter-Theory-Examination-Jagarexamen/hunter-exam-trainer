@@ -37,7 +37,7 @@ function mockBackend() {
             return { correct: chosenOption === "B", correctOption: "B", explanation: null };
         }
         if (endpoint === "/api/practice/attempts/10/finish") {
-            return { correctAnswers: 1, totalQuestions: 2 };
+            return { correctAnswers: 1, answeredQuestions: 2, totalQuestions: 2 };
         }
         throw new Error(`Unexpected endpoint in test: ${endpoint}`);
     });

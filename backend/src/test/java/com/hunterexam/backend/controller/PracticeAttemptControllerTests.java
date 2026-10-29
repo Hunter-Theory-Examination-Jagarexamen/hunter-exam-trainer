@@ -192,11 +192,12 @@ class PracticeAttemptControllerTests {
 
     @Test
     void finish_returnsServerCountedTotals() throws Exception {
-        when(practiceAttemptService.finish(10L, EMAIL)).thenReturn(new PracticeFinishResponse(2, 4));
+        when(practiceAttemptService.finish(10L, EMAIL)).thenReturn(new PracticeFinishResponse(2, 3, 4));
 
         mvc.perform(post("/api/practice/attempts/10/finish").with(student()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.correctAnswers").value(2))
+                .andExpect(jsonPath("$.answeredQuestions").value(3))
                 .andExpect(jsonPath("$.totalQuestions").value(4));
     }
 

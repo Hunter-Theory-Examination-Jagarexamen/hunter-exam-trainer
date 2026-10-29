@@ -307,7 +307,7 @@ class PracticeAttemptServiceTests {
     }
 
     @Test
-    void finish_closesRound_andCountsCorrectOutOfAllQuestions() {
+    void finish_closesRound_andCountsCorrectAnsweredAndTotal() {
         Attempt attempt = runningAttempt(user);
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
         when(attemptRepository.findById(ATTEMPT_ID)).thenReturn(Optional.of(attempt));
@@ -317,13 +317,14 @@ class PracticeAttemptServiceTests {
 
         // Wrong and skipped answers add nothing, and never subtract.
         assertEquals(2, response.getCorrectAnswers());
+        assertEquals(3, response.getAnsweredQuestions());
         assertEquals(4, response.getTotalQuestions());
         assertTrue(attempt.isFinished());
         verify(attemptRepository).save(attempt);
     }
 
     @Test
-    void finish_savesBridgePracticeResult_withServerCountedTotals() {
+    void finish_savesBridgePracticeResult_countingOnlyAnsweredQuestions() {
         Attempt attempt = runningAttempt(user);
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
         when(attemptRepository.findById(ATTEMPT_ID)).thenReturn(Optional.of(attempt));
@@ -335,9 +336,10 @@ class PracticeAttemptServiceTests {
         verify(practiceResultRepository).save(result.capture());
         assertEquals(user, result.getValue().getUser());
         assertEquals(subject, result.getValue().getSubject());
+        // 2 right of 3 answered; the skipped question doesn't count as wrong.
         assertEquals(2, result.getValue().getCorrectAnswers());
-        assertEquals(4, result.getValue().getTotalQuestions());
-        assertEquals(50, result.getValue().getScore());
+        assertEquals(3, result.getValue().getTotalQuestions());
+        assertEquals(67, result.getValue().getScore());
         assertEquals(attempt.getFinishedAt(), result.getValue().getCompletedAt());
     }
 
@@ -352,6 +354,7 @@ class PracticeAttemptServiceTests {
         PracticeFinishResponse response = service.finish(ATTEMPT_ID, EMAIL);
 
         assertEquals(0, response.getCorrectAnswers());
+        assertEquals(0, response.getAnsweredQuestions());
         assertEquals(1, response.getTotalQuestions());
         assertTrue(attempt.isFinished());
         verify(practiceResultRepository, never()).save(any());

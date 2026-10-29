@@ -28,8 +28,8 @@ describe("Practice attempt service", () => {
     });
 
     it("finishes a round", async () => {
-        apiClientMock.mockResolvedValue({correctAnswers: 5, totalQuestions: 7});
-        expect(await finishPracticeRound(10)).toEqual({correctAnswers: 5, totalQuestions: 7});
+        apiClientMock.mockResolvedValue({correctAnswers: 5, answeredQuestions: 6, totalQuestions: 7});
+        expect(await finishPracticeRound(10)).toEqual({correctAnswers: 5, answeredQuestions: 6, totalQuestions: 7});
         expect(apiClientMock).toHaveBeenCalledWith("/api/practice/attempts/10/finish", {method: "POST"});
     });
 });

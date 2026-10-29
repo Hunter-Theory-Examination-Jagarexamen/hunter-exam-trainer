@@ -122,10 +122,11 @@ Response:
 No request body. Response:
 
 ```json
-{ "correctAnswers": 5, "totalQuestions": 7 }
+{ "correctAnswers": 5, "answeredQuestions": 6, "totalQuestions": 7 }
 ```
 
-- `totalQuestions` is all questions in the round; skipped questions count as not correct (nothing is subtracted).
+- `totalQuestions` is all questions in the round, `answeredQuestions` how many were answered (skipped questions are not counted, nothing is subtracted).
+- A round that was answered at least once is also saved for the statistics, counting only the answered questions (e.g. 5 of 6, not 5 of 7).
 - `409` if the round is already finished, `403` if it belongs to another user.
 
 **Authentication notes:**

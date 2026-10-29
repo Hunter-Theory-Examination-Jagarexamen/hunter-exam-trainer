@@ -19,5 +19,6 @@ export interface PracticeAnswerResponse {
 // Response from POST /api/practice/attempts/{id}/finish, counted by the server.
 export interface PracticeFinishResponse {
     correctAnswers: number;
+    answeredQuestions: number;
     totalQuestions: number;
 }
