@@ -74,6 +74,8 @@ Response:
 - `mockExams` — mock exam summary (count, latest/best score, latest pass/fail)
 - `lastActivityAt` — latest activity across practice AND mock exams
 
+**Question note:** `correctAnswer` in `POST/PUT /api/admin/questions` must be a single letter A–D, matching the correct option's position. (Previously it was the option's text; see #155.)
+
 The `mockExams` field is a separate object so it can be filtered out per student in a future sharing feature (#125).
 
 ## Practice rounds: request and response
