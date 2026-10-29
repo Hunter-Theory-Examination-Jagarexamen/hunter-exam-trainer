@@ -43,6 +43,15 @@
     "incorrect": "Incorrect. The correct answer is:",
     "previous": "Previous",
     "next": "Next",
-    "finish": "Finish"
+    "finish": "Finish",
+    "quitRound": "Quit round",
+    "quitTitle": "Quit this round?",
+    "quitText": "Your answers are already saved.",
+    "quitConfirm": "Quit",
+    "quitCancel": "Keep practising",
+    "resultTitle": "Result",
+    "resultAll": "You got {{correct}} of {{total}} correct.",
+    "resultPartial": "You answered {{answered}} of {{total}} questions and got {{correct}} correct.",
+    "backToSubjects": "Back to subjects"
   }
 }

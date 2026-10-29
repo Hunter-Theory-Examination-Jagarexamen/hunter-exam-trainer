@@ -43,6 +43,15 @@
     "incorrect": "Fel. Rätt svar är:",
     "previous": "Föregående",
     "next": "Nästa",
-    "finish": "Slutför"
+    "finish": "Slutför",
+    "quitRound": "Avsluta omgången",
+    "quitTitle": "Avsluta omgången?",
+    "quitText": "Dina svar är redan sparade.",
+    "quitConfirm": "Avsluta",
+    "quitCancel": "Fortsätt öva",
+    "resultTitle": "Resultat",
+    "resultAll": "Du fick {{correct}} av {{total}} rätt.",
+    "resultPartial": "Du svarade på {{answered}} av {{total}} frågor och fick {{correct}} rätt.",
+    "backToSubjects": "Tillbaka till ämnen"
   }
 }

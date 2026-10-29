@@ -2,10 +2,17 @@ import { useNavigate, useParams } from "react-router-dom";
 import PageTitle from "../../components/common/PageTitle";
 import PracticeQuestionCard from "../../components/practice/PracticeQuestionCard";
 import PracticeNavigation from "../../components/practice/PracticeNavigation";
+import QuitRoundDialog from "../../components/practice/QuitRoundDialog";
+import PracticeRoundResult from "../../components/practice/PracticeRoundResult";
 import type { PracticeQuestion } from "../../types/practiceQuestions";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import { useTranslation } from "react-i18next";
-import type {OptionLetter, PracticeAnswerResponse} from "../../types/practiceAttempt";
+import type {
+    OptionLetter,
+    PracticeAnswerResponse,
+    PracticeFinishResponse,
+    PracticeStartResponse
+} from "../../types/practiceAttempt";
 import {
     answerPracticeQuestion,
     finishPracticeRound,
@@ -33,6 +40,18 @@ const PracticeQuestions = () => {
     const [answers, setAnswers] = useState<Record<number, { chosen: OptionLetter; check: PracticeAnswerResponse }>>({});
     // True while an answer is on its way to the server (blocks a second click).
     const [isChecking, setIsChecking] = useState(false);
+    // The server's totals once the round is finished; the page then shows the result.
+    const [result, setResult] = useState<PracticeFinishResponse | null>(null);
+    // True while the "Quit this round?" box is shown.
+    const [isConfirmingQuit, setIsConfirmingQuit] = useState(false);
+    const [isQuitting, setIsQuitting] = useState(false);
+
+    // The start request for this page visit. Starting a round changes data on the
+    // server (it closes the student's other open round), so it must be sent only
+    // once. React's StrictMode runs the effect below twice in development; the
+    // second run reuses this request instead of starting a second round.
+    // A new visit (leaving and coming back) is a new component, so a new round.
+    const startRequest = useRef<{ subject: string; promise: Promise<PracticeStartResponse> } | null>(null);
 
     useEffect(() => {
 
@@ -53,7 +72,10 @@ const PracticeQuestions = () => {
                 setIsLoading(true);
                 setError("");
 
-                const round = await startPracticeRound(Number(subject));
+                if (startRequest.current?.subject !== subject) {
+                    startRequest.current = { subject, promise: startPracticeRound(Number(subject)) };
+                }
+                const round = await startRequest.current.promise;
                 if (!active) {
                     return;
                 }
@@ -80,6 +102,8 @@ const PracticeQuestions = () => {
                 setCurrentQuestionIndex(0);
                 setSelectedAnswer(null);
                 setAnswers({});
+                setResult(null);
+                setIsConfirmingQuit(false);
             }
             catch (error: unknown) {
                 if (!active) {
@@ -143,6 +167,25 @@ const PracticeQuestions = () => {
         setSelectedAnswer(null);
     };
 
+    // Finishes the round on the server and shows its result. Returns the totals,
+    // or null if it failed.
+    const finishRound = async (): Promise<PracticeFinishResponse | null> => {
+        if (attemptId === null) {
+            return null;
+        }
+        try {
+            const totals = await finishPracticeRound(attemptId);
+            setResult(totals);
+            return totals;
+        } catch (error) {
+            // A visible message with "Try again" comes in a later step (#170).
+            console.error("Failed to finish practice round:", error);
+            return null;
+        }
+    };
+
+    const backToSubjects = () => navigate("/practice/subjects");
+
     const handleNext = async () => {
 
         if (currentQuestionIndex < questions.length - 1) {
@@ -151,21 +194,18 @@ const PracticeQuestions = () => {
 
         } else {
 
-            if (attemptId === null) {
-                return;
-            }
+            await finishRound();
+        }
+    };
 
-            try {
-
-                await finishPracticeRound(attemptId);
-
-                navigate("/practice/subjects");
-
-            } catch (error) {
-
-                // A visible message with "Try again" comes in a later step (#170).
-                console.error("Failed to finish practice round:", error);
-            }
+    const handleQuitConfirmed = async () => {
+        setIsQuitting(true);
+        const totals = await finishRound();
+        setIsQuitting(false);
+        setIsConfirmingQuit(false);
+        // Nothing answered: no result to show, back to the subject list.
+        if (totals && totals.answeredQuestions === 0) {
+            backToSubjects();
         }
     };
 
@@ -199,6 +239,15 @@ const PracticeQuestions = () => {
         );
     }
 
+    if (result) {
+        return (
+            <div className="practice-questions">
+                <PageTitle title={subjectName} subtitle={t("practice.subtitle")} />
+                <PracticeRoundResult result={result} onBack={backToSubjects} />
+            </div>
+        );
+    }
+
     if (!currentQuestion) {
         return (
             <div>
@@ -216,6 +265,21 @@ const PracticeQuestions = () => {
                 title={subjectName}
                 subtitle={t("practice.subtitle")}
             />
+
+            <div className="practice-quit-row">
+                <button className="practice-secondary-button" onClick={() => setIsConfirmingQuit(true)}
+                        disabled={isConfirmingQuit}>
+                    {t("practice.quitRound")}
+                </button>
+            </div>
+
+            {isConfirmingQuit && (
+                <QuitRoundDialog
+                    onConfirm={handleQuitConfirmed}
+                    onCancel={() => setIsConfirmingQuit(false)}
+                    isQuitting={isQuitting}
+                />
+            )}
 
             <div className="practice-progress">
                 {t("practice.progress", { current: currentQuestionIndex + 1, total: questions.length })}
