@@ -59,7 +59,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ExamServiceTests {
 
-    private static final Long SESSION_ID = 1L;
+    private static final Long ATTEMPT_ID = 1L;
     private static final String EMAIL = "student@example.test";
 
     @Mock QuestionRepository questionRepository;
@@ -105,12 +105,12 @@ class ExamServiceTests {
     }
 
     /** Fakes a running exam with the given answers already saved on its rows. */
-    private Attempt givenOpenSessionWith(List<Question> questions, Map<Long, String> answers) {
-        return givenOpenSessionWith(questions, answers, LocalDateTime.now());
+    private Attempt givenOpenExamWith(List<Question> questions, Map<Long, String> answers) {
+        return givenOpenExamWith(questions, answers, LocalDateTime.now());
     }
 
     /** Overload: the exam started at the given time. */
-    private Attempt givenOpenSessionWith(
+    private Attempt givenOpenExamWith(
         List<Question> questions,
         Map<Long, String> answers,
         LocalDateTime startedAt
@@ -126,7 +126,7 @@ class ExamServiceTests {
             }
             rows.add(row);
         }
-        when(attemptQuestionRepository.findByAttemptIdOrderByPosition(SESSION_ID)).thenReturn(rows);
+        when(attemptQuestionRepository.findByAttemptIdOrderByPosition(ATTEMPT_ID)).thenReturn(rows);
         return exam;
     }
 
@@ -141,7 +141,7 @@ class ExamServiceTests {
 
     private ExamSubmitRequest submission() {
         ExamSubmitRequest request = new ExamSubmitRequest();
-        request.setSessionId(SESSION_ID);
+        request.setAttemptId(ATTEMPT_ID);
         return request;
     }
 
@@ -155,15 +155,15 @@ class ExamServiceTests {
     /** Overload: the attempt started at the given time. */
     private Attempt givenAttempt(AttemptType type, LocalDateTime startedAt) {
         Attempt attempt = new Attempt(user, type, startedAt);
-        ReflectionTestUtils.setField(attempt, "id", SESSION_ID);
-        when(attemptRepository.findById(SESSION_ID)).thenReturn(Optional.of(attempt));
+        ReflectionTestUtils.setField(attempt, "id", ATTEMPT_ID);
+        when(attemptRepository.findById(ATTEMPT_ID)).thenReturn(Optional.of(attempt));
         return attempt;
     }
 
     /** Fakes the attempt's row for the given question (correct answer B). */
     private AttemptQuestion givenRow(Attempt attempt, long questionId) {
         AttemptQuestion row = new AttemptQuestion(attempt, question(questionId), 0);
-        when(attemptQuestionRepository.findByAttemptIdAndQuestionId(SESSION_ID, questionId))
+        when(attemptQuestionRepository.findByAttemptIdAndQuestionId(ATTEMPT_ID, questionId))
             .thenReturn(Optional.of(row));
         return row;
     }
@@ -172,7 +172,7 @@ class ExamServiceTests {
     void saveAnswerStoresTheAnswerOnTheQuestionsRow() {
         AttemptQuestion row = givenRow(givenAttempt(AttemptType.MOCK_EXAM), 1L);
 
-        examService.saveAnswer(SESSION_ID, 1L, "B", EMAIL);
+        examService.saveAnswer(ATTEMPT_ID, 1L, "B", EMAIL);
 
         assertTrue(row.isAnswered());
         assertEquals("B", row.getChosenOption());
@@ -184,8 +184,8 @@ class ExamServiceTests {
     void saveAnswerCanChangeAnEarlierAnswer() {
         AttemptQuestion row = givenRow(givenAttempt(AttemptType.MOCK_EXAM), 1L);
 
-        examService.saveAnswer(SESSION_ID, 1L, "B", EMAIL);
-        examService.saveAnswer(SESSION_ID, 1L, "C", EMAIL);
+        examService.saveAnswer(ATTEMPT_ID, 1L, "B", EMAIL);
+        examService.saveAnswer(ATTEMPT_ID, 1L, "C", EMAIL);
 
         assertEquals("C", row.getChosenOption());
         assertFalse(row.getCorrect());
@@ -197,15 +197,15 @@ class ExamServiceTests {
         givenAttempt(AttemptType.SUBJECT_PRACTICE);
 
         assertThrows(NotFoundException.class,
-            () -> examService.saveAnswer(SESSION_ID, 1L, "B", EMAIL));
+            () -> examService.saveAnswer(ATTEMPT_ID, 1L, "B", EMAIL));
     }
 
     @Test
     void saveAnswerRejectsUnknownExam() {
-        when(attemptRepository.findById(SESSION_ID)).thenReturn(Optional.empty());
+        when(attemptRepository.findById(ATTEMPT_ID)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
-            () -> examService.saveAnswer(SESSION_ID, 1L, "B", EMAIL));
+            () -> examService.saveAnswer(ATTEMPT_ID, 1L, "B", EMAIL));
     }
 
     // ----- Security: ownership -----
@@ -221,10 +221,10 @@ class ExamServiceTests {
         when(userRepository.findByEmail("other@example.test")).thenReturn(Optional.of(otherUser));
 
         assertThrows(AccessDeniedException.class,
-            () -> examService.saveAnswer(SESSION_ID, 1L, "B", "other@example.test"));
+            () -> examService.saveAnswer(ATTEMPT_ID, 1L, "B", "other@example.test"));
     }
 
-    // ----- Security: session is linked to user at start -----
+    // ----- saveAnswer: only a running exam, only its own questions -----
 
     @Test
     void saveAnswerRejectsSubmittedExam() {
@@ -232,24 +232,24 @@ class ExamServiceTests {
         ReflectionTestUtils.setField(exam, "finishedAt", LocalDateTime.now());
 
         assertThrows(ConflictException.class,
-            () -> examService.saveAnswer(SESSION_ID, 1L, "B", EMAIL));
+            () -> examService.saveAnswer(ATTEMPT_ID, 1L, "B", EMAIL));
     }
 
     @Test
     void saveAnswerRejectsQuestionNotInTheExam() {
         givenAttempt(AttemptType.MOCK_EXAM);
-        when(attemptQuestionRepository.findByAttemptIdAndQuestionId(SESSION_ID, 999L))
+        when(attemptQuestionRepository.findByAttemptIdAndQuestionId(ATTEMPT_ID, 999L))
             .thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
-            () -> examService.saveAnswer(SESSION_ID, 999L, "B", EMAIL));
+            () -> examService.saveAnswer(ATTEMPT_ID, 999L, "B", EMAIL));
     }
 
     // ----- submitExam: uses server-saved answers -----
 
     @Test
     void submitUsesServerSavedAnswers() {
-        givenOpenSessionWith(
+        givenOpenExamWith(
             List.of(question(1), question(2), question(3), question(4)),
             Map.of(1L, "B", 2L, "B", 3L, "B", 4L, "B")
         );
@@ -264,7 +264,7 @@ class ExamServiceTests {
     @Test
     void submitIgnoresClientProvidedAnswers() {
         // Server has correct answers; client sends wrong ones (ignored)
-        givenOpenSessionWith(
+        givenOpenExamWith(
             List.of(question(1), question(2)),
             Map.of(1L, "B", 2L, "B")
         );
@@ -282,7 +282,7 @@ class ExamServiceTests {
 
     @Test
     void allCorrectAnswersGiveFullScore() {
-        givenOpenSessionWith(
+        givenOpenExamWith(
             List.of(question(1), question(2), question(3), question(4)),
             Map.of(1L, "B", 2L, "B", 3L, "B", 4L, "B")
         );
@@ -299,7 +299,7 @@ class ExamServiceTests {
     @Test
     void mixedAnswersAreCountedAsCorrectIncorrectAndUnanswered() {
         // Q1 right, Q2 wrong, Q3 skipped, Q4 right
-        givenOpenSessionWith(
+        givenOpenExamWith(
             List.of(question(1), question(2), question(3), question(4)),
             Map.of(1L, "B", 2L, "A", 4L, "B")
         );
@@ -316,7 +316,7 @@ class ExamServiceTests {
     @Test
     void scoreIsRoundedToNearestWholePercent() {
         // 2 of 3 right = 66.67%
-        givenOpenSessionWith(
+        givenOpenExamWith(
             List.of(question(1), question(2), question(3)),
             Map.of(1L, "B", 2L, "B", 3L, "A")
         );
@@ -328,7 +328,7 @@ class ExamServiceTests {
 
     @Test
     void savedResultHasTheScoreAndBelongsToTheUser() {
-        givenOpenSessionWith(
+        givenOpenExamWith(
             List.of(question(1), question(2), question(3), question(4)),
             Map.of(1L, "B", 2L, "A", 4L, "B")
         );
@@ -351,7 +351,7 @@ class ExamServiceTests {
     @Test
     void scoresAllIssuedQuestionsNotOnlyTheAnsweredOnes() {
         // Server issued 3 questions, only 1 answer saved
-        givenOpenSessionWith(
+        givenOpenExamWith(
             List.of(question(1), question(2), question(3)),
             Map.of(1L, "B")
         );
@@ -367,7 +367,7 @@ class ExamServiceTests {
 
     @Test
     void submitClosesTheExam() {
-        Attempt exam = givenOpenSessionWith(List.of(question(1)), Map.of(1L, "B"));
+        Attempt exam = givenOpenExamWith(List.of(question(1)), Map.of(1L, "B"));
 
         examService.submitExam(submission(), EMAIL);
 
@@ -378,7 +378,7 @@ class ExamServiceTests {
     @Test
     void submitAddsEachAnsweredQuestionToTheSubjectTotals() {
         // Q1 right, Q2 wrong, Q3 skipped
-        givenOpenSessionWith(
+        givenOpenExamWith(
             List.of(question(1), question(2), question(3)),
             Map.of(1L, "B", 2L, "A")
         );
@@ -393,12 +393,12 @@ class ExamServiceTests {
 
     @Test
     void submittedExamCannotBeAnsweredAfterwards() {
-        Attempt exam = givenOpenSessionWith(List.of(question(1)), Map.of(1L, "B"));
+        Attempt exam = givenOpenExamWith(List.of(question(1)), Map.of(1L, "B"));
         examService.submitExam(submission(), EMAIL);
         assertTrue(exam.isFinished());
 
         assertThrows(ConflictException.class,
-            () -> examService.saveAnswer(SESSION_ID, 1L, "A", EMAIL));
+            () -> examService.saveAnswer(ATTEMPT_ID, 1L, "A", EMAIL));
     }
 
     @Test
@@ -414,7 +414,7 @@ class ExamServiceTests {
     // ----- Security: ownership -----
 
     @Test
-    void otherUserCannotSubmitSomeonesSession() {
+    void otherUserCannotSubmitSomeonesExam() {
         givenAttempt(AttemptType.MOCK_EXAM);
 
         User otherUser = new User();
@@ -487,12 +487,12 @@ class ExamServiceTests {
         });
     }
 
-    // ----- Session and time-limit rules -----
+    // ----- Submit rules and time limit -----
 
     @Test
-    void submitWithoutSessionIdIsRejected() {
+    void submitWithoutAttemptIdIsRejected() {
         ExamSubmitRequest request = submission();
-        request.setSessionId(null);
+        request.setAttemptId(null);
 
         assertThrows(IllegalArgumentException.class,
             () -> examService.submitExam(request, EMAIL));
@@ -501,8 +501,8 @@ class ExamServiceTests {
     }
 
     @Test
-    void submitWithUnknownSessionIdIsRejected() {
-        when(attemptRepository.findById(SESSION_ID)).thenReturn(Optional.empty());
+    void submitWithUnknownAttemptIdIsRejected() {
+        when(attemptRepository.findById(ATTEMPT_ID)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
             () -> examService.submitExam(submission(), EMAIL));
@@ -511,7 +511,7 @@ class ExamServiceTests {
     }
 
     @Test
-    void sessionThatIsAlreadySubmittedCannotBeSubmittedAgain() {
+    void examThatIsAlreadySubmittedCannotBeSubmittedAgain() {
         Attempt exam = givenAttempt(AttemptType.MOCK_EXAM);
         exam.setFinishedAt(LocalDateTime.now());
 
@@ -523,7 +523,7 @@ class ExamServiceTests {
     }
 
     @Test
-    void submitMoreThanGracePeriodLateIsRejectedAndClosesTheSession() {
+    void submitMoreThanGracePeriodLateIsRejectedAndClosesTheExam() {
         // 63 minutes elapsed = 60 limit + 2 grace + 1 over
         Attempt exam = givenAttempt(AttemptType.MOCK_EXAM, LocalDateTime.now().minusMinutes(63));
 
@@ -539,7 +539,7 @@ class ExamServiceTests {
     @Test
     void submitWithinGracePeriodIsAccepted() {
         // 61 minutes elapsed = 60 limit + 2 grace → still accepted
-        givenOpenSessionWith(
+        givenOpenExamWith(
             List.of(question(1)),
             Map.of(1L, "B"),
             LocalDateTime.now().minusMinutes(61)
@@ -553,7 +553,7 @@ class ExamServiceTests {
 
     @Test
     void submitJustBeforeTheTimeLimitIsAccepted() {
-        givenOpenSessionWith(
+        givenOpenExamWith(
             List.of(question(1)),
             Map.of(1L, "B"),
             LocalDateTime.now().minusMinutes(59)
@@ -577,13 +577,13 @@ class ExamServiceTests {
     }
 
     @Test
-    void startExamGives70DifferentQuestionsAndTheAttemptIdAsSessionId() {
+    void startExamGives70DifferentQuestionsAndTheAttemptId() {
         when(questionRepository.findAll()).thenReturn(questionBank(100));
         givenAttemptIsSavedWithId(42L);
 
         ExamStartResponse response = examService.startExam(EMAIL);
 
-        assertEquals(42L, response.getSessionId());
+        assertEquals(42L, response.getAttemptId());
         assertEquals(70, response.getQuestions().size());
         long differentIds = response.getQuestions().stream()
             .map(q -> q.getId())

@@ -104,7 +104,7 @@ public class ExamService {
      * given. Returns them without the correct answers.
      *
      * @param email email of the logged-in user
-     * @return the attempt id (sent as "sessionId") and the 70 questions
+     * @return the attempt id and the 70 questions
      */
     @Transactional
     public ExamStartResponse startExam(String email) {
@@ -155,7 +155,6 @@ public class ExamService {
                 ))
                 .toList();
 
-        // The page still calls it "sessionId"; it is now the attempt id.
         return new ExamStartResponse(attempt.getId(), questionDtos);
     }
 
@@ -170,7 +169,7 @@ public class ExamService {
      * before submit. Nothing is added to the per-subject totals here; that
      * happens once, at submit.
      *
-     * @param attemptId  the exam (the page calls it "sessionId")
+     * @param attemptId  the exam (its attempt id)
      * @param questionId question being answered
      * @param answer     the chosen letter, "A"–"D" (validated by the DTO)
      * @param email      email of the logged-in user
@@ -228,16 +227,16 @@ public class ExamService {
      * changes in the method. A late submit should still close the exam,
      * so that one exception keeps the change.
      *
-     * @param request the exam's id (the page calls it "sessionId")
+     * @param request the exam's attempt id
      * @param email   email of the logged-in user
      * @return the exam result, including score and answer breakdown
      */
     @Transactional(noRollbackFor = ExamTimeLimitExceededException.class)
     public ExamResultResponse submitExam(ExamSubmitRequest request, String email) {
 
-        Long attemptId = request.getSessionId();
+        Long attemptId = request.getAttemptId();
         if (attemptId == null) {
-            throw new IllegalArgumentException("Session ID is required for exam submission.");
+            throw new IllegalArgumentException("Attempt ID is required for exam submission.");
         }
 
         Attempt exam = findOwnRunningExam(attemptId, email);

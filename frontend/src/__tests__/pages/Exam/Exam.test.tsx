@@ -34,7 +34,7 @@ const questions: ExamQuestion[] = [
 function mockBackend() {
     vi.mocked(apiClient).mockImplementation(async (endpoint: string) => {
         if (endpoint === "/api/exam/start") {
-            return { sessionId: "session-1", questions };
+            return { attemptId: "attempt-1", questions };
         }
         if (endpoint.match(/^\/api\/exam\/[^/]+\/answer$/)) {
             return null;  // 204
@@ -109,7 +109,7 @@ describe("Exam page", () => {
         // The answer POST should fire
         await waitFor(() => {
             const answerCall = vi.mocked(apiClient).mock.calls.find(
-                ([endpoint]) => endpoint === "/api/exam/session-1/answer"
+                ([endpoint]) => endpoint === "/api/exam/attempt-1/answer"
             );
             expect(answerCall).toBeDefined();
             const body = JSON.parse(answerCall![1]!.body as string);
@@ -128,13 +128,13 @@ describe("Exam page", () => {
 
         await waitFor(() => {
             const answerCalls = vi.mocked(apiClient).mock.calls.filter(
-                ([endpoint]) => endpoint === "/api/exam/session-1/answer"
+                ([endpoint]) => endpoint === "/api/exam/attempt-1/answer"
             );
             expect(answerCalls).toHaveLength(1);
         });
     });
 
-    it("submits the session id and answers, then shows the result page", async () => {
+    it("submits the attempt id and answers, then shows the result page", async () => {
         mockBackend();
         renderExam();
 
@@ -160,7 +160,7 @@ describe("Exam page", () => {
         // The body is a JSON string; turn it back into an object to compare
         const body = JSON.parse(submitCall![1]!.body as string);
         expect(body).toEqual({
-            sessionId: "session-1",
+            attemptId: "attempt-1",
             answers: { "1": "B", "2": "C" },
         });
     });

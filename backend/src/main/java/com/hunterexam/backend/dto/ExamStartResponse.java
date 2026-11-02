@@ -7,12 +7,12 @@ import java.util.List;
 @Getter
 public class ExamStartResponse {
 
-    private Long sessionId;
+    private Long attemptId;
 
     private List<QuestionResponse> questions;
 
-    public ExamStartResponse(Long sessionId, List<QuestionResponse> questions) {
-        this.sessionId = sessionId;
+    public ExamStartResponse(Long attemptId, List<QuestionResponse> questions) {
+        this.attemptId = attemptId;
         this.questions = questions;
     }
 

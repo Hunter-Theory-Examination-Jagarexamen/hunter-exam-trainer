@@ -73,7 +73,7 @@ class ExamControllerTests {
         mvc.perform(post("/api/exam/start")
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_STUDENT"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.sessionId").value(10));
+                .andExpect(jsonPath("$.attemptId").value(10));
 
         verify(examService, times(2)).startExam(any());
     }

@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import apiClient, { ApiError } from "../../api/apiClient.ts";
 
 interface ExamStartResponse {
-    sessionId: string;
+    attemptId: string;
     questions: ExamQuestion[];
 }
 
@@ -16,7 +16,7 @@ const Exam = () => {
 
     const navigate = useNavigate();
 
-    const [sessionId, setSessionId] = useState<string | null>(null);
+    const [attemptId, setAttemptId] = useState<string | null>(null);
     const [questions, setQuestions] = useState<ExamQuestion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
@@ -39,7 +39,7 @@ const Exam = () => {
             const result = await apiClient("/api/exam/submit", {
                 method: "POST",
                 body: JSON.stringify({
-                    sessionId,
+                    attemptId,
                     answers
                 })
             });
@@ -60,7 +60,7 @@ const Exam = () => {
                 "Failed to submit exam. Your answers are saved on the server — please try again."
             );
         }
-    }, [sessionId, answers, navigate]);
+    }, [attemptId, answers, navigate]);
 
 
     //Load exam questions
@@ -78,7 +78,7 @@ const Exam = () => {
                     });
                 }
                 const data = await startRequest.current;
-                setSessionId(data.sessionId);
+                setAttemptId(data.attemptId);
                 setQuestions(data.questions);
             }
 
@@ -153,12 +153,12 @@ const Exam = () => {
         // Persist to the server (best-effort). If this fails, we keep going:
 
         // the local state still holds the answer, and the user can try again by selecting a different option (which retries the save).
-        if (!sessionId) {
+        if (!attemptId) {
             return;
         }
 
         try {
-            await apiClient(`/api/exam/${sessionId}/answer`, {
+            await apiClient(`/api/exam/${attemptId}/answer`, {
                 method: "POST",
                 body: JSON.stringify({
                     questionId: currentQuestion.id,

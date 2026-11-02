@@ -23,7 +23,7 @@ endpoints are added to this table, not duplicated elsewhere.
 | POST   | /api/practice/attempts/{id}/finish | Finish a practice round and get its totals | Required         |
 | POST   | /api/practice/results         | Save a completed practice result (old; not used by the frontend) | Required |
 | POST   | /api/exam/start               | Start a mock exam and receive 70 questions      | Required         |
-| POST   | /api/exam/{sessionId}/answer | Save or change one answer in the running mock exam | Required |
+| POST   | /api/exam/{attemptId}/answer | Save or change one answer in the running mock exam | Required |
 | POST   | /api/exam/submit              | Submit the mock exam; the server scores the saved answers | Required |
 | GET    | /api/dashboard                | Get dashboard statistics for the logged-in user | Required         |
 | GET    | /api/dashboard/recent         | Get the user's recent mock exam activity        | Required         |
@@ -86,8 +86,8 @@ name or a subject still in use returns `409`, an unknown id `404`.
 ## Mock exam: request and response
 
 A mock exam is stored as an attempt of type `MOCK_EXAM`, in the same tables as
-practice rounds (`attempts` + `attempt_questions`). The `sessionId` below
-is that attempt's id. The server enforces the time limit from the exam's start.
+practice rounds (`attempts` + `attempt_questions`); `attemptId` is the
+exam's id in those tables. The server enforces the time limit from the exam's start.
 
 ### `POST /api/exam/start`
 
@@ -97,14 +97,14 @@ answers. `409 Conflict` if there are fewer than 70 questions.
 
 ```json
 {
-  "sessionId": 12,
+  "attemptId": 12,
   "questions": [
     { "id": 5, "questionText": "...", "optionA": "...", "optionB": "...", "optionC": "...", "optionD": "...", "imageUrl": null }
   ]
 }
 ```
 
-### `POST /api/exam/{sessionId}/answer`
+### `POST /api/exam/{attemptId}/answer`
 
 ```json
 { "questionId": 5, "answer": "A" }
@@ -123,10 +123,10 @@ answers. `409 Conflict` if there are fewer than 70 questions.
 ### `POST /api/exam/submit`
 
 ```json
-{ "sessionId": 12 }
+{ "attemptId": 12 }
 ```
 
-- `sessionId` is required and must come from `/api/exam/start`.
+- `attemptId` is required and must come from `/api/exam/start`.
 - The server scores the answers saved with `/answer`; unanswered questions count
   as not correct. The client doesn't send a question list, and an `answers`
   field in the body is ignored.
