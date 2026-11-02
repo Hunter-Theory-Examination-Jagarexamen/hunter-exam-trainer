@@ -2,7 +2,7 @@ package com.hunterexam.backend.controller;
 
 import com.hunterexam.backend.config.OAuth2LoginSuccessHandler;
 import com.hunterexam.backend.config.SecurityConfig;
-import com.hunterexam.backend.dto.ExamQuestionResponse;
+import com.hunterexam.backend.dto.QuestionResponse;
 import com.hunterexam.backend.dto.PracticeAnswerResponse;
 import com.hunterexam.backend.dto.PracticeFinishResponse;
 import com.hunterexam.backend.dto.PracticeStartResponse;
@@ -88,7 +88,7 @@ class PracticeAttemptControllerTests {
 
     @Test
     void start_returnsRoundAndQuestions_withoutCorrectAnswers() throws Exception {
-        ExamQuestionResponse question = new ExamQuestionResponse(
+        QuestionResponse question = new QuestionResponse(
                 100L, "Question?", "One", "Two", "Three", "Four", null);
         when(practiceAttemptService.start(5L, EMAIL))
                 .thenReturn(new PracticeStartResponse(10L, "Viltvård", List.of(question)));

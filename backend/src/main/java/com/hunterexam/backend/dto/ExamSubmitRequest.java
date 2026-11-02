@@ -14,7 +14,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class ExamSubmitRequest {
 
-    private Long sessionId;
+    private Long attemptId;
 
     private Map<String, String> answers;
 }

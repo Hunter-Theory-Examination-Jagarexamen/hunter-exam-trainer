@@ -18,12 +18,6 @@ class Role {
     ADMIN
 }
 
-class ExamSession {
-    +Long id
-    +LocalDateTime startedAt
-    +boolean completed
-}
-
 class Subject { 
     +Long id 
     +String name 
@@ -61,7 +55,6 @@ class ExamResult {
 
     User "1" --> "*" PracticeResult : has 
     User "1" --> "*" ExamResult : has 
-    User "1" --> "*" ExamSession : starts 
     User --> Role : has 
     Subject "1" --> "*" Question : contains 
     PracticeResult "*" --> "1" Subject : for 

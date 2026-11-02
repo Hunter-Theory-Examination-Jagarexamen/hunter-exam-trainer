@@ -3,13 +3,13 @@ package com.hunterexam.backend.dto;
 import lombok.Getter;
 
 /**
- * Response containing a question for the mock exam.
+ * A question as sent to the student, in a mock exam or a practice round.
  * <p>
- * The correct answer is intentionally not included so that
- * it is not exposed to the client before the exam is submitted.
+ * The correct answer is intentionally not included, so the client
+ * can't see it before the server has checked the answer.
  */
 @Getter
-public class ExamQuestionResponse {
+public class QuestionResponse {
 
     private Long id;
     private String questionText;
@@ -19,7 +19,7 @@ public class ExamQuestionResponse {
     private String optionD;
     private String imageUrl;
 
-    public ExamQuestionResponse(
+    public QuestionResponse(
             Long id,
             String questionText,
             String optionA,

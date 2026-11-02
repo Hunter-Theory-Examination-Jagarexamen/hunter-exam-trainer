@@ -2,9 +2,11 @@ package com.hunterexam.backend.controller;
 
 import com.hunterexam.backend.config.OAuth2LoginSuccessHandler;
 import com.hunterexam.backend.config.SecurityConfig;
+import com.hunterexam.backend.dto.ExamStartResponse;
 import com.hunterexam.backend.service.ExamService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,7 +14,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -52,5 +61,20 @@ class ExamControllerTests {
 
         // Together with the test above, this pins the rule from both sides:
         // logged out is blocked, logged in gets through
+    }
+
+    @Test
+    void startRetriesOnceWhenTwoStartsClashOnTheTotalsRow() throws Exception {
+        // First call loses the race for a SubjectStats row, the retry succeeds.
+        when(examService.startExam(any()))
+                .thenThrow(new DataIntegrityViolationException("duplicate subject_stats row"))
+                .thenReturn(new ExamStartResponse(10L, List.of()));
+
+        mvc.perform(post("/api/exam/start")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_STUDENT"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.attemptId").value(10));
+
+        verify(examService, times(2)).startExam(any());
     }
 }

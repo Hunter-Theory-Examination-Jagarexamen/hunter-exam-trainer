@@ -74,7 +74,12 @@ public class AttemptQuestion {
         return answeredAt != null;
     }
 
-    /** Fills in the answer. The service checks first that it isn't answered already. */
+    /**
+     * Fills in the answer, replacing an earlier one if there is any.
+     * <p>
+     * Practice checks first that the question isn't answered already;
+     * a mock exam lets the student change the answer until submit.
+     */
     public void recordAnswer(String chosenOption, boolean correct, LocalDateTime answeredAt) {
         this.chosenOption = chosenOption;
         this.correct = correct;

@@ -21,10 +21,10 @@ endpoints are added to this table, not duplicated elsewhere.
 | POST   | /api/practice/attempts        | Start a practice round for a subject            | Required         |
 | POST   | /api/practice/attempts/{id}/answers | Answer one question in a practice round (checked by the server) | Required |
 | POST   | /api/practice/attempts/{id}/finish | Finish a practice round and get its totals | Required         |
-| POST   | /api/practice/results         | Save a completed practice session result (old; no longer used by the frontend since #170, removed later) | Required |
+| POST   | /api/practice/results         | Save a completed practice result (old; not used by the frontend) | Required |
 | POST   | /api/exam/start               | Start a mock exam and receive 70 questions      | Required         |
-| POST   | /api/exam/{sessionId}/answer | Save a single answer on the current exam session | Required |
-| POST   | /api/exam/submit              | Submit a mock exam answers and save the result  | Required         |
+| POST   | /api/exam/{attemptId}/answer | Save or change one answer in the running mock exam | Required |
+| POST   | /api/exam/submit              | Submit the mock exam; the server scores the saved answers | Required |
 | GET    | /api/dashboard                | Get dashboard statistics for the logged-in user | Required         |
 | GET    | /api/dashboard/recent         | Get the user's recent mock exam activity        | Required         |
 | GET    | /api/statistics/subjects      | Get the user's practice performance by subject  | Required         |
@@ -85,46 +85,62 @@ name or a subject still in use returns `409`, an unknown id `404`.
 
 ## Mock exam: request and response
 
-The exam endpoints use a server-side exam session to enforce the time limit (#35).
+A mock exam is stored as an attempt of type `MOCK_EXAM`, in the same tables as
+practice rounds (`attempts` + `attempt_questions`); `attemptId` is the
+exam's id in those tables. The server enforces the time limit from the exam's start.
 
 ### `POST /api/exam/start`
 
-No request body. Creates an exam session for the logged-in user and returns 70 random questions.
+No request body. Creates a mock exam for the logged-in user with 70 random
+questions, stored in the order shown, and returns them without the correct
+answers. `409 Conflict` if there are fewer than 70 questions.
 
 ```json
 {
-  "sessionId": 12,
+  "attemptId": 12,
   "questions": [
-    { "id": 5, "questionText": "...", "optionA": "...", "optionB": "...", "optionC": "...", "optionD": "..." }
+    { "id": 5, "questionText": "...", "optionA": "...", "optionB": "...", "optionC": "...", "optionD": "...", "imageUrl": null }
   ]
 }
 ```
 
+### `POST /api/exam/{attemptId}/answer`
+
+```json
+{ "questionId": 5, "answer": "A" }
+```
+
+- Saves one answer as the student gives it (the page calls it on each
+  selection), so a lost connection, expired token or closed tab doesn't lose it.
+- Answering the same question again **replaces** the earlier answer, until the
+  exam is submitted. (Practice is different: each answer is final.)
+- `answer` must be `A`, `B`, `C` or `D` (`400` otherwise).
+- Response: `204 No Content`. Nothing is said about correct or not before submit.
+- `404` if the exam doesn't exist (a practice round's id also gives `404`),
+  `403` if it belongs to another user, `409` if it is already submitted,
+  `400` if the question isn't part of the exam.
+
 ### `POST /api/exam/submit`
 
 ```json
-{
-  "sessionId": 12,
-  "answers": { "5": "A", "17": "C" }
-}
+{ "attemptId": 12 }
 ```
 
-- `sessionId` is required and must come from `/api/exam/start`.
-- `answers` maps a question ID (as a string) to the chosen option letter `A`-`D`. Unanswered questions are left out.
-- Rejected if more than 60 minutes have passed since start, or if the session was already submitted.
+- `attemptId` is required and must come from `/api/exam/start`.
+- The server scores the answers saved with `/answer`; unanswered questions count
+  as not correct. The client doesn't send a question list, and an `answers`
+  field in the body is ignored.
+- Submitting closes the exam (no more answers or submits) and adds each
+  answered question to the student's per-subject totals.
+- `400` if more than 60 minutes (+ 2 minutes grace) have passed since start: the
+  exam is closed, but not scored. `409` if already submitted, `403` if it
+  belongs to another user, `404` if it doesn't exist.
 
 Response:
 
 ```json
-{ "totalQuestions": 70, "correctAnswers": 52, "incorrectAnswers": 10, "unanswered": 8, "score": 52 }
+{ "totalQuestions": 70, "correctAnswers": 52, "incorrectAnswers": 10, "unanswered": 8, "score": 74 }
 ```
-**Notes:**
-
-- `POST /api/exam/start` links the exam session to the logged-in user. The server records which questions were issued for that session.
-- `POST /api/exam/submit` scores against the questions the server issued at `/start`; the client doesn't send a question list. Only the session's owner may submit; other users receive `403 Forbidden`.
-
-**Exams notes:**
-- `POST /api/exam/{sessionId}/answer` saves an individual answer as the user gives it. Called by the frontend on each selection. Answers are stored on the session and used at submit time, so a lost connection, expired token, or closed tab does not lose the attempt.
 
 **MockExams notes:**
 
@@ -139,7 +155,7 @@ The `mockExams` field is a separate object so it can be filtered out per student
 
 ## Practice rounds: request and response
 
-Practice rounds are stored per question (#168). The server checks each answer, so
+Practice rounds are stored per question. The server checks each answer, so
 the client never gets the correct answers in advance and never sends its own score.
 
 ### `POST /api/practice/attempts`
