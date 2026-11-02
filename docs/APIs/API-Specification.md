@@ -1,15 +1,23 @@
 ## API Specification
 
+This file is the canonical list of endpoints. README.md only links here; new
+endpoints are added to this table, not duplicated elsewhere.
+
 | Method | Endpoint                      | Purpose                                         | Authentication   |
 |--------|-------------------------------|-------------------------------------------------|------------------|
 | POST   | /api/auth/register            | Register new user                               | Public           |
 | POST   | /api/auth/login               | Authenticate user and return JWT                | Public           |
+| POST   | /api/auth/forgot-password     | Request a password reset email                  | Public           |
+| POST   | /api/auth/reset-password      | Set a new password using a reset token          | Public           |
+| POST   | /api/auth/oauth2/exchange     | Exchange a one-time OAuth2 code for an app JWT  | Public           |
+| GET    | /api/auth/google/status       | Whether Google login is enabled                 | Public           |
 | GET    | /api/users/me                 | Get logged-in user's profile                    | Required         |
 | PUT    | /api/users/me/password        | Change the logged-in user's password            | Required         |
 | GET    | /api/subjects                 | Get all subjects and question counts            | Required         |
-| POST   | /api/subjects                 | Create a new subject                            | Required (ADMIN) |
-| PUT    | /api/subjects/{id}            | Update an existing subject                      | Required (ADMIN) |
-| DELETE | /api/subjects/{id}            | Delete a subject                                | Required (ADMIN) |
+| GET    | /api/subjects/{id}            | Get one subject                                 | Required         |
+| POST   | /api/admin/subjects           | Create a new subject                            | Required (ADMIN) |
+| PUT    | /api/admin/subjects/{id}      | Update an existing subject                      | Required (ADMIN) |
+| DELETE | /api/admin/subjects/{id}      | Delete a subject                                | Required (ADMIN) |
 | POST   | /api/practice/attempts        | Start a practice round for a subject            | Required         |
 | POST   | /api/practice/attempts/{id}/answers | Answer one question in a practice round (checked by the server) | Required |
 | POST   | /api/practice/attempts/{id}/finish | Finish a practice round and get its totals | Required         |
@@ -22,7 +30,58 @@
 | GET    | /api/statistics/subjects      | Get the user's practice performance by subject  | Required         |
 | GET    | /api/statistics/progress      | Get the user's weekly accuracy over time        | Required         |
 | GET    | /api/admin/learners           | Get aggregated progress for all learners        | Required (ADMIN) |
+| GET    | /api/admin/stats              | Get question, subject and learner counts        | Required (ADMIN) |
 | GET    | /api/admin/questions?subjectId={id} | Get a subject's questions, including the correct answer (admin Question Bank) | Required (ADMIN) |
+| POST   | /api/admin/questions          | Create a question (201, with `Location` header) | Required (ADMIN) |
+| PUT    | /api/admin/questions/{id}     | Replace a question (200)                        | Required (ADMIN) |
+| DELETE | /api/admin/questions/{id}     | Delete a question (204)                         | Required (ADMIN) |
+
+Subject writes were moved from `/api/subjects` to `/api/admin/subjects`. The old
+paths have no write handlers anymore: an ADMIN call to them answers
+`405 Method Not Allowed`, and STUDENT or anonymous calls are rejected with
+`403`/`401` by the security rules before dispatch. Reads stay on
+`GET /api/subjects` and `GET /api/subjects/{id}` for any authenticated user.
+
+## Question management: request and response
+
+`POST /api/admin/questions` and `PUT /api/admin/questions/{id}` accept the same
+JSON body:
+
+```json
+{
+  "questionText": "Which option is correct?",
+  "optionA": "First option",
+  "optionB": "Second option",
+  "optionC": "Third option",
+  "optionD": "Fourth option",
+  "correctAnswer": "A",
+  "explanation": "Optional explanation",
+  "imageUrl": "https://example.com/images/questions.jpg",
+  "subjectId": 1
+}
+```
+
+All fields except `explanation` and `imageUrl` are required. Text fields have a
+maximum length of 255 characters. `imageUrl` is optional and supports an image
+illustration URL. `subjectId` must be positive and refer to an existing subject.
+`correctAnswer` must be a single letter `A`-`D` matching the correct option's
+position (see the question note below). Invalid input returns 400; a missing
+question or subject returns 404. PUT replaces all editable fields, including
+clearing the explanation or image URL when omitted. Students receive
+`403 Forbidden` on these admin routes, and requests without a token
+`401 Unauthorized`.
+
+## Subject management: request and response
+
+`POST /api/admin/subjects` and `PUT /api/admin/subjects/{id}` accept:
+
+```json
+{ "name": "Wildlife", "description": "Animals" }
+```
+
+Both fields are required and limited to 255 characters. `POST` answers `201`,
+`PUT` answers `200`, `DELETE /api/admin/subjects/{id}` answers `204`. A duplicate
+name or a subject still in use returns `409`, an unknown id `404`.
 
 ## Mock exam: request and response
 

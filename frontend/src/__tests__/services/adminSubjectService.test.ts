@@ -15,7 +15,9 @@ describe("Subject HTTP contract", () => {
         const result = mode === "list" ? await listSubjects() : mode === "create" ? await createSubject(request) :
             mode === "update" ? await updateSubject(7, request) : await deleteSubject(7);
         const [url, options] = fetchMock.mock.calls[0];
-        expect(url).toBe(`${import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"}/api/subjects${mode === "update" || mode === "delete" ? "/7" : ""}`);
+        const base = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+        const path = mode === "list" ? "/api/subjects" : `/api/admin/subjects${mode === "create" ? "" : "/7"}`;
+        expect(url).toBe(`${base}${path}`);
         expect(options.method).toBe(mode === "list" ? undefined : mode === "create" ? "POST" : mode === "update" ? "PUT" : "DELETE");
         expect(options.headers.get("Authorization")).toBe("Bearer admin-token");
         expect(options.headers.get("Content-Type")).toBe("application/json");

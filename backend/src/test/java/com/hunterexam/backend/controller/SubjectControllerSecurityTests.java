@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
@@ -24,12 +23,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * Verifies that subject write endpoints are admin-only, while
- * reads remain available to any authenticated user.
+ * Verifies that reads on {@code /api/subjects} stay available to any
+ * authenticated user, and that the old write paths are no longer
+ * routed after the move to {@code /api/admin/subjects}.
  */
 @WebMvcTest(controllers = SubjectController.class)
 @ActiveProfiles("test")
@@ -43,50 +42,6 @@ class SubjectControllerSecurityTests {
     private static final String BODY = """
             {"name":"Test Subject","description":"Test description"}
             """;
-
-    @Test
-    void studentCannotWriteSubjects() throws Exception {
-        var student = jwt().authorities(new SimpleGrantedAuthority("ROLE_STUDENT"));
-
-        for (var request : List.of(
-                post("/api/subjects"),
-                put("/api/subjects/1"),
-                delete("/api/subjects/1"))) {
-            mvc.perform(request.with(student)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(BODY))
-                    .andExpect(status().isForbidden());
-        }
-
-        verifyNoInteractions(service);
-    }
-
-    @Test
-    void tooLongNameIsRejectedBeforeCallingService() throws Exception {
-        var admin = jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"));
-        String body = "{\"name\":\"" + "a".repeat(256) + "\",\"description\":\"Test description\"}";
-
-        mvc.perform(post("/api/subjects").with(admin)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(body))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("Name must be at most 255 characters"));
-
-        verifyNoInteractions(service);
-    }
-
-    @Test
-    void anonymousCannotWriteSubjects() throws Exception {
-        for (var request : List.of(
-                post("/api/subjects"),
-                put("/api/subjects/1"),
-                delete("/api/subjects/1"))) {
-            mvc.perform(request.contentType(MediaType.APPLICATION_JSON).content(BODY))
-                    .andExpect(status().isUnauthorized());
-        }
-
-        verifyNoInteractions(service);
-    }
 
     @Test
     void studentCanReadSubjects() throws Exception {
@@ -103,22 +58,51 @@ class SubjectControllerSecurityTests {
     }
 
     @Test
-    void adminCanWriteSubjects() throws Exception {
+    void oldWriteRoutesAreNotWritableByStudents() throws Exception {
+        var student = jwt().authorities(new SimpleGrantedAuthority("ROLE_STUDENT"));
+
+        for (var request : List.of(
+                post("/api/subjects"),
+                put("/api/subjects/1"),
+                delete("/api/subjects/1"))) {
+            mvc.perform(request.with(student)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(BODY))
+                    .andExpect(status().isForbidden());
+        }
+
+        verifyNoInteractions(service);
+    }
+
+    @Test
+    void anonymousCannotUseOldWriteRoutes() throws Exception {
+        for (var request : List.of(
+                post("/api/subjects"),
+                put("/api/subjects/1"),
+                delete("/api/subjects/1"))) {
+            mvc.perform(request.contentType(MediaType.APPLICATION_JSON).content(BODY))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        verifyNoInteractions(service);
+    }
+
+    @Test
+    void oldWriteRoutesAreNoLongerMappedEvenForAdmins() throws Exception {
         var admin = jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"));
-        when(service.createSubject(any())).thenReturn(new SubjectResponse(1L, "Test", "Desc", 0));
-        when(service.updateSubject(any(), any())).thenReturn(new SubjectResponse(1L, "Test", "Desc", 0));
 
-        mvc.perform(post("/api/subjects").with(admin)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(BODY))
-                .andExpect(status().isCreated());
+        // The routes are gone: no handler method answers them (405), so they
+        // cannot be used as aliases for /api/admin/subjects.
+        for (var request : List.of(
+                post("/api/subjects"),
+                put("/api/subjects/1"),
+                delete("/api/subjects/1"))) {
+            mvc.perform(request.with(admin)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(BODY))
+                    .andExpect(status().isMethodNotAllowed());
+        }
 
-        mvc.perform(put("/api/subjects/1").with(admin)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(BODY))
-                .andExpect(status().isOk());
-
-        mvc.perform(delete("/api/subjects/1").with(admin))
-                .andExpect(status().isNoContent());
+        verifyNoInteractions(service);
     }
 }
