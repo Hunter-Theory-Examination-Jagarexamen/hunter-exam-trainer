@@ -4,6 +4,7 @@
 // (ExamHeader, QuestionPanel, ExamNavigation). Only the backend is mocked.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { StrictMode } from "react";
 import { render, screen, act, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
@@ -78,6 +79,24 @@ describe("Exam page", () => {
         expect(screen.getByText("Loading exam questions...")).toBeInTheDocument();
         expect(await screen.findByText("First question?")).toBeInTheDocument();
         expect(apiClient).toHaveBeenCalledWith("/api/exam/start", { method: "POST" });
+    });
+
+    it("starts only one exam under StrictMode, which runs effects twice", async () => {
+        // Two starts would both try to create the same totals rows on the server (#174).
+        mockBackend();
+        render(
+            <StrictMode>
+                <MemoryRouter initialEntries={["/exam"]}>
+                    <Routes>
+                        <Route path="/exam" element={<Exam />} />
+                    </Routes>
+                </MemoryRouter>
+            </StrictMode>
+        );
+
+        expect(await screen.findByText("First question?")).toBeInTheDocument();
+        const starts = vi.mocked(apiClient).mock.calls.filter(([endpoint]) => endpoint === "/api/exam/start");
+        expect(starts).toHaveLength(1);
     });
 
     it("saves each answer to the server as it is given", async () => {

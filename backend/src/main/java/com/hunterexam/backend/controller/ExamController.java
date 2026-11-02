@@ -6,6 +6,7 @@ import com.hunterexam.backend.dto.ExamSubmitRequest;
 import com.hunterexam.backend.service.ExamService;
 import com.hunterexam.backend.dto.ExamAnswerRequest;
 import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.security.core.Authentication;
@@ -41,7 +42,16 @@ public class ExamController {
      */
     @PostMapping("/start")
     public ExamStartResponse startExam(Authentication authentication) {
-        return examService.startExam(authentication.getName());
+        try {
+            return examService.startExam(authentication.getName());
+        } catch (DataIntegrityViolationException e) {
+            // Two starts at the same moment (double click, two tabs, or a practice
+            // round started at the same time) can both try to create the student's
+            // SubjectStats row for a subject. The losing start's transaction is
+            // rolled back, so it is retried once here, outside it, in a new
+            // transaction; this time the row exists. Same as practice start.
+            return examService.startExam(authentication.getName());
+        }
     }
 
     /**

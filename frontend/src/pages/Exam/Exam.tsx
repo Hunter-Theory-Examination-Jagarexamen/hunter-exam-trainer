@@ -3,10 +3,14 @@ import ExamHeader from "../../components/exam/ExamHeader";
 import QuestionPanel from "../../components/exam/QuestionPanel";
 import ExamNavigation from "../../components/exam/ExamNavigation";
 import type { ExamQuestion } from "../../types/examQuestion.ts";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient, { ApiError } from "../../api/apiClient.ts";
 
+interface ExamStartResponse {
+    sessionId: string;
+    questions: ExamQuestion[];
+}
 
 const Exam = () => {
 
@@ -21,6 +25,13 @@ const Exam = () => {
     const [timeLeft, setTimeLeft] = useState(60 * 60);
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+    // The start request, shared by both runs of the load effect. React's
+    // StrictMode (development only) runs effects twice; without this, the page
+    // would start two exams, and both would try to create the same per-subject
+    // totals rows on the server (#174). A ref keeps its value between the runs
+    // and, unlike state, changing it doesn't redraw the page.
+    const startRequest = useRef<Promise<ExamStartResponse> | null>(null);
 
     const submitExam = useCallback(async () => {
 
@@ -61,15 +72,12 @@ const Exam = () => {
                 setIsLoading(true);
                 setError("");
 
-                interface ExamStartResponse {
-                    sessionId: string;
-                    questions: ExamQuestion[];
-                }
-
-                const data: ExamStartResponse =
-                    await apiClient("/api/exam/start", {
+                if (!startRequest.current) {
+                    startRequest.current = apiClient("/api/exam/start", {
                         method: "POST"
                     });
+                }
+                const data = await startRequest.current;
                 setSessionId(data.sessionId);
                 setQuestions(data.questions);
             }
