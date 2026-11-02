@@ -114,7 +114,10 @@ public class SecurityConfig {
                         // Admin-only endpoints.
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // Subject writes are admin-only; reads (GET) stay open to any authenticated user.
+                        // Subject writes live under /api/admin/subjects (rule above). The old
+                        // /api/subjects write paths have no handlers anymore, but they stay
+                        // admin-only so they can never be reopened; reads (GET) stay open
+                        // to any authenticated user.
                         .requestMatchers(HttpMethod.POST,   "/api/subjects").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT,    "/api/subjects/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/subjects/**").hasRole("ADMIN")

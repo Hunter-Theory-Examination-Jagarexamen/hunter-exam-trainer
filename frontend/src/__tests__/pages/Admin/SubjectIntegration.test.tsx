@@ -20,12 +20,14 @@ describe("Subject synchronization on navigation", () => {
             {id: 2, name: "Wildlife", description: "Animals", questionCount: 0}];
         vi.mocked(apiClient).mockImplementation(async (endpoint, options) => {
             if (endpoint === "/api/users/me") return {id: 1, fullName: "Admin", role: UserRole.ADMIN};
-            if (options?.method === "POST" || options?.method === "PUT") {
+            if (options?.method === "POST" || options?.method === "PUT" || options?.method === "DELETE") {
+                const writeUrl = options.method === "POST" ? "/api/admin/subjects" : "/api/admin/subjects/1";
+                if (endpoint !== writeUrl) throw new Error(`Unexpected write endpoint ${endpoint}`);
+                if (options.method === "DELETE") { subjects = subjects.filter(item => item.id !== 1); return null; }
                 const saved = {...JSON.parse(options.body as string), id: options.method === "POST" ? 3 : 1, questionCount: 0};
                 subjects = options.method === "POST" ? [...subjects, saved] : subjects.map(item => item.id === 1 ? saved : item);
                 return saved;
             }
-            if (options?.method === "DELETE") { subjects = subjects.filter(item => item.id !== 1); return null; }
             if (endpoint === "/api/subjects") return subjects;
             if (endpoint.startsWith("/api/admin/questions?")) return [];
             throw new Error(`Unexpected endpoint ${endpoint}`);
@@ -54,5 +56,8 @@ describe("Subject synchronization on navigation", () => {
         if (mode !== "delete") expect(screen.getByText("New description")).toBeInTheDocument();
         if (mode !== "create") expect(screen.queryByRole("heading", {name: "Safety"})).not.toBeInTheDocument();
         expect(vi.mocked(apiClient).mock.calls.filter(([endpoint, options]) => endpoint === "/api/subjects" && !options?.method)).toHaveLength(3);
+        const writes = vi.mocked(apiClient).mock.calls.filter(([, options]) => options?.method);
+        expect(writes).toHaveLength(1);
+        expect(writes[0][0]).toBe(mode === "create" ? "/api/admin/subjects" : "/api/admin/subjects/1");
     });
 });

@@ -9,11 +9,11 @@ export interface SubjectRequest {
 
 export const listSubjects = (): Promise<Subject[]> => apiClient("/api/subjects");
 export const createSubject = (request: SubjectRequest): Promise<Subject> =>
-    apiClient("/api/subjects", {method: "POST", body: JSON.stringify(request)});
+    apiClient("/api/admin/subjects", {method: "POST", body: JSON.stringify(request)});
 export const updateSubject = (id: number, request: SubjectRequest): Promise<Subject> =>
-    apiClient(`/api/subjects/${id}`, {method: "PUT", body: JSON.stringify(request)});
+    apiClient(`/api/admin/subjects/${id}`, {method: "PUT", body: JSON.stringify(request)});
 export const deleteSubject = async (id: number): Promise<void> => {
-    await apiClient(`/api/subjects/${id}`, {method: "DELETE"});
+    await apiClient(`/api/admin/subjects/${id}`, {method: "DELETE"});
 };
 
 // Picks the user message from the HTTP status (see "Error responses" in the README),
