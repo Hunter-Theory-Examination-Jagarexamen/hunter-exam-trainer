@@ -128,8 +128,7 @@ answers. `409 Conflict` if there are fewer than 70 questions.
 
 - `attemptId` is required and must come from `/api/exam/start`.
 - The server scores the answers saved with `/answer`; unanswered questions count
-  as not correct. The client doesn't send a question list, and an `answers`
-  field in the body is ignored.
+  as not correct. The client sends only the exam's id, no answers or question list.
 - Submitting closes the exam (no more answers or submits) and adds each
   answered question to the student's per-subject totals.
 - `400` if more than 60 minutes (+ 2 minutes grace) have passed since start: the

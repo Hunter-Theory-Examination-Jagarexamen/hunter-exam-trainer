@@ -38,10 +38,8 @@ const Exam = () => {
         try {
             const result = await apiClient("/api/exam/submit", {
                 method: "POST",
-                body: JSON.stringify({
-                    attemptId,
-                    answers
-                })
+                // Only which exam: the answers are already saved on the server.
+                body: JSON.stringify({ attemptId })
             });
 
             console.log("Exam result: ", result);
@@ -60,7 +58,7 @@ const Exam = () => {
                 "Failed to submit exam. Your answers are saved on the server — please try again."
             );
         }
-    }, [attemptId, answers, navigate]);
+    }, [attemptId, navigate]);
 
 
     //Load exam questions
