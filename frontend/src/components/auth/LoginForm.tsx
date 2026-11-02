@@ -1,6 +1,5 @@
 import {useEffect, useState} from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import {Eye, EyeOff, Lock, Mail} from "lucide-react";
 import logo from "../../assets/images/logo.svg";
 import "../../styles/auth.css";
@@ -9,15 +8,15 @@ import {
     loginUser
 } from "../../services/authService";
 import { API_BASE_URL } from "../../api/apiClient";
+import { errorStatus, isServerUnreachable } from "../../services/apiErrors";
 
 const LoginForm = () => {
 
-    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const [successMessage] = useState(
         (location.state as { accountCreated?: boolean })?.accountCreated
-        ? t("auth.accountCreatedSuccess", "Account created successfully! You can now log in.")
+        ? "Account created successfully! You can now log in."
             : ""
     );
 
@@ -38,7 +37,7 @@ const LoginForm = () => {
         setError(""); // clear the message from the previous attempt
 
         if(!email || !password) {
-            setError(t("errors.MISSING_CREDENTIALS", "Please enter your email and password"));
+            setError("Please enter your email and password");
             return;
         }
 
@@ -54,10 +53,15 @@ const LoginForm = () => {
 
             navigate("/dashboard");
 
-        } catch (err: any) {
-            console.error("Login/API error:", err);
-            const errorCode = err?.code || "INVALID_CREDENTIALS";
-            setError(t(`errors.${errorCode}`,t("errors.UNKNOWN_ERROR", "An unexpected error occurred.")));
+        } catch (error) {
+            console.error("Login/API error:", error);
+            if (isServerUnreachable(error)) {
+                setError("Can't reach the server. Please try again in a few minutes.");
+            } else if ((errorStatus(error) ?? 0) >= 500) {
+                setError("Something went wrong on the server. Please try again later.");
+            } else {
+                setError("Invalid email or password");
+            }
         } finally {
             setIsLoading(false);
         }
@@ -75,8 +79,8 @@ const LoginForm = () => {
                 <div className="auth-mobile-logo">
                     <img src={logo} alt="Hunter Exam Trainer" />
                 </div>
-                <h2>{t("auth.loginTitle", "Welcome back!")}</h2>
-                <p>{t("auth.loginSubtitle", "Log in to continue your practice.")}</p>
+                <h2>Welcome back!</h2>
+                <p>Log in to continue your practice.</p>
             </div>
 
             {successMessage && (
@@ -88,7 +92,7 @@ const LoginForm = () => {
             <form onSubmit={handleLogin}>
                 <div className="form-field">
                     <label htmlFor="email">
-                        {t("auth.emailLabel", "Email")}
+                        Email
                     </label>
 
                     <div className="input-wrapper">
@@ -97,7 +101,7 @@ const LoginForm = () => {
                         <input
                             id="email"
                             type="email"
-                            placeholder={t("auth.emailPlaceholder", "Enter your email")}
+                            placeholder="Enter your email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
@@ -107,7 +111,7 @@ const LoginForm = () => {
 
                 <div className="form-field">
                     <label htmlFor="password">
-                        {t("auth.passwordLabel", "Password")}
+                        Password
                     </label>
 
                     <div className="input-wrapper">
@@ -116,7 +120,7 @@ const LoginForm = () => {
                         <input
                             id="password"
                             type={showPassword ? "text" : "password"}
-                            placeholder={t("auth.passwordPlaceholder", "Enter your password")}
+                            placeholder="Enter your password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
@@ -125,7 +129,7 @@ const LoginForm = () => {
                             type="button"
                             className="password-toggle"
                             onClick={() => setShowPassword(!showPassword)}
-                            aria-label={showPassword ? t("auth.hidePassword", "Hide Password") : t("auth.showPassword", "Show Password")}
+                            aria-label={showPassword ? "Hide Password" : "Show Password"}
                         >
                             {showPassword ? <EyeOff size={18} /> : <Eye size={18} /> }
                         </button>
@@ -139,7 +143,7 @@ const LoginForm = () => {
                         type="button"
                         onClick={() => navigate("/forgot-password")}
                     >
-                        {t("auth.forgotPassword", "Forgot Password?")}
+                        Forgot Password?
                     </button>
                 </div>
 
@@ -154,7 +158,7 @@ const LoginForm = () => {
                     className="auth-primary-button"
                     disabled={isLoading}
                 >
-                    {isLoading ? t("auth.loggingIn", "Logging in...") : t("auth.loginButton", "Log In")}
+                    {isLoading ? "Logging in..." : "Log In"}
                 </button>
             </form>
 
@@ -162,7 +166,7 @@ const LoginForm = () => {
             {googleEnabled && (
                 <>
                     <div className="auth-divider">
-                        <span>{t("auth.or", "or")}</span>
+                        <span>or</span>
                     </div>
 
                     <div className="auth-secondary-actions">
@@ -171,19 +175,19 @@ const LoginForm = () => {
                             className="auth-secondary-button"
                             onClick={handleGoogleLogin}
                         >
-                            {t("auth.googleLogin", "Continue with Google")}
+                            Continue with Google
                         </button>
                     </div>
                 </>
             )}
 
             <p className="auth-switch">
-                {t("auth.noAccount", "Don't have an account?")}{" "}
+                Don't have an account?{" "}
                 <button
                     type="button"
                     onClick={() => navigate("/register")}
                 >
-                    {t("auth.signUp", "Sign Up")}
+                    Sign Up
                 </button>
             </p>
         </div>

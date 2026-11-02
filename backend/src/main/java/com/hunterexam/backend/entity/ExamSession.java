@@ -14,6 +14,9 @@ import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import jakarta.persistence.MapKeyColumn;
+import java.util.Map;
 
 @Entity
 @Table(name = "exam_sessions")
@@ -32,11 +35,20 @@ public class ExamSession {
 
     @ElementCollection
     @CollectionTable(
-            name = "exam_session_questions",
-            joinColumns = @JoinColumn(name = "session_id")
+        name = "exam_session_questions",
+        joinColumns = @JoinColumn(name = "session_id")
     )
     @Column(name = "question_id")
     private List<Long> questionIds = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(
+        name = "exam_session_answers",
+        joinColumns = @JoinColumn(name = "session_id")
+    )
+    @MapKeyColumn(name = "question_id")
+    @Column(name = "answer")
+    private Map<Long, String> answers = new HashMap<>();
 
     public ExamSession() {
     }
@@ -73,5 +85,17 @@ public class ExamSession {
 
     public void setQuestionIds(List<Long> questionIds) {
         this.questionIds = questionIds;
+    }
+
+    public Map<Long, String> getAnswers() {
+        return answers;
+    }
+
+    public void setAnswers(Map<Long, String> answers) {
+        this.answers = answers;
+    }
+
+    public void setAnswer(Long questionId, String answer) {
+        this.answers.put(questionId, answer);
     }
 }

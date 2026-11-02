@@ -633,9 +633,12 @@ fields, including clearing the explanation or image URL when omitted.
 
 ### Practice
 
-| Method | Endpoint                | Description                       |
-|--------|-------------------------|-----------------------------------|
-| POST   | `/api/practice/results` | Save a completed practice session |
+| Method | Endpoint                                 | Description                                                       |
+|--------|------------------------------------------|-------------------------------------------------------------------|
+| POST   | `/api/practice/attempts`                 | Start a practice round for a subject (questions without answers)  |
+| POST   | `/api/practice/attempts/{id}/answers`    | Answer one question; the server checks it and returns the result  |
+| POST   | `/api/practice/attempts/{id}/finish`     | Finish the round; totals are counted by the server                |
+| POST   | `/api/practice/results`                  | Save a completed practice session (old; replaced by the endpoints above in a later issue) |
 
 ### Mock Exam
 

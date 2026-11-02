@@ -17,6 +17,7 @@ import ResetPassword from "../pages/ResetPassword/ResetPassword";
 import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
 import OAuth2Redirect from "../pages/OAuth2Redirect/OAuth2Redirect";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
+import ServerStatusBanner from "../components/common/ServerStatusBanner";
 import AdminRoute from "../components/auth/AdminRoute";
 import QuestionBank from "../pages/Admin/QuestionBank";
 import LearnerProgressPage from "../pages/Admin/LearnerProgressPage";
@@ -28,6 +29,7 @@ const Statistics = lazy(() => import("../pages/Statistics/Statistics"));
 const AppRoutes = () => {
     return (
         <BrowserRouter>
+            <ServerStatusBanner />
             <Routes>
 
                 {/* Public Routes */}

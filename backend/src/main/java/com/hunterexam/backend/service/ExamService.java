@@ -39,6 +39,12 @@ public class ExamService {
 
     private static final long EXAM_TIME_LIMIT_MINUTES = 60;
 
+    /**
+     * A short grace period after the time limit, so a submit that arrives
+     * seconds late (slow connection, timer edge case) is still accepted.
+     */
+    private static final long SUBMIT_GRACE_MINUTES = 2;
+
     private final QuestionRepository questionRepository;
     private final ExamResultRepository examResultRepository;
     private final UserRepository userRepository;
@@ -105,6 +111,47 @@ public class ExamService {
 
 
     /**
+     * Saves a single answer on the given exam session.
+     * <p>
+     * The session must belong to the current user, must still be open,
+     * and the question must have been issued for this session. Storing
+     * answers server-side means a lost connection, expired token, or
+     * closed tab does not lose the exam attempt.
+     *
+     * @param sessionId  exam session id
+     * @param questionId question being answered
+     * @param answer     the user's chosen option (A/B/C/D)
+     * @param email      email of the logged-in user
+     */
+    public void saveAnswer(Long sessionId, Long questionId, String answer, String email) {
+
+        User currentUser = userRepository.findByEmail(email)
+            .orElseThrow(() -> new NotFoundException("User not found"));
+
+        ExamSession session = examSessionRepository.findById(sessionId)
+            .orElseThrow(() -> new NotFoundException(
+                "Exam session not found with ID: " + sessionId));
+
+        if (session.getUser() == null
+            || !session.getUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("You do not own this exam session.");
+        }
+
+        if (session.isCompleted()) {
+            throw new ConflictException("This exam session has already been submitted.");
+        }
+
+        if (!session.getQuestionIds().contains(questionId)) {
+            throw new IllegalArgumentException(
+                "Question " + questionId + " was not issued for this session.");
+        }
+
+        session.setAnswer(questionId, answer);
+        examSessionRepository.save(session);
+    }
+
+
+    /**
      * Submits and evaluates a completed mock exam.
      * <p>
      * The session's stored question ids are used for scoring — the client's
@@ -125,16 +172,16 @@ public class ExamService {
         }
 
         User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+            .orElseThrow(() -> new NotFoundException("User not found"));
 
         ExamSession session = examSessionRepository.findById(sessionId)
-                .orElseThrow(() -> new NotFoundException("Exam session not found with ID: " + sessionId));
+            .orElseThrow(() -> new NotFoundException("Exam session not found with ID: " + sessionId));
 
         // Ownership check: only the session owner may submit it.
         if (session.getUser() == null
-                || !session.getUser().getId().equals(currentUser.getId())) {
+            || !session.getUser().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException(
-                    "You do not own this exam session."
+                "You do not own this exam session."
             );
         }
 
@@ -144,24 +191,30 @@ public class ExamService {
 
         long minutesElapsed = Duration.between(session.getStartedAt(), LocalDateTime.now()).toMinutes();
 
-        if (minutesElapsed > EXAM_TIME_LIMIT_MINUTES) {
+        // Allow a short grace period so a submit that arrives a few seconds
+        // late (slow connection, timer edge case) is still accepted.
+        if (minutesElapsed > EXAM_TIME_LIMIT_MINUTES + SUBMIT_GRACE_MINUTES) {
             session.setCompleted(true);
             examSessionRepository.save(session);
             throw new IllegalArgumentException(
-                    "Exam submission failed: Time limit of " + EXAM_TIME_LIMIT_MINUTES + " minutes exceeded."
+                "Exam submission failed: Time limit of " + EXAM_TIME_LIMIT_MINUTES
+                    + " minutes exceeded by more than the " + SUBMIT_GRACE_MINUTES
+                    + "-minute grace period."
             );
         }
 
         session.setCompleted(true);
         examSessionRepository.save(session);
 
-        // Use the questions the server issued the client's list is ignored.
+        // Use the questions the server issued — the client's list is ignored.
         List<Long> questionIds = session.getQuestionIds();
         if (questionIds == null || questionIds.isEmpty()) {
             throw new RuntimeException("No exam questions were issued for this session.");
         }
 
-        Map<String, String> answers = request.getAnswers();
+        // Use the answers the server recorded for this session.
+        // The client's request body is intentionally ignored.
+        Map<Long, String> answers = session.getAnswers();
         if (answers == null) {
             answers = Collections.emptyMap();
         }
@@ -174,7 +227,8 @@ public class ExamService {
 
         for (Question question : questions) {
 
-            String selectedAnswer = answers.get(question.getId().toString());
+            // Answers are keyed by question id (Long), not String.
+            String selectedAnswer = answers.get(question.getId());
 
             // Question was not answered by the user.
             if (selectedAnswer == null) {

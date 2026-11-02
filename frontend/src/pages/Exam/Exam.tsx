@@ -5,7 +5,7 @@ import ExamNavigation from "../../components/exam/ExamNavigation";
 import type { ExamQuestion } from "../../types/examQuestion.ts";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import apiClient from "../../api/apiClient.ts";
+import apiClient, { ApiError } from "../../api/apiClient.ts";
 
 
 const Exam = () => {
@@ -40,7 +40,14 @@ const Exam = () => {
         }
         catch (err) {
             console.error("Failed to submit exam: ", err);
-            alert("Failed to submit exam. Please try again");
+
+            if (err instanceof ApiError && err.status === 401) {
+                return;
+            }
+
+            alert(
+                "Failed to submit exam. Your answers are saved on the server — please try again."
+            );
         }
     }, [sessionId, answers, navigate]);
 
@@ -123,11 +130,39 @@ const Exam = () => {
 
     const currentQuestion = questions[currentQuestionIndex];
 
-    const handleAnswerChange = (answerId: string) => {
+    const handleAnswerChange = async (answerId: string) => {
+        // Skip if the user re-clicked the same option (no-op on the server too).
+        if (answers[currentQuestion.id] === answerId) {
+            return;
+        }
+
+        // Update local state immediately for UI responsiveness.
         setAnswers((previousAnswers) => ({
             ...previousAnswers,
             [currentQuestion.id]: answerId
         }));
+
+        // Persist to the server (best-effort). If this fails, we keep going:
+
+        // the local state still holds the answer, and the user can try again by selecting a different option (which retries the save).
+        if (!sessionId) {
+            return;
+        }
+
+        try {
+            await apiClient(`/api/exam/${sessionId}/answer`, {
+                method: "POST",
+                body: JSON.stringify({
+                    questionId: currentQuestion.id,
+                    answer: answerId,
+                }),
+            });
+        }
+        catch (err) {
+            // Do not interrupt the user mid-exam.  Log for debugging.
+            console.error("Failed to save answer:", err);
+
+        }
     };
 
     const handleNext = () => {
@@ -201,7 +236,8 @@ const Exam = () => {
 
             {showConfirmModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div className="question-card text-center max-w-md w-full">                        <h3 className="text-xl font-bold mb-3 text-[var(--color-text)]">Submit Exam?</h3>
+                    <div className="question-card text-center max-w-md w-full">
+                        <h3 className="text-xl font-bold mb-3 text-[var(--color-text)]">Submit Exam?</h3>
                         {unansweredCount > 0 ? (
                             <p className="text-[var(--color-text)] opacity-80 mb-6">
                                 You have <strong>{unansweredCount}</strong> unanswered question{unansweredCount > 1 ? "s" : ""}. Are you sure you want to submit?

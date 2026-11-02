@@ -1,4 +1,8 @@
-const API_URL = `${import.meta.env.VITE_API_BASE_URL || "http://localhost:8080"}/api`;
+import apiClient from "../api/apiClient";
+import { backendMessage, isServerUnreachable } from "./apiErrors";
+
+// All calls go through apiClient, so they get its time limit and its
+// "server can't be reached" handling (ServerUnreachableError).
 
 export interface LoginRequest {
     email: string;
@@ -13,31 +17,16 @@ export interface LoginResponse {
 export const loginUser = async (
     request: LoginRequest
 ): Promise<LoginResponse> => {
-
-    const response = await fetch(`${API_URL}/auth/login`, {
+    return apiClient("/api/auth/login", {
         method: "POST",
-        headers: {"Content-Type": "application/json",},
         body: JSON.stringify(request),
     });
-
-    if (!response.ok) {
-        throw new Error("Invalid email or password");
-    }
-
-    return response.json();
 };
 
 export const checkGoogleLoginEnabled = async (): Promise<boolean> => {
-
     try {
-        const response = await fetch(`${API_URL}/auth/google/status`);
-
-        if (!response.ok) {
-            return false;
-        }
-
-        const data = await response.json();
-        return data.enabled === true;
+        const data = await apiClient("/api/auth/google/status");
+        return data?.enabled === true;
     } catch {
         return false;
     }
@@ -50,32 +39,28 @@ export interface ForgotPasswordResponse {
 export const forgotPassword = async (
     email: string
 ): Promise<ForgotPasswordResponse> => {
-
-    const response = await fetch(`${API_URL}/auth/forgot-password`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json",},
-        body: JSON.stringify({email}),
-    });
-
-    if (!response.ok) {
-        throw new Error("Unable to process the request");
+    try {
+        return await apiClient("/api/auth/forgot-password", {
+            method: "POST",
+            body: JSON.stringify({email}),
+        });
+    } catch (error) {
+        if (isServerUnreachable(error)) throw error;
+        throw new Error("Unable to process the request", {cause: error});
     }
-
-    return response.json();
 };
 
 export const resetPassword = async (
     token: string,
     newPassword: string
 ): Promise<{message: string}> => {
-    const response = await fetch(`${API_URL}/auth/reset-password`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({token, newPassword}),
-    });
-    const data = await response.json();
-    if (!response.ok) {
-        throw new Error(data.message || "Unable to reset password. Please try again.");
+    try {
+        return await apiClient("/api/auth/reset-password", {
+            method: "POST",
+            body: JSON.stringify({token, newPassword}),
+        });
+    } catch (error) {
+        if (isServerUnreachable(error)) throw error;
+        throw new Error(backendMessage(error) || "Unable to reset password. Please try again.", {cause: error});
     }
-    return data;
 };
