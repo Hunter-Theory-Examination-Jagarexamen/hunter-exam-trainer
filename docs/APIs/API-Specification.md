@@ -214,4 +214,4 @@ No request body. Response:
 
 ## Roles
 
-Users have a role: `STUDENT` (default for new registrations) or `ADMIN` (#29). Endpoints under `/api/admin/**` require `ADMIN`.
+Users have a role: `STUDENT` (default for new registrations) or `ADMIN`. Endpoints under `/api/admin/**` require `ADMIN`.

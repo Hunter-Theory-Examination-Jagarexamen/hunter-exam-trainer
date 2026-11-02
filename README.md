@@ -545,7 +545,7 @@ kind of error, never on the message text (`GlobalExceptionHandler`):
 | 400 | Invalid input or request body | `IllegalArgumentException`, `@Valid` failures |
 | 401 | Not logged in, or wrong email/password | `BadCredentialsException` |
 | 403 | Logged in but not allowed (e.g. a student calling an admin endpoint) | `AccessDeniedException` |
-| 404 | The user, subject, question or exam session does not exist | `NotFoundException` |
+| 404 | The user, subject, question or mock exam does not exist | `NotFoundException` |
 | 409 | Clashes with existing data (e.g. email already registered, too few questions for a mock exam), or the database refused the change (e.g. duplicate subject name, deleting a subject in use) | `ConflictException`, `DataIntegrityViolationException` |
 | 429 | Too many requests in a short time (e.g. repeating a password reset request for one email address) | `TooManyRequestsException` |
 | 500 | Unexpected error | anything else |
