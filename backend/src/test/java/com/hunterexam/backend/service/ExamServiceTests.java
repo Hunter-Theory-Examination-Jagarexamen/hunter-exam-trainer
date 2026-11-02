@@ -261,23 +261,6 @@ class ExamServiceTests {
         assertEquals(100, result.getScore());
     }
 
-    @Test
-    void submitIgnoresClientProvidedAnswers() {
-        // Server has correct answers; client sends wrong ones (ignored)
-        givenOpenExamWith(
-            List.of(question(1), question(2)),
-            Map.of(1L, "B", 2L, "B")
-        );
-
-        ExamSubmitRequest request = submission();
-        request.setAnswers(Map.of("1", "A", "2", "A"));  // wrong, ignored
-
-        ExamResultResponse result = examService.submitExam(request, EMAIL);
-
-        assertEquals(2, result.getCorrectAnswers());
-        assertEquals(100, result.getScore());
-    }
-
     // ----- Scoring -----
 
     @Test

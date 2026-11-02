@@ -134,7 +134,7 @@ describe("Exam page", () => {
         });
     });
 
-    it("submits the attempt id and answers, then shows the result page", async () => {
+    it("submits only the attempt id, then shows the result page", async () => {
         mockBackend();
         renderExam();
 
@@ -159,10 +159,8 @@ describe("Exam page", () => {
 
         // The body is a JSON string; turn it back into an object to compare
         const body = JSON.parse(submitCall![1]!.body as string);
-        expect(body).toEqual({
-            attemptId: "attempt-1",
-            answers: { "1": "B", "2": "C" },
-        });
+        // The answers were saved one by one; submit only says which exam.
+        expect(body).toEqual({ attemptId: "attempt-1" });
     });
 
     it("shows an error message when the exam cannot be loaded", async () => {
@@ -202,7 +200,7 @@ describe("Exam page", () => {
         expect(screen.getByText(/59:59/i)).toBeInTheDocument();
     });
 
-    it("automatically submits the exam with current answers when time runs out", async () => {
+    it("automatically submits the exam when time runs out", async () => {
         vi.useFakeTimers({ shouldAdvanceTime: true });
 
         mockBackend();
@@ -224,7 +222,7 @@ describe("Exam page", () => {
         expect(submitCall).toBeDefined();
 
         const body = JSON.parse(submitCall![1]!.body as string);
-        expect(body.answers).toEqual({ "1": "B" });
+        expect(body).toEqual({ attemptId: "attempt-1" });
     });
 
     it("shows a clear message when there are too few questions (409 conflict)", async () => {
