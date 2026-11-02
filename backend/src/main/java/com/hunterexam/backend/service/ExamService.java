@@ -8,16 +8,18 @@ import com.hunterexam.backend.entity.Attempt;
 import com.hunterexam.backend.entity.AttemptQuestion;
 import com.hunterexam.backend.entity.AttemptType;
 import com.hunterexam.backend.entity.ExamResult;
-import com.hunterexam.backend.entity.ExamSession;
 import com.hunterexam.backend.entity.Question;
+import com.hunterexam.backend.entity.Subject;
+import com.hunterexam.backend.entity.SubjectStats;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.exception.ConflictException;
+import com.hunterexam.backend.exception.ExamTimeLimitExceededException;
 import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.repository.AttemptQuestionRepository;
 import com.hunterexam.backend.repository.AttemptRepository;
 import com.hunterexam.backend.repository.ExamResultRepository;
-import com.hunterexam.backend.repository.ExamSessionRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
+import com.hunterexam.backend.repository.SubjectStatsRepository;
 import com.hunterexam.backend.repository.UserRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -28,7 +30,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Handles the mock exam workflow.
@@ -73,24 +76,24 @@ public class ExamService {
     private final QuestionRepository questionRepository;
     private final ExamResultRepository examResultRepository;
     private final UserRepository userRepository;
-    private final ExamSessionRepository examSessionRepository;
     private final AttemptRepository attemptRepository;
     private final AttemptQuestionRepository attemptQuestionRepository;
+    private final SubjectStatsRepository subjectStatsRepository;
 
     public ExamService(
             QuestionRepository questionRepository,
             ExamResultRepository examResultRepository,
             UserRepository userRepository,
-            ExamSessionRepository examSessionRepository,
             AttemptRepository attemptRepository,
-            AttemptQuestionRepository attemptQuestionRepository
+            AttemptQuestionRepository attemptQuestionRepository,
+            SubjectStatsRepository subjectStatsRepository
     ) {
         this.questionRepository = questionRepository;
         this.examResultRepository = examResultRepository;
         this.userRepository = userRepository;
-        this.examSessionRepository = examSessionRepository;
         this.attemptRepository = attemptRepository;
         this.attemptQuestionRepository = attemptQuestionRepository;
+        this.subjectStatsRepository = subjectStatsRepository;
     }
 
     /**
@@ -134,6 +137,11 @@ public class ExamService {
             rows.add(new AttemptQuestion(attempt, chosen.get(position), position));
         }
         attemptQuestionRepository.saveAll(rows);
+
+        // Create the student's missing totals rows now, so submit only has to update them.
+        ensureSubjectStatsExist(user, chosen.stream()
+                .map(Question::getSubject)
+                .collect(Collectors.toSet()));
 
         List<QuestionResponse> questionDtos = chosen.stream()
                 .map(question -> new QuestionResponse(
@@ -208,118 +216,71 @@ public class ExamService {
 
 
     /**
-     * Submits and evaluates a completed mock exam.
+     * Submits and scores a mock exam.
      * <p>
-     * The session's stored question ids are used for scoring — the client's
-     * question list is ignored. Only the session's owner may submit.
+     * The score is counted from the answers stored on the exam's rows; the
+     * client's request body (apart from the id) is ignored. Unanswered
+     * questions count as not correct. Submitting closes the exam, so it
+     * can't be answered or submitted again, and adds each answered question
+     * to the student's per-subject totals.
+     * <p>
+     * {@code noRollbackFor}: normally an exception undoes all database
+     * changes in the method. A late submit should still close the exam,
+     * so that one exception keeps the change.
      *
-     * @param request exam submission containing the session id and answers
+     * @param request the exam's id (the page calls it "sessionId")
      * @param email   email of the logged-in user
      * @return the exam result, including score and answer breakdown
      */
-    public ExamResultResponse submitExam(
-            ExamSubmitRequest request,
-            String email
-    ) {
+    @Transactional(noRollbackFor = ExamTimeLimitExceededException.class)
+    public ExamResultResponse submitExam(ExamSubmitRequest request, String email) {
 
-        Long sessionId = request.getSessionId();
-        if (sessionId == null) {
+        Long attemptId = request.getSessionId();
+        if (attemptId == null) {
             throw new IllegalArgumentException("Session ID is required for exam submission.");
         }
 
-        User currentUser = userRepository.findByEmail(email)
-            .orElseThrow(() -> new NotFoundException("User not found"));
+        Attempt exam = findOwnRunningExam(attemptId, email);
+        LocalDateTime now = LocalDateTime.now();
 
-        ExamSession session = examSessionRepository.findById(sessionId)
-            .orElseThrow(() -> new NotFoundException("Exam session not found with ID: " + sessionId));
+        // The time limit counts from the exam's start, as stored by the server.
+        // A short grace period lets a submit that arrives a few seconds late
+        // (slow connection, timer edge case) still be accepted.
+        long minutesElapsed = Duration.between(exam.getStartedAt(), now).toMinutes();
+        exam.setFinishedAt(now);
+        attemptRepository.save(exam);
 
-        // Ownership check: only the session owner may submit it.
-        if (session.getUser() == null
-            || !session.getUser().getId().equals(currentUser.getId())) {
-            throw new AccessDeniedException(
-                "You do not own this exam session."
-            );
-        }
-
-        if (session.isCompleted()) {
-            throw new IllegalArgumentException("This exam session has already been submitted.");
-        }
-
-        long minutesElapsed = Duration.between(session.getStartedAt(), LocalDateTime.now()).toMinutes();
-
-        // Allow a short grace period so a submit that arrives a few seconds
-        // late (slow connection, timer edge case) is still accepted.
         if (minutesElapsed > EXAM_TIME_LIMIT_MINUTES + SUBMIT_GRACE_MINUTES) {
-            session.setCompleted(true);
-            examSessionRepository.save(session);
-            throw new IllegalArgumentException(
+            throw new ExamTimeLimitExceededException(
                 "Exam submission failed: Time limit of " + EXAM_TIME_LIMIT_MINUTES
                     + " minutes exceeded by more than the " + SUBMIT_GRACE_MINUTES
                     + "-minute grace period."
             );
         }
 
-        session.setCompleted(true);
-        examSessionRepository.save(session);
+        List<AttemptQuestion> rows = attemptQuestionRepository.findByAttemptIdOrderByPosition(exam.getId());
 
-        // Use the questions the server issued — the client's list is ignored.
-        List<Long> questionIds = session.getQuestionIds();
-        if (questionIds == null || questionIds.isEmpty()) {
-            throw new RuntimeException("No exam questions were issued for this session.");
-        }
-
-        // Use the answers the server recorded for this session.
-        // The client's request body is intentionally ignored.
-        Map<Long, String> answers = session.getAnswers();
-        if (answers == null) {
-            answers = Collections.emptyMap();
-        }
-
-        List<Question> questions = questionRepository.findAllById(questionIds);
-
-        long totalQuestions = questionIds.size();
+        long totalQuestions = rows.size();
         long correctAnswers = 0;
         long incorrectAnswers = 0;
 
-        for (Question question : questions) {
-
-            // Answers are keyed by question id (Long), not String.
-            String selectedAnswer = answers.get(question.getId());
-
-            // Question was not answered by the user.
-            if (selectedAnswer == null) {
-                continue;
+        for (AttemptQuestion row : rows) {
+            if (!row.isAnswered()) {
+                continue;  // skipped: counts as not correct, and isn't added to the totals
             }
-
-            // Both selectedAnswer (from the client: "A"/"B"/"C"/"D") and
-            // correctAnswer (from the question) are letters.
-
-            if (selectedAnswer.equals(question.getCorrectAnswer())) {
+            boolean correct = Boolean.TRUE.equals(row.getCorrect());
+            if (correct) {
                 correctAnswers++;
-            }
-            else {
+            } else {
                 incorrectAnswers++;
             }
+            addToSubjectStats(exam.getUser(), row.getQuestion().getSubject(), correct, row.getAnsweredAt());
         }
 
-        // Any question not accounted for as correct/incorrect was left unanswered.
         long unanswered = totalQuestions - correctAnswers - incorrectAnswers;
+        long score = Math.round(((double) correctAnswers / totalQuestions) * 100);
 
-        long score = Math.round(
-                ((double) correctAnswers / totalQuestions) * 100
-        );
-
-        ExamResult examResult = new ExamResult();
-
-        examResult.setTotalQuestions((int) totalQuestions);
-        examResult.setCorrectAnswers((int) correctAnswers);
-        examResult.setIncorrectAnswers((int) incorrectAnswers);
-        examResult.setUnanswered((int) unanswered);
-        examResult.setScore((int) score);
-        examResult.setCompletedAt(LocalDateTime.now());
-        examResult.setUser(currentUser);
-
-        examResultRepository.save(examResult);
+        saveExamResultBridge(exam, totalQuestions, correctAnswers, incorrectAnswers, unanswered, score);
 
         return new ExamResultResponse(
                 totalQuestions,
@@ -328,5 +289,50 @@ public class ExamService {
                 unanswered,
                 score
         );
+    }
+
+    /**
+     * Temporary: keeps the old statistics working until they read from the
+     * stored answers (issue 4 of the refactor plan), then remove this and
+     * ExamResult (issue 5).
+     */
+    private void saveExamResultBridge(Attempt exam, long total, long correct,
+                                      long incorrect, long unanswered, long score) {
+        ExamResult examResult = new ExamResult();
+        examResult.setTotalQuestions((int) total);
+        examResult.setCorrectAnswers((int) correct);
+        examResult.setIncorrectAnswers((int) incorrect);
+        examResult.setUnanswered((int) unanswered);
+        examResult.setScore((int) score);
+        examResult.setCompletedAt(exam.getFinishedAt());
+        examResult.setUser(exam.getUser());
+        examResultRepository.save(examResult);
+    }
+
+    /**
+     * Creates the student's totals row (0 answered, 0 correct) for each subject
+     * in the exam that doesn't have one yet.
+     * <p>
+     * Same idea as in {@code PracticeAttemptService}: done at start, so that
+     * submit only ever updates rows and never inserts them.
+     */
+    private void ensureSubjectStatsExist(User user, Set<Subject> subjects) {
+        for (Subject subject : subjects) {
+            if (!subjectStatsRepository.existsByUserAndSubject(user, subject)) {
+                subjectStatsRepository.save(new SubjectStats(user, subject));
+            }
+        }
+    }
+
+    /**
+     * Adds one answer to the student's totals for the subject. The database does
+     * the adding, so a practice answer at the same moment can't be overwritten.
+     */
+    private void addToSubjectStats(User user, Subject subject, boolean correct, LocalDateTime answeredAt) {
+        int updated = subjectStatsRepository.addAnswer(user, subject, correct ? 1 : 0, answeredAt);
+        if (updated == 0) {
+            throw new IllegalStateException(
+                    "No totals row for subject " + subject.getId() + "; it should have been created at start.");
+        }
     }
 }
