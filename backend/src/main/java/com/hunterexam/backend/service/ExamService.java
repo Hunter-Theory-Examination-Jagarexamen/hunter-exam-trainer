@@ -4,21 +4,28 @@ import com.hunterexam.backend.dto.QuestionResponse;
 import com.hunterexam.backend.dto.ExamResultResponse;
 import com.hunterexam.backend.dto.ExamStartResponse;
 import com.hunterexam.backend.dto.ExamSubmitRequest;
+import com.hunterexam.backend.entity.Attempt;
+import com.hunterexam.backend.entity.AttemptQuestion;
+import com.hunterexam.backend.entity.AttemptType;
 import com.hunterexam.backend.entity.ExamResult;
 import com.hunterexam.backend.entity.ExamSession;
 import com.hunterexam.backend.entity.Question;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.exception.ConflictException;
 import com.hunterexam.backend.exception.NotFoundException;
+import com.hunterexam.backend.repository.AttemptQuestionRepository;
+import com.hunterexam.backend.repository.AttemptRepository;
 import com.hunterexam.backend.repository.ExamResultRepository;
 import com.hunterexam.backend.repository.ExamSessionRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.UserRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -49,28 +56,36 @@ public class ExamService {
     private final ExamResultRepository examResultRepository;
     private final UserRepository userRepository;
     private final ExamSessionRepository examSessionRepository;
+    private final AttemptRepository attemptRepository;
+    private final AttemptQuestionRepository attemptQuestionRepository;
 
     public ExamService(
             QuestionRepository questionRepository,
             ExamResultRepository examResultRepository,
             UserRepository userRepository,
-            ExamSessionRepository examSessionRepository
+            ExamSessionRepository examSessionRepository,
+            AttemptRepository attemptRepository,
+            AttemptQuestionRepository attemptQuestionRepository
     ) {
         this.questionRepository = questionRepository;
         this.examResultRepository = examResultRepository;
         this.userRepository = userRepository;
         this.examSessionRepository = examSessionRepository;
+        this.attemptRepository = attemptRepository;
+        this.attemptQuestionRepository = attemptQuestionRepository;
     }
 
     /**
      * Starts a new mock exam for the given user.
      * <p>
-     * Selects 70 questions at random, records which questions were issued
-     * on the exam session, and returns them without the correct answers.
+     * Selects 70 questions at random and stores them as a {@code MOCK_EXAM}
+     * attempt: one {@link AttemptQuestion} row per question, in the order
+     * given. Returns them without the correct answers.
      *
      * @param email email of the logged-in user
-     * @return session id and the 70 questions for this attempt
+     * @return the attempt id (sent as "sessionId") and the 70 questions
      */
+    @Transactional
     public ExamStartResponse startExam(String email) {
 
         User user = userRepository.findByEmail(email)
@@ -88,11 +103,19 @@ public class ExamService {
         Collections.shuffle(questions);
 
         List<Question> chosen = questions.stream().limit(70).toList();
-        List<Long> chosenIds = chosen.stream().map(Question::getId).toList();
 
-        ExamSession session = new ExamSession(user, LocalDateTime.now());
-        session.setQuestionIds(chosenIds);
-        ExamSession savedSession = examSessionRepository.save(session);
+        // The attempt is the exam itself; its start time is what the
+        // server's time limit is measured from.
+        Attempt attempt = attemptRepository.save(
+                new Attempt(user, AttemptType.MOCK_EXAM, LocalDateTime.now()));
+
+        // One row per question, in the order the student sees them.
+        // The answer fields stay empty until the student answers.
+        List<AttemptQuestion> rows = new ArrayList<>();
+        for (int position = 0; position < chosen.size(); position++) {
+            rows.add(new AttemptQuestion(attempt, chosen.get(position), position));
+        }
+        attemptQuestionRepository.saveAll(rows);
 
         List<QuestionResponse> questionDtos = chosen.stream()
                 .map(question -> new QuestionResponse(
@@ -106,7 +129,8 @@ public class ExamService {
                 ))
                 .toList();
 
-        return new ExamStartResponse(savedSession.getId(), questionDtos);
+        // The page still calls it "sessionId"; it is now the attempt id.
+        return new ExamStartResponse(attempt.getId(), questionDtos);
     }
 
 

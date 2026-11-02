@@ -3,12 +3,17 @@ package com.hunterexam.backend.service;
 import com.hunterexam.backend.dto.ExamResultResponse;
 import com.hunterexam.backend.dto.ExamStartResponse;
 import com.hunterexam.backend.dto.ExamSubmitRequest;
+import com.hunterexam.backend.entity.Attempt;
+import com.hunterexam.backend.entity.AttemptQuestion;
+import com.hunterexam.backend.entity.AttemptType;
 import com.hunterexam.backend.entity.ExamResult;
 import com.hunterexam.backend.entity.ExamSession;
 import com.hunterexam.backend.entity.Question;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.exception.ConflictException;
 import com.hunterexam.backend.exception.NotFoundException;
+import com.hunterexam.backend.repository.AttemptQuestionRepository;
+import com.hunterexam.backend.repository.AttemptRepository;
 import com.hunterexam.backend.repository.ExamResultRepository;
 import com.hunterexam.backend.repository.ExamSessionRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
@@ -55,6 +60,8 @@ class ExamServiceTests {
     @Mock ExamResultRepository examResultRepository;
     @Mock UserRepository userRepository;
     @Mock ExamSessionRepository examSessionRepository;
+    @Mock AttemptRepository attemptRepository;
+    @Mock AttemptQuestionRepository attemptQuestionRepository;
 
     private ExamService examService;
     private User user;
@@ -62,7 +69,7 @@ class ExamServiceTests {
     @BeforeEach
     void setUp() {
         examService = new ExamService(questionRepository, examResultRepository,
-            userRepository, examSessionRepository);
+            userRepository, examSessionRepository, attemptRepository, attemptQuestionRepository);
         user = new User();
         user.setEmail(EMAIL);
         ReflectionTestUtils.setField(user, "id", 1L);
@@ -328,22 +335,40 @@ class ExamServiceTests {
     }
 
     @Test
-    void startExamLinksSessionToTheLoggedInUserAndStoresQuestionIds() {
+    void startExamCreatesMockExamAttemptWith70QuestionsInOrder() {
         when(questionRepository.findAll()).thenReturn(questionBank(100));
+        givenAttemptIsSavedWithId(42L);
 
-        ExamSession savedSession = new ExamSession(user, LocalDateTime.now());
-        ReflectionTestUtils.setField(savedSession, "id", 42L);
-        when(examSessionRepository.save(any(ExamSession.class))).thenReturn(savedSession);
+        ExamStartResponse response = examService.startExam(EMAIL);
 
-        examService.startExam(EMAIL);
+        ArgumentCaptor<Attempt> attempt = ArgumentCaptor.forClass(Attempt.class);
+        verify(attemptRepository).save(attempt.capture());
+        assertSame(user, attempt.getValue().getUser());
+        assertEquals(AttemptType.MOCK_EXAM, attempt.getValue().getType());
+        assertFalse(attempt.getValue().isFinished());
 
-        ArgumentCaptor<ExamSession> captor = ArgumentCaptor.forClass(ExamSession.class);
-        verify(examSessionRepository).save(captor.capture());
-        ExamSession captured = captor.getValue();
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<AttemptQuestion>> rows = ArgumentCaptor.forClass(List.class);
+        verify(attemptQuestionRepository).saveAll(rows.capture());
+        assertEquals(70, rows.getValue().size());
+        for (int i = 0; i < 70; i++) {
+            AttemptQuestion row = rows.getValue().get(i);
+            assertSame(attempt.getValue(), row.getAttempt());
+            assertEquals(i, row.getPosition());
+            assertFalse(row.isAnswered());
+            // The page shows the questions in the same order as the rows.
+            assertEquals(response.getQuestions().get(i).getId(), row.getQuestion().getId());
+        }
+        verifyNoInteractions(examSessionRepository);
+    }
 
-        assertSame(user, captured.getUser());
-        assertEquals(70, captured.getQuestionIds().size());
-        assertEquals(70, captured.getQuestionIds().stream().distinct().count());
+    /** Fakes saving the attempt: the database would give it an id. */
+    private void givenAttemptIsSavedWithId(long id) {
+        when(attemptRepository.save(any(Attempt.class))).thenAnswer(call -> {
+            Attempt saved = call.getArgument(0);
+            ReflectionTestUtils.setField(saved, "id", id);
+            return saved;
+        });
     }
 
     // ----- Session and time-limit rules -----
@@ -439,16 +464,13 @@ class ExamServiceTests {
 
         assertThrows(ConflictException.class, () -> examService.startExam(EMAIL));
 
-        verifyNoInteractions(examSessionRepository);
+        verifyNoInteractions(attemptRepository, attemptQuestionRepository);
     }
 
     @Test
-    void startExamGives70DifferentQuestionsAndTheSessionId() {
+    void startExamGives70DifferentQuestionsAndTheAttemptIdAsSessionId() {
         when(questionRepository.findAll()).thenReturn(questionBank(100));
-
-        ExamSession savedSession = new ExamSession(user, LocalDateTime.now());
-        ReflectionTestUtils.setField(savedSession, "id", 42L);
-        when(examSessionRepository.save(any(ExamSession.class))).thenReturn(savedSession);
+        givenAttemptIsSavedWithId(42L);
 
         ExamStartResponse response = examService.startExam(EMAIL);
 
