@@ -1,6 +1,6 @@
 package com.hunterexam.backend.service;
 
-import com.hunterexam.backend.dto.ExamQuestionResponse;
+import com.hunterexam.backend.dto.QuestionResponse;
 import com.hunterexam.backend.dto.ExamResultResponse;
 import com.hunterexam.backend.dto.ExamStartResponse;
 import com.hunterexam.backend.dto.ExamSubmitRequest;
@@ -94,8 +94,8 @@ public class ExamService {
         session.setQuestionIds(chosenIds);
         ExamSession savedSession = examSessionRepository.save(session);
 
-        List<ExamQuestionResponse> questionDtos = chosen.stream()
-                .map(question -> new ExamQuestionResponse(
+        List<QuestionResponse> questionDtos = chosen.stream()
+                .map(question -> new QuestionResponse(
                         question.getId(),
                         question.getQuestionText(),
                         question.getOptionA(),

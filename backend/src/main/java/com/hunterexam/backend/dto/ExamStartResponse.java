@@ -9,9 +9,9 @@ public class ExamStartResponse {
 
     private Long sessionId;
 
-    private List<ExamQuestionResponse> questions;
+    private List<QuestionResponse> questions;
 
-    public ExamStartResponse(Long sessionId, List<ExamQuestionResponse> questions) {
+    public ExamStartResponse(Long sessionId, List<QuestionResponse> questions) {
         this.sessionId = sessionId;
         this.questions = questions;
     }

@@ -16,9 +16,9 @@ public class PracticeStartResponse {
     private final String subjectName;
 
     // Reuses the mock exam's question shape, which already leaves out the correct answer.
-    private final List<ExamQuestionResponse> questions;
+    private final List<QuestionResponse> questions;
 
-    public PracticeStartResponse(Long attemptId, String subjectName, List<ExamQuestionResponse> questions) {
+    public PracticeStartResponse(Long attemptId, String subjectName, List<QuestionResponse> questions) {
         this.attemptId = attemptId;
         this.subjectName = subjectName;
         this.questions = questions;

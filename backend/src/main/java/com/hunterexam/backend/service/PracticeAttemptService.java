@@ -1,6 +1,6 @@
 package com.hunterexam.backend.service;
 
-import com.hunterexam.backend.dto.ExamQuestionResponse;
+import com.hunterexam.backend.dto.QuestionResponse;
 import com.hunterexam.backend.dto.PracticeAnswerResponse;
 import com.hunterexam.backend.dto.PracticeFinishResponse;
 import com.hunterexam.backend.dto.PracticeStartResponse;
@@ -109,7 +109,7 @@ public class PracticeAttemptService {
 
         ensureSubjectStatsExist(user, Set.of(subject));
 
-        List<ExamQuestionResponse> questionDtos = questions.stream()
+        List<QuestionResponse> questionDtos = questions.stream()
                 .map(this::toQuestionResponse)
                 .toList();
 
@@ -289,8 +289,8 @@ public class PracticeAttemptService {
     }
 
     // Leaves out correctAnswer and explanation on purpose.
-    private ExamQuestionResponse toQuestionResponse(Question question) {
-        return new ExamQuestionResponse(
+    private QuestionResponse toQuestionResponse(Question question) {
+        return new QuestionResponse(
                 question.getId(),
                 question.getQuestionText(),
                 question.getOptionA(),
