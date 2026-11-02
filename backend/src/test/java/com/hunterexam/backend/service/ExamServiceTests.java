@@ -128,25 +128,67 @@ class ExamServiceTests {
 
     // ----- saveAnswer -----
 
+    /** Fakes a stored attempt of the given type, owned by the user, started now. */
+    private Attempt givenAttempt(AttemptType type) {
+        Attempt attempt = new Attempt(user, type, LocalDateTime.now());
+        ReflectionTestUtils.setField(attempt, "id", SESSION_ID);
+        when(attemptRepository.findById(SESSION_ID)).thenReturn(Optional.of(attempt));
+        return attempt;
+    }
+
+    /** Fakes the attempt's row for the given question (correct answer B). */
+    private AttemptQuestion givenRow(Attempt attempt, long questionId) {
+        AttemptQuestion row = new AttemptQuestion(attempt, question(questionId), 0);
+        when(attemptQuestionRepository.findByAttemptIdAndQuestionId(SESSION_ID, questionId))
+            .thenReturn(Optional.of(row));
+        return row;
+    }
+
     @Test
-    void saveAnswerStoresTheAnswerForTheSession() {
-        ExamSession session = new ExamSession(user, LocalDateTime.now());
-        session.setQuestionIds(List.of(1L, 2L, 3L));
-        when(examSessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
+    void saveAnswerStoresTheAnswerOnTheQuestionsRow() {
+        AttemptQuestion row = givenRow(givenAttempt(AttemptType.MOCK_EXAM), 1L);
 
         examService.saveAnswer(SESSION_ID, 1L, "B", EMAIL);
 
-        assertEquals("B", session.getAnswers().get(1L));
-        verify(examSessionRepository).save(session);
+        assertTrue(row.isAnswered());
+        assertEquals("B", row.getChosenOption());
+        assertTrue(row.getCorrect());
+        verify(attemptQuestionRepository).save(row);
+    }
+
+    @Test
+    void saveAnswerCanChangeAnEarlierAnswer() {
+        AttemptQuestion row = givenRow(givenAttempt(AttemptType.MOCK_EXAM), 1L);
+
+        examService.saveAnswer(SESSION_ID, 1L, "B", EMAIL);
+        examService.saveAnswer(SESSION_ID, 1L, "C", EMAIL);
+
+        assertEquals("C", row.getChosenOption());
+        assertFalse(row.getCorrect());
+    }
+
+    @Test
+    void saveAnswerRejectsAPracticeRound() {
+        // Practice answers may only be given once; this endpoint must not change them.
+        givenAttempt(AttemptType.SUBJECT_PRACTICE);
+
+        assertThrows(NotFoundException.class,
+            () -> examService.saveAnswer(SESSION_ID, 1L, "B", EMAIL));
+    }
+
+    @Test
+    void saveAnswerRejectsUnknownExam() {
+        when(attemptRepository.findById(SESSION_ID)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class,
+            () -> examService.saveAnswer(SESSION_ID, 1L, "B", EMAIL));
     }
 
     // ----- Security: ownership -----
 
     @Test
     void saveAnswerRejectsOtherUser() {
-        ExamSession session = new ExamSession(user, LocalDateTime.now());
-        session.setQuestionIds(List.of(1L));
-        when(examSessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
+        givenAttempt(AttemptType.MOCK_EXAM);
 
         // A different user is logged in
         User otherUser = new User();
@@ -161,21 +203,19 @@ class ExamServiceTests {
     // ----- Security: session is linked to user at start -----
 
     @Test
-    void saveAnswerRejectsCompletedSession() {
-        ExamSession session = new ExamSession(user, LocalDateTime.now());
-        session.setQuestionIds(List.of(1L));
-        session.setCompleted(true);
-        when(examSessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
+    void saveAnswerRejectsSubmittedExam() {
+        Attempt exam = givenAttempt(AttemptType.MOCK_EXAM);
+        ReflectionTestUtils.setField(exam, "finishedAt", LocalDateTime.now());
 
         assertThrows(ConflictException.class,
             () -> examService.saveAnswer(SESSION_ID, 1L, "B", EMAIL));
     }
 
     @Test
-    void saveAnswerRejectsQuestionNotIssuedForSession() {
-        ExamSession session = new ExamSession(user, LocalDateTime.now());
-        session.setQuestionIds(List.of(1L, 2L));
-        when(examSessionRepository.findById(SESSION_ID)).thenReturn(Optional.of(session));
+    void saveAnswerRejectsQuestionNotInTheExam() {
+        givenAttempt(AttemptType.MOCK_EXAM);
+        when(attemptQuestionRepository.findByAttemptIdAndQuestionId(SESSION_ID, 999L))
+            .thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
             () -> examService.saveAnswer(SESSION_ID, 999L, "B", EMAIL));

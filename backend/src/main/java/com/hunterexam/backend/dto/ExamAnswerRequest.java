@@ -2,6 +2,7 @@ package com.hunterexam.backend.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,6 +22,8 @@ public class ExamAnswerRequest {
     @NotNull(message = "Question ID is required")
     private Long questionId;
 
+    // Stored as one letter in attempt_questions.chosen_option.
     @NotBlank(message = "Answer is required")
+    @Pattern(regexp = "[ABCD]", message = "Answer must be A, B, C or D")
     private String answer;
 }

@@ -37,9 +37,27 @@ import java.util.Map;
  * submitted exam answers, calculating the score and saving the result
  * for the logged-in user.
  * <p>
- * Security model: the server is the authority. Question ids issued at
- * start are stored on the session and reused on submit — the client's
- * list is ignored. Only the session owner may submit.
+ * Security model: the server is the authority. The questions issued at
+ * start are stored as the attempt's rows and reused on submit — the
+ * client's list is ignored. Only the exam's owner may answer or submit.
+ * <p>
+ * Why this is a separate service from {@code PracticeAttemptService}:
+ * both store their rounds in the same tables ({@code Attempt} +
+ * {@code AttemptQuestion}), but the rules for answering are different.
+ * <ul>
+ *   <li><b>Practice:</b> each answer is checked right away, the student
+ *       sees whether it was correct, the answer can't be changed, and it
+ *       is added to the per-subject totals ({@code SubjectStats}) at once.</li>
+ *   <li><b>Mock exam (this class):</b> like the real exam, the student can
+ *       change an answer as often as they like until they submit, and sees
+ *       nothing about correctness before that. The answers are added to
+ *       the per-subject totals only once, at submit, so a changed answer
+ *       isn't counted twice. There is also a time limit.</li>
+ * </ul>
+ * One shared service would need "if practice … else exam" checks in most
+ * methods. Two services keep each set of rules in one readable place;
+ * the cost is a little repeated code, such as looking up the student's
+ * own running attempt.
  */
 @Service
 public class ExamService {
@@ -135,43 +153,57 @@ public class ExamService {
 
 
     /**
-     * Saves a single answer on the given exam session.
+     * Saves (or changes) one answer in the given mock exam.
      * <p>
-     * The session must belong to the current user, must still be open,
-     * and the question must have been issued for this session. Storing
-     * answers server-side means a lost connection, expired token, or
-     * closed tab does not lose the exam attempt.
+     * The exam must belong to the current user and not be submitted yet,
+     * and the question must be part of it. Unlike practice, the same
+     * question can be answered again: the new answer replaces the old one.
+     * Whether it is correct is stored too, but never sent to the student
+     * before submit. Nothing is added to the per-subject totals here; that
+     * happens once, at submit.
      *
-     * @param sessionId  exam session id
+     * @param attemptId  the exam (the page calls it "sessionId")
      * @param questionId question being answered
-     * @param answer     the user's chosen option (A/B/C/D)
+     * @param answer     the chosen letter, "A"–"D" (validated by the DTO)
      * @param email      email of the logged-in user
      */
-    public void saveAnswer(Long sessionId, Long questionId, String answer, String email) {
+    @Transactional
+    public void saveAnswer(Long attemptId, Long questionId, String answer, String email) {
 
-        User currentUser = userRepository.findByEmail(email)
+        Attempt exam = findOwnRunningExam(attemptId, email);
+
+        AttemptQuestion row = attemptQuestionRepository
+            .findByAttemptIdAndQuestionId(exam.getId(), questionId)
+            .orElseThrow(() -> new IllegalArgumentException(
+                "Question " + questionId + " is not part of this exam."));
+
+        boolean correct = answer.equals(row.getQuestion().getCorrectAnswer());
+        row.recordAnswer(answer, correct, LocalDateTime.now());
+        attemptQuestionRepository.save(row);
+    }
+
+    /**
+     * Loads a mock exam and checks that it is the user's own and not submitted.
+     * <p>
+     * A practice round's id is treated as "not found": otherwise this endpoint
+     * could change practice answers, which may only be given once.
+     */
+    private Attempt findOwnRunningExam(Long attemptId, String email) {
+        User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new NotFoundException("User not found"));
 
-        ExamSession session = examSessionRepository.findById(sessionId)
+        Attempt exam = attemptRepository.findById(attemptId)
+            .filter(attempt -> attempt.getType() == AttemptType.MOCK_EXAM)
             .orElseThrow(() -> new NotFoundException(
-                "Exam session not found with ID: " + sessionId));
+                "Mock exam not found with ID: " + attemptId));
 
-        if (session.getUser() == null
-            || !session.getUser().getId().equals(currentUser.getId())) {
-            throw new AccessDeniedException("You do not own this exam session.");
+        if (!exam.getUser().getId().equals(user.getId())) {
+            throw new AccessDeniedException("You do not own this mock exam.");
         }
-
-        if (session.isCompleted()) {
-            throw new ConflictException("This exam session has already been submitted.");
+        if (exam.isFinished()) {
+            throw new ConflictException("This mock exam has already been submitted.");
         }
-
-        if (!session.getQuestionIds().contains(questionId)) {
-            throw new IllegalArgumentException(
-                "Question " + questionId + " was not issued for this session.");
-        }
-
-        session.setAnswer(questionId, answer);
-        examSessionRepository.save(session);
+        return exam;
     }
 
 
