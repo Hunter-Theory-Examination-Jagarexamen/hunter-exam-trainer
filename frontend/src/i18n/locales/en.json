@@ -29,5 +29,10 @@
     "EXAM_ALREADY_SUBMITTED": "Exam has already been submitted.",
     "NOT_FOUND": "Resource is not found",
     "UNKNOWN_ERROR": "An unexpected error occurred. Please try again."
+  },
+  "serverStatus": {
+    "starting": "The server is starting. This can take up to a minute...",
+    "error": "Can't reach the server. Check your internet connection, or try again in a few minutes.",
+    "tryAgain": "Try again"
   }
 }

@@ -8,7 +8,7 @@ import en from './locales/en.json'
 i18n.use(initReactI18next).init({
     resources: {
         sv: { translation: sv },
-        en:{ translation: en },
+        en: { translation: en },
     },
     lng: 'sv',
     fallbackLng: 'sv',
