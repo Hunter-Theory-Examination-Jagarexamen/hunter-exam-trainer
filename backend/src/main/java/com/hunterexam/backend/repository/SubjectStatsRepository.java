@@ -43,6 +43,14 @@ public interface SubjectStatsRepository extends JpaRepository<SubjectStats, Long
     List<SubjectStats> findAnsweredByUserIn(@Param("users") Collection<User> users);
 
     /**
+     * All questions the student has answered, summed over their subjects
+     * (practice answers and scored mock exams). {@code COALESCE} turns the
+     * {@code null} that {@code SUM} gives for no rows into 0.
+     */
+    @Query("SELECT COALESCE(SUM(s.answered), 0) FROM SubjectStats s WHERE s.user = :user")
+    long countAnsweredByUser(@Param("user") User user);
+
+    /**
      * Adds one answer to the totals, letting the database do the adding
      * ({@code answered = answered + 1}) so two answers saved at the same time
      * can't overwrite each other.
