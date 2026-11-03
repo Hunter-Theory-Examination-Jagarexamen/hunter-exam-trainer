@@ -58,7 +58,7 @@ describe("Subject management", () => {
         await open("create"); fill(" Wildlife ", " Wildlife description ");
         vi.mocked(apiClient).mockResolvedValueOnce({...subject, id: 2, name: "Wildlife", description: "Wildlife description"});
         await userEvent.click(screen.getByRole("button", {name: "Save subject"}));
-        expect(apiClient).toHaveBeenCalledWith("/api/subjects", {method: "POST", body: JSON.stringify({name: "Wildlife", description: "Wildlife description"})});
+        expect(apiClient).toHaveBeenCalledWith("/api/admin/subjects", {method: "POST", body: JSON.stringify({name: "Wildlife", description: "Wildlife description"})});
         expect(await screen.findByRole("heading", {name: "Wildlife"})).toBeInTheDocument();
         expect(screen.getByRole("status")).toHaveTextContent('Subject "Wildlife" created.');
         expect(screen.getByRole("button", {name: "Create subject"})).toHaveFocus();
@@ -70,7 +70,7 @@ describe("Subject management", () => {
         fill("Renamed", "New description");
         vi.mocked(apiClient).mockResolvedValueOnce({...subject, name: "Renamed", description: "New description"});
         await userEvent.click(screen.getByRole("button", {name: "Save subject"}));
-        expect(apiClient).toHaveBeenCalledWith("/api/subjects/1", {method: "PUT", body: JSON.stringify({name: "Renamed", description: "New description"})});
+        expect(apiClient).toHaveBeenCalledWith("/api/admin/subjects/1", {method: "PUT", body: JSON.stringify({name: "Renamed", description: "New description"})});
         expect(await screen.findByRole("heading", {name: "Renamed"})).toBeInTheDocument();
         expect(screen.getByText("New description")).toBeInTheDocument();
         expect(screen.queryByRole("heading", {name: "Safety"})).not.toBeInTheDocument();
@@ -110,7 +110,7 @@ describe("Subject management", () => {
         await userEvent.click(screen.getByRole("button", {name: "Delete subject Safety"}));
         vi.mocked(apiClient).mockResolvedValueOnce(null);
         await userEvent.click(screen.getByRole("button", {name: "Confirm deletion"}));
-        expect(apiClient).toHaveBeenCalledWith("/api/subjects/1", {method: "DELETE"});
+        expect(apiClient).toHaveBeenCalledWith("/api/admin/subjects/1", {method: "DELETE"});
         expect(await screen.findByRole("status")).toHaveTextContent('Subject "Safety" deleted.');
         expect(screen.queryByRole("heading", {name: "Safety"})).not.toBeInTheDocument();
         expect(screen.getByRole("button", {name: "Create subject"})).toHaveFocus();

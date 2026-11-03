@@ -1,6 +1,6 @@
 import {describe, expect, it, vi} from "vitest";
 import {fireEvent, render, screen} from "@testing-library/react";
-import {MemoryRouter, Route, Routes} from "react-router-dom";
+import {createMemoryRouter, RouterProvider} from "react-router-dom";
 import QuestionImage from "../../components/common/QuestionImage";
 import QuestionPanel from "../../components/exam/QuestionPanel";
 import PracticeQuestions from "../../pages/Practice/PracticeQuestions";
@@ -11,7 +11,7 @@ import "../../styles/question-image.css";
 
 vi.mock("../../api/apiClient", () => ({default: vi.fn()}));
 const question: Question = {id: 1, questionText: "Which animal?", optionA: "Fox", optionB: "Deer",
-    optionC: "Moose", optionD: "Bear", correctAnswer: "Fox", explanation: "",
+    optionC: "Moose", optionD: "Bear", correctAnswer: "C", explanation: "",
     subject: {id: 1, name: "Wildlife", description: ""}, imageUrl: "https://example.com/fox.jpg"};
 
 describe("Question images", () => {
@@ -49,10 +49,13 @@ describe("Question images", () => {
     });
 
     it.each([question.imageUrl, null])("maps API images through the practice page: %s", async imageUrl => {
-        vi.mocked(apiClient).mockResolvedValueOnce([{...question, imageUrl}]);
-        render(<MemoryRouter initialEntries={["/practice/1"]}><Routes>
-            <Route path="/practice/:subject" element={<PracticeQuestions />} />
-        </Routes></MemoryRouter>);
+        // POST /api/practice/attempts returns a round; its questions have no correct answer.
+        const {id, questionText, optionA, optionB, optionC, optionD} = question;
+        vi.mocked(apiClient).mockResolvedValueOnce({attemptId: 10, subjectName: "Wildlife",
+            questions: [{id, questionText, optionA, optionB, optionC, optionD, imageUrl}]});
+        // A data router, because the practice page uses useBlocker.
+        render(<RouterProvider router={createMemoryRouter(
+            [{path: "/practice/:subject", element: <PracticeQuestions />}], {initialEntries: ["/practice/1"]})} />);
         await screen.findByRole("heading", {name: question.questionText});
         if (imageUrl) {
             expect(screen.getByRole("img", {name: "Image for question: Which animal?"})).toHaveAttribute("src", imageUrl);

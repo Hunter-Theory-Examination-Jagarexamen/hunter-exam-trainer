@@ -3,16 +3,20 @@ import ExamHeader from "../../components/exam/ExamHeader";
 import QuestionPanel from "../../components/exam/QuestionPanel";
 import ExamNavigation from "../../components/exam/ExamNavigation";
 import type { ExamQuestion } from "../../types/examQuestion.ts";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient, { ApiError } from "../../api/apiClient.ts";
 
+interface ExamStartResponse {
+    attemptId: string;
+    questions: ExamQuestion[];
+}
 
 const Exam = () => {
 
     const navigate = useNavigate();
 
-    const [sessionId, setSessionId] = useState<string | null>(null);
+    const [attemptId, setAttemptId] = useState<string | null>(null);
     const [questions, setQuestions] = useState<ExamQuestion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
@@ -22,15 +26,20 @@ const Exam = () => {
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
 
+    // The start request, shared by both runs of the load effect. React's
+    // StrictMode (development only) runs effects twice; without this, the page
+    // would start two exams, and both would try to create the same per-subject
+    // totals rows on the server (#174). A ref keeps its value between the runs
+    // and, unlike state, changing it doesn't redraw the page.
+    const startRequest = useRef<Promise<ExamStartResponse> | null>(null);
+
     const submitExam = useCallback(async () => {
 
         try {
             const result = await apiClient("/api/exam/submit", {
                 method: "POST",
-                body: JSON.stringify({
-                    sessionId,
-                    answers
-                })
+                // Only which exam: the answers are already saved on the server.
+                body: JSON.stringify({ attemptId })
             });
 
             console.log("Exam result: ", result);
@@ -49,7 +58,7 @@ const Exam = () => {
                 "Failed to submit exam. Your answers are saved on the server — please try again."
             );
         }
-    }, [sessionId, answers, navigate]);
+    }, [attemptId, navigate]);
 
 
     //Load exam questions
@@ -61,16 +70,13 @@ const Exam = () => {
                 setIsLoading(true);
                 setError("");
 
-                interface ExamStartResponse {
-                    sessionId: string;
-                    questions: ExamQuestion[];
-                }
-
-                const data: ExamStartResponse =
-                    await apiClient("/api/exam/start", {
+                if (!startRequest.current) {
+                    startRequest.current = apiClient("/api/exam/start", {
                         method: "POST"
                     });
-                setSessionId(data.sessionId);
+                }
+                const data = await startRequest.current;
+                setAttemptId(data.attemptId);
                 setQuestions(data.questions);
             }
 
@@ -145,12 +151,12 @@ const Exam = () => {
         // Persist to the server (best-effort). If this fails, we keep going:
 
         // the local state still holds the answer, and the user can try again by selecting a different option (which retries the save).
-        if (!sessionId) {
+        if (!attemptId) {
             return;
         }
 
         try {
-            await apiClient(`/api/exam/${sessionId}/answer`, {
+            await apiClient(`/api/exam/${attemptId}/answer`, {
                 method: "POST",
                 body: JSON.stringify({
                     questionId: currentQuestion.id,

@@ -1,32 +1,83 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useBlocker, useNavigate, useParams } from "react-router-dom";
 import PageTitle from "../../components/common/PageTitle";
 import PracticeQuestionCard from "../../components/practice/PracticeQuestionCard";
 import PracticeNavigation from "../../components/practice/PracticeNavigation";
+import QuitRoundDialog from "../../components/practice/QuitRoundDialog";
+import PracticeRoundResult from "../../components/practice/PracticeRoundResult";
+import PracticeErrorMessage from "../../components/practice/PracticeErrorMessage";
+import { errorStatus } from "../../services/apiErrors";
 import type { PracticeQuestion } from "../../types/practiceQuestions";
-import {useEffect, useState} from "react";
-import type {Question} from "../../types/question.ts";
-import apiClient from "../../api/apiClient.ts";
+import {useEffect, useRef, useState} from "react";
+import { useTranslation } from "react-i18next";
+import type {
+    OptionLetter,
+    PracticeAnswerResponse,
+    PracticeFinishResponse,
+    PracticeStartResponse
+} from "../../types/practiceAttempt";
+import {
+    answerPracticeQuestion,
+    finishPracticeRound,
+    startPracticeRound
+} from "../../services/practiceAttemptService";
 
 const PracticeQuestions = () => {
 
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const { subject } = useParams();
 
+    const [attemptId, setAttemptId] = useState<number | null>(null);
+    const [subjectName, setSubjectName] = useState("");
     const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    // A translation key (e.g. "practice.loadFailed"), translated when drawn, so the
+    // effect below doesn't depend on t().
     const [error, setError] = useState("");
 
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-    const [showFeedback, setShowFeedback] = useState(false);
-    const [correctAnswers, setCorrectAnswers] = useState(0);
+    // The option picked on the current question, before it is checked.
+    const [selectedAnswer, setSelectedAnswer] = useState<OptionLetter | null>(null);
+    // The server's replies, by question index, so Previous can show them again.
+    const [answers, setAnswers] = useState<Record<number, { chosen: OptionLetter; check: PracticeAnswerResponse }>>({});
+    // True while an answer is on its way to the server (blocks a second click).
+    const [isChecking, setIsChecking] = useState(false);
+    // The server's totals once the round is finished; the page then shows the result.
+    const [result, setResult] = useState<PracticeFinishResponse | null>(null);
+    // True while the "Quit this round?" box is shown.
+    const [isConfirmingQuit, setIsConfirmingQuit] = useState(false);
+    const [isQuitting, setIsQuitting] = useState(false);
+    // What failed last (saving an answer, finishing, quitting), and whether the
+    // server said the round is already closed (409); null when nothing failed.
+    const [actionError, setActionError] = useState<{ action: "answer" | "finish" | "quit"; roundClosed: boolean } | null>(null);
+
+    // The start request for this page visit. Starting a round changes data on the
+    // server (it closes the student's other open round), so it must be sent only
+    // once. React's StrictMode runs the effect below twice in development; the
+    // second run reuses this request instead of starting a second round.
+    // A new visit (leaving and coming back) is a new component, so a new round.
+    const startRequest = useRef<{ subject: string; promise: Promise<PracticeStartResponse> } | null>(null);
+
+    // True while a round is running (started, not finished). A ref, not state, so
+    // the blocker below sees the change at once, e.g. when quitting navigates
+    // right after finishing.
+    const isRoundOpen = useRef(false);
+
+    // Leaving the page while a round is running (menu, back button, any link)
+    // asks first, with the same box as the quit button.
+    const blocker = useBlocker(({ currentLocation, nextLocation }) =>
+        isRoundOpen.current && currentLocation.pathname !== nextLocation.pathname);
 
     useEffect(() => {
 
-        const fetchQuestions = async () => {
+        // If the subject changes or the page closes before the server answers,
+        // the old answer must not overwrite the new state.
+        let active = true;
+
+        const startRound = async () => {
 
             if (!subject) {
-                setError("Subject not found");
+                setError("practice.subjectNotFound");
                 setIsLoading(false);
                 return;
             }
@@ -36,128 +87,189 @@ const PracticeQuestions = () => {
                 setIsLoading(true);
                 setError("");
 
-                const data: Question[]= await apiClient(`/api/questions?subjectId=${subject}`);
+                if (startRequest.current?.subject !== subject) {
+                    startRequest.current = { subject, promise: startPracticeRound(Number(subject)) };
+                }
+                const round = await startRequest.current.promise;
+                if (!active) {
+                    return;
+                }
 
-                const mappedQuestions: PracticeQuestion[] =
-                    data.map((question) => {
+                // Option ids are the letters A-D, the same letters the server checks.
+                const mappedQuestions: PracticeQuestion[] = round.questions.map((question) => ({
+                    id: question.id.toString(),
+                    subjectArea: round.subjectName,
+                    question: question.questionText,
+                    imageUrl: question.imageUrl,
+                    options: [
+                        { id: "A", answer: question.optionA },
+                        { id: "B", answer: question.optionB },
+                        { id: "C", answer: question.optionC },
+                        { id: "D", answer: question.optionD }
+                    ]
+                }));
 
-                        return {
-                            id: question.id.toString(),
-                            subjectArea: question.subject.name,
-                            question: question.questionText,
-                            imageUrl: question.imageUrl,
-
-                            options: [
-                                {
-                                    id: "A",
-                                    answer: question.optionA,
-                                    isCorrect: question.optionA === question.correctAnswer
-                                },
-                                {
-                                    id: "B",
-                                    answer: question.optionB,
-                                    isCorrect: question.optionB === question.correctAnswer
-                                },
-                                {
-                                    id: "C",
-                                    answer: question.optionC,
-                                    isCorrect: question.optionC === question.correctAnswer
-                                },
-                                {
-                                    id: "D",
-                                    answer: question.optionD,
-                                    isCorrect: question.optionD === question.correctAnswer
-                                }
-                            ]
-                        };
-                });
+                setAttemptId(round.attemptId);
+                isRoundOpen.current = true;
+                setSubjectName(round.subjectName);
                 setQuestions(mappedQuestions);
 
                 // Start from the first question whenever a subject is loaded
                 setCurrentQuestionIndex(0);
                 setSelectedAnswer(null);
-                setShowFeedback(false);
-                setCorrectAnswers(0);
+                setAnswers({});
+                setResult(null);
+                setIsConfirmingQuit(false);
             }
             catch (error: unknown) {
-                console.error("Failed to fetch questions: ", error);
+                if (!active) {
+                    return;
+                }
+                console.error("Failed to start practice round: ", error);
                 const errorObj = error as { status?: number; message?: string };
-                if (errorObj?.status === 409 || (errorObj?.message && errorObj.message.includes("Not enough questions"))) {
-                    setError(errorObj.message || "Not enough questions available for this subject.");
+                if (errorObj?.status === 409) {
+                    setError("practice.noQuestionsYet");
                 } else {
-                    setError("Failed to load questions. Please try again.");
+                    setError("practice.loadFailed");
                 }
             }
             finally {
-                setIsLoading(false);
+                if (active) {
+                    setIsLoading(false);
+                }
             }
         };
-        fetchQuestions();
+        startRound();
+
+        return () => {
+            active = false;
+        };
 
     }, [subject]);
 
     const currentQuestion = questions[currentQuestionIndex];
+    const currentAnswer = answers[currentQuestionIndex];
+
+    // A 409 means the server already closed the round, so leaving shouldn't ask.
+    const markRoundClosedIfConflict = (error: unknown) => {
+        if (errorStatus(error) === 409) {
+            isRoundOpen.current = false;
+        }
+    };
 
     const handleAnswerSelect = (answerId: string) => {
-        setSelectedAnswer(answerId);
-    }
-
-    const handleCheckAnswer = () => {
-        if (!selectedAnswer) {
+        // An answered question is read-only: the server keeps the first answer.
+        if (currentAnswer) {
             return;
         }
-        const selectedOption = currentQuestion.options.find(
-            (option) => option.id === selectedAnswer
-        );
+        setSelectedAnswer(answerId as OptionLetter);
+    }
 
-        if (selectedOption?.isCorrect) {
-            setCorrectAnswers((previous) => previous + 1);
+    const handleCheckAnswer = async () => {
+        if (!selectedAnswer || attemptId === null || isChecking) {
+            return;
         }
 
-        setShowFeedback(true);
+        setIsChecking(true);
+        setActionError(null);
+        try {
+            const check = await answerPracticeQuestion(attemptId, Number(currentQuestion.id), selectedAnswer);
+            setAnswers((previous) => ({
+                ...previous,
+                [currentQuestionIndex]: { chosen: selectedAnswer, check }
+            }));
+        } catch (error) {
+            console.error("Failed to save answer:", error);
+            // 409: the round was closed meanwhile (e.g. a new round in another tab).
+            markRoundClosedIfConflict(error);
+            setActionError({ action: "answer", roundClosed: errorStatus(error) === 409 });
+        } finally {
+            setIsChecking(false);
+        }
     };
+
+    const goToQuestion = (index: number) => {
+        setCurrentQuestionIndex(index);
+        setSelectedAnswer(null);
+        setActionError(null);
+    };
+
+    // "Försök igen" repeats what failed.
+    const retryFailedAction = () => {
+        if (actionError?.action === "answer") {
+            handleCheckAnswer();
+        } else if (actionError?.action === "finish") {
+            finishRound("finish");
+        } else if (actionError?.action === "quit") {
+            handleQuitConfirmed();
+        }
+    };
+
+    const errorMessageKey = actionError?.roundClosed
+        ? "practice.roundClosed"
+        : actionError?.action === "answer" ? "practice.answerFailed" : "practice.finishFailed";
+
+    // Finishes the round on the server and shows its result. Returns the totals,
+    // or null if it failed.
+    const finishRound = async (action: "finish" | "quit"): Promise<PracticeFinishResponse | null> => {
+        if (attemptId === null) {
+            return null;
+        }
+        setActionError(null);
+        try {
+            const totals = await finishPracticeRound(attemptId);
+            isRoundOpen.current = false;
+            setResult(totals);
+            return totals;
+        } catch (error) {
+            console.error("Failed to finish practice round:", error);
+            markRoundClosedIfConflict(error);
+            setActionError({ action, roundClosed: errorStatus(error) === 409 });
+            return null;
+        }
+    };
+
+    const backToSubjects = () => navigate("/practice/subjects");
 
     const handleNext = async () => {
 
         if (currentQuestionIndex < questions.length - 1) {
 
-            setCurrentQuestionIndex(currentQuestionIndex + 1);
-            setSelectedAnswer(null);
-            setShowFeedback(false);
+            goToQuestion(currentQuestionIndex + 1);
 
         } else {
 
-            if (!subject) {
-                return;
-            }
-
-            try {
-
-                await apiClient("/api/practice/results", {
-                    method: "POST",
-                    body: JSON.stringify({
-                        subjectId: Number(subject),
-                        correctAnswers: correctAnswers,
-                        totalQuestions: questions.length
-                    })
-                });
-
-                navigate("/practice/subjects");
-
-            } catch (error) {
-
-                console.error("Failed to save practice result:", error);
-            }
+            await finishRound("finish");
         }
+    };
+
+    const handleQuitConfirmed = async () => {
+        setIsQuitting(true);
+        const totals = await finishRound("quit");
+        setIsQuitting(false);
+        setIsConfirmingQuit(false);
+        // Nothing answered: no result to show, back to the subject list.
+        if (totals && totals.answeredQuestions === 0) {
+            backToSubjects();
+        }
+    };
+
+    // Confirmed in the box shown when leaving through the menu or back button:
+    // finish the round, then go where the user was going. The answers are already
+    // saved, so the user leaves even if finishing fails (the next start closes it).
+    const handleLeaveConfirmed = async () => {
+        setIsQuitting(true);
+        await finishRound("quit");
+        isRoundOpen.current = false;
+        setIsQuitting(false);
+        blocker.proceed?.();
     };
 
     const handlePrevious = () => {
 
         if (currentQuestionIndex > 0) {
 
-            setCurrentQuestionIndex(currentQuestionIndex - 1);
-            setSelectedAnswer(null);
-            setShowFeedback(false);
+            goToQuestion(currentQuestionIndex - 1);
         }
     };
 
@@ -165,8 +277,8 @@ const PracticeQuestions = () => {
         return (
             <div>
                 <PageTitle
-                    title="Practice"
-                    subtitle="Loading questions..."
+                    title={t("practice.title")}
+                    subtitle={t("practice.loadingQuestions")}
                 />
             </div>
         );
@@ -176,9 +288,18 @@ const PracticeQuestions = () => {
         return (
             <div>
                 <PageTitle
-                    title="Practice"
-                    subtitle={error}
+                    title={t("practice.title")}
+                    subtitle={t(error)}
                 />
+            </div>
+        );
+    }
+
+    if (result) {
+        return (
+            <div className="practice-questions">
+                <PageTitle title={subjectName} subtitle={t("practice.subtitle")} />
+                <PracticeRoundResult result={result} onBack={backToSubjects} />
             </div>
         );
     }
@@ -187,8 +308,8 @@ const PracticeQuestions = () => {
         return (
             <div>
                 <PageTitle
-                    title="Practice"
-                    subtitle="No questions available for this subject."
+                    title={t("practice.title")}
+                    subtitle={t("practice.noQuestionsYet")}
                 />
             </div>
         );
@@ -197,28 +318,61 @@ const PracticeQuestions = () => {
     return (
         <div className="practice-questions">
             <PageTitle
-                title={currentQuestion.subjectArea}
-                subtitle="Answer the questions and improve your knowledge."
+                title={subjectName}
+                subtitle={t("practice.subtitle")}
             />
 
+            <div className="practice-quit-row">
+                <button className="practice-secondary-button" onClick={() => setIsConfirmingQuit(true)}
+                        disabled={isConfirmingQuit}>
+                    {t("practice.quitRound")}
+                </button>
+            </div>
+
+            {isConfirmingQuit && (
+                <QuitRoundDialog
+                    onConfirm={handleQuitConfirmed}
+                    onCancel={() => setIsConfirmingQuit(false)}
+                    isQuitting={isQuitting}
+                />
+            )}
+
+            {blocker.state === "blocked" && (
+                <QuitRoundDialog
+                    onConfirm={handleLeaveConfirmed}
+                    onCancel={() => blocker.reset?.()}
+                    isQuitting={isQuitting}
+                />
+            )}
+
             <div className="practice-progress">
-                Question {currentQuestionIndex + 1} of {questions.length}
+                {t("practice.progress", { current: currentQuestionIndex + 1, total: questions.length })}
             </div>
 
             <PracticeQuestionCard
                 question={currentQuestion}
-                selectedAnswer={selectedAnswer}
-                showFeedback={showFeedback}
+                selectedAnswer={currentAnswer?.chosen ?? selectedAnswer}
+                feedback={currentAnswer?.check ?? null}
+                isChecking={isChecking}
                 onAnswerSelect={handleAnswerSelect}
                 onCheckAnswer={handleCheckAnswer}
             />
+
+            {actionError && (
+                <PracticeErrorMessage
+                    message={t(errorMessageKey)}
+                    // Trying again can't help once the round is closed.
+                    onRetry={actionError.roundClosed ? undefined : retryFailedAction}
+                    onBack={actionError.roundClosed ? backToSubjects : undefined}
+                />
+            )}
 
             <PracticeNavigation
                 onPrevious={handlePrevious}
                 onNext={handleNext}
                 isFirstQuestion={currentQuestionIndex === 0}
                 isLastQuestion={currentQuestionIndex === questions.length - 1}
-                canGoNext={showFeedback}
+                canGoNext={currentAnswer !== undefined}
             />
         </div>
     );

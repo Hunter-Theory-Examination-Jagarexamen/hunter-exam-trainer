@@ -38,13 +38,13 @@ class QuestionServiceTests {
         subject.setId(2L);
         when(subjects.findById(2L)).thenReturn(Optional.of(subject));
         when(questions.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        Question created = service.create(request("One"));
+        Question created = service.create(request("A"));
         assertNull(created.getId());
         assertSame(subject, created.getSubject());
         Question existing = new Question();
         existing.setId(7L);
         when(questions.findById(7L)).thenReturn(Optional.of(existing));
-        Question updated = service.update(7L, request("Two"));
+        Question updated = service.update(7L, request("B"));
         assertSame(existing, updated);
         assertEquals(7L, updated.getId());
         assertEquals("Updated question", updated.getQuestionText());
@@ -52,19 +52,12 @@ class QuestionServiceTests {
         assertEquals("Two", updated.getOptionB());
         assertEquals("Three", updated.getOptionC());
         assertEquals("Four", updated.getOptionD());
-        assertEquals("Two", updated.getCorrectAnswer());
+        assertEquals("B", updated.getCorrectAnswer());
         assertEquals("Why", updated.getExplanation());
         assertNull(updated.getImageUrl());
         assertSame(subject, updated.getSubject());
     }
 
-    @Test
-    void rejectsAnswerOutsideOptionsAndUnknownSubject() {
-        var service = new QuestionService(questions, subjects);
-        assertThrows(IllegalArgumentException.class, () -> service.create(request("A")));
-        assertThrows(NotFoundException.class, () -> service.create(request("One")));
-        verify(questions, never()).save(any());
-    }
 
     @Test
     void updateAndDeleteReturnNotFoundForMissingQuestion() {

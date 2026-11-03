@@ -4,6 +4,7 @@
 // (ExamHeader, QuestionPanel, ExamNavigation). Only the backend is mocked.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { StrictMode } from "react";
 import { render, screen, act, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
@@ -33,7 +34,7 @@ const questions: ExamQuestion[] = [
 function mockBackend() {
     vi.mocked(apiClient).mockImplementation(async (endpoint: string) => {
         if (endpoint === "/api/exam/start") {
-            return { sessionId: "session-1", questions };
+            return { attemptId: "attempt-1", questions };
         }
         if (endpoint.match(/^\/api\/exam\/[^/]+\/answer$/)) {
             return null;  // 204
@@ -80,6 +81,24 @@ describe("Exam page", () => {
         expect(apiClient).toHaveBeenCalledWith("/api/exam/start", { method: "POST" });
     });
 
+    it("starts only one exam under StrictMode, which runs effects twice", async () => {
+        // Two starts would both try to create the same totals rows on the server (#174).
+        mockBackend();
+        render(
+            <StrictMode>
+                <MemoryRouter initialEntries={["/exam"]}>
+                    <Routes>
+                        <Route path="/exam" element={<Exam />} />
+                    </Routes>
+                </MemoryRouter>
+            </StrictMode>
+        );
+
+        expect(await screen.findByText("First question?")).toBeInTheDocument();
+        const starts = vi.mocked(apiClient).mock.calls.filter(([endpoint]) => endpoint === "/api/exam/start");
+        expect(starts).toHaveLength(1);
+    });
+
     it("saves each answer to the server as it is given", async () => {
         mockBackend();
         renderExam();
@@ -90,7 +109,7 @@ describe("Exam page", () => {
         // The answer POST should fire
         await waitFor(() => {
             const answerCall = vi.mocked(apiClient).mock.calls.find(
-                ([endpoint]) => endpoint === "/api/exam/session-1/answer"
+                ([endpoint]) => endpoint === "/api/exam/attempt-1/answer"
             );
             expect(answerCall).toBeDefined();
             const body = JSON.parse(answerCall![1]!.body as string);
@@ -109,13 +128,13 @@ describe("Exam page", () => {
 
         await waitFor(() => {
             const answerCalls = vi.mocked(apiClient).mock.calls.filter(
-                ([endpoint]) => endpoint === "/api/exam/session-1/answer"
+                ([endpoint]) => endpoint === "/api/exam/attempt-1/answer"
             );
             expect(answerCalls).toHaveLength(1);
         });
     });
 
-    it("submits the session id and answers, then shows the result page", async () => {
+    it("submits only the attempt id, then shows the result page", async () => {
         mockBackend();
         renderExam();
 
@@ -140,10 +159,8 @@ describe("Exam page", () => {
 
         // The body is a JSON string; turn it back into an object to compare
         const body = JSON.parse(submitCall![1]!.body as string);
-        expect(body).toEqual({
-            sessionId: "session-1",
-            answers: { "1": "B", "2": "C" },
-        });
+        // The answers were saved one by one; submit only says which exam.
+        expect(body).toEqual({ attemptId: "attempt-1" });
     });
 
     it("shows an error message when the exam cannot be loaded", async () => {
@@ -183,7 +200,7 @@ describe("Exam page", () => {
         expect(screen.getByText(/59:59/i)).toBeInTheDocument();
     });
 
-    it("automatically submits the exam with current answers when time runs out", async () => {
+    it("automatically submits the exam when time runs out", async () => {
         vi.useFakeTimers({ shouldAdvanceTime: true });
 
         mockBackend();
@@ -205,7 +222,7 @@ describe("Exam page", () => {
         expect(submitCall).toBeDefined();
 
         const body = JSON.parse(submitCall![1]!.body as string);
-        expect(body.answers).toEqual({ "1": "B" });
+        expect(body).toEqual({ attemptId: "attempt-1" });
     });
 
     it("shows a clear message when there are too few questions (409 conflict)", async () => {

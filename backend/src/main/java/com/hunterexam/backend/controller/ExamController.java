@@ -6,6 +6,7 @@ import com.hunterexam.backend.dto.ExamSubmitRequest;
 import com.hunterexam.backend.service.ExamService;
 import com.hunterexam.backend.dto.ExamAnswerRequest;
 import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.security.core.Authentication;
@@ -37,33 +38,42 @@ public class ExamController {
      * exposing the correct answers to the client.
      *
      * @param authentication authentication info from Spring Security
-     * @return session id and the 70 questions for this attempt
+     * @return the exam's attempt id and its 70 questions
      */
     @PostMapping("/start")
     public ExamStartResponse startExam(Authentication authentication) {
-        return examService.startExam(authentication.getName());
+        try {
+            return examService.startExam(authentication.getName());
+        } catch (DataIntegrityViolationException e) {
+            // Two starts at the same moment (double click, two tabs, or a practice
+            // round started at the same time) can both try to create the student's
+            // SubjectStats row for a subject. The losing start's transaction is
+            // rolled back, so it is retried once here, outside it, in a new
+            // transaction; this time the row exists. Same as practice start.
+            return examService.startExam(authentication.getName());
+        }
     }
 
     /**
-     * Saves a single answer on the current exam session.
+     * Saves (or changes) a single answer in the running mock exam.
      * <p>
      * Called as the user answers each question, so a lost connection,
      * expired token, or closed tab does not lose the attempt. Protected
      * by the same ownership rules as submit.
      *
      * @param authentication authentication info from Spring Security
-     * @param sessionId      exam session id
+     * @param attemptId      the exam's attempt id
      * @param request        the question id and chosen answer
      * @return 204 No Content on success
      */
-    @PostMapping("/{sessionId}/answer")
+    @PostMapping("/{attemptId}/answer")
     public ResponseEntity<Void> saveAnswer(
         Authentication authentication,
-        @PathVariable Long sessionId,
+        @PathVariable Long attemptId,
         @Valid @RequestBody ExamAnswerRequest request
     ) {
         examService.saveAnswer(
-            sessionId,
+            attemptId,
             request.getQuestionId(),
             request.getAnswer(),
             authentication.getName()

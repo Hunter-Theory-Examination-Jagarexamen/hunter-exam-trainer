@@ -34,5 +34,32 @@
     "starting": "The server is starting. This can take up to a minute...",
     "error": "Can't reach the server. Check your internet connection, or try again in a few minutes.",
     "tryAgain": "Try again"
+  },
+  "practice": {
+    "title": "Practice",
+    "loadingQuestions": "Loading questions...",
+    "subjectNotFound": "Subject not found.",
+    "noQuestionsYet": "There are no questions in this subject yet.",
+    "loadFailed": "Failed to load questions. Please try again.",
+    "subtitle": "Answer the questions and improve your knowledge.",
+    "progress": "Question {{current}} of {{total}}",
+    "checkAnswer": "Check Answer",
+    "correct": "Correct!",
+    "incorrect": "Incorrect. The correct answer is:",
+    "previous": "Previous",
+    "next": "Next",
+    "finish": "Finish",
+    "quitRound": "Quit round",
+    "quitTitle": "Quit this round?",
+    "quitText": "Your answers are already saved.",
+    "quitConfirm": "Quit",
+    "quitCancel": "Keep practising",
+    "resultTitle": "Result",
+    "resultAll": "You got {{correct}} of {{total}} correct.",
+    "resultPartial": "You answered {{answered}} of {{total}} questions and got {{correct}} correct.",
+    "backToSubjects": "Back to subjects",
+    "answerFailed": "Your answer couldn't be saved. Please try again.",
+    "finishFailed": "The round couldn't be finished. Please try again.",
+    "roundClosed": "This round is already finished, for example in another tab. Your answers are saved."
   }
 }

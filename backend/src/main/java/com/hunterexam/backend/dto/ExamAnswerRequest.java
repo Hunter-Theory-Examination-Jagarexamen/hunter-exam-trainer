@@ -2,6 +2,7 @@ package com.hunterexam.backend.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,8 +11,8 @@ import lombok.Setter;
  * Request body for saving a single exam answer while the exam is in progress.
  *
  * <p>
- * Sent to {@code POST /api/exam/{sessionId}/answer} each time the user selects or changes an answer.
- * The server stores it on the session so that a lost connection, expired token, or closed tab does not lose the attempt.
+ * Sent to {@code POST /api/exam/{attemptId}/answer} each time the user selects or changes an answer.
+ * The server stores it on the exam's question row so that a lost connection, expired token, or closed tab does not lose the attempt.
  */
 @Getter
 @Setter
@@ -21,6 +22,8 @@ public class ExamAnswerRequest {
     @NotNull(message = "Question ID is required")
     private Long questionId;
 
+    // Stored as one letter in attempt_questions.chosen_option.
     @NotBlank(message = "Answer is required")
+    @Pattern(regexp = "[ABCD]", message = "Answer must be A, B, C or D")
     private String answer;
 }

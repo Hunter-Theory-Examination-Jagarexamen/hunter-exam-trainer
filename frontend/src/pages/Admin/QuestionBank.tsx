@@ -82,7 +82,7 @@ const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onS
 
     useEffect(() => {
         let active = true;
-        apiClient(`/api/questions?subjectId=${subjectId}`).then((data: Question[]) => {
+        apiClient(`/api/admin/questions?subjectId=${subjectId}`).then((data: Question[]) => {
             if (active) {
                 setQuestions(data);
                 setIsLoading(false);

@@ -1,6 +1,6 @@
 package com.hunterexam.backend.service;
 
-import com.hunterexam.backend.dto.ExamQuestionResponse;
+import com.hunterexam.backend.dto.QuestionResponse;
 import com.hunterexam.backend.dto.PracticeAnswerResponse;
 import com.hunterexam.backend.dto.PracticeFinishResponse;
 import com.hunterexam.backend.dto.PracticeStartResponse;
@@ -109,11 +109,11 @@ public class PracticeAttemptService {
 
         ensureSubjectStatsExist(user, Set.of(subject));
 
-        List<ExamQuestionResponse> questionDtos = questions.stream()
+        List<QuestionResponse> questionDtos = questions.stream()
                 .map(this::toQuestionResponse)
                 .toList();
 
-        return new PracticeStartResponse(attempt.getId(), questionDtos);
+        return new PracticeStartResponse(attempt.getId(), subject.getName(), questionDtos);
     }
 
     /**
@@ -160,12 +160,13 @@ public class PracticeAttemptService {
     /**
      * Finishes a practice round and returns its totals, counted from the saved answers.
      * <p>
-     * Unanswered questions count as not correct; {@code totalQuestions} is the
-     * number of questions in the round.
+     * {@code totalQuestions} is the number of questions in the round and
+     * {@code answeredQuestions} how many of them were answered, so the page can
+     * show e.g. "3 of 7 answered, 2 correct".
      *
      * @param attemptId the round
      * @param email     email of the logged-in user
-     * @return correct answers and total questions
+     * @return correct, answered and total questions
      */
     @Transactional
     public PracticeFinishResponse finish(Long attemptId, String email) {
@@ -189,10 +190,10 @@ public class PracticeAttemptService {
         long correct = rows.stream().filter(row -> Boolean.TRUE.equals(row.getCorrect())).count();
 
         if (answered > 0) {
-            savePracticeResultBridge(attempt, rows.get(0).getQuestion().getSubject(), correct, total);
+            savePracticeResultBridge(attempt, rows.get(0).getQuestion().getSubject(), correct, answered);
         }
 
-        return new PracticeFinishResponse(correct, total);
+        return new PracticeFinishResponse(correct, answered, total);
     }
 
     /**
@@ -204,14 +205,18 @@ public class PracticeAttemptService {
      * with totals counted by the server. A subject practice round has one
      * subject, so the first question's subject is the round's subject.
      * Rounds with no answers are skipped, so they don't show up as 0 %.
+     * <p>
+     * Only answered questions count (2026-10-29): a round left after 3 of 7
+     * questions, 2 right, is saved as 2 of 3, not 2 of 7. Practice is for
+     * learning; "skipped counts as wrong" belongs to the mock exam.
      */
-    private void savePracticeResultBridge(Attempt attempt, Subject subject, long correct, long total) {
+    private void savePracticeResultBridge(Attempt attempt, Subject subject, long correct, long answered) {
         PracticeResult result = new PracticeResult();
         result.setUser(attempt.getUser());
         result.setSubject(subject);
         result.setCorrectAnswers(correct);
-        result.setTotalQuestions(total);
-        result.setScore(Math.round((double) correct / total * 100));
+        result.setTotalQuestions(answered);
+        result.setScore(Math.round((double) correct / answered * 100));
         result.setCompletedAt(attempt.getFinishedAt());
         practiceResultRepository.save(result);
     }
@@ -239,19 +244,12 @@ public class PracticeAttemptService {
     /**
      * The correct option as a letter (A–D).
      * <p>
-     * Questions still store the correct option's text. Until #155 changes that,
-     * the letter is found by matching the text against the four options.
-     * After #155 this becomes a single read of the stored letter.
+     * As of #155, {@code Question.correctAnswer} stores the letter directly.
      */
     private String correctOptionOf(Question question) {
-        String correctText = question.getCorrectAnswer();
-        if (correctText.equals(question.getOptionA())) return "A";
-        if (correctText.equals(question.getOptionB())) return "B";
-        if (correctText.equals(question.getOptionC())) return "C";
-        if (correctText.equals(question.getOptionD())) return "D";
-        throw new IllegalStateException(
-                "Question " + question.getId() + " has a correct answer that matches no option.");
+        return question.getCorrectAnswer();
     }
+
 
     /**
      * Creates the student's totals row (0 answered, 0 correct) for each subject
@@ -260,8 +258,8 @@ public class PracticeAttemptService {
      * Done at start so that {@link #answer} only ever updates and never inserts:
      * an insert there could clash with another answer arriving at the same moment.
      * Two starts at the same moment (e.g. a double click) can still clash here;
-     * the unique constraint rejects the second with 409 and the student can
-     * simply start again.
+     * the unique constraint rejects the second, and
+     * {@code PracticeAttemptController.start} retries it once.
      */
     private void ensureSubjectStatsExist(User user, Set<Subject> subjects) {
         for (Subject subject : subjects) {
@@ -291,8 +289,8 @@ public class PracticeAttemptService {
     }
 
     // Leaves out correctAnswer and explanation on purpose.
-    private ExamQuestionResponse toQuestionResponse(Question question) {
-        return new ExamQuestionResponse(
+    private QuestionResponse toQuestionResponse(Question question) {
+        return new QuestionResponse(
                 question.getId(),
                 question.getQuestionText(),
                 question.getOptionA(),

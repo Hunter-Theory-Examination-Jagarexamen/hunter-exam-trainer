@@ -1,12 +1,17 @@
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import "../../styles/practice.css";
 import type { PracticeQuestion } from "../../types/practiceQuestions";
+import type { PracticeAnswerResponse } from "../../types/practiceAttempt";
 import QuestionImage from "../common/QuestionImage";
 
 interface PracticeQuestionProps {
     question: PracticeQuestion;
     selectedAnswer: string | null;
-    showFeedback: boolean;
+    // The server's check of the answer; null until the answer is checked.
+    feedback: PracticeAnswerResponse | null;
+    // True while the answer is on its way to the server.
+    isChecking?: boolean;
     onAnswerSelect: (answerId: string) => void;
     onCheckAnswer: () => void;
 }
@@ -14,13 +19,17 @@ interface PracticeQuestionProps {
 const PracticeQuestionCard = ({
                               question,
                               selectedAnswer,
-                              showFeedback,
+                              feedback,
+                              isChecking = false,
                               onAnswerSelect,
                               onCheckAnswer
                           }: PracticeQuestionProps) => {
 
+    const { t } = useTranslation();
+
     // A handle to the feedback box on the page, so we can move focus to it.
     const feedbackRef = useRef<HTMLDivElement>(null);
+    const showFeedback = feedback !== null;
 
     // When the feedback appears, move focus to it. The Check Answer button is
     // disabled at that moment, so without this, focus falls back to the whole page
@@ -31,9 +40,8 @@ const PracticeQuestionCard = ({
         }
     }, [showFeedback]);
 
-    const selectedOption = question.options.find(
-        (option) => option.id === selectedAnswer
-    );
+    // Which option the server says is correct (option ids are the letters A-D).
+    const isCorrectOption = (optionId: string) => feedback?.correctOption === optionId;
 
     return (
         <section className="practice-question">
@@ -49,13 +57,13 @@ const PracticeQuestionCard = ({
                             key={option.id}
                             className={`practice-answer ${
                                 selectedAnswer === option.id 
-                                    ? showFeedback 
-                                        ? option.isCorrect 
-                                            ? "correct" 
+                                    ? showFeedback
+                                        ? feedback.correct
+                                            ? "correct"
                                             : "incorrect"
                                         : "selected"
-                                    : showFeedback && option.isCorrect 
-                                        ? "correct" 
+                                    : isCorrectOption(option.id)
+                                        ? "correct"
                                         : ""
                             }`}
                         >
@@ -64,6 +72,7 @@ const PracticeQuestionCard = ({
                                 name="practice-answer"
                                 value={option.id}
                                 checked={selectedAnswer === option.id}
+                                disabled={showFeedback}
                                 onChange={() => onAnswerSelect(option.id)}
                             />
                             <span>{option.answer}</span>
@@ -75,29 +84,29 @@ const PracticeQuestionCard = ({
                 <button
                     className="check-answer-button"
                     onClick={onCheckAnswer}
-                    disabled={!selectedAnswer || showFeedback}
+                    disabled={!selectedAnswer || showFeedback || isChecking}
                 >
-                    Check Answer
+                    {t("practice.checkAnswer")}
                 </button>
 
-                {showFeedback && selectedOption && (
+                {feedback && (
                     <div
                         ref={feedbackRef}
                         tabIndex={-1}
                         className={
-                            selectedOption.isCorrect
+                            feedback.correct
                                 ? "answer-feedback correct"
                                 : "answer-feedback incorrect"
                         }
                     >
                         {
-                            selectedOption.isCorrect ?
-                                (<p>Correct!</p>):
-                                (<p>Incorrect. The correct answer is: {" "}
+                            feedback.correct ?
+                                (<p>{t("practice.correct")}</p>):
+                                (<p>{t("practice.incorrect")}{" "}
                                     <strong>
                                         {
                                             question.options.find(
-                                                (option) => option.isCorrect
+                                                (option) => isCorrectOption(option.id)
                                             )?.answer
                                         }
                                     </strong>

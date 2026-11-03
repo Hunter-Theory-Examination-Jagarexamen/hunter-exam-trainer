@@ -531,6 +531,10 @@ There are no refresh tokens: users must log in again after expiry.
 
 ## Main API Endpoints
 
+The canonical endpoint list (paths, methods and required roles) is
+[docs/APIs/API-Specification.md](docs/APIs/API-Specification.md). Add new
+endpoints there instead of duplicating endpoint tables in this README.
+
 ### Error responses
 
 Errors return a JSON body `{"message": "..."}`. The status code depends on the
@@ -541,7 +545,7 @@ kind of error, never on the message text (`GlobalExceptionHandler`):
 | 400 | Invalid input or request body | `IllegalArgumentException`, `@Valid` failures |
 | 401 | Not logged in, or wrong email/password | `BadCredentialsException` |
 | 403 | Logged in but not allowed (e.g. a student calling an admin endpoint) | `AccessDeniedException` |
-| 404 | The user, subject, question or exam session does not exist | `NotFoundException` |
+| 404 | The user, subject, question or mock exam does not exist | `NotFoundException` |
 | 409 | Clashes with existing data (e.g. email already registered, too few questions for a mock exam), or the database refused the change (e.g. duplicate subject name, deleting a subject in use) | `ConflictException`, `DataIntegrityViolationException` |
 | 429 | Too many requests in a short time (e.g. repeating a password reset request for one email address) | `TooManyRequestsException` |
 | 500 | Unexpected error | anything else |
@@ -550,17 +554,7 @@ A 500 response never contains internal details. Its message includes a short gen
 code (e.g. `7F3A2C`) that is also written to the backend log with the full error,
 so a reported code can be looked up there.
 
-### Authentication
-
-| Method | Endpoint             | Description            |
-|--------|----------------------|------------------------|
-| POST   | `/api/auth/register` | Register a new user    |
-| POST   | `/api/auth/login`    | Log in and receive JWT |
-| POST   | `/api/auth/forgot-password` | Request a password reset email |
-| POST   | `/api/auth/reset-password` | Set a new password using a reset token |
-| GET    | `/api/auth/google/status` | Whether Google login is enabled |
-
-#### Password reset rate limit
+### Password reset rate limit
 
 `POST /api/auth/forgot-password` accepts **at most one request per email address
 every 60 seconds** (`app.password-reset.rate-limit-window-seconds`). Further
@@ -580,85 +574,6 @@ Remaining limitation: only per-address counting is implemented, so one client ca
 still request resets for many *different* addresses. There is no per-IP limit, and
 `X-Forwarded-For` is deliberately not used to identify clients because arbitrary
 values in that header cannot be trusted.
-
-### User
-
-| Method | Endpoint                 | Description                                    |
-|--------|--------------------------|------------------------------------------------|
-| GET    | `/api/users/me`          | Get the currently logged-in user's information |
-| PUT    | `/api/users/me/password` | Change the user's password                     |
-
-### Subjects
-
-| Method | Endpoint        | Description                          |
-|--------|-----------------|--------------------------------------|
-| GET    | `/api/subjects` | Get all subjects and question counts |
-
-### Questions
-
-| Method | Endpoint                        | Description                 |
-|--------|---------------------------------|-----------------------------|
-| GET    | `/api/questions?subjectId={id}` | Get questions for a subject |
-
-Question management requires a JWT with the `ADMIN` role. Regular users receive
-`403 Forbidden`; requests without authentication receive `401 Unauthorized`.
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/admin/questions` | Create a question (201, with Location header) |
-| PUT | `/api/admin/questions/{id}` | Replace a question (200) |
-| DELETE | `/api/admin/questions/{id}` | Delete a question (204) |
-
-POST and PUT accept the same JSON body:
-
-```json
-{
-  "questionText": "Which option is correct?",
-  "optionA": "First option",
-  "optionB": "Second option",
-  "optionC": "Third option",
-  "optionD": "Fourth option",
-  "correctAnswer": "First option",
-  "explanation": "Optional explanation",
-  "imageUrl": "https://example.com/images/questions.jpg",
-  "subjectId": 1
-}
-```
-
-All fields except `explanation` and `imageUrl` are required. Text fields have a maximum length of
-255 characters. `imageUrl` is optional and supports an image illustration URL. `subjectId` must be positive and refer to an existing subject.
-`correctAnswer` must exactly match one of the four option texts. Invalid input
-returns 400; a missing question or subject returns 404. PUT replaces all editable
-fields, including clearing the explanation or image URL when omitted.
-
-### Practice
-
-| Method | Endpoint                                 | Description                                                       |
-|--------|------------------------------------------|-------------------------------------------------------------------|
-| POST   | `/api/practice/attempts`                 | Start a practice round for a subject (questions without answers)  |
-| POST   | `/api/practice/attempts/{id}/answers`    | Answer one question; the server checks it and returns the result  |
-| POST   | `/api/practice/attempts/{id}/finish`     | Finish the round; totals are counted by the server                |
-| POST   | `/api/practice/results`                  | Save a completed practice session (old; replaced by the endpoints above in a later issue) |
-
-### Mock Exam
-
-| Method | Endpoint           | Description                   |
-|--------|--------------------|-------------------------------|
-| POST   | `/api/exam/start`  | Start a 70-question mock exam |
-| POST   | `/api/exam/submit` | Submit a completed mock exam  |
-
-### Dashboard
-
-| Method | Endpoint                | Description                  |
-|--------|-------------------------|------------------------------|
-| GET    | `/api/dashboard`        | Get dashboard statistics     |
-| GET    | `/api/dashboard/recent` | Get recent mock exam results |
-
-### Statistics
-
-| Method | Endpoint                   | Description                         |
-|--------|----------------------------|-------------------------------------|
-| GET    | `/api/statistics/subjects` | Get practice performance by subject |
 
 
 ## Current Features

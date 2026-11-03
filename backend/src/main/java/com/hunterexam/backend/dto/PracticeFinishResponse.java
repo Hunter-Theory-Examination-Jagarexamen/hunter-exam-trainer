@@ -10,10 +10,13 @@ import lombok.Getter;
 public class PracticeFinishResponse {
 
     private final long correctAnswers;
+    // Questions answered before the round was finished (skipped ones are not counted).
+    private final long answeredQuestions;
     private final long totalQuestions;
 
-    public PracticeFinishResponse(long correctAnswers, long totalQuestions) {
+    public PracticeFinishResponse(long correctAnswers, long answeredQuestions, long totalQuestions) {
         this.correctAnswers = correctAnswers;
+        this.answeredQuestions = answeredQuestions;
         this.totalQuestions = totalQuestions;
     }
 }

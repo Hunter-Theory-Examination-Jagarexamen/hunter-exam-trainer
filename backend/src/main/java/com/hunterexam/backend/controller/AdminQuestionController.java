@@ -6,14 +6,17 @@ import com.hunterexam.backend.service.QuestionService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
+import java.util.List;
 
 /** Question management, protected by the admin path security rule. */
 @RestController
@@ -23,6 +26,16 @@ public class AdminQuestionController {
 
     public AdminQuestionController(QuestionService questionService) {
         this.questionService = questionService;
+    }
+
+    /**
+     * Returns all questions in a subject, including the correct answer,
+     * for the admin Question Bank. Students get questions without the
+     * correct answer from the practice and mock exam endpoints.
+     */
+    @GetMapping
+    public List<Question> getBySubject(@RequestParam Long subjectId) {
+        return questionService.findBySubjectId(subjectId);
     }
 
     @PostMapping

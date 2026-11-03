@@ -21,6 +21,7 @@
   },
   "errors": {
     "EMAIL_TAKEN": "E-postadressen är redan registrerad.",
+
     "INVALID_CREDENTIALS": "Fel e-postadress eller lösenord.",
     "PASSWORD_TOO_SHORT": "Lösenordet är för kort.",
     "PASSWORD_TOO_LONG": "Lösenordet är för långt.",
@@ -34,5 +35,32 @@
     "starting": "Servern startar. Det kan ta upp till en minut...",
     "error": "Det går inte att nå servern. Kontrollera din internetanslutning eller försök igen om en stund.",
     "tryAgain": "Försök igen"
+  },
+  "practice": {
+    "title": "Övning",
+    "loadingQuestions": "Laddar frågor...",
+    "subjectNotFound": "Ämnet hittades inte.",
+    "noQuestionsYet": "Det finns inga frågor i det här ämnet än.",
+    "loadFailed": "Det gick inte att ladda frågorna. Försök igen.",
+    "subtitle": "Svara på frågorna och förbättra dina kunskaper.",
+    "progress": "Fråga {{current}} av {{total}}",
+    "checkAnswer": "Kontrollera svar",
+    "correct": "Rätt!",
+    "incorrect": "Fel. Rätt svar är:",
+    "previous": "Föregående",
+    "next": "Nästa",
+    "finish": "Slutför",
+    "quitRound": "Avsluta omgången",
+    "quitTitle": "Avsluta omgången?",
+    "quitText": "Dina svar är redan sparade.",
+    "quitConfirm": "Avsluta",
+    "quitCancel": "Fortsätt öva",
+    "resultTitle": "Resultat",
+    "resultAll": "Du fick {{correct}} av {{total}} rätt.",
+    "resultPartial": "Du svarade på {{answered}} av {{total}} frågor och fick {{correct}} rätt.",
+    "backToSubjects": "Tillbaka till ämnen",
+    "answerFailed": "Det gick inte att spara svaret. Försök igen.",
+    "finishFailed": "Det gick inte att avsluta omgången. Försök igen.",
+    "roundClosed": "Omgången är redan avslutad, till exempel i en annan flik. Dina svar är sparade."
   }
 }

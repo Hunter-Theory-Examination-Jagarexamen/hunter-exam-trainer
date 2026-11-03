@@ -52,12 +52,12 @@ public class QuestionService {
     }
 
     private void applyRequest(Question question, QuestionRequest request) {
-        if (!List.of(request.optionA(), request.optionB(), request.optionC(), request.optionD())
-                .contains(request.correctAnswer())) {
-            throw new IllegalArgumentException("Correct answer must match one of the option texts");
-        }
+        // Correct answer format is enforced by @Pattern on QuestionRequest
+
+        // (must be A, B, C, or D). No need to match against option texts.
+
         var subject = subjectRepository.findById(request.subjectId())
-                .orElseThrow(() -> new NotFoundException("Subject not found"));
+            .orElseThrow(() -> new NotFoundException("Subject not found"));
         question.setQuestionText(request.questionText());
         question.setOptionA(request.optionA());
         question.setOptionB(request.optionB());
@@ -72,6 +72,9 @@ public class QuestionService {
 
     /**
      * Fetches all questions belonging to a given subject.
+     * <p>
+     * The questions include the correct answer, so only admin endpoints may
+     * return them (students get questions from the practice and mock exam endpoints).
      *
      * @param subjectId id of the subject to fetch questions for
      * @return list of questions for the specified subject
