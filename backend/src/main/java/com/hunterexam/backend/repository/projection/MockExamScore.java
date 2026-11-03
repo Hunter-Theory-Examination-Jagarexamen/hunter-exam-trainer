@@ -6,6 +6,13 @@ import java.time.LocalDateTime;
  * One scored mock exam, counted by the database from the exam's rows
  * (see {@code AttemptQuestionRepository.findScoredMockExams}).
  * Not sent to the frontend; the services build their responses from it.
+ * <p>
+ * Why a separate type: the query returns counted values (one row per exam),
+ * not a table row, so no entity fits ({@code Attempt} stores no score). Without
+ * a type, JPQL would return an untyped {@code Object[]} per row. A query result
+ * like this is called a "projection" (Spring Data's term); it lives next to
+ * the repositories because it belongs to the database side, while
+ * {@code dto/} holds what the API sends and receives.
  *
  * @param attemptId  the exam's attempt
  * @param userId     the student
