@@ -26,8 +26,8 @@ endpoints are added to this table, not duplicated elsewhere.
 | POST   | /api/exam/{attemptId}/answer | Save or change one answer in the running mock exam | Required |
 | POST   | /api/exam/submit              | Submit the mock exam; the server scores the saved answers | Required |
 | GET    | /api/dashboard                | Get dashboard statistics for the logged-in user | Required         |
-| GET    | /api/dashboard/recent         | Get the user's recent mock exam activity        | Required         |
-| GET    | /api/statistics/subjects      | Get the user's practice performance by subject  | Required         |
+| GET    | /api/dashboard/recent         | Get the user's 5 most recent scored mock exams  | Required         |
+| GET    | /api/statistics/subjects      | Get the user's performance by subject (practice and mock exams) | Required |
 | GET    | /api/statistics/progress      | Get the user's weekly accuracy over time        | Required         |
 | GET    | /api/admin/learners           | Get aggregated progress for all learners        | Required (ADMIN) |
 | GET    | /api/admin/stats              | Get question, subject and learner counts        | Required (ADMIN) |
@@ -144,13 +144,37 @@ Response:
 **MockExams notes:**
 
 - `GET /api/admin/learners` returns one entry per learner with:
-- `subjectPerformances` — practice results per subject
-- `mockExams` — mock exam summary (count, latest/best score, latest pass/fail)
-- `lastActivityAt` — latest activity across practice AND mock exams
+- `subjectPerformances` — performance per subject, weakest first (same numbers as `/api/statistics/subjects`)
+- `mockExams` — mock exam summary (count, latest/best score, latest pass/fail), scored mock exams only
+- `lastActivityAt` — the latest answer (practice or mock exam) or mock exam submit; `null` if none
 
 **Question note:** `correctAnswer` in `POST/PUT /api/admin/questions` must be a single letter A–D, matching the correct option's position. (Previously it was the option's text; see #155.)
 
 The `mockExams` field is a separate object so it can be filtered out per student in a future sharing feature (#125).
+
+## Statistics: what the numbers count
+
+The statistics are calculated from the stored answers (`attempts`,
+`attempt_questions`) and the per-subject totals (`subject_stats`).
+
+- **Counted answers:** every answered practice question, and the answers of
+  **scored** mock exams. A mock exam is scored when it was submitted in time;
+  open exams and late submits (`400`) don't count anywhere. Unanswered
+  questions are not counted as answers (in a mock exam's score they count as
+  not correct).
+- **Per subject** (`/api/statistics/subjects`, `subjectPerformances` in
+  `/api/admin/learners`): `percentage` = correct ÷ answered over all counted
+  answers in the subject, rounded. Only subjects with at least one answer are
+  listed. Student and admin see the same numbers.
+- **Progress over time** (`/api/statistics/progress?weeks=N`): one point per
+  week (Monday) with counted answers, oldest first; `accuracy` = correct ÷
+  answered that week, `questionsAnswered` = answers that week.
+- **Dashboard** (`/api/dashboard`): `mockExams`, `averageScore` and
+  `bestScore` from scored mock exams; `questionsAnswered` = all counted answers
+  (practice and mock exams).
+- **Recent activity** (`/api/dashboard/recent`): the 5 most recent scored mock
+  exams, newest first. `id` is the exam's attempt id; `score` is correct ÷
+  total questions, rounded.
 
 ## Practice rounds: request and response
 
