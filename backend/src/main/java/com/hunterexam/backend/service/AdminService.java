@@ -4,12 +4,10 @@ import com.hunterexam.backend.dto.AdminStatsResponse;
 import com.hunterexam.backend.dto.LearnerProgressResponse;
 import com.hunterexam.backend.dto.MockExamSummary;
 import com.hunterexam.backend.dto.SubjectPerformanceResponse;
-import com.hunterexam.backend.entity.PracticeResult;
 import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.entity.SubjectStats;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.repository.AttemptQuestionRepository;
-import com.hunterexam.backend.repository.PracticeResultRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
 import com.hunterexam.backend.repository.SubjectStatsRepository;
@@ -31,7 +29,6 @@ public class AdminService {
     private static final int EXAM_TOTAL_QUESTIONS = 70;
 
     private final UserRepository userRepository;
-    private final PracticeResultRepository practiceResultRepository;
     private final AttemptQuestionRepository attemptQuestionRepository;
     private final QuestionRepository questionRepository;
     private final SubjectRepository subjectRepository;
@@ -39,14 +36,12 @@ public class AdminService {
 
     public AdminService(
             UserRepository userRepository,
-            PracticeResultRepository practiceResultRepository,
             AttemptQuestionRepository attemptQuestionRepository,
             QuestionRepository questionRepository,
             SubjectRepository subjectRepository,
             SubjectStatsRepository subjectStatsRepository
     ) {
         this.userRepository = userRepository;
-        this.practiceResultRepository = practiceResultRepository;
         this.attemptQuestionRepository = attemptQuestionRepository;
         this.questionRepository = questionRepository;
         this.subjectRepository = subjectRepository;
@@ -98,16 +93,13 @@ public class AdminService {
             List<MockExamScore> examScores
     ) {
 
-        List<PracticeResult> practiceResults =
-                practiceResultRepository.findByUser(learner);
-
         // Same calculation as the student's own Statistics page; weakest subject first.
         List<SubjectPerformanceResponse> perSubject =
                 StatisticsService.toSubjectPerformance(subjectStats).stream()
                         .sorted(Comparator.comparingLong(SubjectPerformanceResponse::getPercentage))
                         .toList();
         MockExamSummary mockExams = aggregateMockExams(examScores);
-        LocalDateTime lastActivity = computeLastActivity(practiceResults, examScores);
+        LocalDateTime lastActivity = computeLastActivity(subjectStats, examScores);
 
         return new LearnerProgressResponse(
                 learner.getId(),
@@ -151,16 +143,24 @@ public class AdminService {
         );
     }
 
+    /**
+     * The student's latest answer (practice or mock exam, from the subject
+     * totals) or latest mock exam submit, whichever is newest. An exam's
+     * answers are given before it is submitted, so its {@code finishedAt}
+     * is usually the later one.
+     *
+     * @return null when the student has no answers and no exams
+     */
     private LocalDateTime computeLastActivity(
-            List<PracticeResult> practiceResults,
+            List<SubjectStats> subjectStats,
             List<MockExamScore> examScores
     ) {
-        Stream<LocalDateTime> practiceTimes = practiceResults.stream()
-                .map(PracticeResult::getCompletedAt);
+        Stream<LocalDateTime> answerTimes = subjectStats.stream()
+                .map(SubjectStats::getLastAnsweredAt);
         Stream<LocalDateTime> examTimes = examScores.stream()
                 .map(MockExamScore::finishedAt);
 
-        return Stream.concat(practiceTimes, examTimes)
+        return Stream.concat(answerTimes, examTimes)
                 .filter(t -> t != null)
                 .max(LocalDateTime::compareTo)
                 .orElse(null);
