@@ -74,4 +74,22 @@ class SubjectStatsRepositoryTests {
         assertEquals(17, rows.get(0).getCorrect());
         assertEquals("Wildlife-test", rows.get(1).getSubject().getName());
     }
+
+    @Test
+    void countAnsweredByUserSumsTheStudentsSubjectsAndIsZeroWithoutRows() {
+        // Arrange
+        User student = saveUser("student@example.test");
+        User other = saveUser("other@example.test");
+        User newStudent = saveUser("new@example.test");
+        Subject weapons = saveSubject("Weapons-test");
+        Subject wildlife = saveSubject("Wildlife-test");
+        saveStats(student, weapons, 20, 17);
+        saveStats(student, wildlife, 3, 1);
+        saveStats(other, weapons, 5, 5);
+
+        // Act + Assert: 20 + 3; the other student's 5 aren't counted;
+        // no rows gives 0 (COALESCE), not null
+        assertEquals(23, subjectStats.countAnsweredByUser(student));
+        assertEquals(0, subjectStats.countAnsweredByUser(newStudent));
+    }
 }
