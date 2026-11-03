@@ -1,5 +1,6 @@
 package com.hunterexam.backend.repository;
 
+import com.hunterexam.backend.repository.projection.AnswerOutcome;
 import com.hunterexam.backend.repository.projection.MockExamScore;
 import com.hunterexam.backend.entity.AttemptQuestion;
 import com.hunterexam.backend.entity.User;
@@ -7,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -38,4 +40,22 @@ public interface AttemptQuestionRepository extends JpaRepository<AttemptQuestion
             ORDER BY a.finishedAt DESC
             """)
     List<MockExamScore> findScoredMockExams(@Param("users") Collection<User> users);
+
+    /**
+     * The student's answers since the given time, oldest first. Same rule as
+     * {@code SubjectStats}: practice answers, plus mock exam answers only when
+     * the exam was scored (open and late exams don't count).
+     */
+    @Query("""
+            SELECT new com.hunterexam.backend.repository.projection.AnswerOutcome(
+                q.answeredAt, q.correct)
+            FROM AttemptQuestion q JOIN q.attempt a
+            WHERE a.user = :user
+              AND q.answeredAt >= :since
+              AND (a.type <> com.hunterexam.backend.entity.AttemptType.MOCK_EXAM
+                   OR a.scored = true)
+            ORDER BY q.answeredAt
+            """)
+    List<AnswerOutcome> findCountedAnswersSince(@Param("user") User user,
+                                                @Param("since") LocalDateTime since);
 }

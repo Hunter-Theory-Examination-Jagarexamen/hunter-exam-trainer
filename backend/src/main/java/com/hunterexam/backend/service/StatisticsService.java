@@ -2,13 +2,13 @@ package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.ProgressOverTimeResponse;
 import com.hunterexam.backend.dto.SubjectPerformanceResponse;
-import com.hunterexam.backend.entity.PracticeResult;
 import com.hunterexam.backend.entity.SubjectStats;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.exception.NotFoundException;
-import com.hunterexam.backend.repository.PracticeResultRepository;
+import com.hunterexam.backend.repository.AttemptQuestionRepository;
 import com.hunterexam.backend.repository.SubjectStatsRepository;
 import com.hunterexam.backend.repository.UserRepository;
+import com.hunterexam.backend.repository.projection.AnswerOutcome;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
@@ -28,16 +29,16 @@ import java.util.stream.Collectors;
 @Service
 public class StatisticsService {
 
-    private final PracticeResultRepository practiceResultRepository;
+    private final AttemptQuestionRepository attemptQuestionRepository;
     private final SubjectStatsRepository subjectStatsRepository;
     private final UserRepository userRepository;
 
     public StatisticsService(
-            PracticeResultRepository practiceResultRepository,
+            AttemptQuestionRepository attemptQuestionRepository,
             SubjectStatsRepository subjectStatsRepository,
             UserRepository userRepository
     ) {
-        this.practiceResultRepository = practiceResultRepository;
+        this.attemptQuestionRepository = attemptQuestionRepository;
         this.subjectStatsRepository = subjectStatsRepository;
         this.userRepository = userRepository;
     }
@@ -99,11 +100,12 @@ public class StatisticsService {
     }
 
     /**
-     * Calculates the user's practice accuracy grouped by ISO week
-     * (Monday–Sunday) for the last N weeks.
+     * Calculates the user's accuracy (correct / answered) grouped by ISO week
+     * (Monday–Sunday) for the last N weeks, from each stored answer: practice
+     * and scored mock exams, the same answers as {@code SubjectStats}.
      *
-     * <p>Only weeks in which the user practiced are included in the result,
-     * ordered from oldest to newest.
+     * <p>Only weeks in which the user answered questions are included in the
+     * result, ordered from oldest to newest.
      *
      * @param email user's email
      * @param weeks number of weeks to look back
@@ -120,26 +122,26 @@ public class StatisticsService {
                 .toLocalDate()
                 .atStartOfDay();
 
-        List<PracticeResult> results =
-                practiceResultRepository.findByUserAndCompletedAtAfter(user, since);
+        List<AnswerOutcome> answers =
+                attemptQuestionRepository.findCountedAnswersSince(user, since);
 
-        // Group by the Monday of the week the result was completed.
-        Map<LocalDate, List<PracticeResult>> byWeek = results.stream()
-                .collect(Collectors.groupingBy(r ->
-                        r.getCompletedAt().toLocalDate()
-                                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-                ));
+        // Group by the Monday of the week each answer was given. A TreeMap keeps
+        // its keys sorted, so the weeks come out oldest first.
+        Map<LocalDate, List<AnswerOutcome>> byWeek = answers.stream()
+                .collect(Collectors.groupingBy(
+                        answer -> answer.answeredAt().toLocalDate()
+                                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
+                        TreeMap::new,
+                        Collectors.toList()));
 
         return byWeek.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
                 .map(entry -> {
+                    long total = entry.getValue().size();
                     long correct = entry.getValue().stream()
-                            .mapToLong(PracticeResult::getCorrectAnswers).sum();
-                    long total = entry.getValue().stream()
-                            .mapToLong(PracticeResult::getTotalQuestions).sum();
-                    long accuracy = total == 0 ? 0 : Math.round(correct * 100.0 / total);
+                            .filter(AnswerOutcome::isCorrect)
+                            .count();
 
-                    return new ProgressOverTimeResponse(entry.getKey(), accuracy, total);
+                    return new ProgressOverTimeResponse(entry.getKey(), percentage(correct, total), total);
                 })
                 .toList();
     }
