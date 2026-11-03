@@ -9,10 +9,25 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface SubjectStatsRepository extends JpaRepository<SubjectStats, Long> {
 
     boolean existsByUserAndSubject(User user, Subject subject);
+
+    /**
+     * The student's totals for every subject with at least one answer, with
+     * the subject loaded in the same query ({@code JOIN FETCH}), ordered by
+     * subject id. Rows with 0 answers exist when a round was started but
+     * nothing was answered yet; they are left out.
+     */
+    @Query("""
+            SELECT s FROM SubjectStats s
+            JOIN FETCH s.subject
+            WHERE s.user = :user AND s.answered > 0
+            ORDER BY s.subject.id
+            """)
+    List<SubjectStats> findAnsweredByUser(@Param("user") User user);
 
     /**
      * Adds one answer to the totals, letting the database do the adding

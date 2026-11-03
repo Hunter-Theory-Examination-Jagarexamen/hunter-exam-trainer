@@ -3,9 +3,11 @@ package com.hunterexam.backend.service;
 import com.hunterexam.backend.dto.ProgressOverTimeResponse;
 import com.hunterexam.backend.dto.SubjectPerformanceResponse;
 import com.hunterexam.backend.entity.PracticeResult;
+import com.hunterexam.backend.entity.SubjectStats;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.repository.PracticeResultRepository;
+import com.hunterexam.backend.repository.SubjectStatsRepository;
 import com.hunterexam.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -27,63 +29,59 @@ import java.util.stream.Collectors;
 public class StatisticsService {
 
     private final PracticeResultRepository practiceResultRepository;
+    private final SubjectStatsRepository subjectStatsRepository;
     private final UserRepository userRepository;
 
     public StatisticsService(
             PracticeResultRepository practiceResultRepository,
+            SubjectStatsRepository subjectStatsRepository,
             UserRepository userRepository
     ) {
         this.practiceResultRepository = practiceResultRepository;
+        this.subjectStatsRepository = subjectStatsRepository;
         this.userRepository = userRepository;
     }
 
 
     /**
-     * Calculates the user's average practice performance per subject.
-     * <p>
-     * Groups all of the user's practice results by subject and computes
-     * the average score for each. Subjects the user has not practiced
-     * are not included in the result.
+     * The logged-in student's performance per subject, for the Statistics page.
      *
      * @param email user's email id
-     * @return list of subject performance responses (subject id, name and average score)
+     * @return one row per subject the student has answered questions in
      */
     public List<SubjectPerformanceResponse> getSubjectPerformance(String email) {
 
-        // Find the logged-in user to fetch their practice results.
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        List<PracticeResult> results = practiceResultRepository.findByUser(user);
+        return subjectPerformanceFor(user);
+    }
 
-        // Group all practice results by subject id, so we can average scores per subject.
-        Map<Long, List<PracticeResult>> resultsBySubject = results.stream()
-                .collect(Collectors.groupingBy(
-                        result -> result.getSubject().getId()));
+    /**
+     * Performance per subject: correct answers / answered questions, from
+     * {@link SubjectStats}. Counts every answered question, from practice and
+     * mock exams alike, so each answer weighs the same.
+     * <p>
+     * Shared by the Statistics page and the admin's Learner Progress, so a
+     * student and an admin always see the same numbers.
+     *
+     * @param user the student
+     * @return one row per subject with at least one answer, ordered by subject id
+     */
+    public List<SubjectPerformanceResponse> subjectPerformanceFor(User user) {
 
-        return resultsBySubject.values()
-                .stream()
-                .map(subjectResults -> {
-
-                    // Used only to read the subject id/name, since all results in this
-                    // group belong to the same subject.
-                    PracticeResult firstResult = subjectResults.getFirst();
-
-                    // Average score across all practice attempts for this subject.
-                    long averagePercentage = Math.round(
-                            subjectResults.stream()
-                                    .mapToLong(PracticeResult::getScore)
-                                    .average()
-                                    .orElse(0)
-                    );
-
-                    return new SubjectPerformanceResponse(
-                            firstResult.getSubject().getId(),
-                            firstResult.getSubject().getName(),
-                            averagePercentage
-                    );
-                })
+        return subjectStatsRepository.findAnsweredByUser(user).stream()
+                .map(stats -> new SubjectPerformanceResponse(
+                        stats.getSubject().getId(),
+                        stats.getSubject().getName(),
+                        percentage(stats.getCorrect(), stats.getAnswered())
+                ))
                 .toList();
+    }
+
+    /** Rounded percentage; 0 when nothing was answered. */
+    private static long percentage(long correct, long answered) {
+        return answered == 0 ? 0 : Math.round(correct * 100.0 / answered);
     }
 
     /**
