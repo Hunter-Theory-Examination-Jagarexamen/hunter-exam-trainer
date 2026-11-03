@@ -1,10 +1,11 @@
 package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.SubjectPerformanceResponse;
-import com.hunterexam.backend.entity.PracticeResult;
 import com.hunterexam.backend.entity.Subject;
+import com.hunterexam.backend.entity.SubjectStats;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.repository.PracticeResultRepository;
+import com.hunterexam.backend.repository.SubjectStatsRepository;
 import com.hunterexam.backend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ class StatisticsServiceTests {
     private static final String EMAIL = "student@example.test";
 
     @Mock PracticeResultRepository practiceResultRepository;
+    @Mock SubjectStatsRepository subjectStatsRepository;
     @Mock UserRepository userRepository;
 
     private StatisticsService statisticsService;
@@ -37,7 +39,7 @@ class StatisticsServiceTests {
 
     @BeforeEach
     void setUp() {
-        statisticsService = new StatisticsService(practiceResultRepository, userRepository);
+        statisticsService = new StatisticsService(practiceResultRepository, subjectStatsRepository, userRepository);
         user = new User();
         user.setEmail(EMAIL);
     }
@@ -49,50 +51,53 @@ class StatisticsServiceTests {
         return subject;
     }
 
-    /** One finished practice round in a subject, with its score in percent. */
-    private PracticeResult practiceResult(Subject subject, long score) {
-        PracticeResult result = new PracticeResult();
-        result.setSubject(subject);
-        result.setScore(score);
-        return result;
-    }
-
-    /** Finds one subject's row in the result; the service gives no fixed order. */
-    private SubjectPerformanceResponse rowFor(List<SubjectPerformanceResponse> rows, long subjectId) {
-        return rows.stream()
-                .filter(row -> row.getSubjectId() == subjectId)
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("no row for subject " + subjectId));
+    /** The student's running totals in one subject. */
+    private SubjectStats stats(Subject subject, long answered, long correct) {
+        SubjectStats stats = new SubjectStats(user, subject);
+        stats.setAnswered(answered);
+        stats.setCorrect(correct);
+        return stats;
     }
 
     // ----- Performance by subject -----
 
     @Test
-    void averageScoreIsCalculatedPerSubject() {
-        // Arrange: two rounds in "Weapons" (80 % and 90 %), one in "Wildlife" (50 %)
+    void percentageIsCorrectAnswersOutOfAnsweredPerSubject() {
+        // Arrange: Weapons 17 of 20 correct, Wildlife 1 of 3 (33.3 %, rounds down)
         Subject weapons = subject(1, "Weapons");
         Subject wildlife = subject(2, "Wildlife");
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(practiceResultRepository.findByUser(user)).thenReturn(List.of(
-                practiceResult(weapons, 80),
-                practiceResult(weapons, 90),
-                practiceResult(wildlife, 50)));
+        when(subjectStatsRepository.findAnsweredByUser(user)).thenReturn(List.of(
+                stats(weapons, 20, 17),
+                stats(wildlife, 3, 1)));
 
         // Act
         List<SubjectPerformanceResponse> rows = statisticsService.getSubjectPerformance(EMAIL);
 
-        // Assert: one row per practised subject, with the average of its rounds
+        // Assert: one row per subject, in the repository's order
         assertEquals(2, rows.size());
-        assertEquals("Weapons", rowFor(rows, 1).getSubjectName());
-        assertEquals(85, rowFor(rows, 1).getPercentage());
-        assertEquals(50, rowFor(rows, 2).getPercentage());
+        assertEquals(1L, rows.get(0).getSubjectId());
+        assertEquals("Weapons", rows.get(0).getSubjectName());
+        assertEquals(85, rows.get(0).getPercentage());
+        assertEquals(33, rows.get(1).getPercentage());
     }
 
     @Test
-    void newUserWithNoPracticeGetsAnEmptyList() {
-        // Arrange: a brand-new student who hasn't practised anything yet
+    void percentageRoundsHalfUp() {
+        // Arrange: 2 of 3 correct = 66.67 %
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(practiceResultRepository.findByUser(user)).thenReturn(List.of());
+        when(subjectStatsRepository.findAnsweredByUser(user)).thenReturn(List.of(
+                stats(subject(1, "Weapons"), 3, 2)));
+
+        // Act + Assert
+        assertEquals(67, statisticsService.getSubjectPerformance(EMAIL).getFirst().getPercentage());
+    }
+
+    @Test
+    void newUserWithNoAnswersGetsAnEmptyList() {
+        // Arrange: a brand-new student who hasn't answered anything yet
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(subjectStatsRepository.findAnsweredByUser(user)).thenReturn(List.of());
 
         // Act
         List<SubjectPerformanceResponse> rows = statisticsService.getSubjectPerformance(EMAIL);
