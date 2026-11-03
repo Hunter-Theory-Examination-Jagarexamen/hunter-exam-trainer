@@ -7,6 +7,7 @@ import com.hunterexam.backend.entity.Question;
 import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.User;
+import com.hunterexam.backend.repository.projection.AnswerOutcome;
 import com.hunterexam.backend.repository.projection.MockExamScore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,11 +19,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Tests the grouped JPQL query {@code findScoredMockExams} against a real (H2)
- * database: only scored mock exams count, and each exam's score is counted
- * from its rows.
+ * Tests the JPQL queries against a real (H2) database:
+ * {@code findScoredMockExams} (only scored mock exams count, each exam's score
+ * counted from its rows) and {@code findCountedAnswersSince} (the answers the
+ * progress chart counts).
  */
 @DataJpaTest(showSql = false)
 @ActiveProfiles("test")
@@ -134,5 +138,39 @@ class AttemptQuestionRepositoryTests {
         // Assert
         assertEquals(1, scores.size());
         assertEquals(scored.getId(), scores.getFirst().attemptId());
+    }
+
+    @Test
+    void countedAnswersArePracticeAndScoredExamsOnly() {
+        // Arrange: saveRound gives every answer the time now - 1 hour
+        User other = saveUser("other@example.test");
+        saveRound(student, AttemptType.SUBJECT_PRACTICE, null, false,       // practice, still open: counts
+                true, false, null, null);
+        saveRound(student, AttemptType.MOCK_EXAM, now, true,                // scored exam: counts
+                true, true, true, null);
+        saveRound(student, AttemptType.MOCK_EXAM, null, false,              // open exam: doesn't
+                true, true, true, true);
+        saveRound(student, AttemptType.MOCK_EXAM, now, false,               // late exam: doesn't
+                true, true, true, true);
+        saveRound(other, AttemptType.SUBJECT_PRACTICE, now, false,          // another student: doesn't
+                true, true, true, true);
+
+        // Act
+        List<AnswerOutcome> answers = attemptQuestions.findCountedAnswersSince(student, now.minusDays(1));
+
+        // Assert: 2 practice answers + 3 exam answers; unanswered rows left out
+        assertEquals(5, answers.size());
+        assertEquals(4, answers.stream().filter(AnswerOutcome::isCorrect).count());
+    }
+
+    @Test
+    void countedAnswersLeaveOutAnswersBeforeSince() {
+        // Arrange: answers at now - 1 hour
+        saveRound(student, AttemptType.SUBJECT_PRACTICE, now, false,
+                true, true, true, true);
+
+        // Act + Assert: "since" after the answers gives nothing; before gives all 4
+        assertTrue(attemptQuestions.findCountedAnswersSince(student, now.minusMinutes(30)).isEmpty());
+        assertFalse(attemptQuestions.findCountedAnswersSince(student, now.minusHours(2)).isEmpty());
     }
 }
