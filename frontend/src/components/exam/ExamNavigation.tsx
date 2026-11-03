@@ -9,7 +9,8 @@ interface ExamNavigationProps {
 }
 
 const ExamNavigation = (
-    { onPrevious, onNext, onSubmit, isFirstQuestion, isLastQuestion }: ExamNavigationProps) => {
+    { onPrevious, onNext, onSubmit, isFirstQuestion, isLastQuestion }: ExamNavigationProps
+) => {
 
     return (
         <section className="exam-navigation">
@@ -23,9 +24,17 @@ const ExamNavigation = (
 
             <button
                 className="next-button"
-                onClick={isLastQuestion ? onSubmit : onNext}
+                onClick={onNext}
+                disabled={isLastQuestion}
             >
-                {isLastQuestion ? "Submit Exam" : "Next"}
+                Next
+            </button>
+
+            <button
+                className="submit-exam-button"
+                onClick={onSubmit}
+            >
+                Submit Exam
             </button>
         </section>
     );

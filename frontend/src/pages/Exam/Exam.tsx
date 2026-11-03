@@ -246,7 +246,8 @@ const Exam = () => {
                         <h3 className="text-xl font-bold mb-3 text-[var(--color-text)]">Submit Exam?</h3>
                         {unansweredCount > 0 ? (
                             <p className="text-[var(--color-text)] opacity-80 mb-6">
-                                You have <strong>{unansweredCount}</strong> unanswered question{unansweredCount > 1 ? "s" : ""}. Are you sure you want to submit?
+                                You have <strong>{unansweredCount}</strong> unanswered question{unansweredCount > 1 ? "s" : ""}.
+                                They will count as wrong. Are you sure you want to submit?
                             </p>
                         ) : (
                             <p className="text-[var(--color-text)] opacity-80 mb-6">
@@ -266,7 +267,7 @@ const Exam = () => {
                                 className="next-button"
                                 style={{ borderRadius: "8px", padding: "0.5rem 1rem", fontSize: "0.9rem", fontWeight: 600 }}
                             >
-                                Submit Exam
+                                {unansweredCount > 0 ? "Submit anyway" : "Submit Exam"}
                             </button>
                         </div>
                     </div>

@@ -135,6 +135,8 @@
     display: flex;
     justify-content: space-between;
     margin-top: 0.5rem;
+    align-items: center;
+    gap: 0.75rem;
 }
 
 .exam-navigation button {
@@ -155,18 +157,23 @@
 
 .previous-button {
     background-color: var(--color-surface);
-
     border: 1px solid var(--color-border);
-
     color: var(--color-text);
 }
 
 .next-button {
     background-color: var(--color-primary);
-
     border: none;
-
     color: white;
+}
+
+/* Submit: pushed to the right, distinct from Next */
+
+.submit-exam-button {
+    margin-left: auto;
+    background-color: var(--color-surface);
+    border: 2px solid var(--color-primary);
+    color: var(--color-primary);
 }
 
 .previous-button:hover {
@@ -175,4 +182,23 @@
 
 .next-button:hover {
     opacity: 0.9;
+}
+
+.submit-exam-button:hover {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+/* Mobile: Submit moves to its own row, full width */
+
+@media (max-width: 768px) {
+    .exam-navigation {
+        flex-wrap: wrap;
+    }
+
+    .submit-exam-button {
+        flex-basis: 100%;
+        margin-left: 0;
+        order: 3;
+    }
 }
