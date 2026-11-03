@@ -2,13 +2,11 @@ package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.AdminStatsResponse;
 import com.hunterexam.backend.dto.LearnerProgressResponse;
-import com.hunterexam.backend.entity.PracticeResult;
 import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.SubjectStats;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.repository.AttemptQuestionRepository;
-import com.hunterexam.backend.repository.PracticeResultRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
 import com.hunterexam.backend.repository.SubjectStatsRepository;
@@ -36,7 +34,6 @@ import static org.mockito.Mockito.when;
 class AdminServiceTests {
 
     @Mock UserRepository userRepository;
-    @Mock PracticeResultRepository practiceResultRepository;
     @Mock AttemptQuestionRepository attemptQuestionRepository;
     @Mock QuestionRepository questionRepository;
     @Mock SubjectRepository subjectRepository;
@@ -47,7 +44,7 @@ class AdminServiceTests {
 
     @BeforeEach
     void setUp() {
-        adminService = new AdminService(userRepository, practiceResultRepository, attemptQuestionRepository,
+        adminService = new AdminService(userRepository, attemptQuestionRepository,
                 questionRepository, subjectRepository, subjectStatsRepository);
         learner = new User();
         learner.setId(1L);
@@ -57,15 +54,6 @@ class AdminServiceTests {
         learner.setCreatedAt(LocalDateTime.now().minusDays(30));
     }
 
-    private PracticeResult practice(Subject subject, long score, LocalDateTime at) {
-        PracticeResult r = new PracticeResult();
-        r.setSubject(subject);
-        r.setScore(score);
-        r.setCompletedAt(at);
-        r.setUser(learner);
-        return r;
-    }
-
     /** One scored mock exam of the learner, as the grouped query returns it. */
     private MockExamScore exam(long correct, long total, LocalDateTime at) {
         return new MockExamScore(100L, learner.getId(), at, total, correct);
@@ -73,9 +61,16 @@ class AdminServiceTests {
 
     /** A student's running totals in one subject. */
     private SubjectStats stats(User user, Subject subject, long answered, long correct) {
+        return stats(user, subject, answered, correct, null);
+    }
+
+    /** Same, with the time of the student's latest answer in that subject. */
+    private SubjectStats stats(User user, Subject subject, long answered, long correct,
+                               LocalDateTime lastAnsweredAt) {
         SubjectStats s = new SubjectStats(user, subject);
         s.setAnswered(answered);
         s.setCorrect(correct);
+        s.setLastAnsweredAt(lastAnsweredAt);
         return s;
     }
 
@@ -89,7 +84,6 @@ class AdminServiceTests {
     @Test
     void learnerWithNoResultsShowsEmptyState() {
         when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of(learner));
-        when(practiceResultRepository.findByUser(learner)).thenReturn(List.of());
 
         List<LearnerProgressResponse> result = adminService.getLearnerProgress();
 
@@ -107,7 +101,6 @@ class AdminServiceTests {
     void learnerWithOnlyMockExamsShowsExamsAndLastActivity() {
         LocalDateTime examTime = LocalDateTime.now().minusDays(2);
         when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of(learner));
-        when(practiceResultRepository.findByUser(learner)).thenReturn(List.of());
         when(attemptQuestionRepository.findScoredMockExams(List.of(learner)))
                 .thenReturn(List.of(
                         exam(62, 70, examTime),
@@ -130,10 +123,8 @@ class AdminServiceTests {
         LocalDateTime practiceTime = LocalDateTime.now().minusDays(1);
         Subject ekologi = subject(3L, "Ekologi");
         when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of(learner));
-        when(practiceResultRepository.findByUser(learner))
-                .thenReturn(List.of(practice(ekologi, 80, practiceTime)));
         when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner)))
-                .thenReturn(List.of(stats(learner, ekologi, 10, 8)));
+                .thenReturn(List.of(stats(learner, ekologi, 10, 8, practiceTime)));
 
         LearnerProgressResponse lr = adminService.getLearnerProgress().getFirst();
 
@@ -151,12 +142,10 @@ class AdminServiceTests {
         LocalDateTime examTime = LocalDateTime.now().minusDays(1);  // more recent
         Subject ekologi = subject(3L, "Ekologi");
         when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of(learner));
-        when(practiceResultRepository.findByUser(learner))
-                .thenReturn(List.of(practice(ekologi, 70, practiceTime)));
         when(attemptQuestionRepository.findScoredMockExams(List.of(learner)))
                 .thenReturn(List.of(exam(62, 70, examTime)));
         when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner)))
-                .thenReturn(List.of(stats(learner, ekologi, 10, 7)));
+                .thenReturn(List.of(stats(learner, ekologi, 10, 7, practiceTime)));
 
         LearnerProgressResponse lr = adminService.getLearnerProgress().getFirst();
 
@@ -170,13 +159,26 @@ class AdminServiceTests {
     void latestExamBelowPassThresholdFails() {
         LocalDateTime examTime = LocalDateTime.now();
         when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of(learner));
-        when(practiceResultRepository.findByUser(learner)).thenReturn(List.of());
         when(attemptQuestionRepository.findScoredMockExams(List.of(learner)))
                 .thenReturn(List.of(exam(59, 70, examTime)));  // 59/70 = 84%
 
         LearnerProgressResponse lr = adminService.getLearnerProgress().getFirst();
 
         assertFalse(lr.mockExams().latestPassed());
+    }
+
+    @Test
+    void lastActivityIsTheNewestAnswerAcrossSubjects() {
+        // Arrange: answers in two subjects; Vapen was answered more recently
+        LocalDateTime older = LocalDateTime.now().minusDays(4);
+        LocalDateTime newer = LocalDateTime.now().minusHours(3);
+        when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of(learner));
+        when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner))).thenReturn(List.of(
+                stats(learner, subject(3L, "Ekologi"), 10, 8, older),
+                stats(learner, subject(4L, "Vapen"), 5, 2, newer)));
+
+        // Act + Assert
+        assertEquals(newer, adminService.getLearnerProgress().getFirst().lastActivityAt());
     }
 
     @Test
