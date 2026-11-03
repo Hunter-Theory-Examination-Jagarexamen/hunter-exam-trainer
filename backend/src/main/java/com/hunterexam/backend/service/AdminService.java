@@ -7,11 +7,13 @@ import com.hunterexam.backend.dto.SubjectPerformanceResponse;
 import com.hunterexam.backend.entity.ExamResult;
 import com.hunterexam.backend.entity.PracticeResult;
 import com.hunterexam.backend.entity.Role;
+import com.hunterexam.backend.entity.SubjectStats;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.repository.ExamResultRepository;
 import com.hunterexam.backend.repository.PracticeResultRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
+import com.hunterexam.backend.repository.SubjectStatsRepository;
 import com.hunterexam.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -33,19 +35,22 @@ public class AdminService {
     private final ExamResultRepository examResultRepository;
     private final QuestionRepository questionRepository;
     private final SubjectRepository subjectRepository;
+    private final SubjectStatsRepository subjectStatsRepository;
 
     public AdminService(
             UserRepository userRepository,
             PracticeResultRepository practiceResultRepository,
             ExamResultRepository examResultRepository,
             QuestionRepository questionRepository,
-            SubjectRepository subjectRepository
+            SubjectRepository subjectRepository,
+            SubjectStatsRepository subjectStatsRepository
     ) {
         this.userRepository = userRepository;
         this.practiceResultRepository = practiceResultRepository;
         this.examResultRepository = examResultRepository;
         this.questionRepository = questionRepository;
         this.subjectRepository = subjectRepository;
+        this.subjectStatsRepository = subjectStatsRepository;
     }
 
     /**
@@ -64,13 +69,22 @@ public class AdminService {
 
         List<User> learners = userRepository.findByRole(Role.STUDENT);
 
+        // Every student's subject totals in one query, then split per student
+        // (by user id), so the page doesn't run one query per student.
+        Map<Long, List<SubjectStats>> statsByLearner = learners.isEmpty()
+                ? Map.of()
+                : subjectStatsRepository.findAnsweredByUserIn(learners).stream()
+                        .collect(Collectors.groupingBy(stats -> stats.getUser().getId()));
+
         return learners.stream()
                 .sorted((a, b) -> a.getFullName().compareToIgnoreCase(b.getFullName()))
-                .map(this::buildLearnerProgress)
+                .map(learner -> buildLearnerProgress(
+                        learner,
+                        statsByLearner.getOrDefault(learner.getId(), List.of())))
                 .toList();
     }
 
-    private LearnerProgressResponse buildLearnerProgress(User learner) {
+    private LearnerProgressResponse buildLearnerProgress(User learner, List<SubjectStats> subjectStats) {
 
         List<PracticeResult> practiceResults =
                 practiceResultRepository.findByUser(learner);
@@ -78,7 +92,11 @@ public class AdminService {
         List<ExamResult> examResults =
                 examResultRepository.findByUserOrderByCompletedAtDesc(learner);
 
-        List<SubjectPerformanceResponse> perSubject = aggregateSubjects(practiceResults);
+        // Same calculation as the student's own Statistics page; weakest subject first.
+        List<SubjectPerformanceResponse> perSubject =
+                StatisticsService.toSubjectPerformance(subjectStats).stream()
+                        .sorted(Comparator.comparingLong(SubjectPerformanceResponse::getPercentage))
+                        .toList();
         MockExamSummary mockExams = aggregateMockExams(examResults);
         LocalDateTime lastActivity = computeLastActivity(practiceResults, examResults);
 
@@ -91,27 +109,6 @@ public class AdminService {
                 perSubject,
                 mockExams
         );
-    }
-
-    private List<SubjectPerformanceResponse> aggregateSubjects(List<PracticeResult> results) {
-
-        Map<Long, List<PracticeResult>> bySubject = results.stream()
-                .collect(Collectors.groupingBy(r -> r.getSubject().getId()));
-
-        return bySubject.values().stream()
-                .map(group -> {
-                    PracticeResult first = group.getFirst();
-                    long avg = Math.round(
-                            group.stream().mapToLong(PracticeResult::getScore).average().orElse(0)
-                    );
-                    return new SubjectPerformanceResponse(
-                            first.getSubject().getId(),
-                            first.getSubject().getName(),
-                            avg
-                    );
-                })
-                .sorted(Comparator.comparingLong(SubjectPerformanceResponse::getPercentage))
-                .toList();
     }
 
     private MockExamSummary aggregateMockExams(List<ExamResult> examResults) {

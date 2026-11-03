@@ -6,11 +6,13 @@ import com.hunterexam.backend.entity.ExamResult;
 import com.hunterexam.backend.entity.PracticeResult;
 import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.entity.Subject;
+import com.hunterexam.backend.entity.SubjectStats;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.repository.ExamResultRepository;
 import com.hunterexam.backend.repository.PracticeResultRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
+import com.hunterexam.backend.repository.SubjectStatsRepository;
 import com.hunterexam.backend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +27,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,6 +40,7 @@ class AdminServiceTests {
     @Mock ExamResultRepository examResultRepository;
     @Mock QuestionRepository questionRepository;
     @Mock SubjectRepository subjectRepository;
+    @Mock SubjectStatsRepository subjectStatsRepository;
 
     private AdminService adminService;
     private User learner;
@@ -43,8 +48,9 @@ class AdminServiceTests {
     @BeforeEach
     void setUp() {
         adminService = new AdminService(userRepository, practiceResultRepository, examResultRepository,
-                questionRepository, subjectRepository);
+                questionRepository, subjectRepository, subjectStatsRepository);
         learner = new User();
+        learner.setId(1L);
         learner.setFullName("Test Learner");
         learner.setEmail("learner@test.com");
         learner.setRole(Role.STUDENT);
@@ -68,6 +74,14 @@ class AdminServiceTests {
         r.setCompletedAt(at);
         r.setUser(learner);
         return r;
+    }
+
+    /** A student's running totals in one subject. */
+    private SubjectStats stats(User user, Subject subject, long answered, long correct) {
+        SubjectStats s = new SubjectStats(user, subject);
+        s.setAnswered(answered);
+        s.setCorrect(correct);
+        return s;
     }
 
     private Subject subject(long id, String name) {
@@ -125,6 +139,8 @@ class AdminServiceTests {
         when(practiceResultRepository.findByUser(learner))
                 .thenReturn(List.of(practice(ekologi, 80, practiceTime)));
         when(examResultRepository.findByUserOrderByCompletedAtDesc(learner)).thenReturn(List.of());
+        when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner)))
+                .thenReturn(List.of(stats(learner, ekologi, 10, 8)));
 
         LearnerProgressResponse lr = adminService.getLearnerProgress().getFirst();
 
@@ -133,6 +149,7 @@ class AdminServiceTests {
         assertEquals(practiceTime, lr.lastActivityAt());
         assertEquals(1, lr.subjectPerformances().size());
         assertEquals("Ekologi", lr.subjectPerformances().getFirst().getSubjectName());
+        assertEquals(80, lr.subjectPerformances().getFirst().getPercentage());
     }
 
     @Test
@@ -145,6 +162,8 @@ class AdminServiceTests {
                 .thenReturn(List.of(practice(ekologi, 70, practiceTime)));
         when(examResultRepository.findByUserOrderByCompletedAtDesc(learner))
                 .thenReturn(List.of(exam(62, 70, 89, examTime)));
+        when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner)))
+                .thenReturn(List.of(stats(learner, ekologi, 10, 7)));
 
         LearnerProgressResponse lr = adminService.getLearnerProgress().getFirst();
 
@@ -165,6 +184,44 @@ class AdminServiceTests {
         LearnerProgressResponse lr = adminService.getLearnerProgress().getFirst();
 
         assertFalse(lr.mockExams().latestPassed());
+    }
+
+    @Test
+    void eachLearnerGetsOwnSubjectsFromOneQueryWeakestFirst() {
+        // Arrange: two students; all their subject totals come back from one query
+        User other = new User();
+        other.setId(2L);
+        other.setFullName("Other Learner");
+        Subject ekologi = subject(3L, "Ekologi");
+        Subject vapen = subject(4L, "Vapen");
+        when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of(learner, other));
+        when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner, other))).thenReturn(List.of(
+                stats(learner, ekologi, 20, 18),   // 90 %
+                stats(learner, vapen, 10, 4),      // 40 %
+                stats(other, ekologi, 3, 1)));     // 33 %
+
+        // Act: sorted by name, so "Other Learner" comes before "Test Learner"
+        List<LearnerProgressResponse> result = adminService.getLearnerProgress();
+
+        // Assert: each student sees only their own rows, weakest subject first
+        LearnerProgressResponse otherProgress = result.get(0);
+        LearnerProgressResponse learnerProgress = result.get(1);
+        assertEquals(1, otherProgress.subjectPerformances().size());
+        assertEquals(33, otherProgress.subjectPerformances().getFirst().getPercentage());
+        assertEquals(2, learnerProgress.subjectPerformances().size());
+        assertEquals("Vapen", learnerProgress.subjectPerformances().get(0).getSubjectName());
+        assertEquals(40, learnerProgress.subjectPerformances().get(0).getPercentage());
+        assertEquals(90, learnerProgress.subjectPerformances().get(1).getPercentage());
+        // One query for all students, not one per student
+        verify(subjectStatsRepository).findAnsweredByUserIn(any());
+    }
+
+    @Test
+    void noStudentsMeansNoSubjectStatsQuery() {
+        when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of());
+
+        assertTrue(adminService.getLearnerProgress().isEmpty());
+        verify(subjectStatsRepository, never()).findAnsweredByUserIn(any());
     }
 
     @Test

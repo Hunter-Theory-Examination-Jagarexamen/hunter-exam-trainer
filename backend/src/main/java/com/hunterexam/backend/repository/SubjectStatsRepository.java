@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 
 public interface SubjectStatsRepository extends JpaRepository<SubjectStats, Long> {
@@ -28,6 +29,18 @@ public interface SubjectStatsRepository extends JpaRepository<SubjectStats, Long
             ORDER BY s.subject.id
             """)
     List<SubjectStats> findAnsweredByUser(@Param("user") User user);
+
+    /**
+     * Same as {@link #findAnsweredByUser}, for many students in one query
+     * (Learner Progress), instead of one query per student.
+     */
+    @Query("""
+            SELECT s FROM SubjectStats s
+            JOIN FETCH s.subject
+            WHERE s.user IN :users AND s.answered > 0
+            ORDER BY s.subject.id
+            """)
+    List<SubjectStats> findAnsweredByUserIn(@Param("users") Collection<User> users);
 
     /**
      * Adds one answer to the totals, letting the database do the adding

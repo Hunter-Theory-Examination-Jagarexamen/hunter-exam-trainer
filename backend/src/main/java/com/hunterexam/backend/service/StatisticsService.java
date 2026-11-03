@@ -70,7 +70,21 @@ public class StatisticsService {
      */
     public List<SubjectPerformanceResponse> subjectPerformanceFor(User user) {
 
-        return subjectStatsRepository.findAnsweredByUser(user).stream()
+        return toSubjectPerformance(subjectStatsRepository.findAnsweredByUser(user));
+    }
+
+    /**
+     * The shared calculation: one row per {@link SubjectStats}, with
+     * correct / answered as a rounded percentage. {@code static} because it
+     * only uses its argument, so {@code AdminService} can call it for rows it
+     * loaded itself.
+     *
+     * @param subjectStats one student's totals, one per subject
+     * @return one row per subject, in the same order
+     */
+    public static List<SubjectPerformanceResponse> toSubjectPerformance(List<SubjectStats> subjectStats) {
+
+        return subjectStats.stream()
                 .map(stats -> new SubjectPerformanceResponse(
                         stats.getSubject().getId(),
                         stats.getSubject().getName(),
