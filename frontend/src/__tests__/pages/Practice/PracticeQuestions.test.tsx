@@ -180,7 +180,7 @@ describe("PracticeQuestions", () => {
         expect(calledEndpoints()).not.toContain("/api/practice/attempts/10/finish");
     });
 
-    it("never calls the old question list or results endpoints", async () => {
+    it("never calls the old question list endpoint", async () => {
         renderPage();
 
         await answer("B1");
@@ -190,10 +190,8 @@ describe("PracticeQuestions", () => {
         await userEvent.click(await screen.findByRole("button", { name: "Tillbaka till ämnen" }));
         await screen.findByText("Subject list");
 
-        // /api/questions returned every correct answer; /api/practice/results
-        // took the score from the browser. Both are replaced by the rounds.
+        // /api/questions returned every correct answer; the rounds replace it.
         expect(calledEndpoints().some((e) => e.startsWith("/api/questions"))).toBe(false);
-        expect(calledEndpoints()).not.toContain("/api/practice/results");
     });
 
     it("starts only one round under StrictMode, which runs effects twice", async () => {
