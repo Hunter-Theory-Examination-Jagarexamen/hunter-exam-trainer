@@ -138,28 +138,26 @@ describe("Exam page", () => {
         mockBackend();
         renderExam();
 
-        // Act: answer both questions and submit
+        // Act: answer both questions
         await userEvent.click(await screen.findByRole("radio", { name: "B1" }));
         await userEvent.click(screen.getByRole("button", { name: "Next" }));
         await userEvent.click(screen.getByRole("radio", { name: "C2" }));
 
+        // Click the always-visible Submit button (opens modal)
         await userEvent.click(screen.getByRole("button", { name: "Submit Exam" }));
 
-        const confirmButtons = await screen.findAllByRole("button", {name: "Submit Exam" });
+        // Confirm in modal — both answered, so the confirm button still says "Submit Exam"
+        const confirmButtons = await screen.findAllByRole("button", { name: "Submit Exam" });
         await userEvent.click(confirmButtons[confirmButtons.length - 1]);
 
-        // Assert: the result page shows
         expect(await screen.findByText("Result page")).toBeInTheDocument();
 
-        // Find the /submit call among everything the mock recorded (see vi.fn's .mock.calls)
         const submitCall = vi.mocked(apiClient).mock.calls.find(
             ([endpoint]) => endpoint === "/api/exam/submit"
         );
         expect(submitCall).toBeDefined();
 
-        // The body is a JSON string; turn it back into an object to compare
         const body = JSON.parse(submitCall![1]!.body as string);
-        // The answers were saved one by one; submit only says which exam.
         expect(body).toEqual({ attemptId: "attempt-1" });
     });
 
@@ -235,4 +233,54 @@ describe("Exam page", () => {
         expect(await screen.findByText("Not enough questions available to start the exam.")).toBeInTheDocument();
     });
 
+    it("can submit from the first question, not only the last", async () => {
+        mockBackend();
+        renderExam();
+
+        await screen.findByText("First question?");
+
+        // Click Submit from question 1
+        await userEvent.click(screen.getByRole("button", { name: "Submit Exam" }));
+
+        // Modal appears with unanswered warning
+        expect(screen.getByText(/unanswered question/i)).toBeInTheDocument();
+
+        // Confirm — unanswered > 0 so button says "Submit anyway"
+        await userEvent.click(screen.getByRole("button", { name: "Submit anyway" }));
+
+        expect(await screen.findByText("Result page")).toBeInTheDocument();
+
+        const submitCall = vi.mocked(apiClient).mock.calls.find(
+            ([endpoint]) => endpoint === "/api/exam/submit"
+        );
+        expect(submitCall).toBeDefined();
+    });
+
+    it("disables Next on the last question", async () => {
+        mockBackend();
+        renderExam();
+
+        await screen.findByText("First question?");
+        const nextButton = screen.getByRole("button", { name: "Next" });
+        expect(nextButton).not.toBeDisabled();
+
+        await userEvent.click(nextButton);    // → Q2
+        expect(screen.getByText("Second question?")).toBeInTheDocument();
+        expect(nextButton).toBeDisabled();
+    });
+
+    it("shows 'Submit anyway' when there are unanswered questions", async () => {
+        mockBackend();
+        renderExam();
+
+        await screen.findByText("First question?");
+        // Don't answer anything, just submit
+        await userEvent.click(screen.getByRole("button", { name: "Submit Exam" }));
+
+        // Modal should show "Submit anyway" (unanswered > 0)
+        expect(await screen.findByRole("button", { name: "Submit anyway" })).toBeInTheDocument();
+
+        // Clean up — cancel so no real submit fires
+        await userEvent.click(screen.getByRole("button", { name: "Go back" }));
+    });
     });

@@ -1,14 +1,16 @@
-import {Clock} from "lucide-react";
+import {Clock, List} from "lucide-react";
 import "../../styles/exam.css";
 
 interface ExamHeaderProps {
     currentQuestion: number;
     totalQuestions: number;
     timeLeft: number;
+    onToggleOverview: () => void;
+    overviewOpen: boolean;
 }
 
 const ExamHeader = (
-    { currentQuestion, totalQuestions, timeLeft } : ExamHeaderProps) => {
+    { currentQuestion, totalQuestions, timeLeft, onToggleOverview, overviewOpen } : ExamHeaderProps) => {
 
     const progress = (currentQuestion / totalQuestions) * 100;
 
@@ -25,10 +27,22 @@ const ExamHeader = (
                 <h2>
                     Question {currentQuestion} of {totalQuestions}
                 </h2>
-                <span className="timer">
-                    <Clock size={16} />
-                    {formattedTime}
-                </span>
+                <div className="exam-header-actions">
+                    <button
+                        type="button"
+                        className="exam-overview-toggle"
+                        onClick={onToggleOverview}
+                        aria-expanded={overviewOpen}
+                        aria-label="Toggle question overview"
+                    >
+                        <List size={16} />
+                        Overview
+                    </button>
+                    <span className="timer">
+                        <Clock size={16} />
+                        {formattedTime}
+                    </span>
+                </div>
             </div>
 
             <div className="exam-progress">
