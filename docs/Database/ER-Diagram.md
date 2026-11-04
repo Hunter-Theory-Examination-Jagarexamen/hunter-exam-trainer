@@ -56,6 +56,7 @@ erDiagram
         varchar type "SUBJECT_PRACTICE, RANDOM_PRACTICE or MOCK_EXAM"
         datetime started_at
         datetime finished_at "null while running"
+        boolean scored "mock exam submitted in time"
     }
 
     ATTEMPT_QUESTIONS {

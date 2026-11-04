@@ -355,6 +355,7 @@ class ExamServiceTests {
         examService.submitExam(submission(), EMAIL);
 
         assertTrue(exam.isFinished());
+        assertTrue(exam.isScored(), "an exam submitted in time counts as scored");
         verify(attemptRepository).save(exam);
     }
 
@@ -515,6 +516,7 @@ class ExamServiceTests {
             () -> examService.submitExam(submission(), EMAIL));
 
         assertTrue(exam.isFinished(), "a late exam should be closed");
+        assertFalse(exam.isScored(), "a late exam is closed but not scored");
         verify(attemptRepository).save(exam);
         verifyNoInteractions(attemptQuestionRepository, examResultRepository, subjectStatsRepository);
     }

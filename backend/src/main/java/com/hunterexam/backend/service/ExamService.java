@@ -257,6 +257,9 @@ public class ExamService {
             );
         }
 
+        // In time: the exam counts as scored (saved at the end of the transaction).
+        exam.setScored(true);
+
         List<AttemptQuestion> rows = attemptQuestionRepository.findByAttemptIdOrderByPosition(exam.getId());
 
         long totalQuestions = rows.size();
