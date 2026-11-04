@@ -2,11 +2,13 @@ package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.ProgressOverTimeResponse;
 import com.hunterexam.backend.dto.SubjectPerformanceResponse;
-import com.hunterexam.backend.entity.PracticeResult;
+import com.hunterexam.backend.entity.SubjectStats;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.exception.NotFoundException;
-import com.hunterexam.backend.repository.PracticeResultRepository;
+import com.hunterexam.backend.repository.AttemptQuestionRepository;
+import com.hunterexam.backend.repository.SubjectStatsRepository;
 import com.hunterexam.backend.repository.UserRepository;
+import com.hunterexam.backend.repository.projection.AnswerOutcome;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -15,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
@@ -26,72 +29,83 @@ import java.util.stream.Collectors;
 @Service
 public class StatisticsService {
 
-    private final PracticeResultRepository practiceResultRepository;
+    private final AttemptQuestionRepository attemptQuestionRepository;
+    private final SubjectStatsRepository subjectStatsRepository;
     private final UserRepository userRepository;
 
     public StatisticsService(
-            PracticeResultRepository practiceResultRepository,
+            AttemptQuestionRepository attemptQuestionRepository,
+            SubjectStatsRepository subjectStatsRepository,
             UserRepository userRepository
     ) {
-        this.practiceResultRepository = practiceResultRepository;
+        this.attemptQuestionRepository = attemptQuestionRepository;
+        this.subjectStatsRepository = subjectStatsRepository;
         this.userRepository = userRepository;
     }
 
 
     /**
-     * Calculates the user's average practice performance per subject.
-     * <p>
-     * Groups all of the user's practice results by subject and computes
-     * the average score for each. Subjects the user has not practiced
-     * are not included in the result.
+     * The logged-in student's performance per subject, for the Statistics page.
      *
      * @param email user's email id
-     * @return list of subject performance responses (subject id, name and average score)
+     * @return one row per subject the student has answered questions in
      */
     public List<SubjectPerformanceResponse> getSubjectPerformance(String email) {
 
-        // Find the logged-in user to fetch their practice results.
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        List<PracticeResult> results = practiceResultRepository.findByUser(user);
-
-        // Group all practice results by subject id, so we can average scores per subject.
-        Map<Long, List<PracticeResult>> resultsBySubject = results.stream()
-                .collect(Collectors.groupingBy(
-                        result -> result.getSubject().getId()));
-
-        return resultsBySubject.values()
-                .stream()
-                .map(subjectResults -> {
-
-                    // Used only to read the subject id/name, since all results in this
-                    // group belong to the same subject.
-                    PracticeResult firstResult = subjectResults.getFirst();
-
-                    // Average score across all practice attempts for this subject.
-                    long averagePercentage = Math.round(
-                            subjectResults.stream()
-                                    .mapToLong(PracticeResult::getScore)
-                                    .average()
-                                    .orElse(0)
-                    );
-
-                    return new SubjectPerformanceResponse(
-                            firstResult.getSubject().getId(),
-                            firstResult.getSubject().getName(),
-                            averagePercentage
-                    );
-                })
-                .toList();
+        return subjectPerformanceFor(user);
     }
 
     /**
-     * Calculates the user's practice accuracy grouped by ISO week
-     * (Monday–Sunday) for the last N weeks.
+     * Performance per subject: correct answers / answered questions, from
+     * {@link SubjectStats}. Counts every answered question, from practice and
+     * mock exams alike, so each answer weighs the same.
+     * <p>
+     * Shared by the Statistics page and the admin's Learner Progress, so a
+     * student and an admin always see the same numbers.
      *
-     * <p>Only weeks in which the user practiced are included in the result,
-     * ordered from oldest to newest.
+     * @param user the student
+     * @return one row per subject with at least one answer, ordered by subject id
+     */
+    public List<SubjectPerformanceResponse> subjectPerformanceFor(User user) {
+
+        return toSubjectPerformance(subjectStatsRepository.findAnsweredByUser(user));
+    }
+
+    /**
+     * The shared calculation: one row per {@link SubjectStats}, with
+     * correct / answered as a rounded percentage. {@code static} because it
+     * only uses its argument, so {@code AdminService} can call it for rows it
+     * loaded itself.
+     *
+     * @param subjectStats one student's totals, one per subject
+     * @return one row per subject, in the same order
+     */
+    public static List<SubjectPerformanceResponse> toSubjectPerformance(List<SubjectStats> subjectStats) {
+
+        return subjectStats.stream()
+                .map(stats -> new SubjectPerformanceResponse(
+                        stats.getSubject().getId(),
+                        stats.getSubject().getName(),
+                        percentage(stats.getCorrect(), stats.getAnswered())
+                ))
+                .toList();
+    }
+
+    /** Rounded percentage; 0 when nothing was answered. */
+    private static long percentage(long correct, long answered) {
+        return answered == 0 ? 0 : Math.round(correct * 100.0 / answered);
+    }
+
+    /**
+     * Calculates the user's accuracy (correct / answered) grouped by ISO week
+     * (Monday–Sunday) for the last N weeks, from each stored answer: practice
+     * and scored mock exams, the same answers as {@code SubjectStats}.
+     *
+     * <p>Only weeks in which the user answered questions are included in the
+     * result, ordered from oldest to newest.
      *
      * @param email user's email
      * @param weeks number of weeks to look back
@@ -108,26 +122,26 @@ public class StatisticsService {
                 .toLocalDate()
                 .atStartOfDay();
 
-        List<PracticeResult> results =
-                practiceResultRepository.findByUserAndCompletedAtAfter(user, since);
+        List<AnswerOutcome> answers =
+                attemptQuestionRepository.findCountedAnswersSince(user, since);
 
-        // Group by the Monday of the week the result was completed.
-        Map<LocalDate, List<PracticeResult>> byWeek = results.stream()
-                .collect(Collectors.groupingBy(r ->
-                        r.getCompletedAt().toLocalDate()
-                                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-                ));
+        // Group by the Monday of the week each answer was given. A TreeMap keeps
+        // its keys sorted, so the weeks come out oldest first.
+        Map<LocalDate, List<AnswerOutcome>> byWeek = answers.stream()
+                .collect(Collectors.groupingBy(
+                        answer -> answer.answeredAt().toLocalDate()
+                                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
+                        TreeMap::new,
+                        Collectors.toList()));
 
         return byWeek.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey())
                 .map(entry -> {
+                    long total = entry.getValue().size();
                     long correct = entry.getValue().stream()
-                            .mapToLong(PracticeResult::getCorrectAnswers).sum();
-                    long total = entry.getValue().stream()
-                            .mapToLong(PracticeResult::getTotalQuestions).sum();
-                    long accuracy = total == 0 ? 0 : Math.round(correct * 100.0 / total);
+                            .filter(AnswerOutcome::isCorrect)
+                            .count();
 
-                    return new ProgressOverTimeResponse(entry.getKey(), accuracy, total);
+                    return new ProgressOverTimeResponse(entry.getKey(), percentage(correct, total), total);
                 })
                 .toList();
     }

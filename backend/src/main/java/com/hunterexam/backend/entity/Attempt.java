@@ -50,6 +50,12 @@ public class Attempt {
     // Empty (null) while the round is running.
     private LocalDateTime finishedAt;
 
+    // True only for a mock exam that was submitted in time and scored. A late
+    // submit closes the exam (finishedAt is set) but leaves this false.
+    // The default makes ddl-auto=update able to add the column to existing rows.
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean scored;
+
     public Attempt(User user, AttemptType type, LocalDateTime startedAt) {
         this.user = user;
         this.type = type;

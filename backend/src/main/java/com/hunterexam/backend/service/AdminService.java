@@ -4,15 +4,15 @@ import com.hunterexam.backend.dto.AdminStatsResponse;
 import com.hunterexam.backend.dto.LearnerProgressResponse;
 import com.hunterexam.backend.dto.MockExamSummary;
 import com.hunterexam.backend.dto.SubjectPerformanceResponse;
-import com.hunterexam.backend.entity.ExamResult;
-import com.hunterexam.backend.entity.PracticeResult;
 import com.hunterexam.backend.entity.Role;
+import com.hunterexam.backend.entity.SubjectStats;
 import com.hunterexam.backend.entity.User;
-import com.hunterexam.backend.repository.ExamResultRepository;
-import com.hunterexam.backend.repository.PracticeResultRepository;
+import com.hunterexam.backend.repository.AttemptQuestionRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
+import com.hunterexam.backend.repository.SubjectStatsRepository;
 import com.hunterexam.backend.repository.UserRepository;
+import com.hunterexam.backend.repository.projection.MockExamScore;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -29,23 +29,23 @@ public class AdminService {
     private static final int EXAM_TOTAL_QUESTIONS = 70;
 
     private final UserRepository userRepository;
-    private final PracticeResultRepository practiceResultRepository;
-    private final ExamResultRepository examResultRepository;
+    private final AttemptQuestionRepository attemptQuestionRepository;
     private final QuestionRepository questionRepository;
     private final SubjectRepository subjectRepository;
+    private final SubjectStatsRepository subjectStatsRepository;
 
     public AdminService(
             UserRepository userRepository,
-            PracticeResultRepository practiceResultRepository,
-            ExamResultRepository examResultRepository,
+            AttemptQuestionRepository attemptQuestionRepository,
             QuestionRepository questionRepository,
-            SubjectRepository subjectRepository
+            SubjectRepository subjectRepository,
+            SubjectStatsRepository subjectStatsRepository
     ) {
         this.userRepository = userRepository;
-        this.practiceResultRepository = practiceResultRepository;
-        this.examResultRepository = examResultRepository;
+        this.attemptQuestionRepository = attemptQuestionRepository;
         this.questionRepository = questionRepository;
         this.subjectRepository = subjectRepository;
+        this.subjectStatsRepository = subjectStatsRepository;
     }
 
     /**
@@ -64,23 +64,42 @@ public class AdminService {
 
         List<User> learners = userRepository.findByRole(Role.STUDENT);
 
+        // Every student's subject totals in one query, then split per student
+        // (by user id), so the page doesn't run one query per student.
+        Map<Long, List<SubjectStats>> statsByLearner = learners.isEmpty()
+                ? Map.of()
+                : subjectStatsRepository.findAnsweredByUserIn(learners).stream()
+                        .collect(Collectors.groupingBy(stats -> stats.getUser().getId()));
+
+        // Every student's scored mock exams in one query, newest first; groupingBy
+        // keeps that order inside each student's list.
+        Map<Long, List<MockExamScore>> examsByLearner = learners.isEmpty()
+                ? Map.of()
+                : attemptQuestionRepository.findScoredMockExams(learners).stream()
+                        .collect(Collectors.groupingBy(MockExamScore::userId));
+
         return learners.stream()
                 .sorted((a, b) -> a.getFullName().compareToIgnoreCase(b.getFullName()))
-                .map(this::buildLearnerProgress)
+                .map(learner -> buildLearnerProgress(
+                        learner,
+                        statsByLearner.getOrDefault(learner.getId(), List.of()),
+                        examsByLearner.getOrDefault(learner.getId(), List.of())))
                 .toList();
     }
 
-    private LearnerProgressResponse buildLearnerProgress(User learner) {
+    private LearnerProgressResponse buildLearnerProgress(
+            User learner,
+            List<SubjectStats> subjectStats,
+            List<MockExamScore> examScores
+    ) {
 
-        List<PracticeResult> practiceResults =
-                practiceResultRepository.findByUser(learner);
-
-        List<ExamResult> examResults =
-                examResultRepository.findByUserOrderByCompletedAtDesc(learner);
-
-        List<SubjectPerformanceResponse> perSubject = aggregateSubjects(practiceResults);
-        MockExamSummary mockExams = aggregateMockExams(examResults);
-        LocalDateTime lastActivity = computeLastActivity(practiceResults, examResults);
+        // Same calculation as the student's own Statistics page; weakest subject first.
+        List<SubjectPerformanceResponse> perSubject =
+                StatisticsService.toSubjectPerformance(subjectStats).stream()
+                        .sorted(Comparator.comparingLong(SubjectPerformanceResponse::getPercentage))
+                        .toList();
+        MockExamSummary mockExams = aggregateMockExams(examScores);
+        LocalDateTime lastActivity = computeLastActivity(subjectStats, examScores);
 
         return new LearnerProgressResponse(
                 learner.getId(),
@@ -93,64 +112,55 @@ public class AdminService {
         );
     }
 
-    private List<SubjectPerformanceResponse> aggregateSubjects(List<PracticeResult> results) {
+    /**
+     * Count, latest, best and pass/fail from the student's scored mock exams.
+     *
+     * @param examScores scored mock exams, newest first (as the query returns them)
+     */
+    private MockExamSummary aggregateMockExams(List<MockExamScore> examScores) {
 
-        Map<Long, List<PracticeResult>> bySubject = results.stream()
-                .collect(Collectors.groupingBy(r -> r.getSubject().getId()));
-
-        return bySubject.values().stream()
-                .map(group -> {
-                    PracticeResult first = group.getFirst();
-                    long avg = Math.round(
-                            group.stream().mapToLong(PracticeResult::getScore).average().orElse(0)
-                    );
-                    return new SubjectPerformanceResponse(
-                            first.getSubject().getId(),
-                            first.getSubject().getName(),
-                            avg
-                    );
-                })
-                .sorted(Comparator.comparingLong(SubjectPerformanceResponse::getPercentage))
-                .toList();
-    }
-
-    private MockExamSummary aggregateMockExams(List<ExamResult> examResults) {
-
-        if (examResults.isEmpty()) {
+        if (examScores.isEmpty()) {
             return MockExamSummary.empty();
         }
 
-        // Repository returns results ordered by completedAt DESC.
-        ExamResult latest = examResults.getFirst();
+        MockExamScore latest = examScores.getFirst();
 
-        int bestScore = examResults.stream()
-                .mapToInt(ExamResult::getScore)
+        long bestScore = examScores.stream()
+                .mapToLong(MockExamScore::score)
                 .max()
                 .orElse(0);
 
         boolean latestPassed =
-                latest.getTotalQuestions() == EXAM_TOTAL_QUESTIONS
-                        && latest.getCorrectAnswers() >= PASS_CORRECT_ANSWERS;
+                latest.total() == EXAM_TOTAL_QUESTIONS
+                        && latest.correct() >= PASS_CORRECT_ANSWERS;
 
         return new MockExamSummary(
-                examResults.size(),
-                latest.getScore(),
-                latest.getCompletedAt(),
-                bestScore,
+                examScores.size(),
+                (int) latest.score(),
+                latest.finishedAt(),
+                (int) bestScore,
                 latestPassed
         );
     }
 
+    /**
+     * The student's latest answer (practice or mock exam, from the subject
+     * totals) or latest mock exam submit, whichever is newest. An exam's
+     * answers are given before it is submitted, so its {@code finishedAt}
+     * is usually the later one.
+     *
+     * @return null when the student has no answers and no exams
+     */
     private LocalDateTime computeLastActivity(
-            List<PracticeResult> practiceResults,
-            List<ExamResult> examResults
+            List<SubjectStats> subjectStats,
+            List<MockExamScore> examScores
     ) {
-        Stream<LocalDateTime> practiceTimes = practiceResults.stream()
-                .map(PracticeResult::getCompletedAt);
-        Stream<LocalDateTime> examTimes = examResults.stream()
-                .map(ExamResult::getCompletedAt);
+        Stream<LocalDateTime> answerTimes = subjectStats.stream()
+                .map(SubjectStats::getLastAnsweredAt);
+        Stream<LocalDateTime> examTimes = examScores.stream()
+                .map(MockExamScore::finishedAt);
 
-        return Stream.concat(practiceTimes, examTimes)
+        return Stream.concat(answerTimes, examTimes)
                 .filter(t -> t != null)
                 .max(LocalDateTime::compareTo)
                 .orElse(null);

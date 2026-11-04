@@ -2,6 +2,7 @@ import "../../styles/exam.css";
 import ExamHeader from "../../components/exam/ExamHeader";
 import QuestionPanel from "../../components/exam/QuestionPanel";
 import ExamNavigation from "../../components/exam/ExamNavigation";
+import { useExamBookmarks } from "../../hooks/useExamBookmarks";
 import type { ExamQuestion } from "../../types/examQuestion.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -25,6 +26,8 @@ const Exam = () => {
     const [timeLeft, setTimeLeft] = useState(60 * 60);
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [overviewOpen, setOverviewOpen] = useState(false);
+    const { toggleBookmark, isBookmarked } = useExamBookmarks(attemptId);
 
     // The start request, shared by both runs of the load effect. React's
     // StrictMode (development only) runs effects twice; without this, the page
@@ -55,7 +58,7 @@ const Exam = () => {
             }
 
             alert(
-                "Kunde inte skicka in provet. Dina svar är sparade på servern – försök igen."
+                "Failed to submit exam. Your answers are saved on the server — please try again."
             );
         }
     }, [attemptId, navigate]);
@@ -84,9 +87,9 @@ const Exam = () => {
                 console.error("Failed to load exam questions.", err);
                 const errorObj = err as { status?: number; message?: string };
                 if (errorObj.status === 409 || (errorObj?.message && errorObj.message.includes("Not enough questions"))) {
-                    setError(errorObj.message || "Inte tillräckligt med frågor tillgängliga för att starta provet.");
+                    setError(errorObj.message || "Not enough questions available to start the exam.");
                 } else {
-                    setError("Kunde inte ladda provfrågor. Försök igen.");
+                    setError("Failed to load exam questions. Please try again.");
                 }
             }
             finally {
@@ -171,6 +174,11 @@ const Exam = () => {
         }
     };
 
+    const handleToggleBookmark = () => {
+        if (!currentQuestion) return;
+        toggleBookmark(currentQuestion.id);
+    };
+
     const handleNext = () => {
         if (currentQuestionIndex < questions.length - 1) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -186,7 +194,7 @@ const Exam = () => {
     if (isLoading) {
         return (
             <div className="exam">
-                <p>Laddar provfrågor...</p>
+                <p>Loading exam questions...</p>
             </div>
         );
     }
@@ -202,7 +210,7 @@ const Exam = () => {
     if (questions.length === 0) {
         return (
             <div className="exam">
-                <p>Inga provfrågor tillgängliga.</p>
+                <p>No exam questions available.</p>
             </div>
         );
     }
@@ -216,7 +224,7 @@ const Exam = () => {
 
             <div className="exam-progress-bar text-center my-2">
                 <span className="font-semibold text-gray-700">
-                    Besvarade {answeredCount} / {totalQuestions}
+                    Answered {answeredCount} / {totalQuestions}
                 </span>
             </div>
 
@@ -224,12 +232,16 @@ const Exam = () => {
                 currentQuestion={currentQuestionIndex + 1}
                 totalQuestions={questions.length}
                 timeLeft={timeLeft}
+                onToggleOverview={() => setOverviewOpen((open) => !open)}
+                overviewOpen={overviewOpen}
             />
 
             <QuestionPanel
                 question={currentQuestion}
                 selectedAnswer={answers[currentQuestion.id]}
                 onAnswerChange={handleAnswerChange}
+                isBookmarked={isBookmarked(currentQuestion.id)}
+                onToggleBookmark={handleToggleBookmark}
             />
 
             <ExamNavigation
@@ -243,14 +255,14 @@ const Exam = () => {
             {showConfirmModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
                     <div className="question-card text-center max-w-md w-full">
-                        <h3 className="text-xl font-bold mb-3 text-[var(--color-text)]">Skicka in prov?</h3>
+                        <h3 className="text-xl font-bold mb-3 text-[var(--color-text)]">Submit Exam?</h3>
                         {unansweredCount > 0 ? (
                             <p className="text-[var(--color-text)] opacity-80 mb-6">
-                                Du har <strong>{unansweredCount}</strong> obesvarad{unansweredCount > 1 ? "e" : ""} fråga{unansweredCount > 1 ? "or" : ""}. Är du säker på att du vill skicka in?
+                                You have <strong>{unansweredCount}</strong> unanswered question{unansweredCount > 1 ? "s" : ""}. Are you sure you want to submit?
                             </p>
                         ) : (
                             <p className="text-[var(--color-text)] opacity-80 mb-6">
-                                Du har besvarat alla frågor. Är du säker på att du vill skicka in?
+                                You have answered all questions. Are you sure you want to submit?
                             </p>
                         )}
                         <div className="flex justify-center">
@@ -259,14 +271,14 @@ const Exam = () => {
                                 className="previous-button"
                                 style={{ borderRadius: "8px", padding: "0.5rem 1rem", fontSize: "0.9rem", fontWeight: 600, marginRight: "12px" }}
                             >
-                                Gå tillbaka
+                                Go back
                             </button>
                             <button
                                 onClick={handleConfirmSubmit}
                                 className="next-button"
                                 style={{ borderRadius: "8px", padding: "0.5rem 1rem", fontSize: "0.9rem", fontWeight: 600 }}
                             >
-                                Skicka in prov
+                                Submit Exam
                             </button>
                         </div>
                     </div>

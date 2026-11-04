@@ -48,6 +48,7 @@ class Attempt {
     +AttemptType type
     +LocalDateTime startedAt
     +LocalDateTime finishedAt
+    +boolean scored
     +isFinished() boolean
 }
 
