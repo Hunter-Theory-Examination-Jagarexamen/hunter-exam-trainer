@@ -25,7 +25,7 @@ const AccountSettings = () => {
         setError("");
 
         if (newPassword !== confirmPassword) {
-            setError("New password and confirmation password do not match.");
+            setError("Det nya lösenordet och bekräftelsen matchar inte.");
             return;
         }
 
@@ -39,7 +39,7 @@ const AccountSettings = () => {
                     newPassword
                 })
             });
-            setMessage("Password changed successfully");
+            setMessage("Lösenordet har ändrats");
 
             setCurrentPassword("");
             setNewPassword("");
@@ -50,7 +50,7 @@ const AccountSettings = () => {
             setError(
                 error instanceof Error
                     ? error.message
-                    : "Failed to change password. Please try again."
+                    : "Kunde inte ändra lösenord. Försök igen."
             );
         }
         finally {
@@ -69,7 +69,7 @@ const AccountSettings = () => {
 
     return (
         <section className="profile-section">
-            <h2>Account Settings</h2>
+            <h2>Kontoinställningar</h2>
 
             <div className="account-settings">
 
@@ -79,7 +79,7 @@ const AccountSettings = () => {
                         onClick={() => setShowChangePassword(true)}
                     >
                         <Lock size={16}/>
-                        Change Password
+                        Ändra lösenord
                     </button>
                 )}
 
@@ -90,7 +90,7 @@ const AccountSettings = () => {
                     >
                         <div className="form-group">
                             <label htmlFor="currentPassword">
-                                Current Password
+                                Nuvarande lösenord
                             </label>
                             <input
                                 id="currentPassword"
@@ -105,7 +105,7 @@ const AccountSettings = () => {
 
                         <div className="form-group">
                             <label htmlFor="newPassword">
-                                New Password
+                                Nytt lösenord
                             </label>
                             <input
                                 id="newPassword"
@@ -120,7 +120,7 @@ const AccountSettings = () => {
 
                         <div className="form-group">
                             <label htmlFor="confirmPassword">
-                                Confirm Password
+                                Bekräfta lösenord
                             </label>
                             <input
                                 id="confirmPassword"
@@ -151,14 +151,14 @@ const AccountSettings = () => {
                                 onClick={handleCancel}
                                 disabled={isLoading}
                             >
-                                Cancel
+                                Avbryt
                             </button>
 
                             <button
                                 type="submit"
                                 disabled={isLoading}
                             >
-                                {isLoading ? "Changing..." : "Change Password"}
+                                {isLoading ? "Ändrar..." : "Ändra lösenord"}
                             </button>
                         </div>
                     </form>

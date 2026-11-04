@@ -24,7 +24,7 @@ const SummaryCards = () => {
 
             } catch (error) {
                 console.error("Failed to load statistics:", error);
-                setError("Failed to load statistics. Please try again.");
+                setError("Kunde inte ladda statistik. Försök igen.");
 
             } finally {
                 setIsLoading(false);
@@ -36,7 +36,7 @@ const SummaryCards = () => {
     }, []);
 
     if (isLoading) {
-        return <p>Loading statistics...</p>;
+        return <p>Laddar statistik...</p>;
     }
 
     if (error) {
@@ -44,21 +44,21 @@ const SummaryCards = () => {
     }
 
     if (!data) {
-        return <p>Statistics are not available.</p>;
+        return <p>Statistik är inte tillgänglig.</p>;
     }
 
     return (
         <div className="statistics-cards">
-            <Card title="Mock Exams">
+            <Card title="Låtsasprov">
                 {data.mockExams}
             </Card>
-            <Card title="Questions Answered">
+            <Card title="Besvarade frågor">
                 {data.questionsAnswered}
             </Card>
-            <Card title="Avg Score">
+            <Card title="Genomsnittspoäng">
                 {data.averageScore}%
             </Card>
-            <Card title="Best Score">
+            <Card title="Bästa poäng">
                 {data.bestScore}%
             </Card>
         </div>

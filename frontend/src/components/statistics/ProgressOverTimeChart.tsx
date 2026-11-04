@@ -15,7 +15,7 @@ interface Props {
 
 const ProgressOverTimeChart = ({ data }: Props) => {
     if (data.length === 0) {
-        return <p>No practice results yet.</p>;
+        return <p>Inga övningsresultat än.</p>;
     }
 
     const chartData = data.map((point) => ({
@@ -35,7 +35,7 @@ const ProgressOverTimeChart = ({ data }: Props) => {
                 <YAxis domain={[0, 100]} unit="%" />
                 <Tooltip
                     formatter={(value, name) => {
-                        if (name === "accuracy") return [`${value}%`, "Accuracy"];
+                        if (name === "accuracy") return [`${value}%`, "Träffsäkerhet"];
                         return [String(value), String(name)];
                     }}
                 />

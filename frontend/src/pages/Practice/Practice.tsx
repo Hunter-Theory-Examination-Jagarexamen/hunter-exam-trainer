@@ -5,8 +5,8 @@ const Practice = () => {
     return (
         <div>
             <PageTitle
-                title="Practice"
-                subtitle="Choose a mode to start practicing."
+                title="Öva"
+                subtitle="Välj ett läge för att börja öva."
             />
 
             <PracticeCards />

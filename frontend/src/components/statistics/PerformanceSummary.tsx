@@ -14,7 +14,7 @@ const PerformanceSummary = (
             <div className="performance-result">
                 <Trophy size={16} className="performance-icon" />
                 <span className="subject-title">
-                    Strongest Subject
+                     Starkaste ämne
                 </span>
                 <span className="subject-name">
                     {strongestSubject}
@@ -23,7 +23,7 @@ const PerformanceSummary = (
             <div className="performance-result">
                 <BookOpenText size={16} className="performance-icon" />
                 <span className="subject-title">
-                    Needs Improvement
+                    Behöver förbättras
                 </span>
                 <span className="subject-name">
                     {needsImprovement}

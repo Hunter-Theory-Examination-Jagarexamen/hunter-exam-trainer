@@ -16,21 +16,21 @@ const Header = ({ user, onMenuToggle }: HeaderProps) => {
                     type="button"
                     className="menu-toggle"
                     onClick={onMenuToggle}
-                    aria-label="Toggle navigation menu"
+                    aria-label="Växla navigeringsmeny"
                 >
                     <Menu size={24} />
                 </button>
 
                 <img
                     src={logo}
-                    alt="Hunter Exam Trainer Logo"
+                    alt="Hunter Exam Trainer Logotyp"
                     className="header-logo"
                 />
-                <h1>Hunter Theory Exam</h1>
+                <h1>Jägarexamen Teori</h1>
             </div>
 
             <div className="header-right">
-                <span>Welcome, {user ? user.fullName : "User"}</span>
+                <span>Välkommen, {user ? user.fullName : "Användare"}</span>
             </div>
         </header>
     );

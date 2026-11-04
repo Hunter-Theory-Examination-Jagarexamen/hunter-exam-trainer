@@ -12,12 +12,12 @@ type OptionKey = typeof optionKeys[number];
 interface Props {
     question?: Question;
     subjectId: number;
-    subjects: Subject[];
+    subjects?: Subject[];
     onSaved: (question: Question) => void;
     onCancel: () => void;
 }
 
-export default function QuestionForm({question, subjectId, subjects, onSaved, onCancel}: Props) {
+export default function QuestionForm({question, subjectId, subjects = [], onSaved, onCancel}: Props) {
     const [text, setText] = useState(question?.questionText ?? "");
     const [options, setOptions] = useState({optionA: question?.optionA ?? "", optionB: question?.optionB ?? "",
         optionC: question?.optionC ?? "", optionD: question?.optionD ?? ""});

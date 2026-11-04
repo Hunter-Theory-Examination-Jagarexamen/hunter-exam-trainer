@@ -5,11 +5,11 @@ const RandomPractice = () => {
         <div>
 
             <PageTitle
-                title="Random Practice"
-                subtitle="Practice questions from all subjects."
+                title="Slumpmässig övning"
+                subtitle="Öva på frågor från alla ämnen."
             />
 
-            <p>Random practice will be implemented here.</p>
+            <p>Slumpmässig övning kommer att implementeras här.</p>
 
         </div>
     );

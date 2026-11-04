@@ -21,6 +21,7 @@ const ServerStatusBanner = () => {
         );
     }
 
+
     return (
         <div className="server-status-banner" role="alert">
             <span>

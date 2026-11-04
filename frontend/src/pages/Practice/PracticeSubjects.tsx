@@ -6,8 +6,8 @@ const PracticeSubjects = () => {
         <div>
 
             <PageTitle
-                title="Practice by Subject"
-                subtitle="Choose a subject to start practicing."
+                title="Öva per ämne"
+                subtitle="Välj ett ämnesområde för att börja öva."
             />
 
             <SubjectCards />

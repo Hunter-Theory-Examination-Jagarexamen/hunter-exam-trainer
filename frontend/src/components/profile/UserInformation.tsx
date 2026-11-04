@@ -21,7 +21,7 @@ const UserInformation = () => {
             }
             catch (error) {
                 console.error("Failed to load user details:", error);
-                setError("Failed to load User details. Please try again");
+                setError("Kunde inte ladda användardetaljer. Försök igen");
             }
             finally {
                 setIsLoading(false);
@@ -31,7 +31,7 @@ const UserInformation = () => {
     }, []);
 
     if (isLoading) {
-        return <p>Loading User details...</p>;
+        return <p>Laddar användardetaljer...</p>;
     }
 
     if (error) {
@@ -39,31 +39,31 @@ const UserInformation = () => {
     }
 
     if (!user) {
-        return <p>User details not available.</p>;
+        return <p>Användardetaljer är inte tillgängliga.</p>;
     }
 
     return (
         <section className="profile-section">
-            <h2>User Information</h2>
+            <h2>Användarinformation</h2>
 
             <div className="profile-card">
                 <div className="profile-row">
-                    <span>Name</span>
+                    <span>Namn</span>
                     <strong>{user.fullName}</strong>
                 </div>
                 <div className="profile-row">
-                    <span>Email</span>
+                    <span>E-post</span>
                     <strong>{user.email}</strong>
                 </div>
                 <div className="profile-row">
-                    <span>Role</span>
+                    <span>Roll</span>
                     <strong>{user.role}</strong>
                 </div>
                 <div className="profile-row">
-                    <span>Member Since</span>
+                    <span>Medlem sedan</span>
                     <strong>
                         {new Date(user.createdAt).toLocaleDateString(
-                            "en-US",
+                            "sv-SE",
                             {
                                 month: "long",
                                 year: "numeric"

@@ -28,7 +28,7 @@ const Layout = () => {
             if (active) setCurrentUser({
                 user: null,
                 isLoading: false,
-                error: "Failed to load user details. Please try again.",
+                error: "Kunde inte ladda användardetaljer. Försök igen.",
             });
         });
         return () => { active = false; };

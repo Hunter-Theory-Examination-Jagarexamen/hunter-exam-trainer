@@ -22,7 +22,7 @@ const StatisticsCards = () => {
             }
             catch (error) {
                 console.error("Failed to load dashboard details:", error);
-                setError("Failed to load dashboard details. Please try again");
+                setError("Kunde inte ladda instrumentpanelens detaljer. Försök igen.");
             }
             finally {
                 setIsLoading(false);
@@ -32,7 +32,7 @@ const StatisticsCards = () => {
     }, []);
 
     if (isLoading) {
-        return <p>Loading Dashboard details...</p>;
+        return <p>Laddar instrumentpanelens detaljer...</p>;
     }
 
     if (error) {
@@ -40,21 +40,21 @@ const StatisticsCards = () => {
     }
 
     if (!data) {
-        return <p>Dashboard details are not available.</p>;
+        return <p>Instrumentpanelens detaljer är inte tillgängliga.</p>;
     }
 
     return (
         <div className="dashboard-cards">
-            <Card title="Mock Exams" >
+            <Card title="Låtsasprov" >
                 {data.mockExams}
             </Card>
-            <Card title="Questions Answered" >
+            <Card title="Besvarade frågor" >
                 {data.questionsAnswered}
             </Card>
-            <Card title="Average Score" >
+            <Card title="Genomsnittspoäng" >
                 {data.averageScore}%
             </Card>
-            <Card title="Best Score" >
+            <Card title="Bästa poäng" >
                 {data.bestScore}%
             </Card>
         </div>

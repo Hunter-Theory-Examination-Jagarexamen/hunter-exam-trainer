@@ -40,12 +40,12 @@ const Sidebar = ({ user, isOpen, onClose }: SidebarProps) => {
             <nav className="sidebar-nav">
                 <NavLink to="/dashboard" onClick={onClose} className={headerClass}>
                     <LayoutDashboard size={20} />
-                    Dashboard
+                    Instrumentpanel
                 </NavLink>
 
                 <NavLink to="/practice" onClick={onClose}>
                     <BookOpen size={20} />
-                    Practice
+                    Öva
                 </NavLink>
 
                 <NavLink
@@ -60,17 +60,17 @@ const Sidebar = ({ user, isOpen, onClose }: SidebarProps) => {
                     }
                 >
                     <ClipboardCheck size={20} />
-                    Mock Exam
+                    Skrivprov
                 </NavLink>
 
                 <NavLink to="/statistics" onClick={onClose}>
                     <ChartColumnIncreasing size={20} />
-                    Statistics
+                    Statistik
                 </NavLink>
 
                 <NavLink to="/profile" onClick={onClose}>
                     <User size={20} />
-                    Profile
+                    Profil
                 </NavLink>
 
                 {user?.role === UserRole.ADMIN && (
@@ -83,24 +83,24 @@ const Sidebar = ({ user, isOpen, onClose }: SidebarProps) => {
 
                         <NavLink to="/admin/questions" onClick={onClose}>
                             <ListChecks size={20} />
-                            Questions
+                            Frågor
                         </NavLink>
 
                         <NavLink to="/admin/subjects" onClick={onClose}>
                             <BookOpen size={20} />
-                            Subjects
+                            Ämnen
                         </NavLink>
 
                         <NavLink to="/admin/learners" onClick={onClose}>
                             <Users size={20} />
-                            Learners
+                            Elever
                         </NavLink>
                     </>
                 )}
 
                 <button type="button" className="sidebar-logout" onClick={handleLogout}>
                     <LogOut size={20} />
-                    Logout
+                    Logga ut
                 </button>
             </nav>
         </aside>

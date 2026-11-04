@@ -14,14 +14,14 @@ const RecentResults = (
             <Check size={16} className="recent-result-icon" />
 
             <span className="recent-result-name">
-                Mock Exam
+                Låtsasprov
             </span>
             <span className="recent-result-score">
                 {activity.score}%
             </span>
             <span className="recent-result-date">
                 {new Date(activity.completedAt).toLocaleDateString(
-                    "en-US",
+                    "sv-SE",
                     {
                         month: "short",
                         day: "numeric",

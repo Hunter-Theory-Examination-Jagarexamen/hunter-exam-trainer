@@ -33,21 +33,21 @@ export default function QuestionForm({question, subjectId, subjects, onSaved, on
     async function submit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         if (pending.current) return;
-        if (!text.trim()) { setError("Enter question text."); return; }
+        if (!text.trim()) { setError("Ange frågetext."); return; }
         const empty = optionKeys.find(key => !options[key].trim());
-        if (empty) { setError(`Enter text for option ${empty.slice(-1)}.`); return; }
-        if (!correct) { setError("Select the correct option."); return; }
-        if (!subjects.some(subject => subject.id === selectedSubject && subject.id > 0)) {
-            setError("Choose an available subject."); return;
+        if (empty) { setError(`Ange text för alternativ ${empty.slice(-1)}.`); return; }
+        if (!correct) { setError("Välj det rätta svarsalternativet."); return; }
+        if (!subjects || !subjects.some(subject => subject.id === selectedSubject && subject.id > 0)) {
+            setError("Välj ett tillgängligt ämne."); return;
         }
         if ([text, ...Object.values(options), explanation].some(value => value.length > 255)) {
-            setError("Question text, options and explanation must each be at most 255 characters."); return;
+            setError("Frågetext, svarsalternativ och förklaring får högst vara 255 tecken var."); return;
         }
         if (imageUrl.trim().length > 1000) {
-            setError("Image URL must be at most 1000 characters."); return;
+            setError("Bild-URL får högst vara 1000 tecken."); return;
         }
         if (imageUrl.trim() && !isQuestionImageUrl(imageUrl.trim())) {
-            setError("Enter a complete HTTP or HTTPS image URL."); return;
+            setError("Ange en fullständig HTTP- eller HTTPS-bild-URL."); return;
         }
         pending.current = true;
         setSubmitting(true);
@@ -66,45 +66,45 @@ export default function QuestionForm({question, subjectId, subjects, onSaved, on
     }
 
     return <form className="card question-editor" aria-labelledby="question-editor-title" onSubmit={submit} noValidate>
-        <h2 id="question-editor-title">{question ? `Edit question #${question.id}: ${question.questionText}` : "Add question"}</h2>
+        <h2 id="question-editor-title">{question ? `Redigera fråga #${question.id}: ${question.questionText}` : "Lägg till fråga"}</h2>
         <fieldset disabled={submitting}>
             <div className="question-bank-field">
-                <label htmlFor="edit-question-text">Question text (required)</label>
+                <label htmlFor="edit-question-text">Frågetext (obligatoriskt)</label>
                 <textarea autoFocus id="edit-question-text" required maxLength={255} value={text} onChange={e => setText(e.target.value)} />
             </div>
             <fieldset>
-                <legend>Answer options — select the correct option (required)</legend>
+                <legend>Svarsalternativ — välj det rätta alternativet (obligatoriskt)</legend>
                 {optionKeys.map(key => <div className="question-bank-field" key={key}>
-                    <label htmlFor={`edit-${key}`}>Option {key.slice(-1)} (required)</label>
+                    <label htmlFor={`edit-${key}`}>Alternativ {key.slice(-1)} (obligatoriskt)</label>
                     <input id={`edit-${key}`} required maxLength={255} value={options[key]}
-                        onChange={e => setOptions({...options, [key]: e.target.value})} />
+                           onChange={e => setOptions({...options, [key]: e.target.value})} />
                     <label className="question-correct-option"><input type="radio" name="correct-option"
-                        checked={correct === key} onChange={() => setCorrect(key)} />Correct option {key.slice(-1)}</label>
+                                                                      checked={correct === key} onChange={() => setCorrect(key)} />Rätt alternativ {key.slice(-1)}</label>
                 </div>)}
             </fieldset>
             <div className="question-bank-field">
-                <label htmlFor="edit-subject">Question subject (required)</label>
+                <label htmlFor="edit-subject">Frågans ämne (obligatoriskt)</label>
                 <select id="edit-subject" value={selectedSubject} onChange={e => setSelectedSubject(Number(e.target.value))}>
-                    {subjects.map(subject => <option key={subject.id} value={subject.id}>{subject.name}</option>)}
+                    {subjects && subjects.map(subject => <option key={subject.id} value={subject.id}>{subject.name}</option>)}
                 </select>
             </div>
             <div className="question-bank-field">
-                <label htmlFor="edit-image-url">Image URL (optional)</label>
+                <label htmlFor="edit-image-url">Bild-URL (valfritt)</label>
                 <input id="edit-image-url" type="url" maxLength={1000} value={imageUrl}
-                    aria-describedby="image-url-help" onChange={e => setImageUrl(e.target.value)} />
-                <p id="image-url-help">Use a complete HTTP or HTTPS URL. Leave blank to save without an image.</p>
-                {imageUrl && <button type="button" onClick={() => setImageUrl("")}>Remove image</button>}
-                <QuestionImage imageUrl={imageUrl} questionText={text.trim() || "New question"} />
+                       aria-describedby="image-url-help" onChange={e => setImageUrl(e.target.value)} />
+                <p id="image-url-help">Använd en komplett HTTP- eller HTTPS-URL. Lämna tomt för att spara utan bild.</p>
+                {imageUrl && <button type="button" onClick={() => setImageUrl("")}>Ta bort bild</button>}
+                <QuestionImage imageUrl={imageUrl} questionText={text.trim() || "Ny fråga"} />
             </div>
             <div className="question-bank-field">
-                <label htmlFor="edit-explanation">Explanation (optional)</label>
+                <label htmlFor="edit-explanation">Förklaring (valfritt)</label>
                 <textarea id="edit-explanation" maxLength={255} value={explanation} onChange={e => setExplanation(e.target.value)} />
             </div>
         </fieldset>
         {error && <p role="alert">{error}</p>}
         <div className="question-bank-actions">
-            <button type="submit" disabled={submitting}>{submitting ? "Saving..." : "Save question"}</button>
-            <button type="button" disabled={submitting} onClick={onCancel}>Cancel</button>
+            <button type="submit" disabled={submitting}>{submitting ? "Sparar..." : "Spara fråga"}</button>
+            <button type="button" disabled={submitting} onClick={onCancel}>Avbryt</button>
         </div>
     </form>;
 }

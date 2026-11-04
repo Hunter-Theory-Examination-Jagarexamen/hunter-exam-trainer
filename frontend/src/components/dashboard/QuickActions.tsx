@@ -7,18 +7,18 @@ const QuickActions = () => {
 
     return (
         <section className="dashboard-section">
-            <h2>Quick Actions</h2>
+            <h2>Snabbåtgärder</h2>
 
             <div className="quick-actions">
                 <button
                     onClick={() => navigate("/practice")}
                 >
-                    Start Practice
+                    Börja öva
                 </button>
                 <button
                     onClick={() => navigate("/mockexam")}
                 >
-                    Start Mock Exam
+                    Starta låtsasprov
                 </button>
             </div>
         </section>

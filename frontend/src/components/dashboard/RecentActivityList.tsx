@@ -21,7 +21,7 @@ const RecentActivityList = () => {
             }
             catch (error) {
                 console.error("Failed to load recent activities:", error);
-                setError("Failed to load recent activities. Please try again");
+                setError("Kunde inte ladda senaste aktiviteter. Försök igen.");
             }
             finally {
                 setIsLoading(false);
@@ -31,7 +31,7 @@ const RecentActivityList = () => {
     }, []);
 
     if (isLoading) {
-        return <p>Loading recent activities...</p>;
+        return <p>Laddar senaste aktiviteter...</p>;
     }
 
     if (error) {
@@ -39,18 +39,18 @@ const RecentActivityList = () => {
     }
 
     if (activities.length === 0) {
-        return <p>No recent activity yet.</p>;
+        return <p>Ingen aktivitet än.</p>;
     }
 
     return (
         <section className="dashboard-section">
-            <h2>Recent Activity</h2>
+            <h2>Senaste aktivitet</h2>
 
             <div className="recent-activity">
                 <div className="recent-activity-header">
-                    <span>Activity</span>
-                    <span>Score</span>
-                    <span>Date</span>
+                    <span>Aktivitet</span>
+                    <span>Poäng</span>
+                    <span>Datum</span>
                 </div>
             </div>
 
@@ -61,7 +61,7 @@ const RecentActivityList = () => {
                         className="recent-activity-row"
                         key={activity.id}
                     >
-                        <span>Mock Exam</span>
+                        <span>Låtsasprov</span>
                         <span>
                             {activity.score}%
                             <small>
@@ -71,7 +71,7 @@ const RecentActivityList = () => {
                         <span>
                             {new Date(
                                 activity.completedAt
-                            ).toLocaleDateString("en-US", {
+                            ).toLocaleDateString("sv-SE", {
                                 month: "short",
                                 day: "numeric",
                                 year: "numeric"

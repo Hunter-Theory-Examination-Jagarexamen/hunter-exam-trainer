@@ -28,7 +28,7 @@ const SubjectCards = () => {
             catch (error) {
 
                 console.error("Failed to fetch subjects: ", error);
-                setError("Failed to load subjects. Please try again");
+                setError("Kunde inte ladda ämnen. Försök igen.");
             }
             finally {
                 setIsLoading(false);
@@ -39,7 +39,7 @@ const SubjectCards = () => {
     }, []);
 
     if (isLoading) {
-        return <p>Loading Subjects...</p>;
+        return <p>Laddar ämnen...</p>;
     }
 
     if (error) {
@@ -69,12 +69,12 @@ const SubjectCards = () => {
 
                         <div className="subject-card-footer">
                             <span>
-                                {subject.questionCount} questions
+                                {subject.questionCount} frågor
                             </span>
                             <button
                                 onClick={() => navigate(`/practice/subjects/${subject.id}`)}
                             >
-                                Start Practice
+                                Börja öva
                                 <ArrowRight size={16} />
                             </button>
                         </div>
