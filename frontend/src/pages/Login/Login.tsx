@@ -2,8 +2,10 @@ import LoginForm from "../../components/auth/LoginForm";
 import logo from "../../assets/images/logo.svg";
 import "../../styles/auth.css";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const Login = () => {
+    const { t } = useTranslation();
 
     const [searchParams] = useSearchParams();
     const googleError = searchParams.get("error") === "google";
@@ -19,20 +21,20 @@ const Login = () => {
                     </div>
                     <h1>HUNTER EXAM TRAINER</h1>
                     <p>
-                        The best way to prepare for the hunter exam.
+                        {t("auth.brandTagLine", "Det bästa sättet att förbereda sig för jägarexamen.")}
                     </p>
                 </div>
             </div>
 
             {googleError && (
                 <div className="auth-error-banner">
-                    Google sign-in failed. Try again or use another method.
+                    {t("auth.googleError", "Inloggning med Google misslyckades. Försök igen eller använd en annan metod.")}
                 </div>
             )}
 
             {sessionExpired && (
                 <div className="auth-error-banner">
-                    Your session has expired. Please log in again.
+                    {t("auth.sessionExpired", "Din session har gått ut. Vänligen logga in igen.")}
                 </div>
             )}
 

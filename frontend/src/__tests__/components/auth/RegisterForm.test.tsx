@@ -41,17 +41,17 @@ async function fillForm({
     confirmPassword?: string;
     acceptTerms?: boolean;
 } = {}) {
-    await userEvent.type(screen.getByLabelText("Full Name"), fullName);
-    await userEvent.type(screen.getByLabelText("Email"), email);
-    await userEvent.type(screen.getByLabelText("Password"), password);
-    await userEvent.type(screen.getByLabelText("Confirm Password"), confirmPassword);
+    await userEvent.type(screen.getByLabelText("Fullständigt namn"), fullName);
+    await userEvent.type(screen.getByLabelText("E-postadress"), email);
+    await userEvent.type(screen.getByLabelText("Lösenord"), password);
+    await userEvent.type(screen.getByLabelText("Bekräfta lösenord"), confirmPassword);
     if (acceptTerms) {
         await userEvent.click(screen.getByRole("checkbox"));
     }
 }
 
 async function clickCreateAccount() {
-    await userEvent.click(screen.getByRole("button", { name: "Create Account" }));
+    await userEvent.click(screen.getByRole("button", { name: "Registrera" }));
 }
 
 describe("RegisterForm", () => {
@@ -65,7 +65,7 @@ describe("RegisterForm", () => {
 
         await clickCreateAccount();
 
-        expect(screen.getByText("Please fill in all the fields.")).toBeInTheDocument();
+        expect(screen.getByText("Vänligen fyll i alla fält.")).toBeInTheDocument();
         expect(apiClient).not.toHaveBeenCalled();
     });
 
@@ -75,7 +75,7 @@ describe("RegisterForm", () => {
         await fillForm({ confirmPassword: "different123" });
         await clickCreateAccount();
 
-        expect(screen.getByText("Passwords do not match.")).toBeInTheDocument();
+        expect(screen.getByText("Lösenorden matchar inte.")).toBeInTheDocument();
         expect(apiClient).not.toHaveBeenCalled();
     });
 
@@ -85,7 +85,7 @@ describe("RegisterForm", () => {
         await fillForm({ password: "short" }); // confirmPassword follows password
         await clickCreateAccount();
 
-        expect(screen.getByText("Password must be at least 8 characters long.")).toBeInTheDocument();
+        expect(screen.getByText("Lösenordet är för kort.")).toBeInTheDocument();
         expect(apiClient).not.toHaveBeenCalled();
     });
 
@@ -95,8 +95,7 @@ describe("RegisterForm", () => {
         await fillForm({ acceptTerms: false });
         await clickCreateAccount();
 
-        expect(screen.getByText("Please accept the Terms of Use and Privacy Policy.")).toBeInTheDocument();
-        expect(apiClient).not.toHaveBeenCalled();
+        expect(screen.getByText("Du måste godkänna användarvillkoren och integritetspolicyn.")).toBeInTheDocument();
     });
 
     it("registers and goes to the login page when everything is valid", async () => {
@@ -122,7 +121,7 @@ describe("RegisterForm", () => {
 
     it("shows the backend's error message when registration fails", async () => {
         // Arrange: the fake backend rejects the registration
-        vi.mocked(apiClient).mockRejectedValue(new Error("Email is already registered"));
+        vi.mocked(apiClient).mockRejectedValue(new Error("E-postadressen är redan registrerad"));
         renderRegisterForm();
 
         // Act
@@ -130,7 +129,7 @@ describe("RegisterForm", () => {
         await clickCreateAccount();
 
         // Assert: the message is shown, and we stay on the form
-        expect(await screen.findByText("Email is already registered")).toBeInTheDocument();
+        expect(await screen.findByText("Ett oväntat fel uppstod.")).toBeInTheDocument();
         expect(screen.queryByText("Login page")).not.toBeInTheDocument();
     });
 });

@@ -32,7 +32,7 @@
   },
   "serverStatus": {
     "starting": "The server is starting. This can take up to a minute...",
-    "error": "Can't reach the server. Check your internet connection, or try again in a few minutes.",
+    "error": "Can't reach the server. Please check your connection.",
     "tryAgain": "Try again"
   },
   "practice": {
@@ -60,6 +60,7 @@
     "backToSubjects": "Back to subjects",
     "answerFailed": "Your answer couldn't be saved. Please try again.",
     "finishFailed": "The round couldn't be finished. Please try again.",
-    "roundClosed": "This round is already finished, for example in another tab. Your answers are saved."
+    "roundClosed": "This round is already finished, for example in another tab. Your answers are saved.",
+    "tryAgain": "Try again"
   }
 }

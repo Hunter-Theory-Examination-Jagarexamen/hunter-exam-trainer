@@ -22,10 +22,10 @@ const Result = () => {
             <section className="result">
 
                 <PageTitle
-                    title="Result"
-                    subtitle="No result data found."
+                    title="Resultat"
+                    subtitle="Ingen resultatdata hittades."
                 />
-                <p>Please complete a mock exam to see your results.</p>
+                <p>Vänligen genomför ett låtsasprov för att se dina resultat.</p>
             </section>
         );
     }
@@ -34,8 +34,8 @@ const Result = () => {
         <section className="result">
 
             <PageTitle
-                title="Result"
-                subtitle="Here is your result for the mock exam."
+                title="Resultat"
+                subtitle="Här är ditt resultat för låtsasprovet."
             />
 
             <ResultSummary

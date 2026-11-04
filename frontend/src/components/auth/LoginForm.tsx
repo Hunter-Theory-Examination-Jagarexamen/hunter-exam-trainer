@@ -9,14 +9,16 @@ import {
 } from "../../services/authService";
 import { API_BASE_URL } from "../../api/apiClient";
 import { errorStatus, isServerUnreachable } from "../../services/apiErrors";
+import { useTranslation } from "react-i18next";
 
 const LoginForm = () => {
 
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const [successMessage] = useState(
         (location.state as { accountCreated?: boolean })?.accountCreated
-        ? "Account created successfully! You can now log in."
+        ? t("auth.accountCreatedSuccess", "Konto skapat! Du kan nu logga in.")
             : ""
     );
 
@@ -37,7 +39,7 @@ const LoginForm = () => {
         setError(""); // clear the message from the previous attempt
 
         if(!email || !password) {
-            setError("Please enter your email and password");
+            setError(t("auth.enterEmailAndPassword", "Vänligen ange både e-postadress och lösenord"));
             return;
         }
 
@@ -56,11 +58,11 @@ const LoginForm = () => {
         } catch (error) {
             console.error("Login/API error:", error);
             if (isServerUnreachable(error)) {
-                setError("Can't reach the server. Please try again in a few minutes.");
+                setError(t("serverStatus.error", "Det går inte att nå servern. Kontrollera din internetanslutning eller försök igen om en stund."));
             } else if ((errorStatus(error) ?? 0) >= 500) {
-                setError("Something went wrong on the server. Please try again later.");
+                setError(t("errors.UNKNOWN_ERROR", "Ett oväntat fel uppstod på servern. Försök igen senare."));
             } else {
-                setError("Invalid email or password");
+                setError(t("errors.INVALID_CREDENTIALS", "Fel e-postadress eller lösenord."));
             }
         } finally {
             setIsLoading(false);
@@ -79,8 +81,8 @@ const LoginForm = () => {
                 <div className="auth-mobile-logo">
                     <img src={logo} alt="Hunter Exam Trainer" />
                 </div>
-                <h2>Welcome back!</h2>
-                <p>Log in to continue your practice.</p>
+                <h2>{t("auth.loginTitle", "Välkommen tillbaka!")}</h2>
+                <p>{t("auth.loginSubtitle", "Logga in för att fortsätta öva.")}</p>
             </div>
 
             {successMessage && (
@@ -91,9 +93,7 @@ const LoginForm = () => {
 
             <form onSubmit={handleLogin}>
                 <div className="form-field">
-                    <label htmlFor="email">
-                        Email
-                    </label>
+                    <label htmlFor="email">{t("auth.emailLabel", "E-post")}</label>
 
                     <div className="input-wrapper">
 
@@ -101,7 +101,7 @@ const LoginForm = () => {
                         <input
                             id="email"
                             type="email"
-                            placeholder="Enter your email"
+                            placeholder={t("auth.emailPlaceholder", "Ange din e-postadress")}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
@@ -110,9 +110,7 @@ const LoginForm = () => {
                 </div>
 
                 <div className="form-field">
-                    <label htmlFor="password">
-                        Password
-                    </label>
+                    <label htmlFor="password">{t("auth.passwordLabel", "Lösenord")}</label>
 
                     <div className="input-wrapper">
 
@@ -120,7 +118,7 @@ const LoginForm = () => {
                         <input
                             id="password"
                             type={showPassword ? "text" : "password"}
-                            placeholder="Enter your password"
+                            placeholder={t("auth.passwordPlaceholder", "Ange ditt lösenord")}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
@@ -129,7 +127,7 @@ const LoginForm = () => {
                             type="button"
                             className="password-toggle"
                             onClick={() => setShowPassword(!showPassword)}
-                            aria-label={showPassword ? "Hide Password" : "Show Password"}
+                            aria-label={showPassword ? t("auth.hidePassword", "Dölj lösenord") : t("auth.showPassword", "Visa lösenord")}
                         >
                             {showPassword ? <EyeOff size={18} /> : <Eye size={18} /> }
                         </button>
@@ -143,7 +141,7 @@ const LoginForm = () => {
                         type="button"
                         onClick={() => navigate("/forgot-password")}
                     >
-                        Forgot Password?
+                        {t("auth.forgotPassword", "Glömt lösenord?")}
                     </button>
                 </div>
 
@@ -158,7 +156,7 @@ const LoginForm = () => {
                     className="auth-primary-button"
                     disabled={isLoading}
                 >
-                    {isLoading ? "Logging in..." : "Log In"}
+                    {isLoading ? t("common.loading", "Loggar in...") : t("auth.loginButton", "Logga in")}
                 </button>
             </form>
 
@@ -166,7 +164,7 @@ const LoginForm = () => {
             {googleEnabled && (
                 <>
                     <div className="auth-divider">
-                        <span>or</span>
+                        <span>{t("common.or", "eller")}</span>
                     </div>
 
                     <div className="auth-secondary-actions">
@@ -175,19 +173,19 @@ const LoginForm = () => {
                             className="auth-secondary-button"
                             onClick={handleGoogleLogin}
                         >
-                            Continue with Google
+                            {t("auth.continueWithGoogle", "Fortsätt med Google")}
                         </button>
                     </div>
                 </>
             )}
 
             <p className="auth-switch">
-                Don't have an account?{" "}
+                {t("auth.noAccount", "Har du inget konto?")}{" "}
                 <button
                     type="button"
                     onClick={() => navigate("/register")}
                 >
-                    Sign Up
+                    {t("auth.registerButton", "Registrera dig")}
                 </button>
             </p>
         </div>

@@ -21,7 +21,7 @@ const LearnerProgressPage = () => {
                 setLearners(data);
             } catch (e) {
                 console.error("Failed to load learner progress:", e);
-                setError("Failed to load learner progress. Please try again.");
+                setError("Kunde inte ladda studenternas framsteg. Försök igen.");
             } finally {
                 setIsLoading(false);
             }
@@ -33,16 +33,16 @@ const LearnerProgressPage = () => {
     return (
         <div className="statistics">
             <PageTitle
-                title="Learner Progress"
-                subtitle="Monitor how learners are progressing."
+                title="Studenternas framsteg"
+                subtitle="Följ studenternas utveckling."
             />
 
-            {isLoading && <p>Loading learners...</p>}
+            {isLoading && <p>Laddar studenter...</p>}
 
             {!isLoading && error && <p role="alert">{error}</p>}
 
             {!isLoading && !error && learners.length === 0 && (
-                <p>No learners yet.</p>
+                <p>Inga studenter ännu.</p>
             )}
 
             {!isLoading &&
@@ -54,30 +54,30 @@ const LearnerProgressPage = () => {
                         <p className="learner-email">{learner.email}</p>
 
                         <p>
-                            <strong>Last activity:</strong>{" "}
+                            <strong>Senaste aktivitet:</strong>{" "}
                             {learner.lastActivityAt
                                 ? new Date(learner.lastActivityAt).toLocaleDateString("sv-SE")
-                                : "Never"}
+                                : "Aldrig"}
                         </p>
 
                         {/* Mock exam summary */}
                         <div className="mock-exam-summary">
                             {learner.mockExams.count === 0 ? (
-                                <p className="mock-exam-empty">No mock exams yet.</p>
+                                <p className="mock-exam-empty">Inga låtsasprov ännu.</p>
                             ) : (
                                 <>
                                     <p className="mock-exam-line">
-                                        <strong>Mock exams:</strong> {learner.mockExams.count} taken
+                                        <strong>Låtsasprov:</strong> {learner.mockExams.count} genomförda
                                     </p>
                                     <p className="mock-exam-line">
-                                        <strong>Latest:</strong> {learner.mockExams.latestScore}%{" "}
+                                        <strong>Senaste:</strong> {learner.mockExams.latestScore}%{" "}
                                         ({new Date(learner.mockExams.latestAt!).toLocaleDateString("sv-SE")})
                                         {learner.mockExams.latestPassed
-                                            ? <span className="mock-exam-pass"> · Passed</span>
-                                            : <span className="mock-exam-fail"> · Not passed</span>}
+                                            ? <span className="mock-exam-pass"> · Godkänd</span>
+                                            : <span className="mock-exam-fail"> · Ej godkänd</span>}
                                     </p>
                                     <p className="mock-exam-line">
-                                        <strong>Best:</strong> {learner.mockExams.bestScore}%
+                                        <strong>Bästa:</strong> {learner.mockExams.bestScore}%
                                     </p>
                                 </>
                             )}
@@ -85,7 +85,7 @@ const LearnerProgressPage = () => {
 
                         {/* Practice subjects */}
                         {learner.subjectPerformances.length === 0 ? (
-                            <p>No practice results yet.</p>
+                            <p>Inga övningsresultat ännu.</p>
                         ) : (
                             <div className="subject-performance-grid">
                                 {learner.subjectPerformances.map((subject) => (

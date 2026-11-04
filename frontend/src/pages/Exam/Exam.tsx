@@ -55,7 +55,7 @@ const Exam = () => {
             }
 
             alert(
-                "Failed to submit exam. Your answers are saved on the server — please try again."
+                "Kunde inte skicka in provet. Dina svar är sparade på servern – försök igen."
             );
         }
     }, [attemptId, navigate]);
@@ -84,9 +84,9 @@ const Exam = () => {
                 console.error("Failed to load exam questions.", err);
                 const errorObj = err as { status?: number; message?: string };
                 if (errorObj.status === 409 || (errorObj?.message && errorObj.message.includes("Not enough questions"))) {
-                    setError(errorObj.message || "Not enough questions available to start the exam.");
+                    setError(errorObj.message || "Inte tillräckligt med frågor tillgängliga för att starta provet.");
                 } else {
-                    setError("Failed to load exam questions. Please try again.");
+                    setError("Kunde inte ladda provfrågor. Försök igen.");
                 }
             }
             finally {
@@ -186,7 +186,7 @@ const Exam = () => {
     if (isLoading) {
         return (
             <div className="exam">
-                <p>Loading exam questions...</p>
+                <p>Laddar provfrågor...</p>
             </div>
         );
     }
@@ -202,7 +202,7 @@ const Exam = () => {
     if (questions.length === 0) {
         return (
             <div className="exam">
-                <p>No exam questions available.</p>
+                <p>Inga provfrågor tillgängliga.</p>
             </div>
         );
     }
@@ -216,7 +216,7 @@ const Exam = () => {
 
             <div className="exam-progress-bar text-center my-2">
                 <span className="font-semibold text-gray-700">
-                    Answered {answeredCount} / {totalQuestions}
+                    Besvarade {answeredCount} / {totalQuestions}
                 </span>
             </div>
 
@@ -243,14 +243,14 @@ const Exam = () => {
             {showConfirmModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
                     <div className="question-card text-center max-w-md w-full">
-                        <h3 className="text-xl font-bold mb-3 text-[var(--color-text)]">Submit Exam?</h3>
+                        <h3 className="text-xl font-bold mb-3 text-[var(--color-text)]">Skicka in prov?</h3>
                         {unansweredCount > 0 ? (
                             <p className="text-[var(--color-text)] opacity-80 mb-6">
-                                You have <strong>{unansweredCount}</strong> unanswered question{unansweredCount > 1 ? "s" : ""}. Are you sure you want to submit?
+                                Du har <strong>{unansweredCount}</strong> obesvarad{unansweredCount > 1 ? "e" : ""} fråga{unansweredCount > 1 ? "or" : ""}. Är du säker på att du vill skicka in?
                             </p>
                         ) : (
                             <p className="text-[var(--color-text)] opacity-80 mb-6">
-                                You have answered all questions. Are you sure you want to submit?
+                                Du har besvarat alla frågor. Är du säker på att du vill skicka in?
                             </p>
                         )}
                         <div className="flex justify-center">
@@ -259,14 +259,14 @@ const Exam = () => {
                                 className="previous-button"
                                 style={{ borderRadius: "8px", padding: "0.5rem 1rem", fontSize: "0.9rem", fontWeight: 600, marginRight: "12px" }}
                             >
-                                Go back
+                                Gå tillbaka
                             </button>
                             <button
                                 onClick={handleConfirmSubmit}
                                 className="next-button"
                                 style={{ borderRadius: "8px", padding: "0.5rem 1rem", fontSize: "0.9rem", fontWeight: 600 }}
                             >
-                                Submit Exam
+                                Skicka in prov
                             </button>
                         </div>
                     </div>
