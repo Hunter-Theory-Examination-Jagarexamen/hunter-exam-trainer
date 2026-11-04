@@ -657,6 +657,8 @@ This allows the Hibernate/JPA to update the database schema based on the entity 
 
 This configuration is intended for the current development setup and should be reviewed before production deployment.
 
+Results are stored per answer: each practice round or mock exam is a row in `attempts`, with one row per question in `attempt_questions` (the chosen answer and whether it was correct). Running totals per student and subject are kept in `subject_stats`; see the [ER diagram](docs/Database/ER-Diagram.md).
+
 SQL logging is currently enabled:
 
 ```

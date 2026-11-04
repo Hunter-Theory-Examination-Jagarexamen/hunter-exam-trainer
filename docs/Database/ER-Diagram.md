@@ -3,10 +3,7 @@
 ```mermaid
 erDiagram
 
-    USERS ||--o{ PRACTICE_RESULT : has 
-    USERS ||--o{ EXAM_RESULT : has 
     SUBJECT ||--o{ QUESTION : contains 
-    SUBJECT ||--o{ PRACTICE_RESULT : used_for
     USERS ||--o{ ATTEMPTS : starts
     ATTEMPTS ||--o{ ATTEMPT_QUESTIONS : contains
     QUESTION ||--o{ ATTEMPT_QUESTIONS : asked_in
@@ -40,16 +37,6 @@ erDiagram
         bigint subject_id FK
     }
 
-    PRACTICE_RESULT {
-        bigint id PK 
-        bigint correct_answers 
-        bigint total_questions 
-        bigint score 
-        datetime completed_at 
-        bigint user_id FK 
-        bigint subject_id FK
-    }
-
     ATTEMPTS {
         bigint id PK
         bigint user_id FK
@@ -76,16 +63,5 @@ erDiagram
         bigint answered
         bigint correct
         datetime last_answered_at
-    }
-
-    EXAM_RESULT {
-        bigint id PK 
-        int total_questions 
-        int correct_answers 
-        int incorrect_answers 
-        int unanswered 
-        int score 
-        datetime completed_at 
-        bigint user_id FK
     }
 ```

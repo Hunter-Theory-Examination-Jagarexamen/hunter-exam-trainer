@@ -21,7 +21,6 @@ endpoints are added to this table, not duplicated elsewhere.
 | POST   | /api/practice/attempts        | Start a practice round for a subject            | Required         |
 | POST   | /api/practice/attempts/{id}/answers | Answer one question in a practice round (checked by the server) | Required |
 | POST   | /api/practice/attempts/{id}/finish | Finish a practice round and get its totals | Required         |
-| POST   | /api/practice/results         | Save a completed practice result (old; not used by the frontend) | Required |
 | POST   | /api/exam/start               | Start a mock exam and receive 70 questions      | Required         |
 | POST   | /api/exam/{attemptId}/answer | Save or change one answer in the running mock exam | Required |
 | POST   | /api/exam/submit              | Submit the mock exam; the server scores the saved answers | Required |
