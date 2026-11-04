@@ -1,6 +1,6 @@
 package com.hunterexam.backend.service;
 
-import com.hunterexam.backend.dto.ExamResultResponse;
+import com.hunterexam.backend.dto.ExamSubmitResponse;
 import com.hunterexam.backend.dto.ExamStartResponse;
 import com.hunterexam.backend.dto.ExamSubmitRequest;
 import com.hunterexam.backend.entity.Attempt;
@@ -250,7 +250,7 @@ class ExamServiceTests {
             Map.of(1L, "B", 2L, "B", 3L, "B", 4L, "B")
         );
 
-        ExamResultResponse result = examService.submitExam(submission(), EMAIL);
+        ExamSubmitResponse result = examService.submitExam(submission(), EMAIL);
 
         assertEquals(4, result.getTotalQuestions());
         assertEquals(4, result.getCorrectAnswers());
@@ -266,7 +266,7 @@ class ExamServiceTests {
             Map.of(1L, "B", 2L, "B", 3L, "B", 4L, "B")
         );
 
-        ExamResultResponse result = examService.submitExam(submission(), EMAIL);
+        ExamSubmitResponse result = examService.submitExam(submission(), EMAIL);
 
         assertEquals(4, result.getTotalQuestions());
         assertEquals(4, result.getCorrectAnswers());
@@ -283,7 +283,7 @@ class ExamServiceTests {
             Map.of(1L, "B", 2L, "A", 4L, "B")
         );
 
-        ExamResultResponse result = examService.submitExam(submission(), EMAIL);
+        ExamSubmitResponse result = examService.submitExam(submission(), EMAIL);
 
         assertEquals(4, result.getTotalQuestions());
         assertEquals(2, result.getCorrectAnswers());
@@ -300,7 +300,7 @@ class ExamServiceTests {
             Map.of(1L, "B", 2L, "B", 3L, "A")
         );
 
-        ExamResultResponse result = examService.submitExam(submission(), EMAIL);
+        ExamSubmitResponse result = examService.submitExam(submission(), EMAIL);
 
         assertEquals(67, result.getScore());
     }
@@ -313,7 +313,7 @@ class ExamServiceTests {
             Map.of(1L, "B", 2L, "A", 4L, "B")
         );
 
-        ExamResultResponse result = examService.submitExam(submission(), EMAIL);
+        ExamSubmitResponse result = examService.submitExam(submission(), EMAIL);
 
         assertEquals(4, result.getTotalQuestions());
         assertEquals(2, result.getCorrectAnswers());
@@ -330,7 +330,7 @@ class ExamServiceTests {
             Map.of(1L, "B")
         );
 
-        ExamResultResponse result = examService.submitExam(submission(), EMAIL);
+        ExamSubmitResponse result = examService.submitExam(submission(), EMAIL);
 
         assertEquals(3, result.getTotalQuestions());
         assertEquals(1, result.getCorrectAnswers());
@@ -521,7 +521,7 @@ class ExamServiceTests {
             LocalDateTime.now().minusMinutes(61)
         );
 
-        ExamResultResponse result = examService.submitExam(submission(), EMAIL);
+        ExamSubmitResponse result = examService.submitExam(submission(), EMAIL);
 
         assertEquals(1, result.getCorrectAnswers());
     }
@@ -534,7 +534,7 @@ class ExamServiceTests {
             LocalDateTime.now().minusMinutes(59)
         );
 
-        ExamResultResponse result = examService.submitExam(submission(), EMAIL);
+        ExamSubmitResponse result = examService.submitExam(submission(), EMAIL);
 
         assertEquals(1, result.getCorrectAnswers());
     }

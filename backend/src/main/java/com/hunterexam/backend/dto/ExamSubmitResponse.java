@@ -6,7 +6,7 @@ import lombok.Getter;
  * Response returned after a successful mock exam submission.
  */
 @Getter
-public class ExamResultResponse {
+public class ExamSubmitResponse {
 
     private long totalQuestions;
     private long correctAnswers;
@@ -14,7 +14,7 @@ public class ExamResultResponse {
     private long unanswered;
     private long score;
 
-    public ExamResultResponse(
+    public ExamSubmitResponse(
             long totalQuestions,
             long correctAnswers,
             long incorrectAnswers,

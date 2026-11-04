@@ -1,7 +1,7 @@
 package com.hunterexam.backend.service;
 
+import com.hunterexam.backend.dto.ExamSubmitResponse;
 import com.hunterexam.backend.dto.QuestionResponse;
-import com.hunterexam.backend.dto.ExamResultResponse;
 import com.hunterexam.backend.dto.ExamStartResponse;
 import com.hunterexam.backend.dto.ExamSubmitRequest;
 import com.hunterexam.backend.entity.Attempt;
@@ -227,7 +227,7 @@ public class ExamService {
      * @return the exam result, including score and answer breakdown
      */
     @Transactional(noRollbackFor = ExamTimeLimitExceededException.class)
-    public ExamResultResponse submitExam(ExamSubmitRequest request, String email) {
+    public ExamSubmitResponse submitExam(ExamSubmitRequest request, String email) {
 
         Long attemptId = request.getAttemptId();
         if (attemptId == null) {
@@ -277,7 +277,7 @@ public class ExamService {
         long unanswered = totalQuestions - correctAnswers - incorrectAnswers;
         long score = Math.round(((double) correctAnswers / totalQuestions) * 100);
 
-        return new ExamResultResponse(
+        return new ExamSubmitResponse(
                 totalQuestions,
                 correctAnswers,
                 incorrectAnswers,
