@@ -7,7 +7,6 @@ import com.hunterexam.backend.dto.ExamSubmitRequest;
 import com.hunterexam.backend.entity.Attempt;
 import com.hunterexam.backend.entity.AttemptQuestion;
 import com.hunterexam.backend.entity.AttemptType;
-import com.hunterexam.backend.entity.ExamResult;
 import com.hunterexam.backend.entity.Question;
 import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.SubjectStats;
@@ -17,7 +16,6 @@ import com.hunterexam.backend.exception.ExamTimeLimitExceededException;
 import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.repository.AttemptQuestionRepository;
 import com.hunterexam.backend.repository.AttemptRepository;
-import com.hunterexam.backend.repository.ExamResultRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectStatsRepository;
 import com.hunterexam.backend.repository.UserRepository;
@@ -74,7 +72,6 @@ public class ExamService {
     private static final long SUBMIT_GRACE_MINUTES = 2;
 
     private final QuestionRepository questionRepository;
-    private final ExamResultRepository examResultRepository;
     private final UserRepository userRepository;
     private final AttemptRepository attemptRepository;
     private final AttemptQuestionRepository attemptQuestionRepository;
@@ -82,14 +79,12 @@ public class ExamService {
 
     public ExamService(
             QuestionRepository questionRepository,
-            ExamResultRepository examResultRepository,
             UserRepository userRepository,
             AttemptRepository attemptRepository,
             AttemptQuestionRepository attemptQuestionRepository,
             SubjectStatsRepository subjectStatsRepository
     ) {
         this.questionRepository = questionRepository;
-        this.examResultRepository = examResultRepository;
         this.userRepository = userRepository;
         this.attemptRepository = attemptRepository;
         this.attemptQuestionRepository = attemptQuestionRepository;
@@ -282,8 +277,6 @@ public class ExamService {
         long unanswered = totalQuestions - correctAnswers - incorrectAnswers;
         long score = Math.round(((double) correctAnswers / totalQuestions) * 100);
 
-        saveExamResultBridge(exam, totalQuestions, correctAnswers, incorrectAnswers, unanswered, score);
-
         return new ExamResultResponse(
                 totalQuestions,
                 correctAnswers,
@@ -291,24 +284,6 @@ public class ExamService {
                 unanswered,
                 score
         );
-    }
-
-    /**
-     * Temporary: keeps the old statistics working until they read from the
-     * stored answers (issue 4 of the refactor plan), then remove this and
-     * ExamResult (issue 5).
-     */
-    private void saveExamResultBridge(Attempt exam, long total, long correct,
-                                      long incorrect, long unanswered, long score) {
-        ExamResult examResult = new ExamResult();
-        examResult.setTotalQuestions((int) total);
-        examResult.setCorrectAnswers((int) correct);
-        examResult.setIncorrectAnswers((int) incorrect);
-        examResult.setUnanswered((int) unanswered);
-        examResult.setScore((int) score);
-        examResult.setCompletedAt(exam.getFinishedAt());
-        examResult.setUser(exam.getUser());
-        examResultRepository.save(examResult);
     }
 
     /**
