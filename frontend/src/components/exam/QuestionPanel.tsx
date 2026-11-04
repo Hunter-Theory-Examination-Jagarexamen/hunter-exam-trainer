@@ -1,5 +1,6 @@
 import "../../styles/exam.css";
 import { Bookmark } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { ExamQuestion } from "../../types/examQuestion.ts";
 import QuestionImage from "../common/QuestionImage";
 
@@ -19,6 +20,8 @@ const QuestionPanel = ({
                            onToggleBookmark,
                        }: QuestionPanelProps) => {
 
+    const { t } = useTranslation();
+
     const options = [
         { id: "A", text: question.optionA },
         { id: "B", text: question.optionB },
@@ -36,13 +39,17 @@ const QuestionPanel = ({
                         className={`question-bookmark-toggle ${isBookmarked ? "is-bookmarked" : ""}`}
                         onClick={onToggleBookmark}
                         aria-pressed={isBookmarked}
-                        aria-label={isBookmarked ? "Remove bookmark" : "Bookmark this question"}
+                        aria-label={isBookmarked
+                            ? t("exam.bookmark.ariaLabelRemove")
+                            : t("exam.bookmark.ariaLabelAdd")}
                     >
                         <Bookmark
                             size={16}
                             fill={isBookmarked ? "currentColor" : "none"}
                         />
-                        {isBookmarked ? "Bookmarked" : "Bookmark"}
+                        {isBookmarked
+                            ? t("exam.bookmark.remove")
+                            : t("exam.bookmark.add")}
                     </button>
                 </div>
                 <QuestionImage imageUrl={question.imageUrl} questionText={question.questionText} />

@@ -39,10 +39,9 @@ describe("ExamOverview", () => {
             />
         );
 
-        const currentBtn = screen.getByRole("button", { name: /Question 3, current/ });
+        const currentBtn = screen.getByRole("button", { name: /Fråga 3, aktuell/ });
         expect(currentBtn).toHaveAttribute("aria-current", "true");
     });
-
 
     it("shows answered / unanswered state", () => {
         render(
@@ -55,9 +54,9 @@ describe("ExamOverview", () => {
             />
         );
 
-        expect(screen.getByRole("button", { name: /Question 1, current, answered/ })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Question 2, unanswered/ })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Question 3, answered/ })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /Fråga 1, aktuell/ })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /Fråga 2, obesvarad/ })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /Fråga 3, besvarad/ })).toBeInTheDocument();
     });
 
     it("shows bookmarked state", () => {
@@ -71,8 +70,8 @@ describe("ExamOverview", () => {
             />
         );
 
-        expect(screen.getByRole("button", { name: /Question 2, unanswered, bookmarked/ })).toBeInTheDocument();
-        expect(screen.getByRole("button", { name: /Question 4, unanswered, bookmarked/ })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /Fråga 2, obesvarad, bokmärkt/ })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /Fråga 4, obesvarad, bokmärkt/ })).toBeInTheDocument();
     });
 
     it("calls onJumpToQuestion with the index when a cell is clicked", async () => {
@@ -87,7 +86,7 @@ describe("ExamOverview", () => {
             />
         );
 
-        await userEvent.click(screen.getByRole("button", { name: /Question 3,/ }));
+        await userEvent.click(screen.getByRole("button", { name: /Fråga 3,/ }));
         expect(onJump).toHaveBeenCalledWith(2);
     });
 });
