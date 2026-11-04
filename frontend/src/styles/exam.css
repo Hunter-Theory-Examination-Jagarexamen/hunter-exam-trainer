@@ -37,6 +37,11 @@
     color: var(--color-primary);
 }
 
+.exam-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
 
 /* =========================
    Progress Bar
@@ -85,6 +90,11 @@
     line-height: 1.6;
 }
 
+.question-card-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 0.75rem;
+}
 
 /* =========================
    Answer Options
@@ -201,4 +211,179 @@
         margin-left: 0;
         order: 3;
     }
+}
+
+/* =========================
+   Overview Sidebar
+   ========================= */
+
+.exam-with-overview {
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.exam-main {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-width: 0;   /* prevents overflow */
+}
+
+.exam-overview-sidebar {
+    position: sticky;
+    top: 1rem;
+    align-self: start;
+}
+
+/* Desktop: sidebar always visible; hide toggle button */
+.exam-overview-toggle {
+    display: none;
+}
+
+.exam-overview-backdrop {
+    display: none;
+}
+
+/* Mobile: sidebar becomes an overlay */
+@media (max-width: 768px) {
+    .exam-with-overview {
+        grid-template-columns: 1fr;
+    }
+
+    .exam-overview-sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: 90vw;
+        max-width: 400px;
+        background: var(--color-surface);
+        z-index: 100;
+        padding: 1.5rem;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        overflow-y: auto;
+    }
+
+    .exam-overview-sidebar.is-open {
+        transform: translateX(0);
+        box-shadow: 4px 0 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .exam-overview-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 99;
+    }
+
+    .exam-overview-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 0.75rem;
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.9rem;
+    }
+}
+
+/* =========================
+   Overview Grid
+   ========================= */
+
+.exam-overview-title {
+    font-size: 0.9rem;
+    margin: 0 0 0.75rem;
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+
+.exam-overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+    gap: 0.4rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.exam-overview-cell {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s ease, border 0.15s ease;
+}
+
+.exam-overview-cell:hover {
+    background: var(--color-secondary);
+}
+
+.exam-overview-cell.is-answered {
+    background: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+.exam-overview-cell.is-current {
+    border: 2px solid var(--color-text);
+    box-shadow: 0 0 0 2px white inset;
+}
+
+.exam-overview-cell.is-bookmarked .exam-overview-bookmark {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    font-size: 0.7rem;
+    line-height: 1;
+    background: white;
+    border-radius: 50%;
+    padding: 1px;
+}
+
+.exam-overview-check {
+    position: absolute;
+    bottom: 2px;
+    right: 3px;
+    font-size: 0.6rem;
+    opacity: 0.8;
+}
+
+/* =========================
+   Bookmark Toggle in Question
+   ========================= */
+
+.question-bookmark-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.65rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--color-text);
+}
+
+.question-bookmark-toggle.is-bookmarked {
+    background: var(--color-secondary);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
 }

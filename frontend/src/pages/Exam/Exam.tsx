@@ -2,10 +2,13 @@ import "../../styles/exam.css";
 import ExamHeader from "../../components/exam/ExamHeader";
 import QuestionPanel from "../../components/exam/QuestionPanel";
 import ExamNavigation from "../../components/exam/ExamNavigation";
+import ExamOverview from "../../components/exam/ExamOverview";
+import { useExamBookmarks } from "../../hooks/useExamBookmarks";
 import type { ExamQuestion } from "../../types/examQuestion.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient, { ApiError } from "../../api/apiClient.ts";
+
 
 interface ExamStartResponse {
     attemptId: string;
@@ -25,6 +28,8 @@ const Exam = () => {
     const [timeLeft, setTimeLeft] = useState(60 * 60);
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [overviewOpen, setOverviewOpen] = useState(false);
+    const { bookmarks, toggleBookmark, isBookmarked } = useExamBookmarks(attemptId);
 
     // The start request, shared by both runs of the load effect. React's
     // StrictMode (development only) runs effects twice; without this, the page
@@ -99,24 +104,21 @@ const Exam = () => {
 
     // Timer
     useEffect(() => {
-
         if (timeLeft <= 0) {
             return;
         }
 
         const timer = setInterval(() => {
-            setTimeLeft(
-                (previousTime) => previousTime - 1
-            );
+            setTimeLeft((previousTime) => Math.max(0, previousTime - 1));
         }, 1000);
 
         return () => clearInterval(timer);
 
     }, [timeLeft]);
 
-    // Auto-submit when time runs out
+// Auto-submit when time runs out
     useEffect(() => {
-        if (timeLeft === 0 && questions.length > 0) {
+        if (timeLeft <= 0 && questions.length > 0) {
             void submitExam();
         }
     }, [timeLeft, submitExam, questions]);
@@ -171,6 +173,17 @@ const Exam = () => {
         }
     };
 
+    const handleJumpToQuestion = (index: number) => {
+        setCurrentQuestionIndex(index);
+        setOverviewOpen(false);
+    };
+
+    const handleToggleBookmark = () => {
+        if (!currentQuestion) return;
+        toggleBookmark(currentQuestion.id);
+    };
+
+
     const handleNext = () => {
         if (currentQuestionIndex < questions.length - 1) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
@@ -213,32 +226,55 @@ const Exam = () => {
 
     return (
         <div className="exam">
-
             <div className="exam-progress-bar text-center my-2">
-                <span className="font-semibold text-gray-700">
-                    Answered {answeredCount} / {totalQuestions}
-                </span>
+                Answered {answeredCount} / {totalQuestions}
             </div>
 
             <ExamHeader
                 currentQuestion={currentQuestionIndex + 1}
                 totalQuestions={questions.length}
                 timeLeft={timeLeft}
+                onToggleOverview={() => setOverviewOpen((open) => !open)}
+                overviewOpen={overviewOpen}
             />
 
-            <QuestionPanel
-                question={currentQuestion}
-                selectedAnswer={answers[currentQuestion.id]}
-                onAnswerChange={handleAnswerChange}
-            />
+            <div className="exam-with-overview">
+                <div className="exam-main">
+                    <QuestionPanel
+                        question={currentQuestion}
+                        selectedAnswer={answers[currentQuestion.id]}
+                        onAnswerChange={handleAnswerChange}
+                        isBookmarked={isBookmarked(currentQuestion.id)}
+                        onToggleBookmark={handleToggleBookmark}
+                    />
 
-            <ExamNavigation
-                onPrevious={handlePrevious}
-                onNext={handleNext}
-                onSubmit={handleSubmit}
-                isFirstQuestion={currentQuestionIndex === 0}
-                isLastQuestion={currentQuestionIndex === questions.length - 1}
-            />
+                    <ExamNavigation
+                        onPrevious={handlePrevious}
+                        onNext={handleNext}
+                        onSubmit={handleSubmit}
+                        isFirstQuestion={currentQuestionIndex === 0}
+                        isLastQuestion={currentQuestionIndex === questions.length - 1}
+                    />
+                </div>
+
+                <aside className={`exam-overview-sidebar ${overviewOpen ? "is-open" : ""}`}>
+                    <ExamOverview
+                        questions={questions}
+                        answers={answers}
+                        bookmarks={bookmarks}
+                        currentIndex={currentQuestionIndex}
+                        onJumpToQuestion={handleJumpToQuestion}
+                    />
+                </aside>
+            </div>
+
+            {overviewOpen && (
+                <div
+                    className="exam-overview-backdrop"
+                    onClick={() => setOverviewOpen(false)}
+                    aria-hidden="true"
+                />
+            )}
 
             {showConfirmModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
@@ -273,7 +309,6 @@ const Exam = () => {
                     </div>
                 </div>
             )}
-
         </div>
     );
 };
