@@ -1,4 +1,5 @@
 import "../../styles/exam.css";
+import { useTranslation } from "react-i18next";
 import type { ExamQuestion } from "../../types/examQuestion";
 
 interface ExamOverviewProps {
@@ -9,19 +10,6 @@ interface ExamOverviewProps {
     onJumpToQuestion: (index: number) => void;
 }
 
-/**
- * Grid of all exam questions: one cell per question, in order.
- * <p>
- *
- * Each cell shows the question number and one or more state indicators:
- * - current: border + shadow
- * - answered: filled background + ✓
- * - bookmarked: 🔖 icon in the corner
- * - unanswered: outline only
- * <p>
- *
- * Cells are buttons, so keyboard users can tab between them.
- */
 const ExamOverview = ({
                           questions,
                           answers,
@@ -30,13 +18,17 @@ const ExamOverview = ({
                           onJumpToQuestion,
                       }: ExamOverviewProps) => {
 
+    const { t } = useTranslation();
+
+    const answeredCount = Object.keys(answers).length;
+
     return (
         <nav
             className="exam-overview"
-            aria-label="Question overview"
+            aria-label={t("exam.overview.title", { answered: answeredCount, total: questions.length })}
         >
             <h2 className="exam-overview-title">
-                Overview · {Object.keys(answers).length} / {questions.length} answered
+                {t("exam.overview.title", { answered: answeredCount, total: questions.length })}
             </h2>
 
             <ol className="exam-overview-grid">
@@ -50,6 +42,12 @@ const ExamOverview = ({
                     if (isAnswered) classNames.push("is-answered");
                     if (isBookmarked) classNames.push("is-bookmarked");
 
+                    const stateLabel = isCurrent
+                        ? t("exam.overview.stateCurrent")
+                        : isAnswered
+                            ? t("exam.overview.stateAnswered")
+                            : t("exam.overview.stateUnanswered");
+
                     return (
                         <li key={question.id}>
                             <button
@@ -58,10 +56,9 @@ const ExamOverview = ({
                                 onClick={() => onJumpToQuestion(index)}
                                 aria-current={isCurrent ? "true" : undefined}
                                 aria-label={
-                                    `Question ${index + 1}`
-                                    + (isCurrent ? ", current" : "")
-                                    + (isAnswered ? ", answered" : ", unanswered")
-                                    + (isBookmarked ? ", bookmarked" : "")
+                                    t("exam.overview.ariaLabel", { number: index + 1 })
+                                    + ", " + stateLabel
+                                    + (isBookmarked ? ", " + t("exam.overview.stateBookmarked") : "")
                                 }
                             >
                                 <span className="exam-overview-number">{index + 1}</span>
