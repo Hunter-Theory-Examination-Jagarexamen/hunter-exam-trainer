@@ -6,7 +6,6 @@ import com.hunterexam.backend.dto.PracticeStartResponse;
 import com.hunterexam.backend.entity.Attempt;
 import com.hunterexam.backend.entity.AttemptQuestion;
 import com.hunterexam.backend.entity.AttemptType;
-import com.hunterexam.backend.entity.PracticeResult;
 import com.hunterexam.backend.entity.Question;
 import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.SubjectStats;
@@ -15,7 +14,6 @@ import com.hunterexam.backend.exception.ConflictException;
 import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.repository.AttemptQuestionRepository;
 import com.hunterexam.backend.repository.AttemptRepository;
-import com.hunterexam.backend.repository.PracticeResultRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
 import com.hunterexam.backend.repository.SubjectStatsRepository;
@@ -57,7 +55,6 @@ class PracticeAttemptServiceTests {
 
     @Mock AttemptRepository attemptRepository;
     @Mock AttemptQuestionRepository attemptQuestionRepository;
-    @Mock PracticeResultRepository practiceResultRepository;
     @Mock QuestionRepository questionRepository;
     @Mock SubjectRepository subjectRepository;
     @Mock SubjectStatsRepository subjectStatsRepository;
@@ -70,7 +67,7 @@ class PracticeAttemptServiceTests {
     @BeforeEach
     void setUp() {
         service = new PracticeAttemptService(attemptRepository, attemptQuestionRepository,
-                practiceResultRepository, questionRepository, subjectRepository,
+                questionRepository, subjectRepository,
                 subjectStatsRepository, userRepository);
 
         user = user(1L);
@@ -171,7 +168,7 @@ class PracticeAttemptServiceTests {
     }
 
     @Test
-    void start_closesEarlierRunningRound_andSavesItsBridgeResult() {
+    void start_closesEarlierRunningRound() {
         Attempt leftRound = runningAttempt(user);
         AttemptQuestion answered = new AttemptQuestion(leftRound, question(100L), 0);
         answered.recordAnswer("B", true, LocalDateTime.now());
@@ -188,9 +185,6 @@ class PracticeAttemptServiceTests {
         service.start(5L, EMAIL);
 
         assertTrue(leftRound.isFinished());
-        ArgumentCaptor<PracticeResult> result = ArgumentCaptor.forClass(PracticeResult.class);
-        verify(practiceResultRepository).save(result.capture());
-        assertEquals(1, result.getValue().getCorrectAnswers());
     }
 
     @Test
@@ -324,27 +318,7 @@ class PracticeAttemptServiceTests {
     }
 
     @Test
-    void finish_savesBridgePracticeResult_countingOnlyAnsweredQuestions() {
-        Attempt attempt = runningAttempt(user);
-        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(attemptRepository.findById(ATTEMPT_ID)).thenReturn(Optional.of(attempt));
-        when(attemptQuestionRepository.findByAttemptIdOrderByPosition(ATTEMPT_ID)).thenReturn(roundRows(attempt));
-
-        service.finish(ATTEMPT_ID, EMAIL);
-
-        ArgumentCaptor<PracticeResult> result = ArgumentCaptor.forClass(PracticeResult.class);
-        verify(practiceResultRepository).save(result.capture());
-        assertEquals(user, result.getValue().getUser());
-        assertEquals(subject, result.getValue().getSubject());
-        // 2 right of 3 answered; the skipped question doesn't count as wrong.
-        assertEquals(2, result.getValue().getCorrectAnswers());
-        assertEquals(3, result.getValue().getTotalQuestions());
-        assertEquals(67, result.getValue().getScore());
-        assertEquals(attempt.getFinishedAt(), result.getValue().getCompletedAt());
-    }
-
-    @Test
-    void finish_withNoAnswers_closesRoundButSavesNoBridgeResult() {
+    void finish_withNoAnswers_closesRound() {
         Attempt attempt = runningAttempt(user);
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
         when(attemptRepository.findById(ATTEMPT_ID)).thenReturn(Optional.of(attempt));
@@ -357,7 +331,6 @@ class PracticeAttemptServiceTests {
         assertEquals(0, response.getAnsweredQuestions());
         assertEquals(1, response.getTotalQuestions());
         assertTrue(attempt.isFinished());
-        verify(practiceResultRepository, never()).save(any());
     }
 
     @Test
@@ -368,7 +341,7 @@ class PracticeAttemptServiceTests {
         when(attemptRepository.findById(ATTEMPT_ID)).thenReturn(Optional.of(finished));
 
         assertThrows(ConflictException.class, () -> service.finish(ATTEMPT_ID, EMAIL));
-        verify(practiceResultRepository, never()).save(any());
+        verify(attemptRepository, never()).save(any());
     }
 
     @Test
