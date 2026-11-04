@@ -35,14 +35,6 @@ class Question {
     +String explanation
 }
 
-class PracticeResult { 
-    +Long id 
-    +long correctAnswers 
-    +long totalQuestions 
-    +long score 
-    +LocalDateTime completedAt 
-} 
-
 class Attempt {
     +Long id
     +AttemptType type
@@ -76,18 +68,6 @@ class SubjectStats {
     +LocalDateTime lastAnsweredAt
 }
 
-class ExamResult { 
-    +Long id 
-    +int totalQuestions 
-    +int correctAnswers 
-    +int incorrectAnswers 
-    +int unanswered 
-    +int score 
-    +LocalDateTime completedAt 
-}
-
-    User "1" --> "*" PracticeResult : has 
-    User "1" --> "*" ExamResult : has 
     User --> Role : has 
     User "1" --> "*" Attempt : starts
     Attempt --> AttemptType : has
@@ -96,6 +76,5 @@ class ExamResult {
     User "1" --> "*" SubjectStats : has
     SubjectStats "*" --> "1" Subject : counts
     Subject "1" --> "*" Question : contains 
-    PracticeResult "*" --> "1" Subject : for 
     Question "*" --> "1" Subject : belongs to
 ```

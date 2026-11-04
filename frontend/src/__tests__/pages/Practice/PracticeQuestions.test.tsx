@@ -180,7 +180,7 @@ describe("PracticeQuestions", () => {
         expect(calledEndpoints()).not.toContain("/api/practice/attempts/10/finish");
     });
 
-    it("never calls the old question list endpoint", async () => {
+    it("never loads the full question list", async () => {
         renderPage();
 
         await answer("B1");
@@ -190,7 +190,8 @@ describe("PracticeQuestions", () => {
         await userEvent.click(await screen.findByRole("button", { name: "Tillbaka till ämnen" }));
         await screen.findByText("Subject list");
 
-        // /api/questions returned every correct answer; the rounds replace it.
+        // The practice page gets its questions from the round, without the correct
+        // answers; a full question list must never be loaded.
         expect(calledEndpoints().some((e) => e.startsWith("/api/questions"))).toBe(false);
     });
 
