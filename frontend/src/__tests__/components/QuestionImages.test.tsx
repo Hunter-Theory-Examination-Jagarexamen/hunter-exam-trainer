@@ -40,7 +40,15 @@ describe("Question images", () => {
 
     it("displays the image in mock exams and preserves answers after loading failure", () => {
         const onAnswerChange = vi.fn();
-        render(<QuestionPanel question={question} onAnswerChange={onAnswerChange} />);
+        render(
+            <QuestionPanel
+                question={question}
+                selectedAnswer={undefined}
+                onAnswerChange={onAnswerChange}
+                isBookmarked={false}
+                onToggleBookmark={() => {}}
+            />
+        );
         expect(screen.getByRole("img")).toHaveAttribute("src", question.imageUrl);
         fireEvent.error(screen.getByRole("img"));
         fireEvent.click(screen.getByRole("radio", {name: "Fox"}));

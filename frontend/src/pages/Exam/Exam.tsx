@@ -8,6 +8,7 @@ import type { ExamQuestion } from "../../types/examQuestion.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient, { ApiError } from "../../api/apiClient.ts";
+import { useTranslation } from "react-i18next";
 
 
 interface ExamStartResponse {
@@ -26,6 +27,7 @@ const Exam = () => {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [timeLeft, setTimeLeft] = useState(60 * 60);
+    const { t } = useTranslation();
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [overviewOpen, setOverviewOpen] = useState(false);
@@ -59,9 +61,7 @@ const Exam = () => {
                 return;
             }
 
-            alert(
-                "Failed to submit exam. Your answers are saved on the server — please try again."
-            );
+            alert(t("exam.submitFailed"));
         }
     }, [attemptId, navigate]);
 
@@ -89,9 +89,9 @@ const Exam = () => {
                 console.error("Failed to load exam questions.", err);
                 const errorObj = err as { status?: number; message?: string };
                 if (errorObj.status === 409 || (errorObj?.message && errorObj.message.includes("Not enough questions"))) {
-                    setError(errorObj.message || "Not enough questions available to start the exam.");
+                    setError(errorObj.message || t("exam.startNotEnough"));
                 } else {
-                    setError("Failed to load exam questions. Please try again.");
+                    setError(t("exam.startError"));
                 }
             }
             finally {
@@ -199,7 +199,7 @@ const Exam = () => {
     if (isLoading) {
         return (
             <div className="exam">
-                <p>Loading exam questions...</p>
+                <p>{t("exam.loading")}</p>
             </div>
         );
     }
@@ -276,18 +276,20 @@ const Exam = () => {
                 />
             )}
 
+
             {showConfirmModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
                     <div className="question-card text-center max-w-md w-full">
-                        <h3 className="text-xl font-bold mb-3 text-[var(--color-text)]">Submit Exam?</h3>
+                        <h3 className="text-xl font-bold mb-3 text-[var(--color-text)]">
+                            {t("exam.confirm.title")}
+                        </h3>
                         {unansweredCount > 0 ? (
                             <p className="text-[var(--color-text)] opacity-80 mb-6">
-                                You have <strong>{unansweredCount}</strong> unanswered question{unansweredCount > 1 ? "s" : ""}.
-                                They will count as wrong. Are you sure you want to submit?
+                                {t("exam.confirm.unanswered", { count: unansweredCount })}
                             </p>
                         ) : (
                             <p className="text-[var(--color-text)] opacity-80 mb-6">
-                                You have answered all questions. Are you sure you want to submit?
+                                {t("exam.confirm.allAnswered")}
                             </p>
                         )}
                         <div className="flex justify-center">
@@ -296,19 +298,22 @@ const Exam = () => {
                                 className="previous-button"
                                 style={{ borderRadius: "8px", padding: "0.5rem 1rem", fontSize: "0.9rem", fontWeight: 600, marginRight: "12px" }}
                             >
-                                Go back
+                                {t("exam.confirm.goBack")}
                             </button>
                             <button
                                 onClick={handleConfirmSubmit}
                                 className="next-button"
                                 style={{ borderRadius: "8px", padding: "0.5rem 1rem", fontSize: "0.9rem", fontWeight: 600 }}
                             >
-                                {unansweredCount > 0 ? "Submit anyway" : "Submit Exam"}
+                                {unansweredCount > 0
+                                    ? t("exam.confirm.submitAnyway")
+                                    : t("exam.navigation.submit")}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
+
         </div>
     );
 };
