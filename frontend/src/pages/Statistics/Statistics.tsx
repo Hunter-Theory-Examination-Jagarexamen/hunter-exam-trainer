@@ -41,7 +41,7 @@ const Statistics = () => {
 
             } catch (error) {
                 console.error("Failed to load recent results:", error);
-                setRecentError("Failed to load recent results. Please try again.");
+                setRecentError("Kunde inte ladda senaste resultat. Försök igen.");
 
             } finally {
                 setIsLoadingRecent(false);
@@ -68,7 +68,7 @@ const Statistics = () => {
                 console.error("Failed to load subject performance:", error);
 
                 setProgressError(
-                    "Failed to load subject performance. Please try again."
+                    "Kunde inte ladda ämnesprestationer. Försök igen."
                 );
 
             } finally {
@@ -93,7 +93,7 @@ const Statistics = () => {
             } catch (error) {
                 console.error("Failed to load progress over time:", error);
                 setProgressOverTimeError(
-                    "Failed to load progress over time. Please try again."
+                    "Kunde inte ladda framsteg över tid. Försök igen."
                 );
             } finally {
                 setIsLoadingProgressOverTime(false);
@@ -124,28 +124,28 @@ const Statistics = () => {
     return (
         <div className="statistics">
             <PageTitle
-                title="Statistics"
-                subtitle="View your learning progress."
+                title="Statistik"
+                subtitle="Visa dina inlärningsframsteg."
             />
             <SummaryCards />
 
             <section className="dashboard-section">
                 <div className="section-header">
-                    <h2>Progress over Time</h2>
+                    <h2>Framsteg över tid</h2>
                     <select
                         value={weeksRange}
                         onChange={(e) => setWeeksRange(Number(e.target.value))}
                         className="weeks-select"
-                        aria-label="Time range for progress over time"
+                        aria-label="Tidsintervall för framsteg över tid"
                     >
-                        <option value={4}>Last 4 weeks</option>
-                        <option value={8}>Last 8 weeks</option>
-                        <option value={12}>Last 12 weeks</option>
+                        <option value={4}>Senaste 4 veckorna</option>
+                        <option value={8}>Senaste 8 veckorna</option>
+                        <option value={12}>Senaste 12 veckorna</option>
                     </select>
                 </div>
 
                 <div className="statistics-card">
-                    {isLoadingProgressOverTime && <p>Loading progress...</p>}
+                    {isLoadingProgressOverTime && <p>Laddar framsteg...</p>}
 
                     {!isLoadingProgressOverTime && progressOverTimeError && (
                         <p role="alert">{progressOverTimeError}</p>
@@ -158,9 +158,9 @@ const Statistics = () => {
             </section>
 
             <section className="dashboard-section">
-                <h2>Performance by Subject</h2>
+                <h2>Prestation per ämne</h2>
                 {isLoadingProgress && (
-                    <p>Loading subject performance...</p>
+                    <p>Laddar ämnesprestationer...</p>
                 )}
 
                 {!isLoadingProgress && progressError && (
@@ -170,7 +170,7 @@ const Statistics = () => {
                 {!isLoadingProgress &&
                     !progressError &&
                     subjectPerformance.length === 0 && (
-                        <p>No practice results yet.</p>
+                        <p>Inga övningsresultat ännu.</p>
                     )}
 
                 {!isLoadingProgress &&
@@ -193,11 +193,11 @@ const Statistics = () => {
 
             <section className="dashboard-section">
 
-                <h2>Recent Results</h2>
+                <h2>Senaste resultat</h2>
 
                 <div className="statistics-card">
                     {isLoadingRecent && (
-                        <p>Loading recent results...</p>
+                        <p>Laddar senaste resultat...</p>
                     )}
 
                     {recentError && (
@@ -207,7 +207,7 @@ const Statistics = () => {
                     {!isLoadingRecent &&
                         !recentError &&
                         recentActivities.length === 0 && (
-                            <p>No recent results yet.</p>
+                            <p>Inga senaste resultat ännu.</p>
                         )}
 
                     {!isLoadingRecent &&
@@ -222,11 +222,11 @@ const Statistics = () => {
             </section>
 
             <section className="dashboard-section">
-                <h2>Performance Summary</h2>
+                <h2>Prestationssammanfattning</h2>
 
                 <div className="statistics-card">
                     {subjectPerformance.length === 0 ? (
-                        <p>No practice results yet.</p>
+                        <p>Inga övningsresultat ännu.</p>
                     ) : (
                         <PerformanceSummary
                             strongestSubject={strongestSubject?.subjectName ?? ""}

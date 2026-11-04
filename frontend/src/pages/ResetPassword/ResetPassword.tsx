@@ -24,11 +24,11 @@ const ResetPassword = () => {
         e.preventDefault();
         setError("");
         if (password !== confirmPassword) {
-            setError("Passwords do not match.");
+            setError("Lösenorden matchar inte.");
             return;
         }
         if (password.length < 8 || new TextEncoder().encode(password).length > 72) {
-            setError("Password must be at least 8 characters and at most 72 UTF-8 bytes.");
+            setError("Lösenordet måste vara minst 8 tecken och högst 72 UTF-8-byte.");
             return;
         }
         setIsLoading(true);
@@ -38,7 +38,7 @@ const ResetPassword = () => {
             setPassword("");
             setConfirmPassword("");
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Unable to reset password. Please try again.");
+            setError(err instanceof Error ? err.message : "Kunde inte återställa lösenordet. Försök igen.");
         } finally {
             setIsLoading(false);
         }
@@ -49,21 +49,21 @@ const ResetPassword = () => {
             <div className="auth-brand-panel">
                 <div className="auth-brand-content">
                     <div className="auth-logo"><img src={logo} alt="Hunter Exam Trainer" /></div>
-                    <h1>HUNTER EXAM TRAINER</h1>
-                    <p>Reset your password to continue your practice.</p>
+                    <h1>JÄGAREXAMEN TRÄNARE</h1>
+                    <p>Återställ ditt lösenord för att fortsätta träna.</p>
                 </div>
             </div>
             <div className="auth-form-container">
                 <div className="auth-form-header">
                     <div className="auth-mobile-logo"><img src={logo} alt="Hunter Exam Trainer" /></div>
-                    <h2>Reset password</h2>
-                    <p>Choose a new password of at least 8 characters.</p>
+                    <h2>Återställ lösenord</h2>
+                    <p>Välj ett nytt lösenord på minst 8 tecken.</p>
                 </div>
-                {!validToken && <p role="alert">Reset link is invalid. Please request a new reset link.</p>}
+                {!validToken && <p role="alert">Återställningslänken är ogiltig. Vänligen begär en ny återställningslänk.</p>}
                 {validToken && !message && (
                     <form onSubmit={handleSubmit}>
                         <div className="form-field">
-                            <label htmlFor="password">New password</label>
+                            <label htmlFor="password">Nytt lösenord</label>
                             <div className="input-wrapper">
                                 <Lock size={18} />
                                 <input id="password" type="password" autoComplete="new-password"
@@ -72,7 +72,7 @@ const ResetPassword = () => {
                             </div>
                         </div>
                         <div className="form-field">
-                            <label htmlFor="confirmPassword">Confirm new password</label>
+                            <label htmlFor="confirmPassword">Bekräfta nytt lösenord</label>
                             <div className="input-wrapper">
                                 <Lock size={18} />
                                 <input id="confirmPassword" type="password" autoComplete="new-password"
@@ -82,13 +82,13 @@ const ResetPassword = () => {
                         </div>
                         {error && <p role="alert" style={{color: "#e53e3e"}}>{error}</p>}
                         <button type="submit" className="auth-primary-button" disabled={isLoading}>
-                            {isLoading ? "Resetting..." : "Reset Password"}
+                            {isLoading ? "Återställer..." : "Återställ lösenord"}
                         </button>
                     </form>
                 )}
                 {message && <div className="forgot-message" role="status">{message}</div>}
-                {!message && <p className="auth-switch"><button type="button" onClick={() => navigate("/forgot-password")}>Request a new reset link</button></p>}
-                <p className="auth-switch"><button type="button" onClick={() => navigate("/login")}>Back to Login</button></p>
+                {!message && <p className="auth-switch"><button type="button" onClick={() => navigate("/forgot-password")}>Begär en ny återställningslänk</button></p>}
+                <p className="auth-switch"><button type="button" onClick={() => navigate("/login")}>Tillbaka till inloggning</button></p>
             </div>
         </div>
     );

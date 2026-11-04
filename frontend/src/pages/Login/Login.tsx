@@ -19,7 +19,7 @@ const Login = () => {
                     <div className="auth-logo">
                         <img src={logo} alt="Hunter Exam Trainer" />
                     </div>
-                    <h1>HUNTER EXAM TRAINER</h1>
+                    <h1>JÄGAREXAMEN TRÄNARE</h1>
                     <p>
                         {t("auth.brandTagLine", "Det bästa sättet att förbereda sig för jägarexamen.")}
                     </p>

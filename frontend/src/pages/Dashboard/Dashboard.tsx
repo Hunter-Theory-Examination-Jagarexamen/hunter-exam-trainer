@@ -8,8 +8,8 @@ const Dashboard = () => {
     return (
         <div className="dashboard">
             <PageTitle
-                title="Dashboard"
-                subtitle="Track your learning progress."
+                title="Instrumentpanel"
+                subtitle="Följ dina inlärningsframsteg."
             />
             <StatisticsCards />
 

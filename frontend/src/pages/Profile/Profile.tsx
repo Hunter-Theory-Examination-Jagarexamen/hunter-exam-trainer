@@ -7,8 +7,8 @@ const Profile = () => {
     return (
         <div className="profile">
             <PageTitle
-                title="Profile"
-                subtitle="Manage your account information and settings."
+                title="Profil"
+                subtitle="Hantera din kontoinformation och inställningar."
             />
             <UserInformation />
             <AccountSettings />

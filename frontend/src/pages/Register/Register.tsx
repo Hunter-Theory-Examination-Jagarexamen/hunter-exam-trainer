@@ -10,10 +10,10 @@ const Register = () => {
                     <div className="auth-logo">
                         <img src={logo} alt="Hunter Exam Trainer" />
                     </div>
-                    <h1>HUNTER EXAM TRAINER</h1>
+                    <h1>JÄGAREXAMEN TRÄNARE</h1>
                     <p>
-                        Create an account to track your progress
-                        and improve your results.
+                        Skapa ett konto för att följa dina framsteg
+                        och förbättra dina resultat.
                     </p>
                 </div>
             </div>

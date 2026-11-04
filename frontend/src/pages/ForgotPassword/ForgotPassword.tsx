@@ -18,7 +18,7 @@ const ForgotPassword = () => {
         e.preventDefault();
 
         if (!email) {
-            alert("Please enter your email");
+            alert("Vänligen ange din e-postadress");
             return;
         }
 
@@ -32,7 +32,7 @@ const ForgotPassword = () => {
             setMessage(response.message);
 
         } catch (error) {
-            setError(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+            setError(error instanceof Error ? error.message : "Något gick fel. Försök igen.");
         } finally {
             setIsLoading(false);
         }
@@ -46,9 +46,9 @@ const ForgotPassword = () => {
                     <div className="auth-logo">
                         <img src={logo} alt="Hunter Exam Trainer" />
                     </div>
-                    <h1>HUNTER EXAM TRAINER</h1>
+                    <h1>JÄGAREXAMEN TRÄNARE</h1>
                     <p>
-                        Reset your password to continue your practice.
+                        Återställ ditt lösenord för att fortsätta träna.
                     </p>
                 </div>
             </div>
@@ -59,16 +59,16 @@ const ForgotPassword = () => {
                     <div className="auth-mobile-logo">
                         <img src={logo} alt="Hunter Exam Trainer" />
                     </div>
-                    <h2>Forgot password</h2>
+                    <h2>Glömt lösenord</h2>
                     <p>
-                        Enter your email to receive a password reset link.
+                        Ange din e-postadress för att få en länk för återställning av lösenord.
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-field">
                         <label htmlFor="email">
-                            Email
+                            E-post
                         </label>
 
                         <div className="input-wrapper">
@@ -78,7 +78,7 @@ const ForgotPassword = () => {
                                 type="email"
                                 required
                                 autoComplete="email"
-                                placeholder="Enter your email"
+                                placeholder="Ange din e-postadress"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
@@ -90,7 +90,7 @@ const ForgotPassword = () => {
                         className="auth-primary-button"
                         disabled={isLoading}
                     >
-                        {isLoading ? "Sending..." : "Send Reset Link"}
+                        {isLoading ? "Skickar..." : "Skicka återställningslänk"}
                     </button>
                 </form>
 
@@ -103,12 +103,12 @@ const ForgotPassword = () => {
                 )}
 
                 <p className="auth-switch">
-                    Remembered your password?{" "}
+                    Kom du ihåg ditt lösenord?{" "}
                     <button
                         type="button"
                         onClick={() => navigate("/login")}
                     >
-                        Back to Login
+                        Tillbaka till inloggning
                     </button>
                 </p>
 
