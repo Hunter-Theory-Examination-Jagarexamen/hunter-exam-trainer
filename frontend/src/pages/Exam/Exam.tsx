@@ -2,6 +2,7 @@ import "../../styles/exam.css";
 import ExamHeader from "../../components/exam/ExamHeader";
 import QuestionPanel from "../../components/exam/QuestionPanel";
 import ExamNavigation from "../../components/exam/ExamNavigation";
+import ExamOverview from "../../components/exam/ExamOverview";
 import { useExamBookmarks } from "../../hooks/useExamBookmarks";
 import type { ExamQuestion } from "../../types/examQuestion.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -27,13 +28,8 @@ const Exam = () => {
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [overviewOpen, setOverviewOpen] = useState(false);
-    const { toggleBookmark, isBookmarked } = useExamBookmarks(attemptId);
+    const { bookmarks, toggleBookmark, isBookmarked } = useExamBookmarks(attemptId);
 
-    // The start request, shared by both runs of the load effect. React's
-    // StrictMode (development only) runs effects twice; without this, the page
-    // would start two exams, and both would try to create the same per-subject
-    // totals rows on the server (#174). A ref keeps its value between the runs
-    // and, unlike state, changing it doesn't redraw the page.
     const startRequest = useRef<Promise<ExamStartResponse> | null>(null);
 
     const submitExam = useCallback(async () => {
@@ -41,7 +37,6 @@ const Exam = () => {
         try {
             const result = await apiClient("/api/exam/submit", {
                 method: "POST",
-                // Only which exam: the answers are already saved on the server.
                 body: JSON.stringify({ attemptId })
             });
 
@@ -58,13 +53,11 @@ const Exam = () => {
             }
 
             alert(
-                "Failed to submit exam. Your answers are saved on the server — please try again."
+                "Kunde inte skicka in provet. Dina svar är sparade på servern – försök igen."
             );
         }
     }, [attemptId, navigate]);
 
-
-    //Load exam questions
     useEffect(() => {
 
         const fetchExamQuestions = async () => {
@@ -87,9 +80,9 @@ const Exam = () => {
                 console.error("Failed to load exam questions.", err);
                 const errorObj = err as { status?: number; message?: string };
                 if (errorObj.status === 409 || (errorObj?.message && errorObj.message.includes("Not enough questions"))) {
-                    setError(errorObj.message || "Not enough questions available to start the exam.");
+                    setError(errorObj.message || "Inte tillräckligt med frågor tillgängliga för att starta provet.");
                 } else {
-                    setError("Failed to load exam questions. Please try again.");
+                    setError("Kunde inte ladda provfrågor. Försök igen.");
                 }
             }
             finally {
@@ -100,26 +93,21 @@ const Exam = () => {
         void fetchExamQuestions();
     }, []);
 
-    // Timer
     useEffect(() => {
-
         if (timeLeft <= 0) {
             return;
         }
 
         const timer = setInterval(() => {
-            setTimeLeft(
-                (previousTime) => previousTime - 1
-            );
+            setTimeLeft((previousTime) => Math.max(0, previousTime - 1));
         }, 1000);
 
         return () => clearInterval(timer);
 
     }, [timeLeft]);
 
-    // Auto-submit when time runs out
     useEffect(() => {
-        if (timeLeft === 0 && questions.length > 0) {
+        if (timeLeft <= 0 && questions.length > 0) {
             void submitExam();
         }
     }, [timeLeft, submitExam, questions]);
@@ -140,20 +128,15 @@ const Exam = () => {
     const currentQuestion = questions[currentQuestionIndex];
 
     const handleAnswerChange = async (answerId: string) => {
-        // Skip if the user re-clicked the same option (no-op on the server too).
         if (answers[currentQuestion.id] === answerId) {
             return;
         }
 
-        // Update local state immediately for UI responsiveness.
         setAnswers((previousAnswers) => ({
             ...previousAnswers,
             [currentQuestion.id]: answerId
         }));
 
-        // Persist to the server (best-effort). If this fails, we keep going:
-
-        // the local state still holds the answer, and the user can try again by selecting a different option (which retries the save).
         if (!attemptId) {
             return;
         }
@@ -168,10 +151,13 @@ const Exam = () => {
             });
         }
         catch (err) {
-            // Do not interrupt the user mid-exam.  Log for debugging.
             console.error("Failed to save answer:", err);
-
         }
+    };
+
+    const handleJumpToQuestion = (index: number) => {
+        setCurrentQuestionIndex(index);
+        setOverviewOpen(false);
     };
 
     const handleToggleBookmark = () => {
@@ -194,7 +180,7 @@ const Exam = () => {
     if (isLoading) {
         return (
             <div className="exam">
-                <p>Loading exam questions...</p>
+                <p>Laddar provfrågor...</p>
             </div>
         );
     }
@@ -210,7 +196,7 @@ const Exam = () => {
     if (questions.length === 0) {
         return (
             <div className="exam">
-                <p>No exam questions available.</p>
+                <p>Inga provfrågor tillgängliga.</p>
             </div>
         );
     }
@@ -221,10 +207,9 @@ const Exam = () => {
 
     return (
         <div className="exam">
-
             <div className="exam-progress-bar text-center my-2">
                 <span className="font-semibold text-gray-700">
-                    Answered {answeredCount} / {totalQuestions}
+                    Besvarade {answeredCount} / {totalQuestions}
                 </span>
             </div>
 
@@ -236,33 +221,55 @@ const Exam = () => {
                 overviewOpen={overviewOpen}
             />
 
-            <QuestionPanel
-                question={currentQuestion}
-                selectedAnswer={answers[currentQuestion.id]}
-                onAnswerChange={handleAnswerChange}
-                isBookmarked={isBookmarked(currentQuestion.id)}
-                onToggleBookmark={handleToggleBookmark}
-            />
+            <div className="exam-with-overview">
+                <div className="exam-main">
+                    <QuestionPanel
+                        question={currentQuestion}
+                        selectedAnswer={answers[currentQuestion.id]}
+                        onAnswerChange={handleAnswerChange}
+                        isBookmarked={isBookmarked(currentQuestion.id)}
+                        onToggleBookmark={handleToggleBookmark}
+                    />
 
-            <ExamNavigation
-                onPrevious={handlePrevious}
-                onNext={handleNext}
-                onSubmit={handleSubmit}
-                isFirstQuestion={currentQuestionIndex === 0}
-                isLastQuestion={currentQuestionIndex === questions.length - 1}
-            />
+                    <ExamNavigation
+                        onPrevious={handlePrevious}
+                        onNext={handleNext}
+                        onSubmit={handleSubmit}
+                        isFirstQuestion={currentQuestionIndex === 0}
+                        isLastQuestion={currentQuestionIndex === questions.length - 1}
+                    />
+                </div>
+
+                <aside className={`exam-overview-sidebar ${overviewOpen ? "is-open" : ""}`}>
+                    <ExamOverview
+                        questions={questions}
+                        answers={answers}
+                        bookmarks={bookmarks}
+                        currentIndex={currentQuestionIndex}
+                        onJumpToQuestion={handleJumpToQuestion}
+                    />
+                </aside>
+            </div>
+
+            {overviewOpen && (
+                <div
+                    className="exam-overview-backdrop"
+                    onClick={() => setOverviewOpen(false)}
+                    aria-hidden="true"
+                />
+            )}
 
             {showConfirmModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
                     <div className="question-card text-center max-w-md w-full">
-                        <h3 className="text-xl font-bold mb-3 text-[var(--color-text)]">Submit Exam?</h3>
+                        <h3 className="text-xl font-bold mb-3 text-[var(--color-text)]">Skicka in prov?</h3>
                         {unansweredCount > 0 ? (
                             <p className="text-[var(--color-text)] opacity-80 mb-6">
-                                You have <strong>{unansweredCount}</strong> unanswered question{unansweredCount > 1 ? "s" : ""}. Are you sure you want to submit?
+                                Du har <strong>{unansweredCount}</strong> obesvarad{unansweredCount > 1 ? "e" : ""} fråga{unansweredCount > 1 ? "or" : ""}. De kommer att räknas som felaktiga. Är du säker på att du vill skicka in?
                             </p>
                         ) : (
                             <p className="text-[var(--color-text)] opacity-80 mb-6">
-                                You have answered all questions. Are you sure you want to submit?
+                                Du har besvarat alla frågor. Är du säker på att du vill skicka in?
                             </p>
                         )}
                         <div className="flex justify-center">
@@ -271,20 +278,19 @@ const Exam = () => {
                                 className="previous-button"
                                 style={{ borderRadius: "8px", padding: "0.5rem 1rem", fontSize: "0.9rem", fontWeight: 600, marginRight: "12px" }}
                             >
-                                Go back
+                                Gå tillbaka
                             </button>
                             <button
                                 onClick={handleConfirmSubmit}
                                 className="next-button"
                                 style={{ borderRadius: "8px", padding: "0.5rem 1rem", fontSize: "0.9rem", fontWeight: 600 }}
                             >
-                                Submit Exam
+                                Skicka in ändå
                             </button>
                         </div>
                     </div>
                 </div>
             )}
-
         </div>
     );
 };
