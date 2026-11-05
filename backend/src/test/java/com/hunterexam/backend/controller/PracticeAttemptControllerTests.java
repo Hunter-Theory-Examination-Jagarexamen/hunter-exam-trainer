@@ -127,6 +127,51 @@ class PracticeAttemptControllerTests {
                 .andExpect(status().isNotFound());
     }
 
+    // ---------- startRandom ----------
+
+    @Test
+    void loggedOutUserCannotStartRandomRound() throws Exception {
+        mvc.perform(post("/api/practice/attempts/random"))
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(practiceAttemptService);
+    }
+
+    @Test
+    void startRandom_returnsRoundWithQuestions_withoutSubjectNameOrCorrectAnswers() throws Exception {
+        QuestionResponse question = new QuestionResponse(
+                100L, "Question?", "One", "Two", "Three", "Four", null);
+        // A random round mixes subjects, so it has no subject name.
+        when(practiceAttemptService.startRandom(EMAIL))
+                .thenReturn(new PracticeStartResponse(11L, null, List.of(question)));
+
+        mvc.perform(post("/api/practice/attempts/random").with(student())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.attemptId").value(11))
+                .andExpect(jsonPath("$.subjectName").doesNotExist())
+                .andExpect(jsonPath("$.questions[0].id").value(100))
+                .andExpect(jsonPath("$.questions[0].correctAnswer").doesNotExist())
+                .andExpect(jsonPath("$.questions[0].explanation").doesNotExist());
+
+        // The email comes from the token; there is no body to trust.
+        verify(practiceAttemptService).startRandom(EMAIL);
+    }
+
+    @Test
+    void startRandom_retriesOnce_whenTwoStartsClashOnTheTotalsRow() throws Exception {
+        when(practiceAttemptService.startRandom(EMAIL))
+                .thenThrow(new DataIntegrityViolationException("duplicate subject_stats row"))
+                .thenReturn(new PracticeStartResponse(11L, null, List.of()));
+
+        mvc.perform(post("/api/practice/attempts/random").with(student())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.attemptId").value(11));
+
+        verify(practiceAttemptService, times(2)).startRandom(EMAIL);
+    }
+
     // ---------- answer ----------
 
     @Test

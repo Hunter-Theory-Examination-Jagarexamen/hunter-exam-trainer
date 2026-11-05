@@ -19,6 +19,7 @@ endpoints are added to this table, not duplicated elsewhere.
 | PUT    | /api/admin/subjects/{id}      | Update an existing subject                      | Required (ADMIN) |
 | DELETE | /api/admin/subjects/{id}      | Delete a subject                                | Required (ADMIN) |
 | POST   | /api/practice/attempts        | Start a practice round for a subject            | Required         |
+| POST   | /api/practice/attempts/random | Start a random practice round (questions from all subjects) | Required |
 | POST   | /api/practice/attempts/{id}/answers | Answer one question in a practice round (checked by the server) | Required |
 | POST   | /api/practice/attempts/{id}/finish | Finish a practice round and get its totals | Required         |
 | POST   | /api/exam/start               | Start a mock exam and receive 70 questions      | Required         |
@@ -199,7 +200,33 @@ Starts a round with all questions of the subject. Response (no `correctAnswer` o
 ```
 
 - `400` if `subjectId` is missing, `404` if the subject doesn't exist, `409` if it has no questions.
-- Starting a round closes the student's earlier unfinished practice round (one open practice round per student).
+- Starting a round (either start endpoint) closes the student's earlier unfinished practice round (one open practice round per student).
+
+### `POST /api/practice/attempts/random`
+
+No request body. Starts a random practice round: the server picks up to
+**20 questions** at random from the whole question bank, across all subjects.
+The questions are spread over as many subjects as the round size allows (a
+subject with many questions can't fill the round alone), each question appears
+at most once, and the order is random. A smaller bank gives a shorter round.
+
+Response has the same shape as `/api/practice/attempts`, but `subjectName` is
+`null`, because a random round mixes subjects:
+
+```json
+{
+  "attemptId": 11,
+  "subjectName": null,
+  "questions": [
+    { "id": 8, "questionText": "...", "optionA": "...", "optionB": "...", "optionC": "...", "optionD": "...", "imageUrl": null }
+  ]
+}
+```
+
+- `409 Conflict` if the question bank is empty.
+- The round is answered and finished exactly like a subject round: `/answers`
+  saves and checks each answer (attributed to that question's subject in the
+  statistics), `/finish` returns the totals.
 
 ### `POST /api/practice/attempts/{id}/answers`
 

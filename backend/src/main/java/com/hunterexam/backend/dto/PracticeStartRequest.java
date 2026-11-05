@@ -6,11 +6,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Request body for starting a practice round:
+ * Request body for starting a practice round with one subject:
  * {@code POST /api/practice/attempts}.
  * <p>
- * For now a round always covers one subject. Random practice (#151) will
- * add other ways to choose the questions.
+ * A random round (#151) has no body: it is started with
+ * {@code POST /api/practice/attempts/random}, where the server picks the
+ * questions from the whole bank.
  */
 @Getter
 @Setter
