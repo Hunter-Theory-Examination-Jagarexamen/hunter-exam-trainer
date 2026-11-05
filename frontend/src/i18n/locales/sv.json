@@ -166,7 +166,7 @@
       "editTitle": "Redigera fråga #{{id}}: {{text}}",
       "createTitle": "Lägg till fråga",
       "textLabel": "Frågetext (obligatoriskt)",
-      "legendOptions": "Svarsalternativ — välj det rätte alternativet (obligatoriskt)",
+      "legendOptions": "Svarsalternativ — välj det rätta alternativet (obligatoriskt)",
       "optionLabel": "Alternativ {{key}} (obligatoriskt)",
       "correctOptionLabel": "Rätt alternativ {{key}}",
       "subjectLabel": "Frågans ämne (obligatoriskt)",

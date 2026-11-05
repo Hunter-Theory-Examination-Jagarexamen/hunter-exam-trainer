@@ -5,7 +5,8 @@
     "submit": "Submit",
     "cancel": "Cancel",
     "save": "Save",
-    "back": "Back"
+    "back": "Back",
+    "or": "or"
   },
   "auth": {
     "loginTitle": "Log In",
@@ -17,7 +18,33 @@
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?",
     "registerLink": "Register here",
-    "loginLink": "Log in here"
+    "loginLink": "Log in here",
+    "accountCreatedSuccess": "Account created successfully! You can now log in.",
+    "enterEmailAndPassword": "Please enter both email and password",
+    "loginSubtitle": "Log in to continue your practice.",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "hidePassword": "Hide password",
+    "showPassword": "Show password",
+    "forgotPassword": "Forgot Password?",
+    "continueWithGoogle": "Continue with Google",
+    "fullNameLabel": "Full name",
+    "fullNamePlaceHolder": "Enter your full name",
+    "confirmPasswordLabel": "Confirm password",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "termsAgreement": "I agree to the",
+    "termsOfUse": "Terms of Use",
+    "and": "and",
+    "privacyPolicy": "Privacy Policy",
+    "creatingAccount": "Creating account...",
+    "brandTagLine": "The best way to prepare for the hunter exam.",
+    "googleError": "Google login failed. Please try again or use another method.",
+    "sessionExpired": "Your session has expired. Please log in again.",
+    "welcomeBack": "Welcome back!",
+    "loggingIn": "Logging in...",
+    "goToRegister": "Sign Up",
+    "createPasswordPlaceholder": "Create a password",
+    "registerFailed": "Registration failed. Please try again."
   },
   "errors": {
     "EMAIL_TAKEN": "Email already registered.",
@@ -28,7 +55,10 @@
     "TOO_MANY_RESET_REQUESTS": "Too many password reset requests. Please try again later.",
     "EXAM_ALREADY_SUBMITTED": "Exam has already been submitted.",
     "NOT_FOUND": "Resource is not found",
-    "UNKNOWN_ERROR": "An unexpected error occurred. Please try again."
+    "UNKNOWN_ERROR": "An unexpected error occurred. Please try again.",
+    "MISSING_FIELDS": "Please fill in all fields.",
+    "PASSWORD_MISMATCH": "Passwords do not match.",
+    "TERMS_REQUIRED": "Please accept the Terms of Use and Privacy Policy."
   },
   "serverStatus": {
     "starting": "The server is starting. This can take up to a minute...",
@@ -65,6 +95,115 @@
     "finishFailed": "The round couldn't be finished. Please try again.",
     "roundClosed": "This round is already finished, for example in another tab. Your answers are saved.",
     "tryAgain": "Try again"
+  },
+  "admin": {
+    "title": "Admin",
+    "subtitle": "Choose an admin tool.",
+    "loadingOverview": "Loading admin overview...",
+    "cards": {
+      "questions": {
+        "title": "Questions",
+        "caption": "Open the question bank"
+      },
+      "subjects": {
+        "title": "Subjects",
+        "caption": "Open subject management"
+      },
+      "learners": {
+        "title": "Learners",
+        "caption": "Open learner progress"
+      }
+    }
+  },
+  "learnerProgress": {
+    "title": "Learner Progress",
+    "subtitle": "Follow the learners' progress.",
+    "loading": "Loading learners...",
+    "noLearners": "No learners yet.",
+    "lastActivity": "Last activity:",
+    "never": "Never",
+    "noMockExams": "No mock exams yet.",
+    "mockExamsCount": "Mock exams:",
+    "taken": "taken",
+    "latest": "Latest:",
+    "passed": " · Passed",
+    "notPassed": " · Not passed",
+    "best": "Best:",
+    "noPracticeResults": "No practice results yet."
+  },
+  "questionBank": {
+    "title": "Admin Question Bank",
+    "subtitle": "Browse existing questions by subject. Search within the selected subject.",
+    "loadingQuestions": "Loading questions...",
+    "loadingSubjects": "Loading subjects...",
+    "noSubjects": "No subjects available.",
+    "subjectLabel": "Subject",
+    "addQuestion": "Add question",
+    "noQuestions": "No questions available for this subject.",
+    "searchLabel": "Search questions",
+    "searchPlaceholder": "Search by ID, question, answer or explanation",
+    "questionCount": "{{filtered}} of {{total}} questions",
+    "noMatch": "No questions match your search.",
+    "correctAnswer": "Correct answer:",
+    "explanation": "Explanation:",
+    "edit": "Edit",
+    "delete": "Delete",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {{current}} of {{total}}",
+    "deleteTitle": "Delete question #{{id}}?",
+    "deleteWarning": "This permanently deletes the question. This action cannot be undone.",
+    "cancelDeletion": "Cancel deletion",
+    "confirmDeletion": "Confirm deletion",
+    "deleting": "Deleting...",
+    "saving": "Saving...",
+    "saveQuestion": "Save question",
+    "cancel": "Cancel",
+    "successCreated": "Question #{{id}} created in {{subject}}.",
+    "successUpdated": "Question #{{id}} updated in {{subject}}.",
+    "successDeleted": "Question #{{id}} deleted.",
+    "editor": {
+      "editTitle": "Edit question #{{id}}: {{text}}",
+      "createTitle": "Add question",
+      "textLabel": "Question text (required)",
+      "legendOptions": "Answer options — select the correct option (required)",
+      "optionLabel": "Option {{key}} (required)",
+      "correctOptionLabel": "Correct option {{key}}",
+      "subjectLabel": "Question subject (required)",
+      "imageUrlLabel": "Image URL (optional)",
+      "imageUrlHelp": "Use a full HTTP or HTTPS URL. Leave empty to save without an image.",
+      "removeImage": "Remove image",
+      "explanationLabel": "Explanation (optional)"
+    }
+  },
+  "subjects": {
+    "title": "Manage Subjects",
+    "subtitle": "Create and edit the subjects used by the question bank and practice mode.",
+    "loading": "Loading subjects...",
+    "retry": "Retry loading subjects",
+    "createSubject": "Create subject",
+    "refreshList": "Refresh subject list",
+    "noSubjects": "No subjects available. Create a subject to get started.",
+    "questionsCount": "{{count}} questions",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteTitle": "Delete subject \"{{name}}\"?",
+    "deleteWarning": "This permanently deletes the subject. This action cannot be undone. Subjects used by questions or practice results can't be deleted at the moment.",
+    "cancelDeletion": "Cancel deletion",
+    "confirmDeletion": "Confirm deletion",
+    "deleting": "Deleting...",
+    "saving": "Saving...",
+    "saveSubject": "Save subject",
+    "cancel": "Cancel",
+    "successDeleted": "Subject \"{{name}}\" deleted.",
+    "successCreated": "Subject \"{{name}}\" created.",
+    "successUpdated": "Subject \"{{name}}\" updated.",
+    "editor": {
+      "editTitle": "Edit subject: {{name}}",
+      "createTitle": "Create subject",
+      "nameLabel": "Name (required)",
+      "descriptionLabel": "Description (required)"
+    }
   },
   "exam": {
     "loading": "Loading exam questions...",
