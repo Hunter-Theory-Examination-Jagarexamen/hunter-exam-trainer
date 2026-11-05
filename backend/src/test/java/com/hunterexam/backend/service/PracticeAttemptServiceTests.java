@@ -3,6 +3,7 @@ package com.hunterexam.backend.service;
 import com.hunterexam.backend.dto.PracticeAnswerResponse;
 import com.hunterexam.backend.dto.PracticeFinishResponse;
 import com.hunterexam.backend.dto.PracticeStartResponse;
+import com.hunterexam.backend.dto.QuestionResponse;
 import com.hunterexam.backend.entity.Attempt;
 import com.hunterexam.backend.entity.AttemptQuestion;
 import com.hunterexam.backend.entity.AttemptType;
@@ -27,11 +28,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,7 +48,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for {@link PracticeAttemptService}: start, answer and finish.
+ * Unit tests for {@link PracticeAttemptService}: start, startRandom, answer
+ * and finish.
  * <p>
  * The repositories are Mockito mocks, so no database is used.
  */
@@ -87,6 +93,10 @@ class PracticeAttemptServiceTests {
 
     // A question whose correct answer is option B ("Two"), stored as text like today.
     private Question question(Long id) {
+        return question(id, subject);
+    }
+
+    private Question question(Long id, Subject subject) {
         Question q = new Question();
         q.setId(id);
         q.setQuestionText("Question " + id);
@@ -98,6 +108,13 @@ class PracticeAttemptServiceTests {
         q.setExplanation("Because two.");
         q.setSubject(subject);
         return q;
+    }
+
+    private static Subject subject(Long id, String name) {
+        Subject s = new Subject();
+        s.setId(id);
+        s.setName(name);
+        return s;
     }
 
     private Attempt runningAttempt(User owner) {
@@ -188,6 +205,25 @@ class PracticeAttemptServiceTests {
     }
 
     @Test
+    void start_closesOnlyPracticeRounds_neverAMockExam() {
+        // Starting practice must not touch a running mock exam (#186): only
+        // the practice types are asked for, so an open exam stays open.
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(subjectRepository.findById(5L)).thenReturn(Optional.of(subject));
+        when(questionRepository.findBySubjectId(5L)).thenReturn(List.of(question(100L)));
+        when(attemptRepository.save(any(Attempt.class))).thenAnswer(call -> call.getArgument(0));
+        when(subjectStatsRepository.existsByUserAndSubject(user, subject)).thenReturn(true);
+
+        service.start(5L, EMAIL);
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<java.util.Collection<AttemptType>> types = ArgumentCaptor.forClass(java.util.Collection.class);
+        verify(attemptRepository).findByUserAndFinishedAtIsNullAndTypeIn(eq(user), types.capture());
+        assertFalse(types.getValue().contains(AttemptType.MOCK_EXAM),
+                "starting practice must never close a running mock exam");
+    }
+
+    @Test
     void start_throwsNotFound_whenSubjectDoesNotExist() {
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
         when(subjectRepository.findById(99L)).thenReturn(Optional.empty());
@@ -205,6 +241,113 @@ class PracticeAttemptServiceTests {
         assertThrows(ConflictException.class, () -> service.start(5L, EMAIL));
         verify(attemptRepository, never()).save(any());
         verify(attemptQuestionRepository, never()).saveAll(anyList());
+    }
+
+    // ---------- startRandom ----------
+
+    // Stubs what both random start tests need: the user, the bank, and a
+    // round that gets an id when saved (like the database would give it).
+    private void givenRandomBank(List<Question> bank) {
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(questionRepository.findAllWithSubject()).thenReturn(bank);
+        when(attemptRepository.save(any(Attempt.class))).thenAnswer(call -> {
+            Attempt saved = call.getArgument(0);
+            saved.setId(ATTEMPT_ID);
+            return saved;
+        });
+        when(subjectStatsRepository.existsByUserAndSubject(eq(user), any(Subject.class))).thenReturn(true);
+    }
+
+    @Test
+    void startRandom_takesTheWholeBank_whenItIsSmallerThanTwenty_andCoversEverySubject() {
+        Subject other = subject(6L, "Jaktvård");
+        List<Question> bank = List.of(
+                question(100L), question(101L), question(102L, other), question(103L, other));
+        givenRandomBank(bank);
+
+        PracticeStartResponse response = service.startRandom(EMAIL);
+
+        assertEquals(ATTEMPT_ID, response.getAttemptId());
+        // A round that mixes subjects has no single subject name.
+        assertNull(response.getSubjectName());
+        // The bank is smaller than a full round, so every question is in it.
+        assertEquals(4, response.getQuestions().size());
+        assertEquals(
+                bank.stream().map(Question::getId).collect(Collectors.toSet()),
+                response.getQuestions().stream().map(QuestionResponse::getId).collect(Collectors.toSet()));
+
+        ArgumentCaptor<Attempt> attempt = ArgumentCaptor.forClass(Attempt.class);
+        verify(attemptRepository).save(attempt.capture());
+        assertEquals(AttemptType.RANDOM_PRACTICE, attempt.getValue().getType());
+
+        // One row per question, in the order they are shown, none answered yet.
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<AttemptQuestion>> rows = ArgumentCaptor.forClass(List.class);
+        verify(attemptQuestionRepository).saveAll(rows.capture());
+        assertEquals(4, rows.getValue().size());
+        for (int position = 0; position < 4; position++) {
+            assertEquals(position, rows.getValue().get(position).getPosition());
+            assertFalse(rows.getValue().get(position).isAnswered());
+        }
+
+        // Every subject of the round gets a totals row, so answers can update it.
+        verify(subjectStatsRepository).existsByUserAndSubject(user, subject);
+        verify(subjectStatsRepository).existsByUserAndSubject(user, other);
+    }
+
+    @Test
+    void startRandom_takesTwentyQuestions_withoutDuplicates_andNotOnlyTheBiggestSubject() {
+        Subject small = subject(6L, "Jaktvård");
+        List<Question> bank = new ArrayList<>();
+        for (long id = 100; id <= 124; id++) {
+            bank.add(question(id));          // 25 questions of the default subject
+        }
+        bank.add(question(200L, small));     // one question of a small subject
+        givenRandomBank(bank);
+
+        PracticeStartResponse response = service.startRandom(EMAIL);
+
+        List<Long> ids = response.getQuestions().stream().map(QuestionResponse::getId).toList();
+        assertEquals(20, ids.size(), "a full bank gives a full round");
+        assertEquals(20, new HashSet<>(ids).size(), "no question should appear twice");
+        // The round-robin picks one question per subject first, so the small
+        // subject is represented even though the big one could fill the round.
+        assertTrue(ids.contains(200L));
+        verify(subjectStatsRepository).existsByUserAndSubject(user, small);
+    }
+
+    @Test
+    void startRandom_throwsConflict_whenQuestionBankIsEmpty() {
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(questionRepository.findAllWithSubject()).thenReturn(List.of());
+
+        assertThrows(ConflictException.class, () -> service.startRandom(EMAIL));
+
+        // Nothing is opened: no earlier round closed, no round saved.
+        verify(attemptRepository, never()).findByUserAndFinishedAtIsNullAndTypeIn(any(), any());
+        verify(attemptRepository, never()).save(any());
+        verify(attemptQuestionRepository, never()).saveAll(anyList());
+    }
+
+    @Test
+    void startRandom_closesEarlierRunningRound() {
+        Attempt leftRound = runningAttempt(user);
+        AttemptQuestion answered = new AttemptQuestion(leftRound, question(100L), 0);
+        answered.recordAnswer("B", true, LocalDateTime.now());
+
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(questionRepository.findAllWithSubject()).thenReturn(List.of(question(101L)));
+        when(attemptRepository.findByUserAndFinishedAtIsNullAndTypeIn(eq(user), any()))
+                .thenReturn(List.of(leftRound));
+        when(attemptQuestionRepository.findByAttemptIdOrderByPosition(ATTEMPT_ID))
+                .thenReturn(List.of(answered));
+        when(attemptRepository.save(any(Attempt.class))).thenAnswer(call -> call.getArgument(0));
+        when(subjectStatsRepository.existsByUserAndSubject(user, subject)).thenReturn(true);
+
+        service.startRandom(EMAIL);
+
+        // One open practice round per student, whatever kind of round it was.
+        assertTrue(leftRound.isFinished());
     }
 
     // ---------- answer ----------
@@ -236,6 +379,28 @@ class PracticeAttemptServiceTests {
         assertEquals("B", response.getCorrectOption());
         assertFalse(row.getCorrect());
         verify(subjectStatsRepository).addAnswer(eq(user), eq(subject), eq(0L), any());
+    }
+
+    @Test
+    void answer_inARandomRound_updatesTheTotalsOfThatQuestionsOwnSubject() {
+        // A mixed round: the answered question belongs to another subject than
+        // the one the student practised most, so the answer must count there.
+        Subject other = subject(6L, "Jaktvård");
+        Attempt randomRound = new Attempt(user, AttemptType.RANDOM_PRACTICE, LocalDateTime.now());
+        randomRound.setId(ATTEMPT_ID);
+        AttemptQuestion row = new AttemptQuestion(randomRound, question(100L, other), 0);
+
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(attemptRepository.findById(ATTEMPT_ID)).thenReturn(Optional.of(randomRound));
+        when(attemptQuestionRepository.findByAttemptIdAndQuestionId(ATTEMPT_ID, 100L))
+                .thenReturn(Optional.of(row));
+        when(subjectStatsRepository.addAnswer(eq(user), eq(other), eq(1L), any())).thenReturn(1);
+
+        PracticeAnswerResponse response = service.answer(ATTEMPT_ID, 100L, "B", EMAIL);
+
+        assertTrue(response.isCorrect());
+        verify(subjectStatsRepository).addAnswer(eq(user), eq(other), eq(1L), any());
+        verify(subjectStatsRepository, never()).addAnswer(eq(user), eq(subject), anyLong(), any());
     }
 
     @Test

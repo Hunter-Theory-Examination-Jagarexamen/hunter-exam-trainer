@@ -18,14 +18,26 @@ import type {
 import {
     answerPracticeQuestion,
     finishPracticeRound,
-    startPracticeRound
+    startPracticeRound,
+    startRandomPracticeRound
 } from "../../services/practiceAttemptService";
 
-const PracticeQuestions = () => {
+interface PracticeQuestionsProps {
+    // Which round to start: "subject" (default) takes the subject from the URL,
+    // "random" asks the server for questions from all subjects (#151).
+    mode?: "subject" | "random";
+}
+
+const PracticeQuestions = ({ mode = "subject" }: PracticeQuestionsProps) => {
 
     const navigate = useNavigate();
     const { t } = useTranslation();
     const { subject } = useParams();
+
+    const isRandom = mode === "random";
+    // Where "back" goes after a round: the subject list, or the mode cards.
+    const backPath = isRandom ? "/practice" : "/practice/subjects";
+    const backLabelKey = isRandom ? "practice.backToModes" : "practice.backToSubjects";
 
     const [attemptId, setAttemptId] = useState<number | null>(null);
     const [subjectName, setSubjectName] = useState("");
@@ -56,7 +68,7 @@ const PracticeQuestions = () => {
     // once. React's StrictMode runs the effect below twice in development; the
     // second run reuses this request instead of starting a second round.
     // A new visit (leaving and coming back) is a new component, so a new round.
-    const startRequest = useRef<{ subject: string; promise: Promise<PracticeStartResponse> } | null>(null);
+    const startRequest = useRef<{ key: string; promise: Promise<PracticeStartResponse> } | null>(null);
 
     // True while a round is running (started, not finished). A ref, not state, so
     // the blocker below sees the change at once, e.g. when quitting navigates
@@ -70,13 +82,15 @@ const PracticeQuestions = () => {
 
     useEffect(() => {
 
-        // If the subject changes or the page closes before the server answers,
+        // If the round changes or the page closes before the server answers,
         // the old answer must not overwrite the new state.
         let active = true;
 
         const startRound = async () => {
 
-            if (!subject) {
+            // One start per page visit: "random", or the subject in the URL.
+            const startKey = isRandom ? "random" : subject;
+            if (!startKey) {
                 setError("practice.subjectNotFound");
                 setIsLoading(false);
                 return;
@@ -87,8 +101,13 @@ const PracticeQuestions = () => {
                 setIsLoading(true);
                 setError("");
 
-                if (startRequest.current?.subject !== subject) {
-                    startRequest.current = { subject, promise: startPracticeRound(Number(subject)) };
+                if (startRequest.current?.key !== startKey) {
+                    startRequest.current = {
+                        key: startKey,
+                        promise: isRandom
+                            ? startRandomPracticeRound()
+                            : startPracticeRound(Number(startKey))
+                    };
                 }
                 const round = await startRequest.current.promise;
                 if (!active) {
@@ -98,7 +117,8 @@ const PracticeQuestions = () => {
                 // Option ids are the letters A-D, the same letters the server checks.
                 const mappedQuestions: PracticeQuestion[] = round.questions.map((question) => ({
                     id: question.id.toString(),
-                    subjectArea: round.subjectName,
+                    // A random round mixes subjects, so there is no one subject name.
+                    subjectArea: round.subjectName ?? "",
                     question: question.questionText,
                     imageUrl: question.imageUrl,
                     options: [
@@ -111,10 +131,10 @@ const PracticeQuestions = () => {
 
                 setAttemptId(round.attemptId);
                 isRoundOpen.current = true;
-                setSubjectName(round.subjectName);
+                setSubjectName(round.subjectName ?? "");
                 setQuestions(mappedQuestions);
 
-                // Start from the first question whenever a subject is loaded
+                // Start from the first question whenever a round is loaded
                 setCurrentQuestionIndex(0);
                 setSelectedAnswer(null);
                 setAnswers({});
@@ -128,7 +148,8 @@ const PracticeQuestions = () => {
                 console.error("Failed to start practice round: ", error);
                 const errorObj = error as { status?: number; message?: string };
                 if (errorObj?.status === 409) {
-                    setError("practice.noQuestionsYet");
+                    // 409 means the bank has no questions for this round.
+                    setError(isRandom ? "practice.randomNoQuestions" : "practice.noQuestionsYet");
                 } else {
                     setError("practice.loadFailed");
                 }
@@ -145,7 +166,7 @@ const PracticeQuestions = () => {
             active = false;
         };
 
-    }, [subject]);
+    }, [isRandom, subject]);
 
     const currentQuestion = questions[currentQuestionIndex];
     const currentAnswer = answers[currentQuestionIndex];
@@ -229,7 +250,11 @@ const PracticeQuestions = () => {
         }
     };
 
-    const backToSubjects = () => navigate("/practice/subjects");
+    // Where "back" leads after the round: the subject list, or the mode cards.
+    const goBack = () => navigate(backPath);
+
+    // The page heading: the round's subject, or the fixed title of a random round.
+    const pageTitle = isRandom ? t("practice.randomTitle") : (subjectName || t("practice.title"));
 
     const handleNext = async () => {
 
@@ -248,9 +273,9 @@ const PracticeQuestions = () => {
         const totals = await finishRound("quit");
         setIsQuitting(false);
         setIsConfirmingQuit(false);
-        // Nothing answered: no result to show, back to the subject list.
+        // Nothing answered: no result to show, back to where the round started.
         if (totals && totals.answeredQuestions === 0) {
-            backToSubjects();
+            goBack();
         }
     };
 
@@ -277,7 +302,7 @@ const PracticeQuestions = () => {
         return (
             <div>
                 <PageTitle
-                    title={t("practice.title")}
+                    title={pageTitle}
                     subtitle={t("practice.loadingQuestions")}
                 />
             </div>
@@ -288,7 +313,7 @@ const PracticeQuestions = () => {
         return (
             <div>
                 <PageTitle
-                    title={t("practice.title")}
+                    title={pageTitle}
                     subtitle={t(error)}
                 />
             </div>
@@ -298,8 +323,8 @@ const PracticeQuestions = () => {
     if (result) {
         return (
             <div className="practice-questions">
-                <PageTitle title={subjectName} subtitle={t("practice.subtitle")} />
-                <PracticeRoundResult result={result} onBack={backToSubjects} />
+                <PageTitle title={pageTitle} subtitle={t("practice.subtitle")} />
+                <PracticeRoundResult result={result} onBack={goBack} backLabelKey={backLabelKey} />
             </div>
         );
     }
@@ -308,8 +333,8 @@ const PracticeQuestions = () => {
         return (
             <div>
                 <PageTitle
-                    title={t("practice.title")}
-                    subtitle={t("practice.noQuestionsYet")}
+                    title={pageTitle}
+                    subtitle={t(isRandom ? "practice.randomNoQuestions" : "practice.noQuestionsYet")}
                 />
             </div>
         );
@@ -318,7 +343,7 @@ const PracticeQuestions = () => {
     return (
         <div className="practice-questions">
             <PageTitle
-                title={subjectName}
+                title={pageTitle}
                 subtitle={t("practice.subtitle")}
             />
 
@@ -363,7 +388,8 @@ const PracticeQuestions = () => {
                     message={t(errorMessageKey)}
                     // Trying again can't help once the round is closed.
                     onRetry={actionError.roundClosed ? undefined : retryFailedAction}
-                    onBack={actionError.roundClosed ? backToSubjects : undefined}
+                    onBack={actionError.roundClosed ? goBack : undefined}
+                    backLabelKey={backLabelKey}
                 />
             )}
 

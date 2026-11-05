@@ -19,11 +19,13 @@ endpoints are added to this table, not duplicated elsewhere.
 | PUT    | /api/admin/subjects/{id}      | Update an existing subject                      | Required (ADMIN) |
 | DELETE | /api/admin/subjects/{id}      | Delete a subject                                | Required (ADMIN) |
 | POST   | /api/practice/attempts        | Start a practice round for a subject            | Required         |
+| POST   | /api/practice/attempts/random | Start a random practice round (questions from all subjects) | Required |
 | POST   | /api/practice/attempts/{id}/answers | Answer one question in a practice round (checked by the server) | Required |
 | POST   | /api/practice/attempts/{id}/finish | Finish a practice round and get its totals | Required         |
 | POST   | /api/exam/start               | Start a mock exam and receive 70 questions      | Required         |
 | POST   | /api/exam/{attemptId}/answer | Save or change one answer in the running mock exam | Required |
 | POST   | /api/exam/submit              | Submit the mock exam; the server scores the saved answers | Required |
+| POST   | /api/exam/{attemptId}/abandon | End the running mock exam without scoring it | Required         |
 | GET    | /api/dashboard                | Get dashboard statistics for the logged-in user | Required         |
 | GET    | /api/dashboard/recent         | Get the user's 5 most recent scored mock exams  | Required         |
 | GET    | /api/statistics/subjects      | Get the user's performance by subject (practice and mock exams) | Required |
@@ -94,6 +96,10 @@ No request body. Creates a mock exam for the logged-in user with 70 random
 questions, stored in the order shown, and returns them without the correct
 answers. `409 Conflict` if there are fewer than 70 questions.
 
+Any mock exam of the same student that is still running (tab closed, abandoned
+through the menu, ...) is closed **without scoring it** first, so at most one
+mock exam can be open at a time. Practice rounds are never touched by this.
+
 ```json
 {
   "attemptId": 12,
@@ -139,6 +145,19 @@ Response:
 ```json
 { "totalQuestions": 70, "correctAnswers": 52, "incorrectAnswers": 10, "unanswered": 8, "score": 74 }
 ```
+
+### `POST /api/exam/{attemptId}/abandon`
+
+No request body. Ends the student's running mock exam **without scoring it**:
+the attempt is closed (finish time set, `scored` stays `false`), so it can never
+be answered or submitted again and never appears as a result, in statistics, or
+in the subject totals. Used when the student confirms leaving a running exam
+through the menu or the browser's back button.
+
+- Response: `204 No Content`.
+- `409` if the exam is already submitted or abandoned (treat as "already
+  ended"), `403` if it belongs to another user, `404` if it doesn't exist —
+  a practice round's id also gives `404`.
 
 **MockExams notes:**
 
@@ -199,7 +218,33 @@ Starts a round with all questions of the subject. Response (no `correctAnswer` o
 ```
 
 - `400` if `subjectId` is missing, `404` if the subject doesn't exist, `409` if it has no questions.
-- Starting a round closes the student's earlier unfinished practice round (one open practice round per student).
+- Starting a round (either start endpoint) closes the student's earlier unfinished practice round (one open practice round per student).
+
+### `POST /api/practice/attempts/random`
+
+No request body. Starts a random practice round: the server picks up to
+**20 questions** at random from the whole question bank, across all subjects.
+The questions are spread over as many subjects as the round size allows (a
+subject with many questions can't fill the round alone), each question appears
+at most once, and the order is random. A smaller bank gives a shorter round.
+
+Response has the same shape as `/api/practice/attempts`, but `subjectName` is
+`null`, because a random round mixes subjects:
+
+```json
+{
+  "attemptId": 11,
+  "subjectName": null,
+  "questions": [
+    { "id": 8, "questionText": "...", "optionA": "...", "optionB": "...", "optionC": "...", "optionD": "...", "imageUrl": null }
+  ]
+}
+```
+
+- `409 Conflict` if the question bank is empty.
+- The round is answered and finished exactly like a subject round: `/answers`
+  saves and checks each answer (attributed to that question's subject in the
+  statistics), `/finish` returns the totals.
 
 ### `POST /api/practice/attempts/{id}/answers`
 

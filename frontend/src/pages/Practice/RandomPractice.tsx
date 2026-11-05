@@ -1,18 +1,10 @@
-import PageTitle from "../../components/common/PageTitle";
+import PracticeQuestions from "./PracticeQuestions";
 
+// Random practice (#151): the server picks questions from all subjects and
+// checks every answer. The round starts as soon as the page opens, the same
+// way choosing a subject starts a subject round.
 const RandomPractice = () => {
-    return (
-        <div>
-
-            <PageTitle
-                title="Slumpmässig övning"
-                subtitle="Öva på frågor från alla ämnen."
-            />
-
-            <p>Slumpmässig övning kommer att implementeras här.</p>
-
-        </div>
-    );
+    return <PracticeQuestions mode="random" />;
 };
 
 export default RandomPractice;

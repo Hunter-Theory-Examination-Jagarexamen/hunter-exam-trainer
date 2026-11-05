@@ -3,9 +3,9 @@ package com.hunterexam.backend.entity;
 /**
  * The kind of round an {@link Attempt} is.
  * <p>
- * Only SUBJECT_PRACTICE is used so far. RANDOM_PRACTICE (#151) and
- * MOCK_EXAM are listed now so that later issues can use them without
- * changing the table.
+ * SUBJECT_PRACTICE is one subject, RANDOM_PRACTICE (#151) mixes subjects, and
+ * MOCK_EXAM is a timed exam. They are stored as text ("SUBJECT_PRACTICE"), so
+ * reordering the enum can't change old rows.
  */
 public enum AttemptType {
     SUBJECT_PRACTICE,

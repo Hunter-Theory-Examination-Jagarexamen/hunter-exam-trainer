@@ -37,9 +37,11 @@
   },
   "practice": {
     "title": "Practice",
+    "randomTitle": "Random Practice",
     "loadingQuestions": "Loading questions...",
     "subjectNotFound": "Subject not found.",
     "noQuestionsYet": "There are no questions in this subject yet.",
+    "randomNoQuestions": "There are no questions to practise yet.",
     "loadFailed": "Failed to load questions. Please try again.",
     "subtitle": "Answer the questions and improve your knowledge.",
     "progress": "Question {{current}} of {{total}}",
@@ -58,6 +60,7 @@
     "resultAll": "You got {{correct}} of {{total}} correct.",
     "resultPartial": "You answered {{answered}} of {{total}} questions and got {{correct}} correct.",
     "backToSubjects": "Back to subjects",
+    "backToModes": "Back to practice",
     "answerFailed": "Your answer couldn't be saved. Please try again.",
     "finishFailed": "The round couldn't be finished. Please try again.",
     "roundClosed": "This round is already finished, for example in another tab. Your answers are saved.",
@@ -96,6 +99,22 @@
       "allAnswered": "You have answered all questions. Are you sure you want to submit?",
       "goBack": "Go back",
       "submitAnyway": "Submit anyway"
+    },
+    "leave": {
+      "title": "Leave the exam?",
+      "text": "If you leave, the exam ends without a result and you cannot continue later.",
+      "stay": "Stay",
+      "confirm": "Leave exam",
+      "failed": "Could not end the exam. Please try again."
+    },
+    "instructions": {
+      "title": "Instructions",
+      "questions": "The exam contains 70 multiple-choice questions.",
+      "time": "You have 60 minutes to complete the exam.",
+      "oneCorrect": "Each question has only one correct answer.",
+      "review": "You can review your answers before submitting.",
+      "score": "Your score will be displayed after submission.",
+      "unanswered": "Unanswered questions count as incorrect."
     }
   }
 }

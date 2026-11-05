@@ -88,4 +88,26 @@ public class ExamController {
     ) {
         return examService.submitExam(request, authentication.getName());
     }
+
+    /**
+     * Ends a running mock exam without scoring it (#186).
+     * <p>
+     * Called when the student confirms leaving the exam page (menu link,
+     * browser back). The exam is closed with no result: it can't be
+     * answered or submitted afterwards, and it doesn't count as a scored
+     * exam in the dashboard or statistics. Protected by the same ownership
+     * rules as submit.
+     *
+     * @param authentication authentication info from Spring Security
+     * @param attemptId      the exam's attempt id
+     * @return 204 No Content on success
+     */
+    @PostMapping("/{attemptId}/abandon")
+    public ResponseEntity<Void> abandonExam(
+        Authentication authentication,
+        @PathVariable Long attemptId
+    ) {
+        examService.abandonExam(attemptId, authentication.getName());
+        return ResponseEntity.noContent().build();
+    }
 }
