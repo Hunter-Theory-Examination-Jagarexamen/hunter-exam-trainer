@@ -5,7 +5,8 @@
     "submit": "Skicka",
     "cancel": "Avbryt",
     "save": "Spara",
-    "back": "Tillbaka"
+    "back": "Tillbaka",
+    "or": "eller"
   },
   "auth": {
     "loginTitle": "Logga in",
@@ -17,7 +18,28 @@
     "noAccount": "Har du inget konto?",
     "hasAccount": "Har du redan ett konto?",
     "registerLink": "Registrera dig här",
-    "loginLink": "Logga in här"
+    "loginLink": "Logga in här",
+    "accountCreatedSuccess": "Konto skapat! Du kan nu logga in.",
+    "enterEmailAndPassword": "Vänligen ange både e-postadress och lösenord",
+    "loginSubtitle": "Logga in för att fortsätta öva.",
+    "emailPlaceholder": "Ange din e-postadress",
+    "passwordPlaceholder": "Ange ditt lösenord",
+    "hidePassword": "Dölj lösenord",
+    "showPassword": "Visa lösenord",
+    "forgotPassword": "Glömt lösenord?",
+    "continueWithGoogle": "Fortsätt med Google",
+    "fullNameLabel": "Fullständigt namn",
+    "fullNamePlaceHolder": "Ange ditt fullständiga namn",
+    "confirmPasswordLabel": "Bekräfta lösenord",
+    "confirmPasswordPlaceholder": "Bekräfta ditt lösenord",
+    "termsAgreement": "Jag godkänner",
+    "termsOfUse": "användarvillkoren",
+    "and": "och",
+    "privacyPolicy": "integritetspolicyn",
+    "creatingAccount": "Skapar konto...",
+    "brandTagLine": "Det bästa sättet att förbereda sig för jägarexamen.",
+    "googleError": "Inloggning med Google misslyckades. Försök igen eller använd en annan metod.",
+    "sessionExpired": "Din session har gått ut. Vänligen logga in igen."
   },
   "errors": {
     "EMAIL_TAKEN": "E-postadressen är redan registrerad.",
@@ -28,7 +50,15 @@
     "TOO_MANY_RESET_REQUESTS": "För många förfrågningar om lösenordsåterställning. Försök igen senare.",
     "EXAM_ALREADY_SUBMITTED": "Provet har redan lämnats in.",
     "NOT_FOUND": "Resursen hittades inte.",
-    "UNKNOWN_ERROR": "Ett oväntat fel uppstod."
+    "UNKNOWN_ERROR": "Ett oväntat fel uppstod.",
+    "MISSING_FIELDS": "Vänligen fyll i alla fält.",
+    "PASSWORD_MISMATCH": "Lösenorden matchar inte.",
+    "TERMS_REQUIRED": "Du måste godkänna användarvillkoren och integritetspolicyn."
+  },
+  "serverStatus": {
+    "starting": "Servern startar. Det kan ta upp till en minut...",
+    "error": "Kan inte nå servern. Kontrollera din internetanslutning eller försök igen om en stund.",
+    "tryAgain": "Ladda om sidan"
   },
   "practice": {
     "title": "Övning",
@@ -57,6 +87,115 @@
     "finishFailed": "Det gick inte att avsluta omgången. Försök igen.",
     "roundClosed": "Omgången är redan avslutad, till exempel i en annan flik. Dina svar är sparade.",
     "tryAgain": "Försök igen"
+  },
+  "admin": {
+    "title": "Admin",
+    "subtitle": "Välj ett adminverktyg.",
+    "loadingOverview": "Laddar admin-översikt...",
+    "cards": {
+      "questions": {
+        "title": "Frågor",
+        "caption": "Öppna frågebanken"
+      },
+      "subjects": {
+        "title": "Ämnen",
+        "caption": "Öppna ämneshanteringen"
+      },
+      "learners": {
+        "title": "Studenter",
+        "caption": "Öppna studenternas framsteg"
+      }
+    }
+  },
+  "learnerProgress": {
+    "title": "Studenternas framsteg",
+    "subtitle": "Följ studenternas utveckling.",
+    "loading": "Laddar studenter...",
+    "noLearners": "Inga studenter ännu.",
+    "lastActivity": "Senaste aktivitet:",
+    "never": "Aldrig",
+    "noMockExams": "Inga låtsasprov ännu.",
+    "mockExamsCount": "Låtsasprov:",
+    "taken": "genomförda",
+    "latest": "Senaste:",
+    "passed": " · Godkänd",
+    "notPassed": " · Ej godkänd",
+    "best": "Bästa:",
+    "noPracticeResults": "Inga övningsresultat ännu."
+  },
+  "questionBank": {
+    "title": "Admin - Frågebank",
+    "subtitle": "Bläddra bland befintliga frågor per ämne. Sök inom det valda ämnet.",
+    "loadingQuestions": "Laddar frågor...",
+    "loadingSubjects": "Laddar ämnen...",
+    "noSubjects": "Inga ämnen tillgängliga.",
+    "subjectLabel": "Ämne",
+    "addQuestion": "Lägg till fråga",
+    "noQuestions": "Inga frågor tillgängliga för detta ämne.",
+    "searchLabel": "Sök frågor",
+    "searchPlaceholder": "Sök på ID, fråga, svar eller förklaring",
+    "questionCount": "{{filtered}} av {{total}} frågor",
+    "noMatch": "Inga frågor matchar din sökning.",
+    "correctAnswer": "Rätt svar:",
+    "explanation": "Förklaring:",
+    "edit": "Redigera",
+    "delete": "Ta bort",
+    "previous": "Föregående",
+    "next": "Nästa",
+    "page": "Sida {{current}} av {{total}}",
+    "deleteTitle": "Ta bort fråga #{{id}}?",
+    "deleteWarning": "Detta tar bort frågan permanent. Denna åtgärd kan inte ångras.",
+    "cancelDeletion": "Avbryt borttagning",
+    "confirmDeletion": "Bekräfta borttagning",
+    "deleting": "Tar bort...",
+    "saving": "Sparar...",
+    "saveQuestion": "Spara fråga",
+    "cancel": "Avbryt",
+    "successCreated": "Fråga #{{id}} skapades i {{subject}}.",
+    "successUpdated": "Fråga #{{id}} uppdaterades i {{subject}}.",
+    "successDeleted": "Fråga #{{id}} har tagits bort.",
+    "editor": {
+      "editTitle": "Redigera fråga #{{id}}: {{text}}",
+      "createTitle": "Lägg till fråga",
+      "textLabel": "Frågetext (obligatoriskt)",
+      "legendOptions": "Svarsalternativ — välj det rätte alternativet (obligatoriskt)",
+      "optionLabel": "Alternativ {{key}} (obligatoriskt)",
+      "correctOptionLabel": "Rätt alternativ {{key}}",
+      "subjectLabel": "Frågans ämne (obligatoriskt)",
+      "imageUrlLabel": "Bild-URL (valfritt)",
+      "imageUrlHelp": "Använd en komplett HTTP- eller HTTPS-URL. Lämna tomt för att spara utan bild.",
+      "removeImage": "Ta bort bild",
+      "explanationLabel": "Förklaring (valfritt)"
+    }
+  },
+  "subjects": {
+    "title": "Hantera ämnen",
+    "subtitle": "Skapa och redigera ämnen som används av frågebanken och övningsläget.",
+    "loading": "Laddar ämnen...",
+    "retry": "Försök ladda ämnen igen",
+    "createSubject": "Skapa ämne",
+    "refreshList": "Uppdatera ämneslista",
+    "noSubjects": "Inga ämnen tillgängliga. Skapa ett ämne för att komma igång.",
+    "questionsCount": "{{count}} frågor",
+    "edit": "Redigera",
+    "delete": "Ta bort",
+    "deleteTitle": "Ta bort ämne \"{{name}}\"?",
+    "deleteWarning": "Detta tar bort ämnet permanent. Denna åtgärd kan inte ångras. Ämnen som används av frågor eller övningsresultat kan för närvarande inte tas bort.",
+    "cancelDeletion": "Avbryt borttagning",
+    "confirmDeletion": "Bekräfta borttagning",
+    "deleting": "Tar bort...",
+    "saving": "Sparar...",
+    "saveSubject": "Spara ämne",
+    "cancel": "Avbryt",
+    "successDeleted": "Ämne \"{{name}}\" har tagits bort.",
+    "successCreated": "Ämne \"{{name}}\" skapades.",
+    "successUpdated": "Ämne \"{{name}}\" uppdaterades.",
+    "editor": {
+      "editTitle": "Redigera ämne: {{name}}",
+      "createTitle": "Skapa ämne",
+      "nameLabel": "Namn (obligatoriskt)",
+      "descriptionLabel": "Beskrivning (obligatoriskt)"
+    }
   },
   "exam": {
     "loading": "Laddar provfrågor...",
