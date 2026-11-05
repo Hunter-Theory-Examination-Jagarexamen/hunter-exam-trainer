@@ -7,6 +7,7 @@ import com.hunterexam.backend.dto.SubjectPerformanceResponse;
 import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.entity.SubjectStats;
 import com.hunterexam.backend.entity.User;
+import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.repository.AttemptQuestionRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
@@ -85,6 +86,23 @@ public class AdminService {
                         statsByLearner.getOrDefault(learner.getId(), List.of()),
                         examsByLearner.getOrDefault(learner.getId(), List.of())))
                 .toList();
+    }
+
+    /**
+     * Progress for one user (student or admin), for the admin's detail view.
+     *
+     * @throws NotFoundException if no user has this id
+     */
+    public LearnerProgressResponse getLearnerProgress(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        // Same queries as the list above, with a list of one user.
+        List<User> oneUser = List.of(user);
+        return buildLearnerProgress(
+                user,
+                subjectStatsRepository.findAnsweredByUserIn(oneUser),
+                attemptQuestionRepository.findScoredMockExams(oneUser));
     }
 
     private LearnerProgressResponse buildLearnerProgress(

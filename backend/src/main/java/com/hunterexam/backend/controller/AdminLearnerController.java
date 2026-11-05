@@ -4,6 +4,7 @@ import com.hunterexam.backend.dto.LearnerProgressResponse;
 import com.hunterexam.backend.service.AdminService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,5 +30,16 @@ public class AdminLearnerController {
     @GetMapping
     public ResponseEntity<List<LearnerProgressResponse>> getLearnerProgress() {
         return ResponseEntity.ok(adminService.getLearnerProgress());
+    }
+
+    /**
+     * Returns progress for one user (student or admin).
+     * Unknown id gives 404 through GlobalExceptionHandler.
+     *
+     * @param userId the user's id from the URL
+     */
+    @GetMapping("/{userId}")
+    public ResponseEntity<LearnerProgressResponse> getOneLearnerProgress(@PathVariable Long userId) {
+        return ResponseEntity.ok(adminService.getLearnerProgress(userId));
     }
 }
