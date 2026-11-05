@@ -129,7 +129,8 @@
     "passed": " · Godkänd",
     "notPassed": " · Ej godkänd",
     "best": "Bästa:",
-    "noPracticeResults": "Inga övningsresultat ännu."
+    "noPracticeResults": "Inga övningsresultat ännu.",
+    "loadFailed": "Kunde inte ladda studenternas framsteg. Försök igen."
   },
   "questionBank": {
     "title": "Admin - Frågebank",
@@ -217,8 +218,15 @@
       "editTitle": "Redigera ämne: {{name}}",
       "createTitle": "Skapa ämne",
       "nameLabel": "Namn (obligatoriskt)",
-      "descriptionLabel": "Beskrivning (obligatoriskt)"
-    }
+      "descriptionLabel": "Beskrivning (obligatoriskt)",
+      "errors": {
+        "missingName": "Ange ett ämnesnamn.",
+        "missingDescription": "Ange en ämnesbeskrivning.",
+        "tooLong": "Namn och beskrivning får högst vara 255 tecken var."
+      }
+    },
+    "editAria": "Redigera ämne {{name}}",
+    "deleteAria": "Ta bort ämne {{name}}"
   },
   "exam": {
     "loading": "Laddar provfrågor...",

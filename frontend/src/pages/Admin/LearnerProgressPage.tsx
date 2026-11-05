@@ -3,8 +3,10 @@ import PageTitle from "../../components/common/PageTitle";
 import apiClient from "../../api/apiClient.ts";
 import type { LearnerProgress } from "../../types/learnerProgress.ts";
 import "../../styles/statistics.css";
+import { useTranslation } from "react-i18next";
 
 const LearnerProgressPage = () => {
+    const { t } = useTranslation();
     const [learners, setLearners] = useState<LearnerProgress[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
@@ -21,7 +23,7 @@ const LearnerProgressPage = () => {
                 setLearners(data);
             } catch (e) {
                 console.error("Failed to load learner progress:", e);
-                setError("Kunde inte ladda studenternas framsteg. Försök igen.");
+                setError(t("learnerProgress.loadFailed"));
             } finally {
                 setIsLoading(false);
             }
@@ -33,16 +35,16 @@ const LearnerProgressPage = () => {
     return (
         <div className="statistics">
             <PageTitle
-                title="Studenternas framsteg"
-                subtitle="Följ studenternas utveckling."
+                title={t("learnerProgress.title")}
+                subtitle={t("learnerProgress.subtitle")}
             />
 
-            {isLoading && <p>Laddar studenter...</p>}
+            {isLoading && <p>{t("learnerProgress.loading")}</p>}
 
             {!isLoading && error && <p role="alert">{error}</p>}
 
             {!isLoading && !error && learners.length === 0 && (
-                <p>Inga studenter ännu.</p>
+                <p>{t("learnerProgress.noLearners")}</p>
             )}
 
             {!isLoading &&
@@ -54,30 +56,30 @@ const LearnerProgressPage = () => {
                         <p className="learner-email">{learner.email}</p>
 
                         <p>
-                            <strong>Senaste aktivitet:</strong>{" "}
+                            <strong>{t("learnerProgress.lastActivity")}</strong>{" "}
                             {learner.lastActivityAt
                                 ? new Date(learner.lastActivityAt).toLocaleDateString("sv-SE")
-                                : "Aldrig"}
+                                : t("learnerProgress.never")}
                         </p>
 
                         {/* Mock exam summary */}
                         <div className="mock-exam-summary">
                             {learner.mockExams.count === 0 ? (
-                                <p className="mock-exam-empty">Inga övningsprov ännu.</p>
+                                <p className="mock-exam-empty">{t("learnerProgress.noMockExams")}</p>
                             ) : (
                                 <>
                                     <p className="mock-exam-line">
-                                        <strong>Övningsprov:</strong> {learner.mockExams.count} genomförda
+                                        <strong>{t("learnerProgress.mockExamsCount")}</strong> {learner.mockExams.count} {t("learnerProgress.taken")}
                                     </p>
                                     <p className="mock-exam-line">
-                                        <strong>Senaste:</strong> {learner.mockExams.latestScore}%{" "}
+                                        <strong>{t("learnerProgress.latest")}</strong> {learner.mockExams.latestScore}%{" "}
                                         ({new Date(learner.mockExams.latestAt!).toLocaleDateString("sv-SE")})
                                         {learner.mockExams.latestPassed
-                                            ? <span className="mock-exam-pass"> · Godkänd</span>
-                                            : <span className="mock-exam-fail"> · Ej godkänd</span>}
+                                            ? <span className="mock-exam-pass">{t("learnerProgress.passed")}</span>
+                                            : <span className="mock-exam-fail">{t("learnerProgress.notPassed")}</span>}
                                     </p>
                                     <p className="mock-exam-line">
-                                        <strong>Bästa:</strong> {learner.mockExams.bestScore}%
+                                        <strong>{t("learnerProgress.best")}</strong> {learner.mockExams.bestScore}%
                                     </p>
                                 </>
                             )}
@@ -85,7 +87,7 @@ const LearnerProgressPage = () => {
 
                         {/* Practice subjects */}
                         {learner.subjectPerformances.length === 0 ? (
-                            <p>Inga övningsresultat ännu.</p>
+                            <p>{t("learnerProgress.noPracticeResults")}</p>
                         ) : (
                             <div className="subject-performance-grid">
                                 {learner.subjectPerformances.map((subject) => (

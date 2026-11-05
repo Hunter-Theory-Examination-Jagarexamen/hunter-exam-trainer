@@ -129,7 +129,8 @@
     "passed": " · Passed",
     "notPassed": " · Not passed",
     "best": "Best:",
-    "noPracticeResults": "No practice results yet."
+    "noPracticeResults": "No practice results yet.",
+    "loadFailed": "Failed to load learner progress. Please try again."
   },
   "questionBank": {
     "title": "Admin Question Bank",
@@ -217,8 +218,15 @@
       "editTitle": "Edit subject: {{name}}",
       "createTitle": "Create subject",
       "nameLabel": "Name (required)",
-      "descriptionLabel": "Description (required)"
-    }
+      "descriptionLabel": "Description (required)",
+      "errors": {
+        "missingName": "Enter a subject name.",
+        "missingDescription": "Enter a subject description.",
+        "tooLong": "Name and description must each be at most 255 characters."
+      }
+    },
+    "editAria": "Edit subject {{name}}",
+    "deleteAria": "Delete subject {{name}}"
   },
   "exam": {
     "loading": "Loading exam questions...",

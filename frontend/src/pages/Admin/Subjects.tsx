@@ -4,10 +4,12 @@ import PageTitle from "../../components/common/PageTitle";
 import type {Subject} from "../../types/subject";
 import {createSubject, deleteSubject, listSubjects, subjectError, updateSubject} from "../../services/adminSubjectService";
 import "../../styles/admin.css";
+import {useTranslation} from "react-i18next";
 
 function SubjectForm({subject, onSaved, onCancel}: {
     subject?: Subject; onSaved: (saved: Subject) => void; onCancel: () => void;
 }) {
+    const {t} = useTranslation();
     const [name, setName] = useState(subject?.name ?? "");
     const [description, setDescription] = useState(subject?.description ?? "");
     const [error, setError] = useState("");
@@ -17,11 +19,11 @@ function SubjectForm({subject, onSaved, onCancel}: {
     async function submit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         if (pending.current) return;
-        if (!name.trim()) { setError("Ange ett ämnesnamn."); return; }
-        if (!description.trim()) { setError("Ange en ämnesbeskrivning."); return; }
+        if (!name.trim()) { setError(t("subjects.editor.errors.missingName")); return; }
+        if (!description.trim()) { setError(t("subjects.editor.errors.missingDescription")); return; }
         // Subject columns use JPA's default varchar(255); the DTO requires both fields.
         if (name.length > 255 || description.length > 255) {
-            setError("Namn och beskrivning får högst vara 255 tecken var."); return;
+            setError(t("subjects.editor.errors.tooLong")); return;
         }
         pending.current = true;
         setSubmitting(true);
@@ -38,26 +40,27 @@ function SubjectForm({subject, onSaved, onCancel}: {
     }
 
     return <form className="card question-editor" aria-labelledby="subject-editor-title" onSubmit={submit} noValidate>
-        <h2 id="subject-editor-title">{subject ? `Redigera ämne: ${subject.name}` : "Skapa ämne"}</h2>
+        <h2 id="subject-editor-title">{subject ? t("subjects.editor.editTitle", {name: subject.name}) : t("subjects.editor.createTitle")}</h2>
         <fieldset disabled={submitting}>
             <div className="question-bank-field">
-                <label htmlFor="subject-name">Namn (obligatoriskt)</label>
+                <label htmlFor="subject-name">{t("subjects.editor.nameLabel")}</label>
                 <input autoFocus id="subject-name" required maxLength={255} value={name} onChange={e => setName(e.target.value)} />
             </div>
             <div className="question-bank-field">
-                <label htmlFor="subject-description">Beskrivning (obligatoriskt)</label>
+                <label htmlFor="subject-description">{t("subjects.editor.descriptionLabel")}</label>
                 <textarea id="subject-description" required maxLength={255} value={description} onChange={e => setDescription(e.target.value)} />
             </div>
         </fieldset>
         {error && <p role="alert">{error}</p>}
         <div className="question-bank-actions">
-            <button type="submit" disabled={submitting}>{submitting ? "Sparar..." : "Spara ämne"}</button>
-            <button type="button" disabled={submitting} onClick={onCancel}>Avbryt</button>
+            <button type="submit" disabled={submitting}>{submitting ? t("subjects.saving") : t("subjects.saveSubject")}</button>
+            <button type="button" disabled={submitting} onClick={onCancel}>{t("subjects.cancel")}</button>
         </div>
     </form>;
 }
 
 export default function Subjects() {
+    const {t} = useTranslation();
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -96,7 +99,7 @@ export default function Subjects() {
         try {
             await deleteSubject(deleting.id);
             setSubjects(previous => previous.filter(subject => subject.id !== deleting.id));
-            setSuccess(`Ämne "${deleting.name}" har tagits bort.`);
+            setSuccess(t("subjects.successDeleted", {name: deleting.name}));
             setDeleting(null);
         } catch (error: unknown) {
             setDeleteError(subjectError(error, "delete"));
@@ -107,50 +110,50 @@ export default function Subjects() {
     }
 
     return <div className="question-bank">
-        <PageTitle title="Hantera ämnen" subtitle="Skapa och redigera ämnen som används av frågebanken och övningsläget." />
+        <PageTitle title={t("subjects.title")} subtitle={t("subjects.subtitle")} />
         {success && <p role="status">{success}</p>}
-        {loading ? <p role="status">Laddar ämnen...</p> : error ? <>
+        {loading ? <p role="status">{t("subjects.loading")}</p> : error ? <>
             <p role="alert">{error}</p>
             <div className="question-bank-actions"><button type="button" onClick={() => {
                 setLoading(true); setError(""); setRevision(value => value + 1);
-            }}>Försök ladda ämnen igen</button></div>
+            }}>{t("subjects.retry")}</button></div>
         </> : <>
             <div className="question-bank-actions">
                 <button ref={createButton} type="button" disabled={busy} onClick={event => {
                     returnFocus.current = event.currentTarget; setSuccess(""); setEditor("create");
-                }}>Skapa ämne</button>
+                }}>{t("subjects.createSubject")}</button>
                 <button type="button" disabled={busy} onClick={() => {
                     setSuccess(""); setLoading(true); setRevision(value => value + 1);
-                }}>Uppdatera ämneslista</button>
+                }}>{t("subjects.refreshList")}</button>
             </div>
             {editor !== null && <SubjectForm subject={editor === "create" ? undefined : editor} onCancel={() => setEditor(null)}
                                              onSaved={saved => {
                                                  setSubjects(previous => editor === "create" ? [...previous, saved] : previous.map(subject => subject.id === saved.id ? saved : subject));
-                                                 setSuccess(`Ämne "${saved.name}" ${editor === "create" ? "skapades" : "uppdaterades"}.`);
+                                                 setSuccess(t(editor === "create" ? "subjects.successCreated" : "subjects.successUpdated", {name: saved.name}));
                                                  setEditor(null);
                                              }} />}
             {deleting && <section className="card question-delete-confirmation" role="region" aria-labelledby="delete-subject-title">
-                <h2 id="delete-subject-title">Ta bort ämne "{deleting.name}"?</h2>
-                <p>Detta tar bort ämnet permanent. Denna åtgärd kan inte ångras. Ämnen som används av frågor eller övningsresultat kan för närvarande inte tas bort.</p>
+                <h2 id="delete-subject-title">{t("subjects.deleteTitle", {name: deleting.name})}</h2>
+                <p>{t("subjects.deleteWarning")}</p>
                 {deleteError && <p role="alert">{deleteError}</p>}
                 <div className="question-bank-actions">
-                    <button autoFocus type="button" disabled={submitting} onClick={() => setDeleting(null)}>Avbryt borttagning</button>
+                    <button autoFocus type="button" disabled={submitting} onClick={() => setDeleting(null)}>{t("subjects.cancelDeletion")}</button>
                     <button type="button" className="question-delete" disabled={submitting} onClick={confirmDelete}>
-                        {submitting ? "Tar bort..." : "Bekräfta borttagning"}</button>
+                        {submitting ? t("subjects.deleting") : t("subjects.confirmDeletion")}</button>
                 </div>
             </section>}
-            {subjects.length === 0 && <p>Inga ämnen tillgängliga. Skapa ett ämne för att komma igång.</p>}
+            {subjects.length === 0 && <p>{t("subjects.noSubjects")}</p>}
             <div className="question-bank-list">{subjects.map(subject => <article className="card" key={subject.id}>
                 <h2 className="card-title">{subject.name}</h2>
                 <p>{subject.description}</p>
-                <p>{subject.questionCount} frågor</p>
+                <p>{t("subjects.questionsCount", {count: subject.questionCount})}</p>
                 <div className="question-bank-actions">
-                    <button type="button" disabled={busy} aria-label={`Redigera ämne ${subject.name}`} onClick={event => {
+                    <button type="button" disabled={busy} aria-label={t("subjects.editAria", {name: subject.name})} onClick={event => {
                         returnFocus.current = event.currentTarget; setSuccess(""); setEditor(subject);
-                    }}>Redigera</button>
-                    <button type="button" disabled={busy} className="question-delete" aria-label={`Ta bort ämne ${subject.name}`} onClick={event => {
+                    }}>{t("subjects.edit")}</button>
+                    <button type="button" disabled={busy} className="question-delete" aria-label={t("subjects.deleteAria", {name: subject.name})} onClick={event => {
                         returnFocus.current = event.currentTarget; setSuccess(""); setDeleteError(""); setDeleting(subject);
-                    }}>Ta bort</button>
+                    }}>{t("subjects.delete")}</button>
                 </div>
             </article>)}</div>
         </>}
