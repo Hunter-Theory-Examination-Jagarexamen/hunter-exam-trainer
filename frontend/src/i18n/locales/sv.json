@@ -94,6 +94,22 @@
       "allAnswered": "Du har besvarat alla frågor. Är du säker på att du vill lämna in?",
       "goBack": "Gå tillbaka",
       "submitAnyway": "Lämna in ändå"
+    },
+    "leave": {
+      "title": "Lämna provet?",
+      "text": "Om du lämnar avslutas provet utan resultat och du kan inte fortsätta senare.",
+      "stay": "Stanna kvar",
+      "confirm": "Lämna provet",
+      "failed": "Det gick inte att avsluta provet. Försök igen."
+    },
+    "instructions": {
+      "title": "Instruktioner",
+      "questions": "Provet innehåller 70 flervalsfrågor.",
+      "time": "Du har 60 minuter på dig att slutföra provet.",
+      "oneCorrect": "Varje fråga har endast ett rätt svar.",
+      "review": "Du kan granska dina svar innan du lämnar in.",
+      "score": "Ditt resultat visas efter inlämning.",
+      "unanswered": "Obesvarade frågor räknas som fel."
     }
   }
 }

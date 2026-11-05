@@ -25,6 +25,7 @@ endpoints are added to this table, not duplicated elsewhere.
 | POST   | /api/exam/start               | Start a mock exam and receive 70 questions      | Required         |
 | POST   | /api/exam/{attemptId}/answer | Save or change one answer in the running mock exam | Required |
 | POST   | /api/exam/submit              | Submit the mock exam; the server scores the saved answers | Required |
+| POST   | /api/exam/{attemptId}/abandon | End the running mock exam without scoring it | Required         |
 | GET    | /api/dashboard                | Get dashboard statistics for the logged-in user | Required         |
 | GET    | /api/dashboard/recent         | Get the user's 5 most recent scored mock exams  | Required         |
 | GET    | /api/statistics/subjects      | Get the user's performance by subject (practice and mock exams) | Required |
@@ -95,6 +96,10 @@ No request body. Creates a mock exam for the logged-in user with 70 random
 questions, stored in the order shown, and returns them without the correct
 answers. `409 Conflict` if there are fewer than 70 questions.
 
+Any mock exam of the same student that is still running (tab closed, abandoned
+through the menu, ...) is closed **without scoring it** first, so at most one
+mock exam can be open at a time. Practice rounds are never touched by this.
+
 ```json
 {
   "attemptId": 12,
@@ -140,6 +145,19 @@ Response:
 ```json
 { "totalQuestions": 70, "correctAnswers": 52, "incorrectAnswers": 10, "unanswered": 8, "score": 74 }
 ```
+
+### `POST /api/exam/{attemptId}/abandon`
+
+No request body. Ends the student's running mock exam **without scoring it**:
+the attempt is closed (finish time set, `scored` stays `false`), so it can never
+be answered or submitted again and never appears as a result, in statistics, or
+in the subject totals. Used when the student confirms leaving a running exam
+through the menu or the browser's back button.
+
+- Response: `204 No Content`.
+- `409` if the exam is already submitted or abandoned (treat as "already
+  ended"), `403` if it belongs to another user, `404` if it doesn't exist —
+  a practice round's id also gives `404`.
 
 **MockExams notes:**
 

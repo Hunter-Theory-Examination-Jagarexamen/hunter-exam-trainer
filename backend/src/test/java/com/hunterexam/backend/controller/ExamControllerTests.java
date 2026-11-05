@@ -3,6 +3,7 @@ package com.hunterexam.backend.controller;
 import com.hunterexam.backend.config.OAuth2LoginSuccessHandler;
 import com.hunterexam.backend.config.SecurityConfig;
 import com.hunterexam.backend.dto.ExamStartResponse;
+import com.hunterexam.backend.exception.ConflictException;
 import com.hunterexam.backend.service.ExamService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -35,6 +37,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @Import(SecurityConfig.class)
 class ExamControllerTests {
+
+    private static final String EMAIL = "student@example.test";
 
     @Autowired MockMvc mvc;
     @MockitoBean ExamService examService;
@@ -76,5 +80,34 @@ class ExamControllerTests {
                 .andExpect(jsonPath("$.attemptId").value(10));
 
         verify(examService, times(2)).startExam(any());
+    }
+
+    @Test
+    void loggedOutUserCannotAbandonAnExam() throws Exception {
+        mvc.perform(post("/api/exam/7/abandon"))
+                .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(examService);
+    }
+
+    @Test
+    void studentCanAbandonTheirExam() throws Exception {
+        // The email comes from the token; there is no body to trust.
+        mvc.perform(post("/api/exam/7/abandon")
+                        .with(jwt().jwt(token -> token.subject(EMAIL))))
+                .andExpect(status().isNoContent());
+
+        verify(examService).abandonExam(7L, EMAIL);
+    }
+
+    @Test
+    void abandoningAnAlreadyEndedExamIsAConflict() throws Exception {
+        // e.g. the exam was already submitted or abandoned in another tab.
+        doThrow(new ConflictException("This mock exam has already been submitted."))
+                .when(examService).abandonExam(7L, EMAIL);
+
+        mvc.perform(post("/api/exam/7/abandon")
+                        .with(jwt().jwt(token -> token.subject(EMAIL))))
+                .andExpect(status().isConflict());
     }
 }

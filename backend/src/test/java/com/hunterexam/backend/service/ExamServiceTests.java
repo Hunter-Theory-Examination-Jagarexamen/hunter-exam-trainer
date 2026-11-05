@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -564,5 +565,98 @@ class ExamServiceTests {
             .distinct()
             .count();
         assertEquals(70, differentIds, "no question should appear twice");
+    }
+
+    // ----- Leaving an exam without scoring it (#186) -----
+
+    @Test
+    void abandonClosesTheExamWithoutScoringIt() {
+        Attempt exam = givenAttempt(AttemptType.MOCK_EXAM);
+
+        examService.abandonExam(ATTEMPT_ID, EMAIL);
+
+        assertTrue(exam.isFinished());
+        assertFalse(exam.isScored(), "an abandoned exam must not count as a result");
+        verify(attemptRepository).save(exam);
+        // No score, no totals: nothing about the exam is counted anywhere.
+        verifyNoInteractions(attemptQuestionRepository, subjectStatsRepository);
+    }
+
+    @Test
+    void abandoningAnAlreadyEndedExamIsAConflict() {
+        // Repeated abandonment (double click, two tabs) is rejected, not repeated.
+        Attempt exam = givenAttempt(AttemptType.MOCK_EXAM);
+        exam.setFinishedAt(LocalDateTime.now());
+
+        assertThrows(ConflictException.class,
+            () -> examService.abandonExam(ATTEMPT_ID, EMAIL));
+
+        verify(attemptRepository, never()).save(any());
+    }
+
+    @Test
+    void abandonRejectsAPracticeRound() {
+        // Practice rounds have their own finish endpoint (#170).
+        givenAttempt(AttemptType.SUBJECT_PRACTICE);
+
+        assertThrows(NotFoundException.class,
+            () -> examService.abandonExam(ATTEMPT_ID, EMAIL));
+    }
+
+    @Test
+    void abandonRejectsOtherUser() {
+        givenAttempt(AttemptType.MOCK_EXAM);
+
+        User otherUser = new User();
+        otherUser.setEmail("other@example.test");
+        ReflectionTestUtils.setField(otherUser, "id", 99L);
+        when(userRepository.findByEmail("other@example.test")).thenReturn(Optional.of(otherUser));
+
+        assertThrows(AccessDeniedException.class,
+            () -> examService.abandonExam(ATTEMPT_ID, "other@example.test"));
+    }
+
+    @Test
+    void abandonedExamCannotBeAnsweredOrSubmittedAfterwards() {
+        Attempt exam = givenAttempt(AttemptType.MOCK_EXAM);
+
+        examService.abandonExam(ATTEMPT_ID, EMAIL);
+
+        assertThrows(ConflictException.class,
+            () -> examService.saveAnswer(ATTEMPT_ID, 1L, "A", EMAIL));
+        assertThrows(ConflictException.class,
+            () -> examService.submitExam(submission(), EMAIL));
+    }
+
+    @Test
+    void startExamClosesAnEarlierOpenExamWithoutScoringIt() {
+        when(questionRepository.findAll()).thenReturn(questionBank(100));
+        when(attemptRepository.save(any(Attempt.class))).thenAnswer(call -> call.getArgument(0));
+        Attempt earlier = new Attempt(user, AttemptType.MOCK_EXAM,
+            LocalDateTime.now().minusMinutes(10));
+        ReflectionTestUtils.setField(earlier, "id", 7L);
+        when(attemptRepository.findByUserAndFinishedAtIsNullAndTypeIn(
+            eq(user), eq(Set.of(AttemptType.MOCK_EXAM))))
+            .thenReturn(List.of(earlier));
+
+        examService.startExam(EMAIL);
+
+        assertTrue(earlier.isFinished(), "an exam left running is closed by the next start");
+        assertFalse(earlier.isScored(), "closed this way it gets no score");
+        verify(attemptRepository).save(earlier);
+    }
+
+    @Test
+    void startExamOnlyAsksForOpenMockExamsToClose() {
+        // Only MOCK_EXAM, never practice rounds: starting an exam must not
+        // close a practice round, and vice versa (the practice service passes
+        // its own types to the same query).
+        when(questionRepository.findAll()).thenReturn(questionBank(100));
+        givenAttemptIsSavedWithId(42L);
+
+        examService.startExam(EMAIL);
+
+        verify(attemptRepository).findByUserAndFinishedAtIsNullAndTypeIn(
+            eq(user), eq(Set.of(AttemptType.MOCK_EXAM)));
     }
 }

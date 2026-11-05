@@ -205,6 +205,25 @@ class PracticeAttemptServiceTests {
     }
 
     @Test
+    void start_closesOnlyPracticeRounds_neverAMockExam() {
+        // Starting practice must not touch a running mock exam (#186): only
+        // the practice types are asked for, so an open exam stays open.
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(subjectRepository.findById(5L)).thenReturn(Optional.of(subject));
+        when(questionRepository.findBySubjectId(5L)).thenReturn(List.of(question(100L)));
+        when(attemptRepository.save(any(Attempt.class))).thenAnswer(call -> call.getArgument(0));
+        when(subjectStatsRepository.existsByUserAndSubject(user, subject)).thenReturn(true);
+
+        service.start(5L, EMAIL);
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<java.util.Collection<AttemptType>> types = ArgumentCaptor.forClass(java.util.Collection.class);
+        verify(attemptRepository).findByUserAndFinishedAtIsNullAndTypeIn(eq(user), types.capture());
+        assertFalse(types.getValue().contains(AttemptType.MOCK_EXAM),
+                "starting practice must never close a running mock exam");
+    }
+
+    @Test
     void start_throwsNotFound_whenSubjectDoesNotExist() {
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
         when(subjectRepository.findById(99L)).thenReturn(Optional.empty());
