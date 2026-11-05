@@ -8,6 +8,8 @@ import type { ExamQuestion } from "../../types/examQuestion.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import apiClient, { ApiError } from "../../api/apiClient.ts";
+import { useTranslation } from "react-i18next";
+
 
 interface ExamStartResponse {
     attemptId: string;
@@ -25,11 +27,17 @@ const Exam = () => {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [timeLeft, setTimeLeft] = useState(60 * 60);
+    const { t } = useTranslation();
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [overviewOpen, setOverviewOpen] = useState(false);
     const { bookmarks, toggleBookmark, isBookmarked } = useExamBookmarks(attemptId);
 
+    // The start request, shared by both runs of the load effect. React's
+    // StrictMode (development only) runs effects twice; without this, the page
+    // would start two exams, and both would try to create the same per-subject
+    // totals rows on the server (#174). A ref keeps its value between the runs
+    // and, unlike state, changing it doesn't redraw the page.
     const startRequest = useRef<Promise<ExamStartResponse> | null>(null);
 
     const submitExam = useCallback(async () => {
@@ -37,6 +45,7 @@ const Exam = () => {
         try {
             const result = await apiClient("/api/exam/submit", {
                 method: "POST",
+                // Only which exam: the answers are already saved on the server.
                 body: JSON.stringify({ attemptId })
             });
 
@@ -52,12 +61,12 @@ const Exam = () => {
                 return;
             }
 
-            alert(
-                "Kunde inte skicka in provet. Dina svar är sparade på servern – försök igen."
-            );
+            alert(t("exam.submitFailed"));
         }
     }, [attemptId, navigate]);
 
+
+    //Load exam questions
     useEffect(() => {
 
         const fetchExamQuestions = async () => {
@@ -80,9 +89,9 @@ const Exam = () => {
                 console.error("Failed to load exam questions.", err);
                 const errorObj = err as { status?: number; message?: string };
                 if (errorObj.status === 409 || (errorObj?.message && errorObj.message.includes("Not enough questions"))) {
-                    setError(errorObj.message || "Inte tillräckligt med frågor tillgängliga för att starta provet.");
+                    setError(errorObj.message || t("exam.startNotEnough"));
                 } else {
-                    setError("Kunde inte ladda provfrågor. Försök igen.");
+                    setError(t("exam.startError"));
                 }
             }
             finally {
@@ -93,6 +102,7 @@ const Exam = () => {
         void fetchExamQuestions();
     }, []);
 
+    // Timer
     useEffect(() => {
         if (timeLeft <= 0) {
             return;
@@ -106,6 +116,7 @@ const Exam = () => {
 
     }, [timeLeft]);
 
+// Auto-submit when time runs out
     useEffect(() => {
         if (timeLeft <= 0 && questions.length > 0) {
             void submitExam();
@@ -128,15 +139,20 @@ const Exam = () => {
     const currentQuestion = questions[currentQuestionIndex];
 
     const handleAnswerChange = async (answerId: string) => {
+        // Skip if the user re-clicked the same option (no-op on the server too).
         if (answers[currentQuestion.id] === answerId) {
             return;
         }
 
+        // Update local state immediately for UI responsiveness.
         setAnswers((previousAnswers) => ({
             ...previousAnswers,
             [currentQuestion.id]: answerId
         }));
 
+        // Persist to the server (best-effort). If this fails, we keep going:
+
+        // the local state still holds the answer, and the user can try again by selecting a different option (which retries the save).
         if (!attemptId) {
             return;
         }
@@ -151,7 +167,9 @@ const Exam = () => {
             });
         }
         catch (err) {
+            // Do not interrupt the user mid-exam.  Log for debugging.
             console.error("Failed to save answer:", err);
+
         }
     };
 
@@ -164,6 +182,7 @@ const Exam = () => {
         if (!currentQuestion) return;
         toggleBookmark(currentQuestion.id);
     };
+
 
     const handleNext = () => {
         if (currentQuestionIndex < questions.length - 1) {
@@ -180,7 +199,7 @@ const Exam = () => {
     if (isLoading) {
         return (
             <div className="exam">
-                <p>Laddar provfrågor...</p>
+                <p>{t("exam.loading")}</p>
             </div>
         );
     }
@@ -196,7 +215,7 @@ const Exam = () => {
     if (questions.length === 0) {
         return (
             <div className="exam">
-                <p>Inga provfrågor tillgängliga.</p>
+                <p>No exam questions available.</p>
             </div>
         );
     }
@@ -208,9 +227,7 @@ const Exam = () => {
     return (
         <div className="exam">
             <div className="exam-progress-bar text-center my-2">
-                <span className="font-semibold text-gray-700">
-                    Besvarade {answeredCount} / {totalQuestions}
-                </span>
+                Answered {answeredCount} / {totalQuestions}
             </div>
 
             <ExamHeader
@@ -259,17 +276,20 @@ const Exam = () => {
                 />
             )}
 
+
             {showConfirmModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
                     <div className="question-card text-center max-w-md w-full">
-                        <h3 className="text-xl font-bold mb-3 text-[var(--color-text)]">Skicka in prov?</h3>
+                        <h3 className="text-xl font-bold mb-3 text-[var(--color-text)]">
+                            {t("exam.confirm.title")}
+                        </h3>
                         {unansweredCount > 0 ? (
                             <p className="text-[var(--color-text)] opacity-80 mb-6">
-                                Du har <strong>{unansweredCount}</strong> obesvarad{unansweredCount > 1 ? "e" : ""} fråga{unansweredCount > 1 ? "or" : ""}. De kommer att räknas som felaktiga. Är du säker på att du vill skicka in?
+                                {t("exam.confirm.unanswered", { count: unansweredCount })}
                             </p>
                         ) : (
                             <p className="text-[var(--color-text)] opacity-80 mb-6">
-                                Du har besvarat alla frågor. Är du säker på att du vill skicka in?
+                                {t("exam.confirm.allAnswered")}
                             </p>
                         )}
                         <div className="flex justify-center">
@@ -278,19 +298,22 @@ const Exam = () => {
                                 className="previous-button"
                                 style={{ borderRadius: "8px", padding: "0.5rem 1rem", fontSize: "0.9rem", fontWeight: 600, marginRight: "12px" }}
                             >
-                                Gå tillbaka
+                                {t("exam.confirm.goBack")}
                             </button>
                             <button
                                 onClick={handleConfirmSubmit}
                                 className="next-button"
                                 style={{ borderRadius: "8px", padding: "0.5rem 1rem", fontSize: "0.9rem", fontWeight: 600 }}
                             >
-                                Skicka in ändå
+                                {unansweredCount > 0
+                                    ? t("exam.confirm.submitAnyway")
+                                    : t("exam.navigation.submit")}
                             </button>
                         </div>
                     </div>
                 </div>
             )}
+
         </div>
     );
 };

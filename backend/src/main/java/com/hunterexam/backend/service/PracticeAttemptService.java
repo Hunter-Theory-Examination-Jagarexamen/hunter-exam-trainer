@@ -7,7 +7,6 @@ import com.hunterexam.backend.dto.PracticeStartResponse;
 import com.hunterexam.backend.entity.Attempt;
 import com.hunterexam.backend.entity.AttemptQuestion;
 import com.hunterexam.backend.entity.AttemptType;
-import com.hunterexam.backend.entity.PracticeResult;
 import com.hunterexam.backend.entity.Question;
 import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.SubjectStats;
@@ -16,7 +15,6 @@ import com.hunterexam.backend.exception.ConflictException;
 import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.repository.AttemptQuestionRepository;
 import com.hunterexam.backend.repository.AttemptRepository;
-import com.hunterexam.backend.repository.PracticeResultRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
 import com.hunterexam.backend.repository.SubjectStatsRepository;
@@ -43,7 +41,6 @@ public class PracticeAttemptService {
 
     private final AttemptRepository attemptRepository;
     private final AttemptQuestionRepository attemptQuestionRepository;
-    private final PracticeResultRepository practiceResultRepository;
     private final QuestionRepository questionRepository;
     private final SubjectRepository subjectRepository;
     private final SubjectStatsRepository subjectStatsRepository;
@@ -52,7 +49,6 @@ public class PracticeAttemptService {
     public PracticeAttemptService(
             AttemptRepository attemptRepository,
             AttemptQuestionRepository attemptQuestionRepository,
-            PracticeResultRepository practiceResultRepository,
             QuestionRepository questionRepository,
             SubjectRepository subjectRepository,
             SubjectStatsRepository subjectStatsRepository,
@@ -60,7 +56,6 @@ public class PracticeAttemptService {
     ) {
         this.attemptRepository = attemptRepository;
         this.attemptQuestionRepository = attemptQuestionRepository;
-        this.practiceResultRepository = practiceResultRepository;
         this.questionRepository = questionRepository;
         this.subjectRepository = subjectRepository;
         this.subjectStatsRepository = subjectStatsRepository;
@@ -176,8 +171,8 @@ public class PracticeAttemptService {
     }
 
     /**
-     * Closes a round: sets {@code finishedAt}, counts the totals from the saved
-     * answers and saves the bridge result. Used by {@link #finish} and by
+     * Closes a round: sets {@code finishedAt} and counts the totals from the
+     * saved answers. Used by {@link #finish} and by
      * {@link #start} for rounds that were left without finishing.
      */
     private PracticeFinishResponse close(Attempt attempt) {
@@ -189,36 +184,7 @@ public class PracticeAttemptService {
         long answered = rows.stream().filter(AttemptQuestion::isAnswered).count();
         long correct = rows.stream().filter(row -> Boolean.TRUE.equals(row.getCorrect())).count();
 
-        if (answered > 0) {
-            savePracticeResultBridge(attempt, rows.get(0).getQuestion().getSubject(), correct, answered);
-        }
-
         return new PracticeFinishResponse(correct, answered, total);
-    }
-
-    /**
-     * Temporary: keeps the old statistics working until they read from
-     * SubjectStats (issue 4 of the refactor plan), then remove this and
-     * PracticeResult (issue 5).
-     * <p>
-     * Saves the same one-row summary the old practice page sent itself, but
-     * with totals counted by the server. A subject practice round has one
-     * subject, so the first question's subject is the round's subject.
-     * Rounds with no answers are skipped, so they don't show up as 0 %.
-     * <p>
-     * Only answered questions count (2026-10-29): a round left after 3 of 7
-     * questions, 2 right, is saved as 2 of 3, not 2 of 7. Practice is for
-     * learning; "skipped counts as wrong" belongs to the mock exam.
-     */
-    private void savePracticeResultBridge(Attempt attempt, Subject subject, long correct, long answered) {
-        PracticeResult result = new PracticeResult();
-        result.setUser(attempt.getUser());
-        result.setSubject(subject);
-        result.setCorrectAnswers(correct);
-        result.setTotalQuestions(answered);
-        result.setScore(Math.round((double) correct / answered * 100));
-        result.setCompletedAt(attempt.getFinishedAt());
-        practiceResultRepository.save(result);
     }
 
     /**

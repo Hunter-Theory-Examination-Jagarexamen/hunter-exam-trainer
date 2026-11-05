@@ -1,12 +1,11 @@
 package com.hunterexam.backend.service;
 
-import com.hunterexam.backend.dto.ExamResultResponse;
+import com.hunterexam.backend.dto.ExamSubmitResponse;
 import com.hunterexam.backend.dto.ExamStartResponse;
 import com.hunterexam.backend.dto.ExamSubmitRequest;
 import com.hunterexam.backend.entity.Attempt;
 import com.hunterexam.backend.entity.AttemptQuestion;
 import com.hunterexam.backend.entity.AttemptType;
-import com.hunterexam.backend.entity.ExamResult;
 import com.hunterexam.backend.entity.Question;
 import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.SubjectStats;
@@ -16,7 +15,6 @@ import com.hunterexam.backend.exception.ExamTimeLimitExceededException;
 import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.repository.AttemptQuestionRepository;
 import com.hunterexam.backend.repository.AttemptRepository;
-import com.hunterexam.backend.repository.ExamResultRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectStatsRepository;
 import com.hunterexam.backend.repository.UserRepository;
@@ -37,7 +35,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -63,7 +60,6 @@ class ExamServiceTests {
     private static final String EMAIL = "student@example.test";
 
     @Mock QuestionRepository questionRepository;
-    @Mock ExamResultRepository examResultRepository;
     @Mock UserRepository userRepository;
     @Mock AttemptRepository attemptRepository;
     @Mock AttemptQuestionRepository attemptQuestionRepository;
@@ -75,7 +71,7 @@ class ExamServiceTests {
 
     @BeforeEach
     void setUp() {
-        examService = new ExamService(questionRepository, examResultRepository,
+        examService = new ExamService(questionRepository,
             userRepository, attemptRepository, attemptQuestionRepository, subjectStatsRepository);
         user = new User();
         user.setEmail(EMAIL);
@@ -254,7 +250,7 @@ class ExamServiceTests {
             Map.of(1L, "B", 2L, "B", 3L, "B", 4L, "B")
         );
 
-        ExamResultResponse result = examService.submitExam(submission(), EMAIL);
+        ExamSubmitResponse result = examService.submitExam(submission(), EMAIL);
 
         assertEquals(4, result.getTotalQuestions());
         assertEquals(4, result.getCorrectAnswers());
@@ -270,7 +266,7 @@ class ExamServiceTests {
             Map.of(1L, "B", 2L, "B", 3L, "B", 4L, "B")
         );
 
-        ExamResultResponse result = examService.submitExam(submission(), EMAIL);
+        ExamSubmitResponse result = examService.submitExam(submission(), EMAIL);
 
         assertEquals(4, result.getTotalQuestions());
         assertEquals(4, result.getCorrectAnswers());
@@ -287,7 +283,7 @@ class ExamServiceTests {
             Map.of(1L, "B", 2L, "A", 4L, "B")
         );
 
-        ExamResultResponse result = examService.submitExam(submission(), EMAIL);
+        ExamSubmitResponse result = examService.submitExam(submission(), EMAIL);
 
         assertEquals(4, result.getTotalQuestions());
         assertEquals(2, result.getCorrectAnswers());
@@ -304,31 +300,26 @@ class ExamServiceTests {
             Map.of(1L, "B", 2L, "B", 3L, "A")
         );
 
-        ExamResultResponse result = examService.submitExam(submission(), EMAIL);
+        ExamSubmitResponse result = examService.submitExam(submission(), EMAIL);
 
         assertEquals(67, result.getScore());
     }
 
     @Test
-    void savedResultHasTheScoreAndBelongsToTheUser() {
+    void resultCountsRightWrongAndSkippedQuestions() {
+        // 4 questions: 2 right, 1 wrong, 1 skipped
         givenOpenExamWith(
             List.of(question(1), question(2), question(3), question(4)),
             Map.of(1L, "B", 2L, "A", 4L, "B")
         );
 
-        examService.submitExam(submission(), EMAIL);
+        ExamSubmitResponse result = examService.submitExam(submission(), EMAIL);
 
-        ArgumentCaptor<ExamResult> saved = ArgumentCaptor.forClass(ExamResult.class);
-        verify(examResultRepository).save(saved.capture());
-        ExamResult examResult = saved.getValue();
-
-        assertSame(user, examResult.getUser());
-        assertEquals(4, examResult.getTotalQuestions());
-        assertEquals(2, examResult.getCorrectAnswers());
-        assertEquals(1, examResult.getIncorrectAnswers());
-        assertEquals(1, examResult.getUnanswered());
-        assertEquals(50, examResult.getScore());
-        assertNotNull(examResult.getCompletedAt());
+        assertEquals(4, result.getTotalQuestions());
+        assertEquals(2, result.getCorrectAnswers());
+        assertEquals(1, result.getIncorrectAnswers());
+        assertEquals(1, result.getUnanswered());
+        assertEquals(50, result.getScore());
     }
 
     @Test
@@ -339,7 +330,7 @@ class ExamServiceTests {
             Map.of(1L, "B")
         );
 
-        ExamResultResponse result = examService.submitExam(submission(), EMAIL);
+        ExamSubmitResponse result = examService.submitExam(submission(), EMAIL);
 
         assertEquals(3, result.getTotalQuestions());
         assertEquals(1, result.getCorrectAnswers());
@@ -392,7 +383,7 @@ class ExamServiceTests {
         assertThrows(NotFoundException.class,
             () -> examService.submitExam(submission(), EMAIL));
 
-        verifyNoInteractions(examResultRepository, subjectStatsRepository);
+        verifyNoInteractions(subjectStatsRepository);
     }
 
     // ----- Security: ownership -----
@@ -409,7 +400,7 @@ class ExamServiceTests {
         assertThrows(AccessDeniedException.class,
             () -> examService.submitExam(submission(), "other@example.test"));
 
-        verifyNoInteractions(attemptQuestionRepository, examResultRepository, subjectStatsRepository);
+        verifyNoInteractions(attemptQuestionRepository, subjectStatsRepository);
     }
 
     @Test
@@ -481,7 +472,7 @@ class ExamServiceTests {
         assertThrows(IllegalArgumentException.class,
             () -> examService.submitExam(request, EMAIL));
 
-        verifyNoInteractions(attemptRepository, examResultRepository);
+        verifyNoInteractions(attemptRepository);
     }
 
     @Test
@@ -491,7 +482,7 @@ class ExamServiceTests {
         assertThrows(NotFoundException.class,
             () -> examService.submitExam(submission(), EMAIL));
 
-        verifyNoInteractions(attemptQuestionRepository, examResultRepository);
+        verifyNoInteractions(attemptQuestionRepository);
     }
 
     @Test
@@ -503,7 +494,7 @@ class ExamServiceTests {
         assertThrows(ConflictException.class,
             () -> examService.submitExam(submission(), EMAIL));
 
-        verifyNoInteractions(attemptQuestionRepository, examResultRepository, subjectStatsRepository);
+        verifyNoInteractions(attemptQuestionRepository, subjectStatsRepository);
     }
 
     @Test
@@ -518,7 +509,7 @@ class ExamServiceTests {
         assertTrue(exam.isFinished(), "a late exam should be closed");
         assertFalse(exam.isScored(), "a late exam is closed but not scored");
         verify(attemptRepository).save(exam);
-        verifyNoInteractions(attemptQuestionRepository, examResultRepository, subjectStatsRepository);
+        verifyNoInteractions(attemptQuestionRepository, subjectStatsRepository);
     }
 
     @Test
@@ -530,10 +521,9 @@ class ExamServiceTests {
             LocalDateTime.now().minusMinutes(61)
         );
 
-        ExamResultResponse result = examService.submitExam(submission(), EMAIL);
+        ExamSubmitResponse result = examService.submitExam(submission(), EMAIL);
 
         assertEquals(1, result.getCorrectAnswers());
-        verify(examResultRepository).save(any(ExamResult.class));
     }
 
     @Test
@@ -544,10 +534,9 @@ class ExamServiceTests {
             LocalDateTime.now().minusMinutes(59)
         );
 
-        ExamResultResponse result = examService.submitExam(submission(), EMAIL);
+        ExamSubmitResponse result = examService.submitExam(submission(), EMAIL);
 
         assertEquals(1, result.getCorrectAnswers());
-        verify(examResultRepository).save(any(ExamResult.class));
     }
 
     // ----- Starting an exam -----

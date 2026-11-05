@@ -76,7 +76,7 @@ describe("Exam page", () => {
         mockBackend();
         renderExam();
 
-        expect(screen.getByText("Loading exam questions...")).toBeInTheDocument();
+        expect(screen.getByText("Laddar provfrågor...")).toBeInTheDocument();
         expect(await screen.findByText("First question?")).toBeInTheDocument();
         expect(apiClient).toHaveBeenCalledWith("/api/exam/start", { method: "POST" });
     });
@@ -140,14 +140,14 @@ describe("Exam page", () => {
 
         // Act: answer both questions
         await userEvent.click(await screen.findByRole("radio", { name: "B1" }));
-        await userEvent.click(screen.getByRole("button", { name: "Next" }));
+        await userEvent.click(screen.getByRole("button", { name: "Nästa" }));
         await userEvent.click(screen.getByRole("radio", { name: "C2" }));
 
         // Click the always-visible Submit button (opens modal)
-        await userEvent.click(screen.getByRole("button", { name: "Submit Exam" }));
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in provet" }));
 
         // Confirm in modal — both answered, so the confirm button still says "Submit Exam"
-        const confirmButtons = await screen.findAllByRole("button", { name: "Submit Exam" });
+        const confirmButtons = await screen.findAllByRole("button", { name: "Lämna in provet" });
         await userEvent.click(confirmButtons[confirmButtons.length - 1]);
 
         expect(await screen.findByText("Result page")).toBeInTheDocument();
@@ -165,7 +165,7 @@ describe("Exam page", () => {
         vi.mocked(apiClient).mockRejectedValue(new Error("Server down"));
         renderExam();
 
-        expect(await screen.findByText("Failed to load exam questions. Please try again.")).toBeInTheDocument();
+        expect(await screen.findByText("Kunde inte ladda provfrågor. Försök igen.")).toBeInTheDocument();
     });
 
     it("disables Previous on the first question and enables it on subsequent questions", async () => {
@@ -174,10 +174,10 @@ describe("Exam page", () => {
 
         await screen.findByText("First question?");
 
-        const prevButton = screen.getByRole("button", { name: "Previous" });
+        const prevButton = screen.getByRole("button", { name: "Föregående" });
         expect(prevButton).toBeDisabled();
 
-        await userEvent.click(screen.getByRole("button", { name: "Next" }));
+        await userEvent.click(screen.getByRole("button", { name: "Nästa" }));
         expect(screen.getByText("Second question?")).toBeInTheDocument();
 
         expect(prevButton).not.toBeDisabled();
@@ -226,11 +226,11 @@ describe("Exam page", () => {
     it("shows a clear message when there are too few questions (409 conflict)", async () => {
         vi.mocked(apiClient).mockRejectedValue({
             status: 409,
-            message: "Not enough questions available to start the exam."
+            message: "Det finns inte tillräckligt många frågor för att starta provet."
         });
         renderExam();
 
-        expect(await screen.findByText("Not enough questions available to start the exam.")).toBeInTheDocument();
+        expect(await screen.findByText("Det finns inte tillräckligt många frågor för att starta provet.")).toBeInTheDocument();
     });
 
     it("can submit from the first question, not only the last", async () => {
@@ -240,13 +240,12 @@ describe("Exam page", () => {
         await screen.findByText("First question?");
 
         // Click Submit from question 1
-        await userEvent.click(screen.getByRole("button", { name: "Submit Exam" }));
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in provet" }));
 
         // Modal appears with unanswered warning
-        expect(screen.getByText(/unanswered question/i)).toBeInTheDocument();
-
+        expect(screen.getByText(/obesvarade frågor/i)).toBeInTheDocument();
         // Confirm — unanswered > 0 so button says "Submit anyway"
-        await userEvent.click(screen.getByRole("button", { name: "Submit anyway" }));
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in ändå" }));
 
         expect(await screen.findByText("Result page")).toBeInTheDocument();
 
@@ -261,7 +260,7 @@ describe("Exam page", () => {
         renderExam();
 
         await screen.findByText("First question?");
-        const nextButton = screen.getByRole("button", { name: "Next" });
+        const nextButton = screen.getByRole("button", { name: "Nästa" });
         expect(nextButton).not.toBeDisabled();
 
         await userEvent.click(nextButton);    // → Q2
@@ -275,12 +274,12 @@ describe("Exam page", () => {
 
         await screen.findByText("First question?");
         // Don't answer anything, just submit
-        await userEvent.click(screen.getByRole("button", { name: "Submit Exam" }));
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in provet" }));
 
         // Modal should show "Submit anyway" (unanswered > 0)
-        expect(await screen.findByRole("button", { name: "Submit anyway" })).toBeInTheDocument();
+        expect(await screen.findByRole("button", { name: "Lämna in ändå" })).toBeInTheDocument();
 
         // Clean up — cancel so no real submit fires
-        await userEvent.click(screen.getByRole("button", { name: "Go back" }));
+        await userEvent.click(screen.getByRole("button", { name: "Gå tillbaka" }));
     });
     });

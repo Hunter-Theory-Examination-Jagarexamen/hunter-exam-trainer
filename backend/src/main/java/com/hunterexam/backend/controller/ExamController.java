@@ -1,6 +1,6 @@
 package com.hunterexam.backend.controller;
 
-import com.hunterexam.backend.dto.ExamResultResponse;
+import com.hunterexam.backend.dto.ExamSubmitResponse;
 import com.hunterexam.backend.dto.ExamStartResponse;
 import com.hunterexam.backend.dto.ExamSubmitRequest;
 import com.hunterexam.backend.service.ExamService;
@@ -82,7 +82,7 @@ public class ExamController {
     }
 
     @PostMapping("/submit")
-    public ExamResultResponse submitExam(
+    public ExamSubmitResponse submitExam(
             Authentication authentication,
             @RequestBody ExamSubmitRequest request
     ) {
