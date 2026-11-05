@@ -3,7 +3,8 @@ import apiClient from "../../api/apiClient";
 import {
     answerPracticeQuestion,
     finishPracticeRound,
-    startPracticeRound
+    startPracticeRound,
+    startRandomPracticeRound
 } from "../../services/practiceAttemptService";
 
 vi.mock("../../api/apiClient", () => ({default: vi.fn()}));
@@ -17,6 +18,12 @@ describe("Practice attempt service", () => {
         expect(await startPracticeRound(2)).toEqual({attemptId: 10, questions: []});
         expect(apiClientMock).toHaveBeenCalledWith("/api/practice/attempts",
             {method: "POST", body: JSON.stringify({subjectId: 2})});
+    });
+
+    it("starts a random round with no body, chosen by the server", async () => {
+        apiClientMock.mockResolvedValue({attemptId: 11, subjectName: null, questions: []});
+        expect(await startRandomPracticeRound()).toEqual({attemptId: 11, subjectName: null, questions: []});
+        expect(apiClientMock).toHaveBeenCalledWith("/api/practice/attempts/random", {method: "POST"});
     });
 
     it("sends one answer and returns the server's check", async () => {

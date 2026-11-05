@@ -2,10 +2,12 @@ import type {ExamQuestion} from "./examQuestion";
 
 export type OptionLetter = "A" | "B" | "C" | "D";
 
-// Response from POST /api/practice/attempts (no correct answers).
+// Response from POST /api/practice/attempts or /api/practice/attempts/random
+// (no correct answers).
 export interface PracticeStartResponse {
     attemptId: number;
-    subjectName: string;
+    // The round's subject; null for a random round, which mixes subjects.
+    subjectName: string | null;
     questions: ExamQuestion[];
 }
 

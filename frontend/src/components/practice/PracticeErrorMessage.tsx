@@ -6,11 +6,14 @@ interface PracticeErrorMessageProps {
     onRetry?: () => void;
     // Shown as "Tillbaka till ämnen" when it can't (e.g. the round is closed).
     onBack?: () => void;
+    // Translation key for the back button: the subject list by default, or
+    // the practice mode cards after a random round.
+    backLabelKey?: string;
 }
 
 // A visible error with what the user can do next. role="alert" makes screen
 // readers read it out as soon as it appears.
-const PracticeErrorMessage = ({ message, onRetry, onBack }: PracticeErrorMessageProps) => {
+const PracticeErrorMessage = ({ message, onRetry, onBack, backLabelKey = "practice.backToSubjects" }: PracticeErrorMessageProps) => {
     const { t } = useTranslation();
 
     return (
@@ -21,7 +24,7 @@ const PracticeErrorMessage = ({ message, onRetry, onBack }: PracticeErrorMessage
                     <button className="check-answer-button" onClick={onRetry}>{t("practice.tryAgain")}</button>
                 )}
                 {onBack && (
-                    <button className="practice-secondary-button" onClick={onBack}>{t("practice.backToSubjects")}</button>
+                    <button className="practice-secondary-button" onClick={onBack}>{t(backLabelKey)}</button>
                 )}
             </div>
         </div>

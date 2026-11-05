@@ -25,12 +25,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Practice rounds stored per question (#168): start a round, answer one
  * question at a time (checked on the server), finish the round.
+ * <p>
+ * A round covers one subject ({@link #start}) or, for random practice (#151),
+ * up to {@value #RANDOM_ROUND_SIZE} questions picked by the server from the
+ * whole bank ({@link #startRandom}). Both kinds share the same lifecycle and
+ * the same rules: one open round per student, answers saved as they are given,
+ * totals per subject of each answered question.
  */
 @Service
 public class PracticeAttemptService {
@@ -38,6 +48,13 @@ public class PracticeAttemptService {
     // The round types this service handles. Mock exams are not included.
     private static final Set<AttemptType> PRACTICE_TYPES =
             Set.of(AttemptType.SUBJECT_PRACTICE, AttemptType.RANDOM_PRACTICE);
+
+    /**
+     * How many questions a random round has when the bank has that many:
+     * enough for a real round, few enough to finish in one sitting. A smaller
+     * bank gives a shorter round.
+     */
+    private static final int RANDOM_ROUND_SIZE = 20;
 
     private final AttemptRepository attemptRepository;
     private final AttemptQuestionRepository attemptQuestionRepository;
@@ -86,6 +103,53 @@ public class PracticeAttemptService {
             throw new ConflictException("This subject has no questions yet.");
         }
 
+        return openRound(user, AttemptType.SUBJECT_PRACTICE, questions, subject.getName());
+    }
+
+    /**
+     * Starts a random practice round: questions from all subjects (#151).
+     * <p>
+     * The server picks the questions ({@link #selectRandomQuestions}), so the
+     * client never chooses them and never sees the correct answers. An empty
+     * bank is a conflict, the same as a subject with no questions.
+     *
+     * @param email email of the logged-in user
+     * @return the round's id and its questions; {@code subjectName} is null,
+     * because a random round mixes subjects
+     */
+    @Transactional
+    public PracticeStartResponse startRandom(String email) {
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        List<Question> questions = selectRandomQuestions();
+        if (questions.isEmpty()) {
+            throw new ConflictException("There are no questions to practise yet.");
+        }
+
+        return openRound(user, AttemptType.RANDOM_PRACTICE, questions, null);
+    }
+
+    /**
+     * Opens a round: closes any earlier practice round the student left
+     * running, saves the new round with one {@link AttemptQuestion} row per
+     * question (in the order they are given), makes sure the student has a
+     * totals row for every subject in the round, and returns the questions
+     * without their correct answers.
+     * <p>
+     * The caller has already checked that there is at least one question, so
+     * a round is never opened (and no earlier round closed) for an empty bank.
+     *
+     * @param user        the student
+     * @param type        SUBJECT_PRACTICE or RANDOM_PRACTICE
+     * @param questions   the round's questions, in the order to show them
+     * @param subjectName the subject's name, or null for a mixed round
+     * @return the round's id and its questions
+     */
+    private PracticeStartResponse openRound(User user, AttemptType type,
+                                            List<Question> questions, String subjectName) {
+
         // One open practice round per student: close any earlier round that
         // was left without finishing (tab closed, lost connection, ...).
         // No timer needed: starting a new round is what closes the old one.
@@ -93,8 +157,7 @@ public class PracticeAttemptService {
             close(leftRound);
         }
 
-        Attempt attempt = attemptRepository.save(
-                new Attempt(user, AttemptType.SUBJECT_PRACTICE, LocalDateTime.now()));
+        Attempt attempt = attemptRepository.save(new Attempt(user, type, LocalDateTime.now()));
 
         List<AttemptQuestion> rows = new ArrayList<>();
         for (int position = 0; position < questions.size(); position++) {
@@ -102,13 +165,63 @@ public class PracticeAttemptService {
         }
         attemptQuestionRepository.saveAll(rows);
 
-        ensureSubjectStatsExist(user, Set.of(subject));
+        ensureSubjectStatsExist(user, questions.stream()
+                .map(Question::getSubject)
+                .collect(Collectors.toSet()));
 
         List<QuestionResponse> questionDtos = questions.stream()
                 .map(this::toQuestionResponse)
                 .toList();
 
-        return new PracticeStartResponse(attempt.getId(), subject.getName(), questionDtos);
+        return new PracticeStartResponse(attempt.getId(), subjectName, questionDtos);
+    }
+
+    /**
+     * Picks up to {@value #RANDOM_ROUND_SIZE} questions at random from the
+     * whole bank, without duplicates, in random order.
+     * <p>
+     * The questions of each subject are shuffled, and the subjects are then
+     * walked round-robin, so a subject with many questions can't fill the
+     * round alone and every subject with a question is represented while
+     * there are still slots left. The picked questions are shuffled once
+     * more, so the student sees them in a random order.
+     *
+     * @return the chosen questions, or an empty list when the bank is empty
+     */
+    private List<Question> selectRandomQuestions() {
+
+        List<Question> bank = questionRepository.findAllWithSubject();
+        if (bank.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, List<Question>> bySubject = new LinkedHashMap<>();
+        for (Question question : bank) {
+            bySubject.computeIfAbsent(question.getSubject().getId(), id -> new ArrayList<>())
+                    .add(question);
+        }
+        bySubject.values().forEach(Collections::shuffle);
+
+        List<Question> chosen = new ArrayList<>();
+        for (int position = 0; chosen.size() < RANDOM_ROUND_SIZE; position++) {
+            boolean pickedAny = false;
+            for (List<Question> subjectQuestions : bySubject.values()) {
+                if (position >= subjectQuestions.size()) {
+                    continue;
+                }
+                chosen.add(subjectQuestions.get(position));
+                pickedAny = true;
+                if (chosen.size() == RANDOM_ROUND_SIZE) {
+                    break;
+                }
+            }
+            if (!pickedAny) {
+                break; // every subject has been exhausted
+            }
+        }
+
+        Collections.shuffle(chosen);
+        return chosen;
     }
 
     /**
