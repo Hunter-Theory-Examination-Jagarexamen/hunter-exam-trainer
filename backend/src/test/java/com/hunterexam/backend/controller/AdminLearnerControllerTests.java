@@ -3,6 +3,8 @@ package com.hunterexam.backend.controller;
 import com.hunterexam.backend.config.OAuth2LoginSuccessHandler;
 import com.hunterexam.backend.config.SecurityConfig;
 import com.hunterexam.backend.dto.LearnerProgressResponse;
+import com.hunterexam.backend.dto.LearnerSummaryResponse;
+import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.service.AdminService;
 import org.junit.jupiter.api.Test;
@@ -33,6 +35,31 @@ class AdminLearnerControllerTests {
     @MockitoBean OAuth2LoginSuccessHandler loginHandler;
 
     private static final SimpleGrantedAuthority ADMIN = new SimpleGrantedAuthority("ROLE_ADMIN");
+
+    @Test
+    void anonymousAndStudentsCannotReadTheList() throws Exception {
+        mvc.perform(get("/api/admin/learners"))
+                .andExpect(status().isUnauthorized());
+        mvc.perform(get("/api/admin/learners")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_STUDENT"))))
+                .andExpect(status().isForbidden());
+        verifyNoInteractions(service);
+    }
+
+    @Test
+    void adminReceivesTheListWithRoles() throws Exception {
+        when(service.getLearners()).thenReturn(List.of(
+                new LearnerSummaryResponse(5L, "Zara Admin", Role.ADMIN),
+                new LearnerSummaryResponse(7L, "Anna Andersson", Role.STUDENT)));
+
+        mvc.perform(get("/api/admin/learners").with(jwt().authorities(ADMIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].fullName").value("Zara Admin"))
+                .andExpect(jsonPath("$[0].role").value("ADMIN"))
+                .andExpect(jsonPath("$[1].role").value("STUDENT"))
+                .andExpect(jsonPath("$[1].email").doesNotExist());
+    }
 
     @Test
     void anonymousAndStudentsCannotReadOneLearner() throws Exception {

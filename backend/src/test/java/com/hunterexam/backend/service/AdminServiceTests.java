@@ -2,10 +2,12 @@ package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.AdminStatsResponse;
 import com.hunterexam.backend.dto.LearnerProgressResponse;
+import com.hunterexam.backend.dto.LearnerSummaryResponse;
 import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.SubjectStats;
 import com.hunterexam.backend.entity.User;
+import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.repository.AttemptQuestionRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
@@ -20,13 +22,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -74,6 +76,14 @@ class AdminServiceTests {
         return s;
     }
 
+    private User user(long id, String fullName, Role role) {
+        User u = new User();
+        u.setId(id);
+        u.setFullName(fullName);
+        u.setRole(role);
+        return u;
+    }
+
     private Subject subject(long id, String name) {
         Subject s = new Subject();
         s.setId(id);
@@ -83,12 +93,9 @@ class AdminServiceTests {
 
     @Test
     void learnerWithNoResultsShowsEmptyState() {
-        when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of(learner));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(learner));
 
-        List<LearnerProgressResponse> result = adminService.getLearnerProgress();
-
-        assertEquals(1, result.size());
-        LearnerProgressResponse lr = result.getFirst();
+        LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
         assertEquals(0, lr.mockExams().count());
         assertNull(lr.mockExams().latestScore());
         assertNull(lr.mockExams().bestScore());
@@ -100,14 +107,14 @@ class AdminServiceTests {
     @Test
     void learnerWithOnlyMockExamsShowsExamsAndLastActivity() {
         LocalDateTime examTime = LocalDateTime.now().minusDays(2);
-        when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of(learner));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(learner));
         when(attemptQuestionRepository.findScoredMockExams(List.of(learner)))
                 .thenReturn(List.of(
                         exam(62, 70, examTime),
                         exam(55, 70, examTime.minusDays(5))
                 ));
 
-        LearnerProgressResponse lr = adminService.getLearnerProgress().getFirst();
+        LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
 
         assertEquals(2, lr.mockExams().count());
         assertEquals(89, lr.mockExams().latestScore());
@@ -122,11 +129,11 @@ class AdminServiceTests {
     void learnerWithOnlyPracticeShowsPracticeAndLastActivity() {
         LocalDateTime practiceTime = LocalDateTime.now().minusDays(1);
         Subject ekologi = subject(3L, "Ekologi");
-        when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of(learner));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(learner));
         when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner)))
                 .thenReturn(List.of(stats(learner, ekologi, 10, 8, practiceTime)));
 
-        LearnerProgressResponse lr = adminService.getLearnerProgress().getFirst();
+        LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
 
         assertEquals(0, lr.mockExams().count());
         assertNull(lr.mockExams().latestScore());
@@ -141,13 +148,13 @@ class AdminServiceTests {
         LocalDateTime practiceTime = LocalDateTime.now().minusDays(5);
         LocalDateTime examTime = LocalDateTime.now().minusDays(1);  // more recent
         Subject ekologi = subject(3L, "Ekologi");
-        when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of(learner));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(learner));
         when(attemptQuestionRepository.findScoredMockExams(List.of(learner)))
                 .thenReturn(List.of(exam(62, 70, examTime)));
         when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner)))
                 .thenReturn(List.of(stats(learner, ekologi, 10, 7, practiceTime)));
 
-        LearnerProgressResponse lr = adminService.getLearnerProgress().getFirst();
+        LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
 
         assertEquals(1, lr.mockExams().count());
         assertEquals(89, lr.mockExams().latestScore());
@@ -158,11 +165,11 @@ class AdminServiceTests {
     @Test
     void latestExamBelowPassThresholdFails() {
         LocalDateTime examTime = LocalDateTime.now();
-        when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of(learner));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(learner));
         when(attemptQuestionRepository.findScoredMockExams(List.of(learner)))
                 .thenReturn(List.of(exam(59, 70, examTime)));  // 59/70 = 84%
 
-        LearnerProgressResponse lr = adminService.getLearnerProgress().getFirst();
+        LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
 
         assertFalse(lr.mockExams().latestPassed());
     }
@@ -172,81 +179,75 @@ class AdminServiceTests {
         // Arrange: answers in two subjects; Vapen was answered more recently
         LocalDateTime older = LocalDateTime.now().minusDays(4);
         LocalDateTime newer = LocalDateTime.now().minusHours(3);
-        when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of(learner));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(learner));
         when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner))).thenReturn(List.of(
                 stats(learner, subject(3L, "Ekologi"), 10, 8, older),
                 stats(learner, subject(4L, "Vapen"), 5, 2, newer)));
 
         // Act + Assert
-        assertEquals(newer, adminService.getLearnerProgress().getFirst().lastActivityAt());
+        assertEquals(newer, adminService.getLearnerProgress(1L).lastActivityAt());
     }
 
     @Test
-    void eachLearnerGetsOwnSubjectsFromOneQueryWeakestFirst() {
-        // Arrange: two students; all their subject totals come back from one query
-        User other = new User();
-        other.setId(2L);
-        other.setFullName("Other Learner");
+    void subjectsAreSortedWeakestFirst() {
         Subject ekologi = subject(3L, "Ekologi");
         Subject vapen = subject(4L, "Vapen");
-        when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of(learner, other));
-        when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner, other))).thenReturn(List.of(
+        when(userRepository.findById(1L)).thenReturn(Optional.of(learner));
+        when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner))).thenReturn(List.of(
                 stats(learner, ekologi, 20, 18),   // 90 %
-                stats(learner, vapen, 10, 4),      // 40 %
-                stats(other, ekologi, 3, 1)));     // 33 %
+                stats(learner, vapen, 10, 4)));    // 40 %
 
-        // Act: sorted by name, so "Other Learner" comes before "Test Learner"
-        List<LearnerProgressResponse> result = adminService.getLearnerProgress();
+        LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
 
-        // Assert: each student sees only their own rows, weakest subject first
-        LearnerProgressResponse otherProgress = result.get(0);
-        LearnerProgressResponse learnerProgress = result.get(1);
-        assertEquals(1, otherProgress.subjectPerformances().size());
-        assertEquals(33, otherProgress.subjectPerformances().getFirst().getPercentage());
-        assertEquals(2, learnerProgress.subjectPerformances().size());
-        assertEquals("Vapen", learnerProgress.subjectPerformances().get(0).getSubjectName());
-        assertEquals(40, learnerProgress.subjectPerformances().get(0).getPercentage());
-        assertEquals(90, learnerProgress.subjectPerformances().get(1).getPercentage());
-        // One query for all students, not one per student
-        verify(subjectStatsRepository).findAnsweredByUserIn(any());
+        assertEquals("Vapen", lr.subjectPerformances().get(0).getSubjectName());
+        assertEquals(40, lr.subjectPerformances().get(0).getPercentage());
+        assertEquals(90, lr.subjectPerformances().get(1).getPercentage());
     }
 
     @Test
-    void noStudentsMeansNoSubjectStatsOrExamQuery() {
-        when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of());
-
-        assertTrue(adminService.getLearnerProgress().isEmpty());
-        verify(subjectStatsRepository, never()).findAnsweredByUserIn(any());
-        verify(attemptQuestionRepository, never()).findScoredMockExams(any());
-    }
-
-    @Test
-    void eachLearnerGetsOwnMockExamsFromOneQuery() {
-        // Arrange: two students; the query returns all scored exams, newest first
-        User other = new User();
-        other.setId(2L);
-        other.setFullName("Other Learner");
+    void latestAndBestMockExamCanDiffer() {
+        // The query returns exams newest first
         LocalDateTime now = LocalDateTime.now();
-        when(userRepository.findByRole(Role.STUDENT)).thenReturn(List.of(learner, other));
-        when(attemptQuestionRepository.findScoredMockExams(List.of(learner, other))).thenReturn(List.of(
-                new MockExamScore(11L, 1L, now.minusDays(1), 70L, 50L),   // learner, latest: 71 %
-                new MockExamScore(12L, 2L, now.minusDays(2), 70L, 65L),   // other: 93 %, passed
-                new MockExamScore(13L, 1L, now.minusDays(3), 70L, 63L))); // learner, best: 90 %
+        when(userRepository.findById(1L)).thenReturn(Optional.of(learner));
+        when(attemptQuestionRepository.findScoredMockExams(List.of(learner))).thenReturn(List.of(
+                exam(50, 70, now.minusDays(1)),    // latest: 71 %
+                exam(63, 70, now.minusDays(3))));  // best: 90 %
 
-        // Act: sorted by name, so "Other Learner" comes first
-        List<LearnerProgressResponse> result = adminService.getLearnerProgress();
+        LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
 
-        // Assert
-        LearnerProgressResponse otherProgress = result.get(0);
-        LearnerProgressResponse learnerProgress = result.get(1);
-        assertEquals(1, otherProgress.mockExams().count());
-        assertTrue(otherProgress.mockExams().latestPassed());
-        assertEquals(2, learnerProgress.mockExams().count());
-        assertEquals(71, learnerProgress.mockExams().latestScore());
-        assertEquals(90, learnerProgress.mockExams().bestScore());
-        assertFalse(learnerProgress.mockExams().latestPassed());   // 50 of 70
-        assertEquals(now.minusDays(1), learnerProgress.lastActivityAt());
-        verify(attemptQuestionRepository).findScoredMockExams(any());
+        assertEquals(2, lr.mockExams().count());
+        assertEquals(71, lr.mockExams().latestScore());
+        assertEquals(90, lr.mockExams().bestScore());
+        assertFalse(lr.mockExams().latestPassed());   // 50 of 70
+    }
+
+    @Test
+    void unknownUserIdThrowsNotFound() {
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> adminService.getLearnerProgress(99L));
+    }
+
+    @Test
+    void learnersListShowsAdminsFirstThenStudentsByName() {
+        User admin = user(5L, "Zara Admin", Role.ADMIN);
+        User bertil = user(2L, "bertil Student", Role.STUDENT);   // lower case: sorting ignores case
+        when(userRepository.findAll()).thenReturn(List.of(learner, admin, bertil));
+
+        List<LearnerSummaryResponse> result = adminService.getLearners();
+
+        assertEquals(List.of(
+                new LearnerSummaryResponse(5L, "Zara Admin", Role.ADMIN),
+                new LearnerSummaryResponse(2L, "bertil Student", Role.STUDENT),
+                new LearnerSummaryResponse(1L, "Test Learner", Role.STUDENT)
+        ), result);
+    }
+
+    @Test
+    void learnersListIsEmptyWithNoUsers() {
+        when(userRepository.findAll()).thenReturn(List.of());
+
+        assertTrue(adminService.getLearners().isEmpty());
     }
 
     @Test

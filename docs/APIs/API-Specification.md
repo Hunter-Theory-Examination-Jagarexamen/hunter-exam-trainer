@@ -30,7 +30,8 @@ endpoints are added to this table, not duplicated elsewhere.
 | GET    | /api/dashboard/recent         | Get the user's 5 most recent scored mock exams  | Required         |
 | GET    | /api/statistics/subjects      | Get the user's performance by subject (practice and mock exams) | Required |
 | GET    | /api/statistics/progress      | Get the user's weekly accuracy over time        | Required         |
-| GET    | /api/admin/learners           | Get aggregated progress for all learners        | Required (ADMIN) |
+| GET    | /api/admin/learners           | List all users (admins first, then students) | Required (ADMIN) |
+| GET    | /api/admin/learners/{userId}  | Get one user's progress (`404` if the id doesn't exist) | Required (ADMIN) |
 | GET    | /api/admin/stats              | Get question, subject and learner counts        | Required (ADMIN) |
 | GET    | /api/admin/questions?subjectId={id} | Get a subject's questions, including the correct answer (admin Question Bank) | Required (ADMIN) |
 | POST   | /api/admin/questions          | Create a question (201, with `Location` header) | Required (ADMIN) |
@@ -161,7 +162,11 @@ through the menu or the browser's back button.
 
 **MockExams notes:**
 
-- `GET /api/admin/learners` returns one entry per learner with:
+- `GET /api/admin/learners` returns one entry per user with `userId`, `fullName`
+  and `role` (`ADMIN` or `STUDENT`): admins first, then students, each group
+  sorted by name.
+- `GET /api/admin/learners/{userId}` returns one user's progress (student or
+  admin) with `userId`, `fullName`, `email`, `createdAt` and:
 - `subjectPerformances` — performance per subject, weakest first (same numbers as `/api/statistics/subjects`)
 - `mockExams` — mock exam summary (count, latest/best score, latest pass/fail), scored mock exams only
 - `lastActivityAt` — the latest answer (practice or mock exam) or mock exam submit; `null` if none
@@ -181,7 +186,7 @@ The statistics are calculated from the stored answers (`attempts`,
   questions are not counted as answers (in a mock exam's score they count as
   not correct).
 - **Per subject** (`/api/statistics/subjects`, `subjectPerformances` in
-  `/api/admin/learners`): `percentage` = correct ÷ answered over all counted
+  `/api/admin/learners/{userId}`): `percentage` = correct ÷ answered over all counted
   answers in the subject, rounded. Only subjects with at least one answer are
   listed. Student and admin see the same numbers.
 - **Progress over time** (`/api/statistics/progress?weeks=N`): one point per

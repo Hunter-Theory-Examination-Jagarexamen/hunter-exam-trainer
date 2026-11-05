@@ -2,6 +2,7 @@ package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.AdminStatsResponse;
 import com.hunterexam.backend.dto.LearnerProgressResponse;
+import com.hunterexam.backend.dto.LearnerSummaryResponse;
 import com.hunterexam.backend.dto.MockExamSummary;
 import com.hunterexam.backend.dto.SubjectPerformanceResponse;
 import com.hunterexam.backend.entity.Role;
@@ -19,8 +20,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -61,30 +60,16 @@ public class AdminService {
         );
     }
 
-    public List<LearnerProgressResponse> getLearnerProgress() {
-
-        List<User> learners = userRepository.findByRole(Role.STUDENT);
-
-        // Every student's subject totals in one query, then split per student
-        // (by user id), so the page doesn't run one query per student.
-        Map<Long, List<SubjectStats>> statsByLearner = learners.isEmpty()
-                ? Map.of()
-                : subjectStatsRepository.findAnsweredByUserIn(learners).stream()
-                        .collect(Collectors.groupingBy(stats -> stats.getUser().getId()));
-
-        // Every student's scored mock exams in one query, newest first; groupingBy
-        // keeps that order inside each student's list.
-        Map<Long, List<MockExamScore>> examsByLearner = learners.isEmpty()
-                ? Map.of()
-                : attemptQuestionRepository.findScoredMockExams(learners).stream()
-                        .collect(Collectors.groupingBy(MockExamScore::userId));
-
-        return learners.stream()
-                .sorted((a, b) -> a.getFullName().compareToIgnoreCase(b.getFullName()))
-                .map(learner -> buildLearnerProgress(
-                        learner,
-                        statsByLearner.getOrDefault(learner.getId(), List.of()),
-                        examsByLearner.getOrDefault(learner.getId(), List.of())))
+    /**
+     * Every user for the admin's list: admins first, then students, each group by name.
+     */
+    public List<LearnerSummaryResponse> getLearners() {
+        return userRepository.findAll().stream()
+                .sorted(Comparator
+                        .comparingInt((User user) -> user.getRole() == Role.ADMIN ? 0 : 1)
+                        .thenComparing(User::getFullName, String.CASE_INSENSITIVE_ORDER))
+                .map(user -> new LearnerSummaryResponse(
+                        user.getId(), user.getFullName(), user.getRole()))
                 .toList();
     }
 
@@ -97,7 +82,7 @@ public class AdminService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        // Same queries as the list above, with a list of one user.
+        // The repository queries take a list of users; here it's a list of one.
         List<User> oneUser = List.of(user);
         return buildLearnerProgress(
                 user,

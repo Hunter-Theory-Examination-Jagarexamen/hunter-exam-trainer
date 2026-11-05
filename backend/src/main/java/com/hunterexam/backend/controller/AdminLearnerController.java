@@ -1,6 +1,7 @@
 package com.hunterexam.backend.controller;
 
 import com.hunterexam.backend.dto.LearnerProgressResponse;
+import com.hunterexam.backend.dto.LearnerSummaryResponse;
 import com.hunterexam.backend.service.AdminService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,14 +23,12 @@ public class AdminLearnerController {
     }
 
     /**
-     * Returns aggregated progress for all learners.
+     * Returns every user (admins first, then students) as a light list of names.
      * Protected by the /api/admin/** ADMIN rule in SecurityConfig.
-     *
-     * @return list of learner progress entries
      */
     @GetMapping
-    public ResponseEntity<List<LearnerProgressResponse>> getLearnerProgress() {
-        return ResponseEntity.ok(adminService.getLearnerProgress());
+    public ResponseEntity<List<LearnerSummaryResponse>> getLearners() {
+        return ResponseEntity.ok(adminService.getLearners());
     }
 
     /**
