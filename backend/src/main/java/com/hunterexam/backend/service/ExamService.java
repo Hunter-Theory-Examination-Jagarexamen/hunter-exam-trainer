@@ -97,6 +97,9 @@ public class ExamService {
      * Selects 70 questions at random and stores them as a {@code MOCK_EXAM}
      * attempt: one {@link AttemptQuestion} row per question, in the order
      * given. Returns them without the correct answers.
+     * <p>
+     * Any mock exam the student left running is closed first, without
+     * scoring it (#186), so there is never more than one open exam.
      *
      * @param email email of the logged-in user
      * @return the attempt id and the 70 questions
@@ -113,6 +116,15 @@ public class ExamService {
             throw new ConflictException(
                     "Not enough questions available to start the exam."
             );
+        }
+
+        // One open mock exam per student: an earlier exam left running (tab
+        // closed, abandoned through the menu, ...) is closed without scoring
+        // it, so at most one exam can be running. Same idea as practice
+        // start; only mock exams are closed, never practice rounds.
+        for (Attempt leftExam : attemptRepository.findByUserAndFinishedAtIsNullAndTypeIn(
+                user, Set.of(AttemptType.MOCK_EXAM))) {
+            endWithoutScore(leftExam);
         }
 
         // Randomize question order so each exam attempt is different.
@@ -206,6 +218,40 @@ public class ExamService {
             throw new ConflictException("This mock exam has already been submitted.");
         }
         return exam;
+    }
+
+    /**
+     * Ends a running mock exam without scoring it (#186).
+     * <p>
+     * Called when the student confirms leaving through the menu or the
+     * browser's back button, and it is the only way an exam ends without a
+     * result: the exam is closed ({@code finishedAt} set, {@code scored}
+     * stays false), so it can't be answered or submitted again and never
+     * appears as a result, in statistics, or in the subject totals. The
+     * student's answers stay on the server but count for nothing.
+     * <p>
+     * {@link #endWithoutScore} is the one place an exam is closed this way;
+     * starting a new exam closes an earlier one the same way, and future
+     * changes to ending an exam without a result belong there too.
+     *
+     * @param attemptId the exam (its attempt id)
+     * @param email     email of the logged-in user
+     */
+    @Transactional
+    public void abandonExam(Long attemptId, String email) {
+        endWithoutScore(findOwnRunningExam(attemptId, email));
+    }
+
+    /**
+     * Closes an exam without scoring it: sets {@code finishedAt} and leaves
+     * {@code scored} false (it is only ever set true by a timed submit).
+     * Used by {@link #abandonExam} and by {@link #startExam} for exams that
+     * were left running.
+     */
+    private void endWithoutScore(Attempt exam) {
+        exam.setFinishedAt(LocalDateTime.now());
+        exam.setScored(false);
+        attemptRepository.save(exam);
     }
 
 

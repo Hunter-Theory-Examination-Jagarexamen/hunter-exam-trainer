@@ -3,11 +3,13 @@ import ExamHeader from "../../components/exam/ExamHeader";
 import QuestionPanel from "../../components/exam/QuestionPanel";
 import ExamNavigation from "../../components/exam/ExamNavigation";
 import ExamOverview from "../../components/exam/ExamOverview";
+import LeaveExamDialog from "../../components/exam/LeaveExamDialog";
 import { useExamBookmarks } from "../../hooks/useExamBookmarks";
 import type { ExamQuestion } from "../../types/examQuestion.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useBlocker, useNavigate } from "react-router-dom";
 import apiClient, { ApiError } from "../../api/apiClient.ts";
+import { errorStatus } from "../../services/apiErrors.ts";
 import { useTranslation } from "react-i18next";
 
 
@@ -40,6 +42,70 @@ const Exam = () => {
     // and, unlike state, changing it doesn't redraw the page.
     const startRequest = useRef<Promise<ExamStartResponse> | null>(null);
 
+    // True while the exam runs: from a successful start until it is submitted
+    // or abandoned. A ref, not state, so blockers below see a change in the
+    // same tick — submitting navigates right away, before React re-renders
+    // with new state (#186).
+    const examActiveRef = useRef(false);
+
+    // Leaving the page while an exam runs (sidebar menu, browser Back, any
+    // link) asks first, with "Stay" and "Leave exam" (#186).
+    const blocker = useBlocker(({ currentLocation, nextLocation }) =>
+        examActiveRef.current && currentLocation.pathname !== nextLocation.pathname
+    );
+
+    const [isLeaving, setIsLeaving] = useState(false);
+    const [leaveError, setLeaveError] = useState<string | null>(null);
+    // One abandon request at a time: a double click must not send two (#186).
+    const leaveRequest = useRef(false);
+
+    // Ends the exam on the server without scoring it, then lets the blocked
+    // navigation continue. If that fails, stay on the exam and say why (#186).
+    const handleLeaveConfirmed = async () => {
+        if (leaveRequest.current || !attemptId) {
+            return;
+        }
+        leaveRequest.current = true;
+        setIsLeaving(true);
+        setLeaveError(null);
+
+        try {
+            await apiClient(`/api/exam/${attemptId}/abandon`, { method: "POST" });
+            examActiveRef.current = false;
+            blocker.proceed?.();
+        }
+        catch (err) {
+            console.error("Failed to abandon exam: ", err);
+            const status = errorStatus(err);
+
+            if (status === 409) {
+                // Already ended elsewhere (e.g. submitted in another tab):
+                // the exam is over, so the navigation is safe.
+                examActiveRef.current = false;
+                blocker.proceed?.();
+                return;
+            }
+
+            if (status === 401) {
+                // Session expired: apiClient is already redirecting to the
+                // login page; no leave prompt during that redirect.
+                examActiveRef.current = false;
+                return;
+            }
+
+            setLeaveError(t("exam.leave.failed"));
+        }
+        finally {
+            leaveRequest.current = false;
+            setIsLeaving(false);
+        }
+    };
+
+    const handleLeaveCancelled = () => {
+        setLeaveError(null);
+        blocker.reset?.();
+    };
+
     const submitExam = useCallback(async () => {
 
         try {
@@ -50,6 +116,9 @@ const Exam = () => {
             });
 
             console.log("Exam result: ", result);
+            // The exam is over: no leave prompts for the navigation to the
+            // result page (the ref is read before React re-renders, #186).
+            examActiveRef.current = false;
             navigate("/result", {
                 state: result
             });
@@ -58,6 +127,10 @@ const Exam = () => {
             console.error("Failed to submit exam: ", err);
 
             if (err instanceof ApiError && err.status === 401) {
+                // Session expired: apiClient is already redirecting to login.
+                // The exam stays open on the server and is closed by the next
+                // start, so only suppress the leave prompt here (#186).
+                examActiveRef.current = false;
                 return;
             }
 
@@ -83,6 +156,8 @@ const Exam = () => {
                 const data = await startRequest.current;
                 setAttemptId(data.attemptId);
                 setQuestions(data.questions);
+                // The exam is running: leaving the page now asks first (#186).
+                examActiveRef.current = true;
             }
 
             catch (err: unknown) {
@@ -100,6 +175,29 @@ const Exam = () => {
         };
 
         void fetchExamQuestions();
+    }, []);
+
+    // The browser's own prompt (reload, tab close, address bar) while an exam
+    // is running (#186). The listener attaches with the page itself, and the
+    // handler gates on examActiveRef: only a running exam prompts — not while
+    // the exam is still starting, and never after submit or abandon. Attaching
+    // here (during render()'s act) instead of in an effect keyed on attemptId
+    // matters: that effect can only run after the async start response
+    // re-renders and React flushes its effects, which under load can happen
+    // after the exam is already visible — the browser would then close the
+    // tab without asking (#186 test failure).
+    useEffect(() => {
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            if (!examActiveRef.current) {
+                return; // No exam running: nothing to lose.
+            }
+            event.preventDefault();
+            // Some browsers only show the prompt when returnValue is set.
+            event.returnValue = "";
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => window.removeEventListener("beforeunload", handleBeforeUnload);
     }, []);
 
     // Timer
@@ -312,6 +410,15 @@ const Exam = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {blocker.state === "blocked" && (
+                <LeaveExamDialog
+                    onConfirm={handleLeaveConfirmed}
+                    onCancel={handleLeaveCancelled}
+                    isLeaving={isLeaving}
+                    error={leaveError}
+                />
             )}
 
         </div>

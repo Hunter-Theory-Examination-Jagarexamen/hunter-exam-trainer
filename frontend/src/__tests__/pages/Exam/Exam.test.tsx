@@ -7,7 +7,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { StrictMode } from "react";
 import { render, screen, act, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Routes, Route } from "react-router-dom";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import Exam from "../../../pages/Exam/Exam";
 import apiClient from "../../../api/apiClient.ts";
 import type { ExamQuestion } from "../../../types/examQuestion.ts";
@@ -39,6 +39,9 @@ function mockBackend() {
         if (endpoint.match(/^\/api\/exam\/[^/]+\/answer$/)) {
             return null;  // 204
         }
+        if (endpoint.match(/^\/api\/exam\/[^/]+\/abandon$/)) {
+            return null;  // 204
+        }
         if (endpoint === "/api/exam/submit") {
             return { totalQuestions: 2, correctAnswers: 1, incorrectAnswers: 1, unanswered: 0, score: 50 };
         }
@@ -46,17 +49,41 @@ function mockBackend() {
     });
 }
 
-// Draw the page inside a test router, with a fake /result page.
-function renderExam() {
-    render(
-        <MemoryRouter initialEntries={["/exam"]}>
-            <Routes>
-                <Route path="/exam" element={<Exam />} />
-                <Route path="/result" element={<p>Result page</p>} />
-            </Routes>
-        </MemoryRouter>
-    );
+// A memory "data router" (the page's useBlocker needs one) at /exam, plus
+// stand-ins for the result page and other menu destinations, so tests can see
+// where the user ends up. Returns the router so a test can navigate like the
+// menu or the browser Back button does.
+function createExamRouter(initialEntries: string[] = ["/exam"]) {
+    return createMemoryRouter([
+        { path: "/exam", element: <Exam /> },
+        { path: "/result", element: <p>Result page</p> },
+        { path: "/statistics", element: <p>Statistics page</p> },
+        { path: "/home", element: <p>Home page</p> },
+    ], { initialEntries });
 }
+
+function renderExam(initialEntries?: string[]) {
+    const router = createExamRouter(initialEntries);
+    render(<RouterProvider router={router} />);
+    return router;
+}
+
+// Makes the next call to an endpoint fail with an HTTP status, like apiClient's
+// ApiError; later calls go to the normal fake backend again.
+function failOnce(endpoint: string, status: number) {
+    const normal = vi.mocked(apiClient).getMockImplementation()!;
+    let failed = false;
+    vi.mocked(apiClient).mockImplementation(async (url: string, options?: RequestInit) => {
+        if (url === endpoint && !failed) {
+            failed = true;
+            throw Object.assign(new Error(JSON.stringify({ message: "Failed" })), { status });
+        }
+        return normal(url, options);
+    });
+}
+
+// All endpoints the page called, in order.
+const calledEndpoints = () => vi.mocked(apiClient).mock.calls.map(([endpoint]) => endpoint);
 
 describe("Exam page", () => {
 
@@ -86,11 +113,7 @@ describe("Exam page", () => {
         mockBackend();
         render(
             <StrictMode>
-                <MemoryRouter initialEntries={["/exam"]}>
-                    <Routes>
-                        <Route path="/exam" element={<Exam />} />
-                    </Routes>
-                </MemoryRouter>
+                <RouterProvider router={createExamRouter()} />
             </StrictMode>
         );
 
@@ -281,5 +304,161 @@ describe("Exam page", () => {
 
         // Clean up — cancel so no real submit fires
         await userEvent.click(screen.getByRole("button", { name: "Gå tillbaka" }));
+    });
+
+    // Leaving a running exam: menu links, browser Back, tab close (#186).
+
+    it("asks before leaving through the menu, and keeps answers and the timer on cancel", async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: true });
+        mockBackend();
+        const router = renderExam();
+
+        await userEvent.click(await screen.findByRole("radio", { name: "B1" }));
+        await act(async () => {
+            vi.advanceTimersByTime(61 * 1000);
+        });
+        expect(document.querySelector(".timer")).toHaveTextContent(/^5[89]:\d\d$/);
+
+        // Same as clicking a menu link while the exam runs.
+        await act(() => router.navigate("/statistics"));
+
+        expect(await screen.findByRole("dialog", { name: "Lämna provet?" })).toBeInTheDocument();
+        await userEvent.click(screen.getByRole("button", { name: "Stanna kvar" }));
+
+        expect(router.state.location.pathname).toBe("/exam");
+        expect(screen.getByText("First question?")).toBeInTheDocument();
+        // The answer survived, the countdown carried on (it did not restart),
+        // and no exam was abandoned on the server.
+        expect(screen.getByRole("radio", { name: "B1" })).toBeChecked();
+        expect(document.querySelector(".timer")).toHaveTextContent(/^5[89]:\d\d$/);
+        expect(calledEndpoints().filter((e) => e === "/api/exam/start")).toHaveLength(1);
+        expect(calledEndpoints()).not.toContain("/api/exam/attempt-1/abandon");
+    });
+
+    it("abandons the exam when leaving through the menu is confirmed", async () => {
+        mockBackend();
+        const router = renderExam();
+        await screen.findByText("First question?");
+
+        await act(() => router.navigate("/statistics"));
+        await userEvent.click(await screen.findByRole("button", { name: "Lämna provet" }));
+
+        expect(await screen.findByText("Statistics page")).toBeInTheDocument();
+        expect(apiClient).toHaveBeenCalledWith("/api/exam/attempt-1/abandon", { method: "POST" });
+    });
+
+    it("asks before the browser Back button, and leaves when confirmed", async () => {
+        mockBackend();
+        const router = renderExam(["/home", "/exam"]);
+        await screen.findByText("First question?");
+
+        await act(() => router.navigate(-1));
+
+        expect(await screen.findByRole("dialog", { name: "Lämna provet?" })).toBeInTheDocument();
+        await userEvent.click(screen.getByRole("button", { name: "Lämna provet" }));
+
+        expect(await screen.findByText("Home page")).toBeInTheDocument();
+        expect(apiClient).toHaveBeenCalledWith("/api/exam/attempt-1/abandon", { method: "POST" });
+    });
+
+    it("shows an error and stays when the exam cannot be ended, and can retry", async () => {
+        mockBackend();
+        failOnce("/api/exam/attempt-1/abandon", 500);
+        const router = renderExam();
+        await screen.findByText("First question?");
+
+        await act(() => router.navigate("/statistics"));
+        await userEvent.click(await screen.findByRole("button", { name: "Lämna provet" }));
+
+        expect(await screen.findByRole("alert")).toHaveTextContent("Det gick inte att avsluta provet. Försök igen.");
+        expect(router.state.location.pathname).toBe("/exam");
+        expect(screen.getByText("First question?")).toBeInTheDocument();
+
+        // Trying again can succeed now.
+        await userEvent.click(screen.getByRole("button", { name: "Lämna provet" }));
+
+        expect(await screen.findByText("Statistics page")).toBeInTheDocument();
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+
+    it("goes on without a prompt when the exam was already ended elsewhere (409)", async () => {
+        mockBackend();
+        failOnce("/api/exam/attempt-1/abandon", 409);
+        const router = renderExam();
+        await screen.findByText("First question?");
+
+        await act(() => router.navigate("/statistics"));
+        await userEvent.click(await screen.findByRole("button", { name: "Lämna provet" }));
+
+        expect(await screen.findByText("Statistics page")).toBeInTheDocument();
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+
+    it("sends at most one abandon request even when leaving is clicked twice", async () => {
+        mockBackend();
+        // The abandon request never finishes, so the dialog stays open.
+        vi.mocked(apiClient).mockImplementation(async (endpoint: string) => {
+            if (endpoint === "/api/exam/start") {
+                return { attemptId: "attempt-1", questions };
+            }
+            if (endpoint === "/api/exam/attempt-1/abandon") {
+                return new Promise(() => { /* pending forever */ });
+            }
+            if (endpoint.match(/^\/api\/exam\/[^/]+\/answer$/)) {
+                return null;
+            }
+            throw new Error(`Unexpected endpoint: ${endpoint}`);
+        });
+
+        const router = renderExam();
+        await screen.findByText("First question?");
+        await act(() => router.navigate("/statistics"));
+
+        const confirm = await screen.findByRole("button", { name: "Lämna provet" });
+        await userEvent.click(confirm);
+        expect(confirm).toBeDisabled();
+        await userEvent.click(confirm); // ignored while the first request runs
+
+        expect(calledEndpoints().filter((e) => e === "/api/exam/attempt-1/abandon")).toHaveLength(1);
+    });
+
+    it("does not ask the browser before the exam has started", async () => {
+        mockBackend();
+        renderExam();
+
+        // Still loading: no exam is running, so there is nothing to lose.
+        const event = new Event("beforeunload", { cancelable: true });
+        window.dispatchEvent(event);
+        expect(event.defaultPrevented).toBe(false);
+
+        expect(await screen.findByText("First question?")).toBeInTheDocument();
+    });
+
+    it("asks the browser before closing or reloading while the exam runs", async () => {
+        mockBackend();
+        renderExam();
+        await screen.findByText("First question?");
+
+        const event = new Event("beforeunload", { cancelable: true });
+        window.dispatchEvent(event);
+
+        expect(event.defaultPrevented).toBe(true);
+    });
+
+    it("does not ask the browser or the dialog after the exam was submitted", async () => {
+        mockBackend();
+        const router = renderExam();
+        await screen.findByText("First question?");
+
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in provet" }));
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in ändå" }));
+        expect(await screen.findByText("Result page")).toBeInTheDocument();
+
+        const event = new Event("beforeunload", { cancelable: true });
+        window.dispatchEvent(event);
+        expect(event.defaultPrevented).toBe(false);
+
+        await act(() => router.navigate("/statistics"));
+        expect(await screen.findByText("Statistics page")).toBeInTheDocument();
     });
     });
