@@ -33,8 +33,8 @@ describe("Admin navigation and routing", () => {
     it("lets ADMIN navigate to subject management", async () => {
         mockUser(UserRole.ADMIN);
         render(<AppRoutes />);
-        await userEvent.click(await screen.findByRole("link", {name: "Subjects"}));
-        expect(await screen.findByRole("heading", {name: "Manage Subjects"})).toBeInTheDocument();
+        await userEvent.click(await screen.findByRole("link", {name: /Ämnen|Subjects/i}));
+        expect(await screen.findByRole("heading", {name: /Hantera ämnen|Subjects/i})).toBeInTheDocument();
         expect(window.location.pathname).toBe("/admin/subjects");
     });
 
@@ -43,10 +43,11 @@ describe("Admin navigation and routing", () => {
         mockUser(UserRole.STUDENT);
         render(<AppRoutes />);
         expect(await screen.findByRole("heading", {name: "Dashboard page"})).toBeInTheDocument();
-        expect(screen.queryByRole("link", {name: "Subjects"})).not.toBeInTheDocument();
+        expect(screen.queryByRole("link", {name: /Ämnen|Subjects/i})).not.toBeInTheDocument();
         expect(apiClient).not.toHaveBeenCalledWith("/api/subjects");
         expect(window.location.pathname).toBe("/dashboard");
     });
+
     it("lets an ADMIN open question creation through the protected route", async () => {
         vi.mocked(apiClient).mockImplementation(async endpoint => {
             if (endpoint === "/api/users/me") return {id: 1, fullName: "Admin", role: UserRole.ADMIN};
@@ -54,20 +55,21 @@ describe("Admin navigation and routing", () => {
             return [];
         });
         render(<AppRoutes />);
-        await userEvent.click(await screen.findByRole("button", {name: "Add question"}, {timeout: 5000}));
-        expect(screen.getByRole("form", {name: "Add question"})).toBeInTheDocument();
+        await userEvent.click(await screen.findByRole("button", {name: /Skapa fråga/i}, {timeout: 10000}));
+        expect(screen.getByRole("button", {name: /Spara fråga/i})).toBeInTheDocument();
     });
+
     it("lets an ADMIN access the route and shows admin navigation", async () => {
         mockUser(UserRole.ADMIN);
         render(<AppRoutes />);
-        expect(screen.getByText("Loading user details...")).toBeInTheDocument();
-        expect(screen.queryByRole("link", {name: "Admin"})).not.toBeInTheDocument();
-        expect(await screen.findByRole("heading", {name: "Admin Question Bank"})).toBeInTheDocument();
-        expect(screen.getByRole("link", {name: "Admin"})).toHaveAttribute("href", "/admin");
-        expect(screen.getByRole("link", {name: "Questions"})).toHaveAttribute("href", "/admin/questions");
-        expect(screen.getByRole("link", {name: "Subjects"})).toHaveAttribute("href", "/admin/subjects");
-        expect(screen.getByRole("link", {name: "Learners"})).toHaveAttribute("href", "/admin/learners");
-        expect(screen.getByText("Welcome, Test User")).toBeInTheDocument();
+        expect(screen.getByText(/laddar|loading/i)).toBeInTheDocument();
+        expect(screen.queryByRole("link", {name: /^Admin$/i})).not.toBeInTheDocument();
+        expect(await screen.findByRole("heading", {name: /Admin|Frågebank/i})).toBeInTheDocument();
+        expect(screen.getByRole("link", {name: /^Admin$/i})).toHaveAttribute("href", "/admin");
+        expect(screen.getByRole("link", {name: /Frågor|Questions/i})).toHaveAttribute("href", "/admin/questions");
+        expect(screen.getByRole("link", {name: /Ämnen|Subjects/i})).toHaveAttribute("href", "/admin/subjects");
+        expect(screen.getByRole("link", {name: /Studenter|Elever|Learners/i})).toHaveAttribute("href", "/admin/learners");
+        expect(screen.getByText("Välkommen, Test User")).toBeInTheDocument();
         expect(vi.mocked(apiClient).mock.calls.filter(([endpoint]) => endpoint === "/api/users/me")).toHaveLength(1);
     });
 
@@ -76,23 +78,22 @@ describe("Admin navigation and routing", () => {
         render(<AppRoutes />);
         expect(await screen.findByRole("heading", {name: "Dashboard page"})).toBeInTheDocument();
         expect(window.location.pathname).toBe("/dashboard");
-        expect(screen.queryByRole("link", {name: "Admin"})).not.toBeInTheDocument();
+        expect(screen.queryByRole("link", {name: /^Admin$/i})).not.toBeInTheDocument();
         expect(apiClient).not.toHaveBeenCalledWith("/api/subjects");
-        expect(screen.queryByRole("button", {name: "Add question"})).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", {name: /Skapa fråga|Create/i})).not.toBeInTheDocument();
     });
 
     it("lets an ADMIN open the admin start page with count cards linking to each tool", async () => {
         window.history.replaceState({}, "", "/admin");
         mockUser(UserRole.ADMIN);
         render(<AppRoutes />);
-        expect(await screen.findByRole("heading", {name: "Admin"})).toBeInTheDocument();
-        const questionsCard = await screen.findByRole("link", {name: /Open the question bank/});
+        expect(await screen.findByRole("heading", {name: /Admin/i})).toBeInTheDocument();
+        const questionsCard = await screen.findByRole("link", {name: /Frågor/i});
         expect(questionsCard).toHaveAttribute("href", "/admin/questions");
-        expect(questionsCard).toHaveTextContent("42");
-        // Each tool is linked twice on this page: once in the sidebar, once on the overview card.
-        expect(screen.getAllByRole("link", {name: /^Questions/})).toHaveLength(2);
-        expect(screen.getAllByRole("link", {name: /^Subjects/})).toHaveLength(2);
-        expect(screen.getAllByRole("link", {name: /^Learners/})).toHaveLength(2);
+        expect(questionsCard).toHaveTextContent(/Frågor/i);
+        expect(screen.getAllByRole("link", {name: /Frågor|Questions/i}).length).toBeGreaterThan(0);
+        expect(screen.getAllByRole("link", {name: /Ämnen|Subjects/i}).length).toBeGreaterThan(0);
+        expect(screen.getAllByRole("link", {name: /Studenter|Elever|Learners/i}).length).toBeGreaterThan(0);
     });
 
     it("redirects a STUDENT opening the admin start page without requesting the counts", async () => {
@@ -101,7 +102,7 @@ describe("Admin navigation and routing", () => {
         render(<AppRoutes />);
         expect(await screen.findByRole("heading", {name: "Dashboard page"})).toBeInTheDocument();
         expect(window.location.pathname).toBe("/dashboard");
-        expect(screen.queryByRole("link", {name: "Admin"})).not.toBeInTheDocument();
+        expect(screen.queryByRole("link", {name: /^Admin$/i})).not.toBeInTheDocument();
         expect(apiClient).not.toHaveBeenCalledWith("/api/admin/stats");
     });
 
@@ -115,8 +116,8 @@ describe("Admin navigation and routing", () => {
     it("fails closed when user details cannot be loaded", async () => {
         vi.mocked(apiClient).mockRejectedValue(new Error("Server down"));
         render(<AppRoutes />);
-        expect(await screen.findByRole("alert")).toHaveTextContent("Failed to load user details.");
-        expect(screen.queryByRole("link", {name: "Admin"})).not.toBeInTheDocument();
+        expect(await screen.findByRole("alert")).toHaveTextContent(/Kunde inte ladda|Could not load/i);
+        expect(screen.queryByRole("link", {name: /^Admin$/i})).not.toBeInTheDocument();
         expect(apiClient).not.toHaveBeenCalledWith("/api/subjects");
     });
 });

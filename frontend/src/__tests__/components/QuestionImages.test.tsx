@@ -23,19 +23,18 @@ describe("Question images", () => {
         });
 
     it("uses contextual alt text and responsive styling, and retries when the URL changes", () => {
-        // Vitest does not attach imported stylesheets to jsdom automatically.
         const {rerender} = render(<><style>{imageStyles}</style>
             <QuestionImage imageUrl={question.imageUrl} questionText={question.questionText} /></>);
-        const image = screen.getByRole("img", {name: "Image for question: Which animal?"});
+        const image = screen.getByRole("img", {name: "Bild för fråga: Which animal?"});
         expect(image).toHaveClass("question-image");
         expect(getComputedStyle(image).maxWidth).toBe("100%");
         expect(getComputedStyle(image).height).toBe("auto");
         expect(getComputedStyle(image).objectFit).toBe("contain");
         fireEvent.error(image);
         expect(screen.queryByRole("img")).not.toBeInTheDocument();
-        expect(screen.getByRole("status")).toHaveTextContent("Question image unavailable.");
+        expect(screen.getByRole("status")).toHaveTextContent("Frågebilden är inte tillgänglig.");
         rerender(<QuestionImage imageUrl="https://example.com/deer.jpg" questionText="Which deer?" />);
-        expect(screen.getByRole("img", {name: "Image for question: Which deer?"})).toHaveAttribute("src", "https://example.com/deer.jpg");
+        expect(screen.getByRole("img", {name: "Bild för fråga: Which deer?"})).toHaveAttribute("src", "https://example.com/deer.jpg");
     });
 
     it("displays the image in mock exams and preserves answers after loading failure", () => {
@@ -57,16 +56,14 @@ describe("Question images", () => {
     });
 
     it.each([question.imageUrl, null])("maps API images through the practice page: %s", async imageUrl => {
-        // POST /api/practice/attempts returns a round; its questions have no correct answer.
         const {id, questionText, optionA, optionB, optionC, optionD} = question;
         vi.mocked(apiClient).mockResolvedValueOnce({attemptId: 10, subjectName: "Wildlife",
             questions: [{id, questionText, optionA, optionB, optionC, optionD, imageUrl}]});
-        // A data router, because the practice page uses useBlocker.
         render(<RouterProvider router={createMemoryRouter(
             [{path: "/practice/:subject", element: <PracticeQuestions />}], {initialEntries: ["/practice/1"]})} />);
         await screen.findByRole("heading", {name: question.questionText});
         if (imageUrl) {
-            expect(screen.getByRole("img", {name: "Image for question: Which animal?"})).toHaveAttribute("src", imageUrl);
+            expect(screen.getByRole("img", {name: "Bild för fråga: Which animal?"})).toHaveAttribute("src", imageUrl);
             fireEvent.error(screen.getByRole("img"));
             expect(screen.queryByRole("img")).not.toBeInTheDocument();
         } else expect(screen.queryByRole("img")).not.toBeInTheDocument();

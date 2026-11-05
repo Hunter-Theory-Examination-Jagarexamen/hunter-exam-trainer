@@ -10,6 +10,7 @@ i18n.use(initReactI18next).init({
         sv: { translation: sv },
         en: { translation: en },
     },
+    // Låt alltid språket vara svenska, även i testmiljö
     lng: 'sv',
     fallbackLng: 'sv',
     interpolation: {

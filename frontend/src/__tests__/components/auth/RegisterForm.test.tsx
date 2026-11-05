@@ -7,14 +7,10 @@ import { MemoryRouter, Routes, Route } from "react-router-dom";
 import RegisterForm from "../../../components/auth/RegisterForm";
 import apiClient from "../../../api/apiClient";
 
-// Replace the real apiClient (which calls the backend) with a mock.
-// apiClient is a default export, so the mock uses the key "default".
 vi.mock("../../../api/apiClient", () => ({
     default: vi.fn(),
 }));
 
-// Draw the form inside a test router, with a fake /login page
-// so we can see whether a successful sign-up navigates there.
 function renderRegisterForm() {
     render(
         <MemoryRouter initialEntries={["/register"]}>
@@ -26,15 +22,13 @@ function renderRegisterForm() {
     );
 }
 
-// Fill in the form. Every field is valid by default; a test overrides
-// only the value it wants to break, e.g. fillForm({ password: "short" }).
 async function fillForm({
-    fullName = "Anna Andersson",
-    email = "anna@example.com",
-    password = "secret123",
-    confirmPassword = password,
-    acceptTerms = true,
-}: {
+                            fullName = "Anna Andersson",
+                            email = "anna@example.com",
+                            password = "secret123",
+                            confirmPassword = password,
+                            acceptTerms = true,
+                        }: {
     fullName?: string;
     email?: string;
     password?: string;
@@ -57,7 +51,7 @@ async function clickCreateAccount() {
 describe("RegisterForm", () => {
 
     beforeEach(() => {
-        vi.clearAllMocks(); // forget calls recorded by earlier tests
+        vi.clearAllMocks();
     });
 
     it("shows an error when fields are empty", async () => {
@@ -82,7 +76,7 @@ describe("RegisterForm", () => {
     it("shows an error when the password is shorter than 8 characters", async () => {
         renderRegisterForm();
 
-        await fillForm({ password: "short" }); // confirmPassword follows password
+        await fillForm({ password: "short" });
         await clickCreateAccount();
 
         expect(screen.getByText("Lösenordet är för kort.")).toBeInTheDocument();
@@ -99,15 +93,12 @@ describe("RegisterForm", () => {
     });
 
     it("registers and goes to the login page when everything is valid", async () => {
-        // Arrange: the fake backend accepts the registration
         vi.mocked(apiClient).mockResolvedValue(null);
         renderRegisterForm();
 
-        // Act
         await fillForm();
         await clickCreateAccount();
 
-        // Assert: the backend got the right data, and the login page shows
         expect(apiClient).toHaveBeenCalledWith("/api/auth/register", {
             method: "POST",
             body: JSON.stringify({
@@ -120,15 +111,12 @@ describe("RegisterForm", () => {
     });
 
     it("shows the backend's error message when registration fails", async () => {
-        // Arrange: the fake backend rejects the registration
         vi.mocked(apiClient).mockRejectedValue(new Error("E-postadressen är redan registrerad"));
         renderRegisterForm();
 
-        // Act
         await fillForm();
         await clickCreateAccount();
 
-        // Assert: the message is shown, and we stay on the form
         expect(await screen.findByText("Ett oväntat fel uppstod.")).toBeInTheDocument();
         expect(screen.queryByText("Login page")).not.toBeInTheDocument();
     });
