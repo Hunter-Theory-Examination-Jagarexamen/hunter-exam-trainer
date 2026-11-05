@@ -173,8 +173,23 @@
       "imageUrlLabel": "Image URL (optional)",
       "imageUrlHelp": "Use a full HTTP or HTTPS URL. Leave empty to save without an image.",
       "removeImage": "Remove image",
-      "explanationLabel": "Explanation (optional)"
-    }
+      "explanationLabel": "Explanation (optional)",
+      "newQuestion": "New question",
+      "errors": {
+        "missingText": "Enter question text.",
+        "missingOption": "Enter text for option {{key}}.",
+        "missingCorrect": "Select the correct option.",
+        "invalidSubject": "Choose an available subject.",
+        "tooLong": "Question text, options and explanation must each be at most 255 characters.",
+        "imageUrlTooLong": "Image URL must be at most 1000 characters.",
+        "imageUrlInvalid": "Enter a complete HTTP or HTTPS image URL."
+      }
+    },
+    "loadQuestionsFailed": "Failed to load questions. Please try again.",
+    "loadSubjectsFailed": "Failed to load subjects. Please try again.",
+    "editAria": "Edit question {{id}}",
+    "deleteAria": "Delete question {{id}}",
+    "pagesAria": "Question pages"
   },
   "subjects": {
     "title": "Manage Subjects",

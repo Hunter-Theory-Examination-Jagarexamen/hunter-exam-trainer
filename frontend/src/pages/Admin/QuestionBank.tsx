@@ -7,6 +7,7 @@ import "../../styles/admin.css";
 import QuestionForm from "./QuestionForm";
 import QuestionImage from "../../components/common/QuestionImage";
 import {deleteQuestion, questionMutationError} from "../../services/adminQuestionService";
+import {useTranslation} from "react-i18next";
 
 const PAGE_SIZE = 20;
 
@@ -15,6 +16,7 @@ const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onS
     onBusyChange: (busy: boolean) => void;
     onSavedElsewhere: (question: Question, created: boolean) => void;
 }) => {
+    const {t} = useTranslation();
     const [questions, setQuestions] = useState<Question[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
@@ -55,7 +57,8 @@ const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onS
                 value?.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase()))) setSearch("");
             setPage(1);
         }
-        setSuccess(`Question #${question.id} ${editor === "create" ? "created" : "updated"} in ${question.subject.name}.`);
+        setSuccess(t(editor === "create" ? "questionBank.successCreated" : "questionBank.successUpdated",
+            {id: question.id, subject: question.subject.name}));
         closeEditor();
         if (question.subject.id !== subjectId) onSavedElsewhere(question, editor === "create");
     }
@@ -69,7 +72,7 @@ const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onS
             await deleteQuestion(deleting.id);
             setQuestions(previous => previous.filter(question => question.id !== deleting.id));
             onCountChange(subjectId, -1);
-            setSuccess(`Question #${deleting.id} deleted.`);
+            setSuccess(t("questionBank.successDeleted", {id: deleting.id}));
             setDeleting(null);
             onBusyChange(false);
         } catch (error: unknown) {
@@ -89,14 +92,14 @@ const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onS
             }
         }).catch(() => {
             if (active) {
-                setError("Failed to load questions. Please try again.");
+                setError(t("questionBank.loadQuestionsFailed"));
                 setIsLoading(false);
             }
         });
         return () => { active = false; };
     }, [subjectId]);
 
-    if (isLoading) return <p role="status">Loading questions...</p>;
+    if (isLoading) return <p role="status">{t("questionBank.loadingQuestions")}</p>;
     if (error) return <p role="alert">{error}</p>;
 
     const term = search.trim().toLocaleLowerCase();
@@ -111,33 +114,33 @@ const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onS
     return <>
         <div className="question-bank-actions">
             <button ref={addButton} type="button" disabled={editor !== null || deleting !== null}
-                onClick={() => { setSuccess(""); setEditor("create"); onBusyChange(true); }}>Add question</button>
+                onClick={() => { setSuccess(""); setEditor("create"); onBusyChange(true); }}>{t("questionBank.addQuestion")}</button>
         </div>
         {success && <p role="status">{success}</p>}
         {editor !== null && <QuestionForm question={editor === "create" ? undefined : editor}
             subjectId={subjectId} subjects={subjects} onSaved={saved} onCancel={closeEditor} />}
         {deleting && <section className="card question-delete-confirmation" aria-labelledby="delete-question-title">
-            <h2 id="delete-question-title">Delete question #{deleting.id}?</h2>
+            <h2 id="delete-question-title">{t("questionBank.deleteTitle", {id: deleting.id})}</h2>
             <p>{deleting.questionText}</p>
-            <p>This permanently deletes the question. This action cannot be undone.</p>
+            <p>{t("questionBank.deleteWarning")}</p>
             {deleteError && <p role="alert">{deleteError}</p>}
             <div className="question-bank-actions">
                 <button autoFocus type="button" disabled={submitting} onClick={() => {
                     setDeleting(null); onBusyChange(false);
-                }}>Cancel deletion</button>
+                }}>{t("questionBank.cancelDeletion")}</button>
                 <button type="button" className="question-delete" disabled={submitting} onClick={confirmDelete}>
-                    {submitting ? "Deleting..." : "Confirm deletion"}</button>
+                    {submitting ? t("questionBank.deleting") : t("questionBank.confirmDeletion")}</button>
             </div>
         </section>}
-        {questions.length === 0 && <p>No questions available for this subject.</p>}
+        {questions.length === 0 && <p>{t("questionBank.noQuestions")}</p>}
         <div className="question-bank-field">
-            <label htmlFor="question-search">Search questions</label>
+            <label htmlFor="question-search">{t("questionBank.searchLabel")}</label>
             <input id="question-search" type="search" value={search}
-                placeholder="Search by ID, question, answer or explanation"
+                placeholder={t("questionBank.searchPlaceholder")}
                 onChange={event => { setSearch(event.target.value); setPage(1); }} />
         </div>
-        <p role="status">{filtered.length} of {questions.length} questions</p>
-        {questions.length > 0 && filtered.length === 0 && <p>No questions match your search.</p>}
+        <p role="status">{t("questionBank.questionCount", {filtered: filtered.length, total: questions.length})}</p>
+        {questions.length > 0 && filtered.length === 0 && <p>{t("questionBank.noMatch")}</p>}
         <div className="question-bank-list">
             {filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map(question => (
                 <article className="card" key={question.id}>
@@ -148,29 +151,30 @@ const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onS
                             <li key={index}>{option}</li>
                         ))}
                     </ol>
-                    <p><strong>Correct answer:</strong> {question.correctAnswer}</p>
-                    {question.explanation && <p><strong>Explanation:</strong> {question.explanation}</p>}
+                    <p><strong>{t("questionBank.correctAnswer")}</strong> {question.correctAnswer}</p>
+                    {question.explanation && <p><strong>{t("questionBank.explanation")}</strong> {question.explanation}</p>}
                     <div className="question-bank-actions">
-                        <button type="button" aria-label={`Edit question ${question.id}`} disabled={editor !== null || deleting !== null}
-                            onClick={() => { setSuccess(""); setEditor(question); onBusyChange(true); }}>Edit</button>
-                        <button type="button" className="question-delete" aria-label={`Delete question ${question.id}`}
+                        <button type="button" aria-label={t("questionBank.editAria", {id: question.id})} disabled={editor !== null || deleting !== null}
+                            onClick={() => { setSuccess(""); setEditor(question); onBusyChange(true); }}>{t("questionBank.edit")}</button>
+                        <button type="button" className="question-delete" aria-label={t("questionBank.deleteAria", {id: question.id})}
                             disabled={editor !== null || deleting !== null} onClick={() => {
                                 setSuccess(""); setDeleteError(""); setDeleting(question);
                                 onBusyChange(true);
-                            }}>Delete</button>
+                            }}>{t("questionBank.delete")}</button>
                     </div>
                 </article>
             ))}
         </div>
-        {pageCount > 1 && <nav className="question-bank-pagination" aria-label="Question pages">
-            <button type="button" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>Previous</button>
-            <span>Page {currentPage} of {pageCount}</span>
-            <button type="button" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>Next</button>
+        {pageCount > 1 && <nav className="question-bank-pagination" aria-label={t("questionBank.pagesAria")}>
+            <button type="button" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>{t("questionBank.previous")}</button>
+            <span>{t("questionBank.page", {current: currentPage, total: pageCount})}</span>
+            <button type="button" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>{t("questionBank.next")}</button>
         </nav>}
     </>;
 };
 
 const QuestionBank = () => {
+    const {t} = useTranslation();
     const [busy, setBusy] = useState(false);
     const [success, setSuccess] = useState("");
     const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -188,7 +192,7 @@ const QuestionBank = () => {
             }
         }).catch(() => {
             if (active) {
-                setError("Failed to load subjects. Please try again.");
+                setError(t("questionBank.loadSubjectsFailed"));
                 setIsLoading(false);
             }
         });
@@ -196,12 +200,12 @@ const QuestionBank = () => {
     }, []);
 
     return <div className="question-bank">
-        <PageTitle title="Admin Question Bank" subtitle="Browse existing questions by subject. Search within the selected subject." />
+        <PageTitle title={t("questionBank.title")} subtitle={t("questionBank.subtitle")} />
         {success && <p role="status">{success}</p>}
-        {isLoading ? <p role="status">Loading subjects...</p> : error ? <p role="alert">{error}</p> :
-            subjects.length === 0 ? <p>No subjects available.</p> : <>
+        {isLoading ? <p role="status">{t("questionBank.loadingSubjects")}</p> : error ? <p role="alert">{error}</p> :
+            subjects.length === 0 ? <p>{t("questionBank.noSubjects")}</p> : <>
                 <div className="question-bank-field">
-                    <label htmlFor="question-subject">Subject</label>
+                    <label htmlFor="question-subject">{t("questionBank.subjectLabel")}</label>
                     <select id="question-subject" value={subjectId ?? ""} disabled={busy}
                         onChange={event => { setSuccess(""); setSubjectId(Number(event.target.value)); }}>
                         {subjects.map(subject => <option key={subject.id} value={subject.id}>
@@ -212,7 +216,8 @@ const QuestionBank = () => {
                 {subjectId !== null && <SubjectQuestions key={subjectId} subjectId={subjectId} subjects={subjects}
                     onBusyChange={value => { setBusy(value); if (value) setSuccess(""); }}
                     onSavedElsewhere={(question, created) => {
-                        setSuccess(`Question #${question.id} ${created ? "created" : "updated"} in ${question.subject.name}.`);
+                        setSuccess(t(created ? "questionBank.successCreated" : "questionBank.successUpdated",
+                            {id: question.id, subject: question.subject.name}));
                         setSubjectId(question.subject.id);
                     }}
                     onCountChange={(id, delta) => setSubjects(previous => previous.map(subject =>

@@ -173,8 +173,23 @@
       "imageUrlLabel": "Bild-URL (valfritt)",
       "imageUrlHelp": "Använd en komplett HTTP- eller HTTPS-URL. Lämna tomt för att spara utan bild.",
       "removeImage": "Ta bort bild",
-      "explanationLabel": "Förklaring (valfritt)"
-    }
+      "explanationLabel": "Förklaring (valfritt)",
+      "newQuestion": "Ny fråga",
+      "errors": {
+        "missingText": "Ange frågetext.",
+        "missingOption": "Ange text för alternativ {{key}}.",
+        "missingCorrect": "Välj det rätta svarsalternativet.",
+        "invalidSubject": "Välj ett tillgängligt ämne.",
+        "tooLong": "Frågetext, svarsalternativ och förklaring får högst vara 255 tecken var.",
+        "imageUrlTooLong": "Bild-URL får högst vara 1000 tecken.",
+        "imageUrlInvalid": "Ange en fullständig HTTP- eller HTTPS-bild-URL."
+      }
+    },
+    "loadQuestionsFailed": "Det gick inte att ladda frågorna. Försök igen.",
+    "loadSubjectsFailed": "Det gick inte att ladda ämnena. Försök igen.",
+    "editAria": "Redigera fråga {{id}}",
+    "deleteAria": "Ta bort fråga {{id}}",
+    "pagesAria": "Sidor med frågor"
   },
   "subjects": {
     "title": "Hantera ämnen",

@@ -5,6 +5,7 @@ import type {Subject} from "../../types/subject";
 import {createQuestion, updateQuestion, questionMutationError} from "../../services/adminQuestionService";
 import QuestionImage from "../../components/common/QuestionImage";
 import {isQuestionImageUrl} from "../../utils/questionImageUrl";
+import {useTranslation} from "react-i18next";
 
 const optionKeys = ["optionA", "optionB", "optionC", "optionD"] as const;
 type OptionKey = typeof optionKeys[number];
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export default function QuestionForm({question, subjectId, subjects, onSaved, onCancel}: Props) {
+    const {t} = useTranslation();
     const [text, setText] = useState(question?.questionText ?? "");
     const [options, setOptions] = useState({optionA: question?.optionA ?? "", optionB: question?.optionB ?? "",
         optionC: question?.optionC ?? "", optionD: question?.optionD ?? ""});
@@ -33,21 +35,21 @@ export default function QuestionForm({question, subjectId, subjects, onSaved, on
     async function submit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         if (pending.current) return;
-        if (!text.trim()) { setError("Ange frågetext."); return; }
+        if (!text.trim()) { setError(t("questionBank.editor.errors.missingText")); return; }
         const empty = optionKeys.find(key => !options[key].trim());
-        if (empty) { setError(`Ange text för alternativ ${empty.slice(-1)}.`); return; }
-        if (!correct) { setError("Välj det rätta svarsalternativet."); return; }
+        if (empty) { setError(t("questionBank.editor.errors.missingOption", {key: empty.slice(-1)})); return; }
+        if (!correct) { setError(t("questionBank.editor.errors.missingCorrect")); return; }
         if (!subjects || !subjects.some(subject => subject.id === selectedSubject && subject.id > 0)) {
-            setError("Välj ett tillgängligt ämne."); return;
+            setError(t("questionBank.editor.errors.invalidSubject")); return;
         }
         if ([text, ...Object.values(options), explanation].some(value => value.length > 255)) {
-            setError("Frågetext, svarsalternativ och förklaring får högst vara 255 tecken var."); return;
+            setError(t("questionBank.editor.errors.tooLong")); return;
         }
         if (imageUrl.trim().length > 1000) {
-            setError("Bild-URL får högst vara 1000 tecken."); return;
+            setError(t("questionBank.editor.errors.imageUrlTooLong")); return;
         }
         if (imageUrl.trim() && !isQuestionImageUrl(imageUrl.trim())) {
-            setError("Ange en fullständig HTTP- eller HTTPS-bild-URL."); return;
+            setError(t("questionBank.editor.errors.imageUrlInvalid")); return;
         }
         pending.current = true;
         setSubmitting(true);
@@ -66,45 +68,45 @@ export default function QuestionForm({question, subjectId, subjects, onSaved, on
     }
 
     return <form className="card question-editor" aria-labelledby="question-editor-title" onSubmit={submit} noValidate>
-        <h2 id="question-editor-title">{question ? `Redigera fråga #${question.id}: ${question.questionText}` : "Lägg till fråga"}</h2>
+        <h2 id="question-editor-title">{question ? t("questionBank.editor.editTitle", {id: question.id, text: question.questionText}) : t("questionBank.editor.createTitle")}</h2>
         <fieldset disabled={submitting}>
             <div className="question-bank-field">
-                <label htmlFor="edit-question-text">Frågetext (obligatoriskt)</label>
+                <label htmlFor="edit-question-text">{t("questionBank.editor.textLabel")}</label>
                 <textarea autoFocus id="edit-question-text" required maxLength={255} value={text} onChange={e => setText(e.target.value)} />
             </div>
             <fieldset>
-                <legend>Svarsalternativ — välj det rätta alternativet (obligatoriskt)</legend>
+                <legend>{t("questionBank.editor.legendOptions")}</legend>
                 {optionKeys.map(key => <div className="question-bank-field" key={key}>
-                    <label htmlFor={`edit-${key}`}>Alternativ {key.slice(-1)} (obligatoriskt)</label>
+                    <label htmlFor={`edit-${key}`}>{t("questionBank.editor.optionLabel", {key: key.slice(-1)})}</label>
                     <input id={`edit-${key}`} required maxLength={255} value={options[key]}
                            onChange={e => setOptions({...options, [key]: e.target.value})} />
                     <label className="question-correct-option"><input type="radio" name="correct-option"
-                                                                      checked={correct === key} onChange={() => setCorrect(key)} />Rätt alternativ {key.slice(-1)}</label>
+                                                                      checked={correct === key} onChange={() => setCorrect(key)} />{t("questionBank.editor.correctOptionLabel", {key: key.slice(-1)})}</label>
                 </div>)}
             </fieldset>
             <div className="question-bank-field">
-                <label htmlFor="edit-subject">Frågans ämne (obligatoriskt)</label>
+                <label htmlFor="edit-subject">{t("questionBank.editor.subjectLabel")}</label>
                 <select id="edit-subject" value={selectedSubject} onChange={e => setSelectedSubject(Number(e.target.value))}>
                     {subjects && subjects.map(subject => <option key={subject.id} value={subject.id}>{subject.name}</option>)}
                 </select>
             </div>
             <div className="question-bank-field">
-                <label htmlFor="edit-image-url">Bild-URL (valfritt)</label>
+                <label htmlFor="edit-image-url">{t("questionBank.editor.imageUrlLabel")}</label>
                 <input id="edit-image-url" type="url" maxLength={1000} value={imageUrl}
                        aria-describedby="image-url-help" onChange={e => setImageUrl(e.target.value)} />
-                <p id="image-url-help">Använd en komplett HTTP- eller HTTPS-URL. Lämna tomt för att spara utan bild.</p>
-                {imageUrl && <button type="button" onClick={() => setImageUrl("")}>Ta bort bild</button>}
-                <QuestionImage imageUrl={imageUrl} questionText={text.trim() || "Ny fråga"} />
+                <p id="image-url-help">{t("questionBank.editor.imageUrlHelp")}</p>
+                {imageUrl && <button type="button" onClick={() => setImageUrl("")}>{t("questionBank.editor.removeImage")}</button>}
+                <QuestionImage imageUrl={imageUrl} questionText={text.trim() || t("questionBank.editor.newQuestion")} />
             </div>
             <div className="question-bank-field">
-                <label htmlFor="edit-explanation">Förklaring (valfritt)</label>
+                <label htmlFor="edit-explanation">{t("questionBank.editor.explanationLabel")}</label>
                 <textarea id="edit-explanation" maxLength={255} value={explanation} onChange={e => setExplanation(e.target.value)} />
             </div>
         </fieldset>
         {error && <p role="alert">{error}</p>}
         <div className="question-bank-actions">
-            <button type="submit" disabled={submitting}>{submitting ? "Sparar..." : "Spara fråga"}</button>
-            <button type="button" disabled={submitting} onClick={onCancel}>Avbryt</button>
+            <button type="submit" disabled={submitting}>{submitting ? t("questionBank.saving") : t("questionBank.saveQuestion")}</button>
+            <button type="button" disabled={submitting} onClick={onCancel}>{t("questionBank.cancel")}</button>
         </div>
     </form>;
 }
