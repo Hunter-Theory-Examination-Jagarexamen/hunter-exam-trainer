@@ -60,7 +60,7 @@ const Sidebar = ({ user, isOpen, onClose }: SidebarProps) => {
                     }
                 >
                     <ClipboardCheck size={20} />
-                    Skrivprov
+                    Övningsprov
                 </NavLink>
 
                 <NavLink to="/statistics" onClick={onClose}>
