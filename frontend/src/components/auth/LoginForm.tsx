@@ -18,7 +18,7 @@ const LoginForm = () => {
     const location = useLocation();
     const [successMessage] = useState(
         (location.state as { accountCreated?: boolean })?.accountCreated
-        ? t("auth.accountCreatedSuccess", "Konto skapat! Du kan nu logga in.")
+        ? t("auth.accountCreatedSuccess")
             : ""
     );
 
@@ -39,7 +39,7 @@ const LoginForm = () => {
         setError(""); // clear the message from the previous attempt
 
         if(!email || !password) {
-            setError(t("auth.enterEmailAndPassword", "Vänligen ange både e-postadress och lösenord"));
+            setError(t("auth.enterEmailAndPassword"));
             return;
         }
 
@@ -58,11 +58,11 @@ const LoginForm = () => {
         } catch (error) {
             console.error("Login/API error:", error);
             if (isServerUnreachable(error)) {
-                setError(t("serverStatus.error", "Det går inte att nå servern. Kontrollera din internetanslutning eller försök igen om en stund."));
+                setError(t("serverStatus.error"));
             } else if ((errorStatus(error) ?? 0) >= 500) {
-                setError(t("errors.UNKNOWN_ERROR", "Ett oväntat fel uppstod på servern. Försök igen senare."));
+                setError(t("errors.UNKNOWN_ERROR"));
             } else {
-                setError(t("errors.INVALID_CREDENTIALS", "Fel e-postadress eller lösenord."));
+                setError(t("errors.INVALID_CREDENTIALS"));
             }
         } finally {
             setIsLoading(false);
@@ -81,8 +81,8 @@ const LoginForm = () => {
                 <div className="auth-mobile-logo">
                     <img src={logo} alt="Hunter Exam Trainer" />
                 </div>
-                <h2>{t("auth.loginTitle", "Välkommen tillbaka!")}</h2>
-                <p>{t("auth.loginSubtitle", "Logga in för att fortsätta öva.")}</p>
+                <h2>{t("auth.welcomeBack")}</h2>
+                <p>{t("auth.loginSubtitle")}</p>
             </div>
 
             {successMessage && (
@@ -93,7 +93,7 @@ const LoginForm = () => {
 
             <form onSubmit={handleLogin}>
                 <div className="form-field">
-                    <label htmlFor="email">{t("auth.emailLabel", "E-post")}</label>
+                    <label htmlFor="email">{t("auth.emailLabel")}</label>
 
                     <div className="input-wrapper">
 
@@ -101,7 +101,7 @@ const LoginForm = () => {
                         <input
                             id="email"
                             type="email"
-                            placeholder={t("auth.emailPlaceholder", "Ange din e-postadress")}
+                            placeholder={t("auth.emailPlaceholder")}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
@@ -110,7 +110,7 @@ const LoginForm = () => {
                 </div>
 
                 <div className="form-field">
-                    <label htmlFor="password">{t("auth.passwordLabel", "Lösenord")}</label>
+                    <label htmlFor="password">{t("auth.passwordLabel")}</label>
 
                     <div className="input-wrapper">
 
@@ -118,7 +118,7 @@ const LoginForm = () => {
                         <input
                             id="password"
                             type={showPassword ? "text" : "password"}
-                            placeholder={t("auth.passwordPlaceholder", "Ange ditt lösenord")}
+                            placeholder={t("auth.passwordPlaceholder")}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
@@ -127,7 +127,7 @@ const LoginForm = () => {
                             type="button"
                             className="password-toggle"
                             onClick={() => setShowPassword(!showPassword)}
-                            aria-label={showPassword ? t("auth.hidePassword", "Dölj lösenord") : t("auth.showPassword", "Visa lösenord")}
+                            aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
                         >
                             {showPassword ? <EyeOff size={18} /> : <Eye size={18} /> }
                         </button>
@@ -141,7 +141,7 @@ const LoginForm = () => {
                         type="button"
                         onClick={() => navigate("/forgot-password")}
                     >
-                        {t("auth.forgotPassword", "Glömt lösenord?")}
+                        {t("auth.forgotPassword")}
                     </button>
                 </div>
 
@@ -156,7 +156,7 @@ const LoginForm = () => {
                     className="auth-primary-button"
                     disabled={isLoading}
                 >
-                    {isLoading ? t("common.loading", "Loggar in...") : t("auth.loginButton", "Logga in")}
+                    {isLoading ? t("auth.loggingIn") : t("auth.loginButton")}
                 </button>
             </form>
 
@@ -164,7 +164,7 @@ const LoginForm = () => {
             {googleEnabled && (
                 <>
                     <div className="auth-divider">
-                        <span>{t("common.or", "eller")}</span>
+                        <span>{t("common.or")}</span>
                     </div>
 
                     <div className="auth-secondary-actions">
@@ -173,19 +173,19 @@ const LoginForm = () => {
                             className="auth-secondary-button"
                             onClick={handleGoogleLogin}
                         >
-                            {t("auth.continueWithGoogle", "Fortsätt med Google")}
+                            {t("auth.continueWithGoogle")}
                         </button>
                     </div>
                 </>
             )}
 
             <p className="auth-switch">
-                {t("auth.noAccount", "Har du inget konto?")}{" "}
+                {t("auth.noAccount")}{" "}
                 <button
                     type="button"
                     onClick={() => navigate("/register")}
                 >
-                    {t("auth.registerButton", "Registrera dig")}
+                    {t("auth.goToRegister")}
                 </button>
             </p>
         </div>

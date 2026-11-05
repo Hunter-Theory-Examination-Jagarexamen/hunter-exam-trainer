@@ -21,20 +21,20 @@ const Login = () => {
                     </div>
                     <h1>JÄGAREXAMEN TRÄNARE</h1>
                     <p>
-                        {t("auth.brandTagLine", "Det bästa sättet att förbereda sig för jägarexamen.")}
+                        {t("auth.brandTagLine")}
                     </p>
                 </div>
             </div>
 
             {googleError && (
                 <div className="auth-error-banner">
-                    {t("auth.googleError", "Inloggning med Google misslyckades. Försök igen eller använd en annan metod.")}
+                    {t("auth.googleError")}
                 </div>
             )}
 
             {sessionExpired && (
                 <div className="auth-error-banner">
-                    {t("auth.sessionExpired", "Din session har gått ut. Vänligen logga in igen.")}
+                    {t("auth.sessionExpired")}
                 </div>
             )}
 

@@ -39,7 +39,12 @@
     "creatingAccount": "Skapar konto...",
     "brandTagLine": "Det bästa sättet att förbereda sig för jägarexamen.",
     "googleError": "Inloggning med Google misslyckades. Försök igen eller använd en annan metod.",
-    "sessionExpired": "Din session har gått ut. Vänligen logga in igen."
+    "sessionExpired": "Din session har gått ut. Vänligen logga in igen.",
+    "welcomeBack": "Välkommen tillbaka!",
+    "loggingIn": "Loggar in...",
+    "goToRegister": "Registrera dig",
+    "createPasswordPlaceholder": "Skapa ett lösenord",
+    "registerFailed": "Registreringen misslyckades. Försök igen."
   },
   "errors": {
     "EMAIL_TAKEN": "E-postadressen är redan registrerad.",

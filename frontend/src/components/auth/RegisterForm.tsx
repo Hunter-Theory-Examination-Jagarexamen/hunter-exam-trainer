@@ -28,22 +28,22 @@ const RegisterForm = () => {
         e.preventDefault();
     // Validates that all form fields are populated
         if (!fullName || !email || !password || !confirmPassword) {
-            setError(t("errors.MISSING_FIELDS", "Vänligen fyll i alla fält."));
+            setError(t("errors.MISSING_FIELDS"));
             return;
         }
     // Validates that password matches confirm password
         if (password !== confirmPassword) {
-            setError(t("errors.PASSWORD_MISMATCH", "Lösenorden matchar inte."));
+            setError(t("errors.PASSWORD_MISMATCH"));
             return;
         }
     // Validates minimum password length requirement of 8 characters
         if(password.length < 8) {
-            setError(t("errors.PASSWORD_TOO_SHORT", "Lösenordet är för kort."));
+            setError(t("errors.PASSWORD_TOO_SHORT"));
             return;
         }
     // Validates that the user accepted terms and conditions
         if (!acceptedTerms) {
-            setError(t("errors.TERMS_REQUIRED", "Du måste godkänna användarvillkoren och integritetspolicyn."));
+            setError(t("errors.TERMS_REQUIRED"));
             return;
         }
     // Sets loading state to true during API request
@@ -66,7 +66,7 @@ const RegisterForm = () => {
                 t(`errors.${errorCode}`,
                     err instanceof Error && err.message
                         ? err.message
-                        : t("errors.UNKNOWN_ERROR", "Registration failed. Please try again.")
+                        : t("auth.registerFailed")
                 )
             );
         } finally {
@@ -82,15 +82,15 @@ const RegisterForm = () => {
                     <img src={logo} alt="Hunter Exam Trainer" />
                 </div>
 
-                <h2>{t("auth.registerTitle", "Create Account")}</h2>
+                <h2>{t("auth.registerTitle")}</h2>
 
                 <p className="">
-                    {t("auth.hasAccount", "Already have an account?")}{" "}
+                    {t("auth.hasAccount")}{" "}
                     <button
                         type="button"
                         onClick={() => navigate("/login")}
                     >
-                        {t("auth.loginLink", "Log In")}
+                        {t("auth.loginLink")}
                     </button>
                 </p>
             </div>
@@ -100,13 +100,13 @@ const RegisterForm = () => {
                     {/* Full Name */}
                     <div className="form-field">
                         <label htmlFor="fullName">
-                            {t("auth.fullNameLabel", "Fullständigt namn")}
+                            {t("auth.fullNameLabel")}
                         </label>
                         <div className="input-wrapper">
                             <input
                                 id="fullName"
                                 type="text"
-                                placeholder={t("auth.fullNamePlaceHolder", "Ange ditt fullständiga namn")}
+                                placeholder={t("auth.fullNamePlaceHolder")}
                                 value={fullName}
                                 onChange={(e) => setFullName(e.target.value)}
                             />
@@ -116,13 +116,13 @@ const RegisterForm = () => {
                     {/* Email */}
                     <div className="form-field">
                         <label htmlFor="email">
-                            {t("auth.emailLabel", "E-postadress")}
+                            {t("auth.emailLabel")}
                         </label>
                         <div className="input-wrapper">
                             <input
                                 id="email"
                                 type="email"
-                                placeholder={t("auth.emailPlaceholder", "Ange din e-postadress")}
+                                placeholder={t("auth.emailPlaceholder")}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
@@ -132,13 +132,13 @@ const RegisterForm = () => {
                     {/* Password */}
                     <div className="form-field">
                         <label htmlFor="password">
-                            {t("auth.passwordLabel", "Lösenord")}
+                            {t("auth.passwordLabel")}
                         </label>
                         <div className="input-wrapper">
                             <input
                                 id="password"
                                 type={showPassword ? "text" : "password"}
-                                placeholder={t("auth.passwordPlaceholder", "Skapa ett lösenord")}
+                                placeholder={t("auth.createPasswordPlaceholder")}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
@@ -146,7 +146,7 @@ const RegisterForm = () => {
                                 type="button"
                                 className="password-toggle"
                                 onClick={() => setShowPassword(!showPassword)}
-                                aria-label={showPassword ? t("auth.hidePassword", "Dölj lösenord") : t("auth.showPassword", "Show Password")}
+                                aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
                             >
                                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} /> }
                             </button>
@@ -156,13 +156,13 @@ const RegisterForm = () => {
                     {/* Confirm Password */}
                     <div className="form-field">
                         <label htmlFor="confirmPassword">
-                            {t("auth.confirmPasswordLabel", "Bekräfta lösenord")}
+                            {t("auth.confirmPasswordLabel")}
                         </label>
                         <div className="input-wrapper">
                             <input
                                 id="confirmPassword"
                                 type={showConfirmPassword ? "text" : "password"}
-                                placeholder={t("auth.confirmPasswordPlaceholder", "Bekräfta ditt lösenord")}
+                                placeholder={t("auth.confirmPasswordPlaceholder")}
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                             />
@@ -170,7 +170,7 @@ const RegisterForm = () => {
                                 type="button"
                                 className="password-toggle"
                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                aria-label={showConfirmPassword ? t("auth.hidePassword", "Dölj lösenord") : t("auth.showPassword", "Visa lösenord")}
+                                aria-label={showConfirmPassword ? t("auth.hidePassword") : t("auth.showPassword")}
                             >
                                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} /> }
                             </button>
@@ -188,10 +188,10 @@ const RegisterForm = () => {
                             onChange={(e) => setAcceptedTerms(e.target.checked)}
                         />
                         <span>
-                            {t("auth.termsAgreement", "Jag godkänner")}{" "}
-                            <a href="/terms">{t("auth.termsOfUse", "användarvillkoren")}</a>{" "}
-                            {t("auth.and", "och")}{" "}
-                            <a href="/privacy">{t("auth.privacyPolicy", "integritetspolicyn")}</a>
+                            {t("auth.termsAgreement")}{" "}
+                            <a href="/terms">{t("auth.termsOfUse")}</a>{" "}
+                            {t("auth.and")}{" "}
+                            <a href="/privacy">{t("auth.privacyPolicy")}</a>
                         </span>
                     </label>
                 </div>
@@ -208,7 +208,7 @@ const RegisterForm = () => {
                     className="auth-primary-button"
                     disabled={isLoading}
                 >
-                    {isLoading ? t("auth.creatingAccount", "Skapar konto...") : t("auth.registerButton", "Registrera")}
+                    {isLoading ? t("auth.creatingAccount") : t("auth.registerButton")}
                 </button>
             </form>
         </div>
