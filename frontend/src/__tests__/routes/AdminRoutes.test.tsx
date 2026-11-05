@@ -55,8 +55,8 @@ describe("Admin navigation and routing", () => {
             return [];
         });
         render(<AppRoutes />);
-        await userEvent.click(await screen.findByRole("button", {name: /Skapa fråga/i}, {timeout: 10000}));
-        expect(screen.getByRole("button", {name: /Spara fråga/i})).toBeInTheDocument();
+        await userEvent.click(await screen.findByRole("button", {name: "Lägg till fråga"}, {timeout: 5000}));
+        expect(screen.getByRole("form", {name: "Lägg till fråga"})).toBeInTheDocument();
     });
 
     it("lets an ADMIN access the route and shows admin navigation", async () => {

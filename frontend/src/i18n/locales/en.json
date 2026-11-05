@@ -61,8 +61,8 @@
     "TERMS_REQUIRED": "Please accept the Terms of Use and Privacy Policy."
   },
   "serverStatus": {
-    "starting": "The server is starting. This can take up to a minute...",
-    "error": "Can't reach the server. Please check your connection.",
+    "starting": "The server is starting. This can take up to a minute…",
+    "error": "Can't reach the server. Check your internet connection, or try again in a few minutes.",
     "tryAgain": "Try again"
   },
   "practice": {

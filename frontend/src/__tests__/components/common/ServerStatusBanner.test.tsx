@@ -19,7 +19,7 @@ describe("ServerStatusBanner", () => {
     it("says the server is starting while a request waits", () => {
         render(<ServerStatusBanner />);
         act(() => setServerStatus("starting"));
-        expect(screen.getByRole("status")).toHaveTextContent("serverStatus.starting");
+        expect(screen.getByRole("status")).toHaveTextContent("Servern startar. Det kan ta upp till en minut…");
         expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     });
 
@@ -28,7 +28,7 @@ describe("ServerStatusBanner", () => {
 
         vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
         await act(() => apiClient("/api/users/me").catch(() => {}));
-        expect(screen.getByRole("alert")).toHaveTextContent("serverStatus.errorserverStatus.tryAgain");
+        expect(screen.getByRole("alert")).toHaveTextContent("Det går inte att nå servern");
         expect(screen.getByRole("button", {name: /try again|försök igen/i})).toBeInTheDocument();
 
         vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, {status: 204})));

@@ -70,7 +70,7 @@ describe("Password Recovery Pages", () => {
             await userEvent.click(submitButton);
 
             expect(forgotPassword).toHaveBeenCalledWith("test@example.com");
-            expect(await screen.findByText(/Återställningslänken är ogiltlig/i)).toBeInTheDocument();
+            expect(await screen.findByText(/Återställningslänk skickad/i)).toBeInTheDocument();
         });
 
         it("displays error message when backend request fails", async () => {
@@ -91,7 +91,7 @@ describe("Password Recovery Pages", () => {
         it("shows error when reset token is missing from URL hash", async () => {
             renderResetPassword("");
 
-            expect(await screen.findByText(/ogiltig återställningslänk/i)).toBeInTheDocument();
+            expect(await screen.findByText(/Återställningslänken är ogiltig/i)).toBeInTheDocument();
             expect(screen.queryByLabelText(/bekräfta nytt lösenord/i)).not.toBeInTheDocument();
         });
 

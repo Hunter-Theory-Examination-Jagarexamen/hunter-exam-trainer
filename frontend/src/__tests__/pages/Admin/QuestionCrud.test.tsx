@@ -25,15 +25,15 @@ beforeEach(() => {
 async function open(mode: "create" | "edit" | "delete") {
     render(<QuestionBank />);
     await screen.findByRole("heading", {name: "#1: Original question?"}, {timeout: 5000});
-    await userEvent.click(screen.getByRole("button", {name: mode === "create" ? "Add question" : `${mode === "edit" ? "Edit" : "Delete"} question 1`}));
+    await userEvent.click(screen.getByRole("button", {name: mode === "create" ? "Lägg till fråga" : `${mode === "edit" ? "Redigera" : "Ta bort"} fråga 1`}));
 }
 
 async function fillCreate() {
-    await userEvent.type(screen.getByLabelText("Question text (required)"), "New question?");
+    await userEvent.type(screen.getByLabelText("Frågetext (obligatoriskt)"), "New question?");
     for (const [letter, value] of [["A", "Moose"], ["B", "Deer"], ["C", "Fox"], ["D", "Bear"]]) {
-        await userEvent.type(screen.getByLabelText(`Option ${letter} (required)`), value);
+        await userEvent.type(screen.getByLabelText(`Alternativ ${letter} (obligatoriskt)`), value);
     }
-    await userEvent.click(screen.getByRole("radio", {name: "Correct option C"}));
+    await userEvent.click(screen.getByRole("radio", {name: "Rätt alternativ C"}));
 }
 
 const mutations = () => vi.mocked(apiClient).mock.calls.filter(([, options]) => options?.method);
@@ -41,11 +41,11 @@ const mutations = () => vi.mocked(apiClient).mock.calls.filter(([, options]) => 
 describe("Admin question CRUD", () => {
     it("displays the bank image and handles loading failure", async () => {
         render(<QuestionBank />);
-        const image = await screen.findByRole("img", {name: "Image for question: Original question?"});
+        const image = await screen.findByRole("img", {name: "Bild för fråga: Original question?"});
         expect(image).toHaveAttribute("src", question.imageUrl);
         fireEvent.error(image);
         expect(screen.queryByRole("img")).not.toBeInTheDocument();
-        expect(screen.getByText("Question image unavailable.")).toBeInTheDocument();
+        expect(screen.getByText("Frågebilden är inte tillgänglig.")).toBeInTheDocument();
         expect(screen.getByRole("heading", {name: "#1: Original question?"})).toBeInTheDocument();
     });
 
@@ -53,10 +53,10 @@ describe("Admin question CRUD", () => {
         await open("create");
         await fillCreate();
         const imageUrl = "https://example.com/new.jpg";
-        fireEvent.change(screen.getByLabelText("Image URL (optional)"), {target: {value: ` ${imageUrl} `}});
+        fireEvent.change(screen.getByLabelText("Bild-URL (valfritt)"), {target: {value: ` ${imageUrl} `}});
         expect(within(screen.getByRole("form")).getByRole("img")).toHaveAttribute("src", imageUrl);
         vi.mocked(apiClient).mockResolvedValueOnce({...question, id: 2, imageUrl});
-        await userEvent.click(screen.getByRole("button", {name: "Save question"}));
+        await userEvent.click(screen.getByRole("button", {name: "Spara fråga"}));
         expect(JSON.parse(mutations()[0][1]!.body as string)).toEqual({
             questionText: "New question?", optionA: "Moose", optionB: "Deer", optionC: "Fox", optionD: "Bear",
             correctAnswer: "C", explanation: "", subjectId: 1, imageUrl});
@@ -64,18 +64,18 @@ describe("Admin question CRUD", () => {
 
     it.each(["replace", "remove", "clear"])("can %s an existing image", async mode => {
         await open("edit");
-        const input = screen.getByLabelText("Image URL (optional)");
+        const input = screen.getByLabelText("Bild-URL (valfritt)");
         expect(input).toHaveValue(question.imageUrl);
         expect(input).toHaveAttribute("maxlength", "1000");
-        if (mode === "remove") await userEvent.click(screen.getByRole("button", {name: "Remove image"}));
+        if (mode === "remove") await userEvent.click(screen.getByRole("button", {name: "Ta bort bild"}));
         else fireEvent.change(input, {target: {value: mode === "replace" ? "https://example.com/replaced.jpg" : ""}});
         const imageUrl = mode === "replace" ? "https://example.com/replaced.jpg" : null;
         vi.mocked(apiClient).mockResolvedValueOnce({...question, imageUrl});
-        await userEvent.click(screen.getByRole("button", {name: "Save question"}));
+        await userEvent.click(screen.getByRole("button", {name: "Spara fråga"}));
         expect(JSON.parse(mutations()[0][1]!.body as string)).toEqual({
             questionText: question.questionText, optionA: "Moose", optionB: "Deer", optionC: "Fox", optionD: "Bear",
             correctAnswer: "C", explanation: question.explanation, subjectId: 1, imageUrl});
-        await screen.findByText("Question #1 updated in Safety.");
+        await screen.findByText("Fråga #1 uppdaterades i Safety.");
         if (imageUrl) expect(screen.getByRole("img")).toHaveAttribute("src", imageUrl);
         else expect(screen.queryByRole("img")).not.toBeInTheDocument();
     });
@@ -83,102 +83,102 @@ describe("Admin question CRUD", () => {
     it.each(["javascript:alert(1)", "not a URL", "https://example.com/" + "a".repeat(1000)])(
         "rejects invalid image input without sending (%#)", async value => {
             await open("edit");
-            fireEvent.change(screen.getByLabelText("Image URL (optional)"), {target: {value}});
-            await userEvent.click(screen.getByRole("button", {name: "Save question"}));
+            fireEvent.change(screen.getByLabelText("Bild-URL (valfritt)"), {target: {value}});
+            await userEvent.click(screen.getByRole("button", {name: "Spara fråga"}));
             expect(screen.getByRole("alert")).toHaveTextContent(value.length > 1000
-                ? "Image URL must be at most 1000 characters." : "Enter a complete HTTP or HTTPS image URL.");
+                ? "Bild-URL får högst vara 1000 tecken." : "Ange en fullständig HTTP- eller HTTPS-bild-URL.");
             expect(mutations()).toHaveLength(0);
         });
 
     it("can add a question to an empty subject and cancel without sending", async () => {
         render(<QuestionBank />);
         await screen.findByRole("heading", {name: "#1: Original question?"}, {timeout: 5000});
-        await userEvent.selectOptions(screen.getByLabelText("Subject"), "2");
-        await screen.findByText("No questions available for this subject.");
-        await userEvent.click(screen.getByRole("button", {name: "Add question"}));
-        expect(screen.getByLabelText("Question subject (required)")).toHaveValue("2");
-        await userEvent.click(screen.getByRole("button", {name: "Cancel"}));
+        await userEvent.selectOptions(screen.getByLabelText("Ämne"), "2");
+        await screen.findByText("Inga frågor tillgängliga för detta ämne.");
+        await userEvent.click(screen.getByRole("button", {name: "Lägg till fråga"}));
+        expect(screen.getByLabelText("Frågans ämne (obligatoriskt)")).toHaveValue("2");
+        await userEvent.click(screen.getByRole("button", {name: "Avbryt"}));
         expect(screen.queryByRole("form")).not.toBeInTheDocument();
-        expect(screen.getByRole("button", {name: "Add question"})).toHaveFocus();
+        expect(screen.getByRole("button", {name: "Lägg till fråga"})).toHaveFocus();
         expect(mutations()).toHaveLength(0);
     });
 
     it("preserves a matching search after an edit", async () => {
         render(<QuestionBank />);
         await userEvent.type(await screen.findByRole("searchbox"), "Original");
-        await userEvent.click(screen.getByRole("button", {name: "Edit question 1"}));
+        await userEvent.click(screen.getByRole("button", {name: "Redigera fråga 1"}));
         vi.mocked(apiClient).mockResolvedValueOnce({...question, explanation: "Updated explanation"});
-        await userEvent.click(screen.getByRole("button", {name: "Save question"}));
-        expect(await screen.findByText("Question #1 updated in Safety.")).toBeInTheDocument();
+        await userEvent.click(screen.getByRole("button", {name: "Spara fråga"}));
+        expect(await screen.findByText("Fråga #1 uppdaterades i Safety.")).toBeInTheDocument();
         expect(screen.getByRole("searchbox")).toHaveValue("Original");
         expect(screen.getByText(/Updated explanation/)).toBeInTheDocument();
     });
 
     it("validates required text, all four options, and a correct selection before sending", async () => {
         await open("create");
-        await userEvent.type(screen.getByLabelText("Question text (required)"), "   ");
-        await userEvent.click(screen.getByRole("button", {name: "Save question"}));
-        expect(screen.getByRole("alert")).toHaveTextContent("Enter question text.");
-        await userEvent.clear(screen.getByLabelText("Question text (required)"));
-        await userEvent.type(screen.getByLabelText("Question text (required)"), "Question?");
+        await userEvent.type(screen.getByLabelText("Frågetext (obligatoriskt)"), "   ");
+        await userEvent.click(screen.getByRole("button", {name: "Spara fråga"}));
+        expect(screen.getByRole("alert")).toHaveTextContent("Ange frågetext.");
+        await userEvent.clear(screen.getByLabelText("Frågetext (obligatoriskt)"));
+        await userEvent.type(screen.getByLabelText("Frågetext (obligatoriskt)"), "Question?");
         for (const letter of ["A", "B", "C", "D"]) {
-            await userEvent.click(screen.getByRole("button", {name: "Save question"}));
-            expect(screen.getByRole("alert")).toHaveTextContent(`Enter text for option ${letter}.`);
-            await userEvent.type(screen.getByLabelText(`Option ${letter} (required)`), "Answer");
+            await userEvent.click(screen.getByRole("button", {name: "Spara fråga"}));
+            expect(screen.getByRole("alert")).toHaveTextContent(`Ange text för alternativ ${letter}.`);
+            await userEvent.type(screen.getByLabelText(`Alternativ ${letter} (obligatoriskt)`), "Answer");
         }
-        await userEvent.click(screen.getByRole("button", {name: "Save question"}));
-        expect(screen.getByRole("alert")).toHaveTextContent("Select the correct option.");
+        await userEvent.click(screen.getByRole("button", {name: "Spara fråga"}));
+        expect(screen.getByRole("alert")).toHaveTextContent("Välj det rätta svarsalternativet.");
         expect(mutations()).toHaveLength(0);
     });
 
     it("creates with the latest selected option text and immediately shows the server question", async () => {
         await open("create");
         await fillCreate();
-        await userEvent.clear(screen.getByLabelText("Option C (required)"));
-        await userEvent.type(screen.getByLabelText("Option C (required)"), "Red fox");
+        await userEvent.clear(screen.getByLabelText("Alternativ C (obligatoriskt)"));
+        await userEvent.type(screen.getByLabelText("Alternativ C (obligatoriskt)"), "Red fox");
         vi.mocked(apiClient).mockResolvedValueOnce({...question, id: 2, questionText: "New question?", optionC: "Red fox", correctAnswer: "C"});
-        await userEvent.click(screen.getByRole("button", {name: "Save question"}));
+        await userEvent.click(screen.getByRole("button", {name: "Spara fråga"}));
         expect(apiClient).toHaveBeenCalledWith("/api/admin/questions", {method: "POST", body: JSON.stringify({
             questionText: "New question?", optionA: "Moose", optionB: "Deer", optionC: "Red fox", optionD: "Bear",
             correctAnswer: "C", explanation: "", subjectId: 1, imageUrl: null})});
         expect(await screen.findByRole("heading", {name: "#2: New question?"})).toBeInTheDocument();
-        expect(screen.getByText("Question #2 created in Safety.")).toBeInTheDocument();
+        expect(screen.getByText("Fråga #2 skapades i Safety.")).toBeInTheDocument();
         expect(screen.getByRole("option", {name: "Safety (2)"})).toBeInTheDocument();
     });
 
     it("prepopulates editing, maps correct text, preserves existing image data and immediately updates", async () => {
         await open("edit");
-        expect(screen.getByRole("heading", {name: "Edit question #1: Original question?"})).toBeInTheDocument();
-        expect(screen.getByLabelText("Question text (required)")).toHaveValue(question.questionText);
+        expect(screen.getByRole("heading", {name: "Redigera fråga #1: Original question?"})).toBeInTheDocument();
+        expect(screen.getByLabelText("Frågetext (obligatoriskt)")).toHaveValue(question.questionText);
         for (const letter of ["A", "B", "C", "D"] as const) {
-            expect(screen.getByLabelText(`Option ${letter} (required)`)).toHaveValue(question[`option${letter}`]);
+            expect(screen.getByLabelText(`Alternativ ${letter} (obligatoriskt)`)).toHaveValue(question[`option${letter}`]);
         }
-        expect(screen.getByLabelText("Explanation (optional)")).toHaveValue(question.explanation);
-        expect(screen.getByLabelText("Question subject (required)")).toHaveValue("1");
-        expect(screen.getByRole("radio", {name: "Correct option C"})).toBeChecked();
-        await userEvent.clear(screen.getByLabelText("Option C (required)"));
-        await userEvent.type(screen.getByLabelText("Option C (required)"), "Arctic fox");
-        await userEvent.clear(screen.getByLabelText("Question text (required)"));
-        await userEvent.type(screen.getByLabelText("Question text (required)"), "Updated question?");
+        expect(screen.getByLabelText("Förklaring (valfritt)")).toHaveValue(question.explanation);
+        expect(screen.getByLabelText("Frågans ämne (obligatoriskt)")).toHaveValue("1");
+        expect(screen.getByRole("radio", {name: "Rätt alternativ C"})).toBeChecked();
+        await userEvent.clear(screen.getByLabelText("Alternativ C (obligatoriskt)"));
+        await userEvent.type(screen.getByLabelText("Alternativ C (obligatoriskt)"), "Arctic fox");
+        await userEvent.clear(screen.getByLabelText("Frågetext (obligatoriskt)"));
+        await userEvent.type(screen.getByLabelText("Frågetext (obligatoriskt)"), "Updated question?");
         vi.mocked(apiClient).mockResolvedValueOnce({...question, questionText: "Updated question?", optionC: "Arctic fox", correctAnswer: "C"});
-        await userEvent.click(screen.getByRole("button", {name: "Save question"}));
+        await userEvent.click(screen.getByRole("button", {name: "Spara fråga"}));
         expect(apiClient).toHaveBeenCalledWith("/api/admin/questions/1", {method: "PUT", body: JSON.stringify({
             questionText: "Updated question?", optionA: "Moose", optionB: "Deer", optionC: "Arctic fox", optionD: "Bear",
             correctAnswer: "C", explanation: question.explanation, subjectId: 1, imageUrl: question.imageUrl})});
         const card = (await screen.findByRole("heading", {name: "#1: Updated question?"})).closest("article")!;
-        expect(within(card).getByText(/Correct answer:/).parentElement).toHaveTextContent("C");
+        expect(within(card).getByText(/Rätt svar:/).parentElement).toHaveTextContent("C");
         expect(screen.queryByRole("heading", {name: "#1: Original question?"})).not.toBeInTheDocument();
     });
 
     it("moves a question to another subject and keeps browsing consistent", async () => {
         await open("edit");
-        await userEvent.selectOptions(screen.getByLabelText("Question subject (required)"), "2");
+        await userEvent.selectOptions(screen.getByLabelText("Frågans ämne (obligatoriskt)"), "2");
         vi.mocked(apiClient).mockResolvedValueOnce({...question, subject: subjects[1]})
             .mockResolvedValueOnce([{...question, subject: subjects[1]}]);
-        await userEvent.click(screen.getByRole("button", {name: "Save question"}));
-        expect(await screen.findByText("Question #1 updated in Wildlife.")).toBeInTheDocument();
+        await userEvent.click(screen.getByRole("button", {name: "Spara fråga"}));
+        expect(await screen.findByText("Fråga #1 uppdaterades i Wildlife.")).toBeInTheDocument();
         expect(await screen.findByRole("heading", {name: "#1: Original question?"})).toBeInTheDocument();
-        expect(screen.getByLabelText("Subject")).toHaveValue("2");
+        expect(screen.getByLabelText("Ämne")).toHaveValue("2");
         expect(screen.getByRole("option", {name: "Safety (0)"})).toBeInTheDocument();
         expect(screen.getByRole("option", {name: "Wildlife (1)"})).toBeInTheDocument();
         expect(JSON.parse(mutations()[0][1]!.body as string).subjectId).toBe(2);
@@ -186,19 +186,19 @@ describe("Admin question CRUD", () => {
 
     it("requires confirmation, cancels without a request, and deletes immediately on confirmation", async () => {
         await open("delete");
-        expect(screen.getByRole("heading", {name: "Delete question #1?"})).toBeInTheDocument();
+        expect(screen.getByRole("heading", {name: "Ta bort fråga #1?"})).toBeInTheDocument();
         expect(screen.getByText("Original question?")).toBeInTheDocument();
         expect(mutations()).toHaveLength(0);
-        await userEvent.click(screen.getByRole("button", {name: "Cancel deletion"}));
-        expect(screen.queryByRole("button", {name: "Confirm deletion"})).not.toBeInTheDocument();
+        await userEvent.click(screen.getByRole("button", {name: "Avbryt borttagning"}));
+        expect(screen.queryByRole("button", {name: "Bekräfta borttagning"})).not.toBeInTheDocument();
         expect(mutations()).toHaveLength(0);
-        await userEvent.click(screen.getByRole("button", {name: "Delete question 1"}));
+        await userEvent.click(screen.getByRole("button", {name: "Ta bort fråga 1"}));
         vi.mocked(apiClient).mockResolvedValueOnce(null);
-        await userEvent.click(screen.getByRole("button", {name: "Confirm deletion"}));
+        await userEvent.click(screen.getByRole("button", {name: "Bekräfta borttagning"}));
         expect(apiClient).toHaveBeenCalledWith("/api/admin/questions/1", {method: "DELETE"});
-        expect(await screen.findByText("Question #1 deleted.")).toBeInTheDocument();
+        expect(await screen.findByText("Fråga #1 har tagits bort.")).toBeInTheDocument();
         expect(screen.queryByRole("article")).not.toBeInTheDocument();
-        expect(screen.getByText("No questions available for this subject.")).toBeInTheDocument();
+        expect(screen.getByText("Inga frågor tillgängliga för detta ämne.")).toBeInTheDocument();
     });
 
     it.each(["create", "edit", "delete"] as const)("prevents duplicate %s requests and restores retry after failure", async mode => {
@@ -206,13 +206,13 @@ describe("Admin question CRUD", () => {
         if (mode === "create") await fillCreate();
         let reject!: (error: Error) => void;
         vi.mocked(apiClient).mockImplementationOnce(() => new Promise((_resolve, rejectRequest) => { reject = rejectRequest; }));
-        const button = screen.getByRole("button", {name: mode === "delete" ? "Confirm deletion" : "Save question"});
+        const button = screen.getByRole("button", {name: mode === "delete" ? "Bekräfta borttagning" : "Spara fråga"});
         fireEvent.click(button);
         fireEvent.click(button);
         if (mode !== "delete") fireEvent.submit(screen.getByRole("form"));
         expect(mutations()).toHaveLength(1);
         expect(button).toBeDisabled();
-        expect(screen.getByLabelText("Subject")).toBeDisabled();
+        expect(screen.getByLabelText("Ämne")).toBeDisabled();
         await act(async () => reject(new Error('{"message":"Database technical details"}')));
         expect(screen.getByRole("alert")).toHaveTextContent("The request failed. Please try again.");
         expect(screen.getByRole("alert")).not.toHaveTextContent("Database technical details");
@@ -233,8 +233,8 @@ describe("Admin question CRUD", () => {
         await open("edit");
         // What apiClient throws for an HTTP error: the response body as message, plus the status.
         vi.mocked(apiClient).mockRejectedValueOnce(Object.assign(new Error(body), {status}));
-        await userEvent.click(screen.getByRole("button", {name: "Save question"}));
+        await userEvent.click(screen.getByRole("button", {name: "Spara fråga"}));
         expect(await screen.findByRole("alert")).toHaveTextContent(message);
-        expect(screen.getByLabelText("Question text (required)")).toHaveValue(question.questionText);
+        expect(screen.getByLabelText("Frågetext (obligatoriskt)")).toHaveValue(question.questionText);
     });
 });

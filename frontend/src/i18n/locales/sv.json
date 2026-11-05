@@ -61,9 +61,9 @@
     "TERMS_REQUIRED": "Du måste godkänna användarvillkoren och integritetspolicyn."
   },
   "serverStatus": {
-    "starting": "Servern startar. Det kan ta upp till en minut...",
-    "error": "Kan inte nå servern. Kontrollera din internetanslutning eller försök igen om en stund.",
-    "tryAgain": "Ladda om sidan"
+    "starting": "Servern startar. Det kan ta upp till en minut…",
+    "error": "Det går inte att nå servern. Kontrollera din internetanslutning eller försök igen om en stund.",
+    "tryAgain": "Försök igen"
   },
   "practice": {
     "title": "Övning",

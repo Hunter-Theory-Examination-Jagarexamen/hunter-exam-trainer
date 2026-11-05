@@ -43,20 +43,16 @@ describe("Subject synchronization on navigation", () => {
             await userEvent.type(screen.getByLabelText("Beskrivning (obligatoriskt)"), "New description");
             await userEvent.click(screen.getByRole("button", {name: "Spara ämne"}));
         }
-        await screen.findByRole("status");
+        await screen.findByText(new RegExp(`Ämne .* ${mode === "create" ? "skapades" : mode === "edit" ? "uppdaterades" : "har tagits bort"}\\.`));
         await userEvent.click(screen.getByRole("link", {name: "Frågor"}));
-
-        const expectedSubject = mode === "delete" ? "Wildlife" : "New subject";
-        expect(await screen.findByText(expectedSubject)).toBeInTheDocument();
-        if (mode !== "create") expect(screen.queryByText("Safety")).not.toBeInTheDocument();
-
+        await screen.findByRole("option", {name: `${mode === "delete" ? "Wildlife" : "New subject"} (0)`});
+        if (mode !== "create") expect(screen.queryByRole("option", {name: "Safety (0)"})).not.toBeInTheDocument();
         await userEvent.click(screen.getByRole("button", {name: "Lägg till fråga"}));
-        expect(screen.getByLabelText("Frågans ämne (obligatoriskt)")).toHaveTextContent(expectedSubject);
-
+        expect(screen.getByLabelText("Frågans ämne (obligatoriskt)")).toHaveTextContent(mode === "delete" ? "Wildlife" : "New subject");
         await userEvent.click(screen.getByRole("link", {name: "Öva"}));
         const practiceCard = (await screen.findByRole("heading", {name: "Öva per ämne"})).closest(".practice-card")!;
         await userEvent.click(within(practiceCard as HTMLElement).getByRole("button", {name: "Välj"}));
-        expect(await screen.findByRole("heading", {name: expectedSubject})).toBeInTheDocument();
+        expect(await screen.findByRole("heading", {name: mode === "delete" ? "Wildlife" : "New subject"})).toBeInTheDocument();
         if (mode !== "delete") expect(screen.getByText("New description")).toBeInTheDocument();
         if (mode !== "create") expect(screen.queryByRole("heading", {name: "Safety"})).not.toBeInTheDocument();
         expect(vi.mocked(apiClient).mock.calls.filter(([endpoint, options]) => endpoint === "/api/subjects" && !options?.method)).toHaveLength(3);
