@@ -18,7 +18,7 @@ const QuickActions = () => {
                 <button
                     onClick={() => navigate("/mockexam")}
                 >
-                    Starta låtsasprov
+                    Starta övningsprov
                 </button>
             </div>
         </section>

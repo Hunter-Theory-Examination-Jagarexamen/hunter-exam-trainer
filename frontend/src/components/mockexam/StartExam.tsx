@@ -12,7 +12,7 @@ const StartExam = ({ onStartExam }: StartExamProps) => {
                 className="start-exam-btn"
                 onClick={onStartExam}
             >
-                Starta låtsasprov
+                Starta övningsprov
             </button>
 
         </section>

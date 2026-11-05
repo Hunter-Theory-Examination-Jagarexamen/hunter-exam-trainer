@@ -63,11 +63,11 @@ const LearnerProgressPage = () => {
                         {/* Mock exam summary */}
                         <div className="mock-exam-summary">
                             {learner.mockExams.count === 0 ? (
-                                <p className="mock-exam-empty">Inga låtsasprov ännu.</p>
+                                <p className="mock-exam-empty">Inga övningsprov ännu.</p>
                             ) : (
                                 <>
                                     <p className="mock-exam-line">
-                                        <strong>Låtsasprov:</strong> {learner.mockExams.count} genomförda
+                                        <strong>Övningsprov:</strong> {learner.mockExams.count} genomförda
                                     </p>
                                     <p className="mock-exam-line">
                                         <strong>Senaste:</strong> {learner.mockExams.latestScore}%{" "}

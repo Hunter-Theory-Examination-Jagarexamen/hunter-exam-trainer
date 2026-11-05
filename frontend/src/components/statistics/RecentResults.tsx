@@ -14,7 +14,7 @@ const RecentResults = (
             <Check size={16} className="recent-result-icon" />
 
             <span className="recent-result-name">
-                Låtsasprov
+                Övningsprov
             </span>
             <span className="recent-result-score">
                 {activity.score}%

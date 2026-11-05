@@ -61,7 +61,7 @@ const RecentActivityList = () => {
                         className="recent-activity-row"
                         key={activity.id}
                     >
-                        <span>Låtsasprov</span>
+                        <span>Övningsprov</span>
                         <span>
                             {activity.score}%
                             <small>

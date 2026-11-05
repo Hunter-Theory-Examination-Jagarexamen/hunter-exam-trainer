@@ -25,7 +25,7 @@ const Result = () => {
                     title="Resultat"
                     subtitle="Ingen resultatdata hittades."
                 />
-                <p>Vänligen genomför ett låtsasprov för att se dina resultat.</p>
+                <p>Vänligen genomför ett övningsprov för att se dina resultat.</p>
             </section>
         );
     }
@@ -35,7 +35,7 @@ const Result = () => {
 
             <PageTitle
                 title="Resultat"
-                subtitle="Här är ditt resultat för låtsasprovet."
+                subtitle="Här är ditt resultat för övningsprovet."
             />
 
             <ResultSummary

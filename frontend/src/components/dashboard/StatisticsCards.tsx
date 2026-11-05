@@ -45,7 +45,7 @@ const StatisticsCards = () => {
 
     return (
         <div className="dashboard-cards">
-            <Card title="Låtsasprov" >
+            <Card title="Övningsprov" >
                 {data.mockExams}
             </Card>
             <Card title="Besvarade frågor" >

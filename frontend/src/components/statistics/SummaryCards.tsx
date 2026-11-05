@@ -49,7 +49,7 @@ const SummaryCards = () => {
 
     return (
         <div className="statistics-cards">
-            <Card title="Låtsasprov">
+            <Card title="Övningsprov">
                 {data.mockExams}
             </Card>
             <Card title="Besvarade frågor">

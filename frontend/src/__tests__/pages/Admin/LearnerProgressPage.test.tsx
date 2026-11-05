@@ -57,7 +57,7 @@ describe("LearnerProgressPage", () => {
         renderPage();
 
         expect(await screen.findByText("Test Learner")).toBeInTheDocument();
-        expect(screen.getByText("Inga låtsasprov ännu.")).toBeInTheDocument();
+        expect(screen.getByText("Inga övningsprov ännu.")).toBeInTheDocument();
         expect(screen.getByText("Inga övningsresultat ännu.")).toBeInTheDocument();
         expect(screen.getByText("Aldrig")).toBeInTheDocument();
     });
@@ -103,7 +103,7 @@ describe("LearnerProgressPage", () => {
 
         expect(await screen.findByText("Ekologi")).toBeInTheDocument();
         expect(screen.getByText("80%")).toBeInTheDocument();
-        expect(screen.getByText("Inga låtsasprov ännu.")).toBeInTheDocument();
+        expect(screen.getByText("Inga övningsprov ännu.")).toBeInTheDocument();
     });
 
     it("shows both sections for a learner with practice and exams", async () => {
@@ -129,7 +129,7 @@ describe("LearnerProgressPage", () => {
         expect(await screen.findByText(/1 genomförda/)).toBeInTheDocument();
         expect(screen.getByText(/Godkänd/)).toBeInTheDocument();
         expect(screen.getByText("Ekologi")).toBeInTheDocument();
-        expect(screen.queryByText("Inga låtsasprov ännu.")).not.toBeInTheDocument();
+        expect(screen.queryByText("Inga övningsprov ännu.")).not.toBeInTheDocument();
         expect(screen.queryByText("Inga övningsresultat ännu.")).not.toBeInTheDocument();
     });
 

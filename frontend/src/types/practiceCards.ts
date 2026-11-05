@@ -32,7 +32,7 @@ export const practiceCards: PracticeCards[] = [
     {
         icon: Clock,
         iconVariant: "blue",
-        title: "Låtsasprov",
+        title: "Övningsprov",
         description: "Simulera det riktiga provet (70 frågor, tidsbegränsat).",
         features: ["70 frågor", "Tidsbegränsat prov"],
         buttonLabel: "Starta prov",

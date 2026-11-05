@@ -17,7 +17,7 @@ const MockExam = () => {
         <div className="mockExam">
 
             <PageTitle
-                title="Låtsasprov"
+                title="Övningsprov"
                 subtitle="Förbered dig med en fullständig provsimulering."
             />
             <MockExamHeader />
