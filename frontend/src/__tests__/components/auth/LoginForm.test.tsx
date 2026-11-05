@@ -5,7 +5,8 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import LoginForm from "../../../components/auth/LoginForm";
-import { loginUser } from "../../../services/authService.ts";
+import { checkGoogleLoginEnabled, loginUser } from "../../../services/authService.ts";
+import { ApiError, ServerUnreachableError } from "../../../api/apiClient";
 
 // Replace the real authService (which calls the backend) with mock functions.
 // checkGoogleLoginEnabled must return a Promise, because LoginForm calls .then() on it.
@@ -34,20 +35,38 @@ describe("LoginForm", () => {
     });
 
     afterEach(() => {
-        vi.restoreAllMocks(); // undo vi.spyOn (alert, console.error)
+        vi.restoreAllMocks(); // undo vi.spyOn (console.error)
         localStorage.clear(); // remove any saved token
     });
 
-    it("shows an alert and does not log in when the fields are empty", async () => {
-        // Arrange: catch alert() calls instead of showing a real pop-up
-        const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+    it("hides the Google button when Google login is not configured", async () => {
+        // Arrange: the mock at the top answers "not configured" (false)
+        renderLoginForm();
+
+        // Assert: wait until the check has run, then the button should be missing
+        await waitFor(() => expect(checkGoogleLoginEnabled).toHaveBeenCalled());
+        expect(screen.queryByRole("button", { name: "Continue with Google" })).not.toBeInTheDocument();
+    });
+
+    it("shows the Google button when Google login is configured", async () => {
+        // Arrange: this time the check answers "configured" (true), for one call only
+        vi.mocked(checkGoogleLoginEnabled).mockResolvedValueOnce(true);
+        renderLoginForm();
+
+        // Assert: findByRole waits until the button appears (or times out)
+        expect(await screen.findByRole("button", { name: "Continue with Google" })).toBeInTheDocument();
+    });
+
+    it("shows an error message and does not log in when the fields are empty", async () => {
+        // Arrange
         renderLoginForm();
 
         // Act: click "Log In" without typing anything
         await userEvent.click(screen.getByRole("button", { name: "Log In" }));
 
         // Assert: the user is told what is missing, and the backend is never called
-        expect(alertSpy).toHaveBeenCalledWith("Please enter your email and password");
+        // role="alert" is how screen readers (and this test) find the error message
+        expect(screen.getByRole("alert")).toHaveTextContent("Please enter your email and password");
         expect(loginUser).not.toHaveBeenCalled();
     });
 
@@ -67,10 +86,9 @@ describe("LoginForm", () => {
         expect(localStorage.getItem("token")).toBe("test-token");
     });
 
-    it("shows an alert and saves no token when the login fails", async () => {
+    it("shows an error message and saves no token when the login fails", async () => {
         // Arrange: the fake backend rejects the login
         vi.mocked(loginUser).mockRejectedValue(new Error("401"));
-        const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
         vi.spyOn(console, "error").mockImplementation(() => {}); // keep test output clean
         renderLoginForm();
 
@@ -79,8 +97,46 @@ describe("LoginForm", () => {
         await userEvent.type(screen.getByLabelText("Password"), "wrong-password");
         await userEvent.click(screen.getByRole("button", { name: "Log In" }));
 
-        // Assert: waitFor retries until the alert has appeared (or times out)
-        await waitFor(() => expect(alertSpy).toHaveBeenCalledWith("Invalid email or password"));
+        // Assert: findByRole waits until the error message has appeared (or times out)
+        expect(await screen.findByRole("alert")).toHaveTextContent("Invalid email or password");
         expect(localStorage.getItem("token")).toBeNull();
     });
+
+    it.each([
+        ["the server can't be reached", new ServerUnreachableError(), "Can't reach the server"],
+        ["the server answers with an error", new ApiError("", 500), "Something went wrong on the server"],
+    ])("says so instead of 'Invalid email or password' when %s", async (_case, error, message) => {
+        vi.mocked(loginUser).mockRejectedValue(error);
+        vi.spyOn(console, "error").mockImplementation(() => {});
+        renderLoginForm();
+
+        await userEvent.type(screen.getByLabelText("Email"), "anna@example.com");
+        await userEvent.type(screen.getByLabelText("Password"), "password");
+        await userEvent.click(screen.getByRole("button", { name: "Log In" }));
+
+        expect(await screen.findByRole("alert")).toHaveTextContent(message);
+    });
+
+    it("shows the account creation success message when navigated from registration", async () => {
+        // Arrange: render with initialEntries that include state
+        render (
+            <MemoryRouter initialEntries={[{ pathname: "/login", state: { accountCreated: true } }]}>
+                <Routes>
+                    <Route path="/login" element={<LoginForm />} />
+                </Routes>
+            </MemoryRouter>
+        );
+
+        // Assert: the success message is shown
+        expect(await screen.findByRole("status")).toHaveTextContent("Account created successfully! You can now log in.");
+    });
+
+    it("does not show the account creation success message when opened directly", async () => {
+        // Arrange: render normally without state
+        renderLoginForm();
+
+        // Assert: no status role message should be present
+        expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
 });

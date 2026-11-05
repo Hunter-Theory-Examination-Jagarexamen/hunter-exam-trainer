@@ -4,7 +4,8 @@
 // (ExamHeader, QuestionPanel, ExamNavigation). Only the backend is mocked.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, act } from "@testing-library/react";
+import { StrictMode } from "react";
+import { render, screen, act, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import Exam from "../../../pages/Exam/Exam";
@@ -13,6 +14,14 @@ import type { ExamQuestion } from "../../../types/examQuestion.ts";
 
 vi.mock("../../../api/apiClient.ts", () => ({
     default: vi.fn(),
+    ApiError: class ApiError extends Error {
+        status: number;
+        constructor(message: string, status: number) {
+            super(message);
+            this.status = status;
+        }
+    },
+
 }));
 
 // Two made-up questions, as /api/exam/start would return them.
@@ -25,7 +34,10 @@ const questions: ExamQuestion[] = [
 function mockBackend() {
     vi.mocked(apiClient).mockImplementation(async (endpoint: string) => {
         if (endpoint === "/api/exam/start") {
-            return { sessionId: "session-1", questions };
+            return { attemptId: "attempt-1", questions };
+        }
+        if (endpoint.match(/^\/api\/exam\/[^/]+\/answer$/)) {
+            return null;  // 204
         }
         if (endpoint === "/api/exam/submit") {
             return { totalQuestions: 2, correctAnswers: 1, incorrectAnswers: 1, unanswered: 0, score: 50 };
@@ -56,54 +68,105 @@ describe("Exam page", () => {
 
     afterEach(() => {
         vi.restoreAllMocks();
+        // Switch back to the real clock even if a timer test failed halfway.
+        vi.useRealTimers();
     });
 
     it("shows a loading message, then the first question", async () => {
         mockBackend();
         renderExam();
 
-        expect(screen.getByText("Loading exam questions...")).toBeInTheDocument();
+        expect(screen.getByText("Laddar provfrågor...")).toBeInTheDocument();
         expect(await screen.findByText("First question?")).toBeInTheDocument();
         expect(apiClient).toHaveBeenCalledWith("/api/exam/start", { method: "POST" });
     });
 
-    it("submits the session id, question ids and answers, then shows the result page", async () => {
+    it("starts only one exam under StrictMode, which runs effects twice", async () => {
+        // Two starts would both try to create the same totals rows on the server (#174).
+        mockBackend();
+        render(
+            <StrictMode>
+                <MemoryRouter initialEntries={["/exam"]}>
+                    <Routes>
+                        <Route path="/exam" element={<Exam />} />
+                    </Routes>
+                </MemoryRouter>
+            </StrictMode>
+        );
+
+        expect(await screen.findByText("First question?")).toBeInTheDocument();
+        const starts = vi.mocked(apiClient).mock.calls.filter(([endpoint]) => endpoint === "/api/exam/start");
+        expect(starts).toHaveLength(1);
+    });
+
+    it("saves each answer to the server as it is given", async () => {
         mockBackend();
         renderExam();
 
-        // Act: answer both questions and submit
-        await userEvent.click(await screen.findByRole("radio", { name: "B1" }));
-        await userEvent.click(screen.getByRole("button", { name: "Next" }));
-        await userEvent.click(screen.getByRole("radio", { name: "C2" }));
-        await userEvent.click(screen.getByRole("button", { name: "Submit Exam" }));
+        await screen.findByText("First question?");
+        await userEvent.click(screen.getByRole("radio", { name: "B1" }));
 
-        // Assert: the result page shows
+        // The answer POST should fire
+        await waitFor(() => {
+            const answerCall = vi.mocked(apiClient).mock.calls.find(
+                ([endpoint]) => endpoint === "/api/exam/attempt-1/answer"
+            );
+            expect(answerCall).toBeDefined();
+            const body = JSON.parse(answerCall![1]!.body as string);
+            expect(body).toEqual({ questionId: 1, answer: "B" });
+        });
+    });
+
+    it("does not save the same answer twice", async () => {
+        mockBackend();
+        renderExam();
+
+        await screen.findByText("First question?");
+        const option = screen.getByRole("radio", { name: "B1" });
+        await userEvent.click(option);
+        await userEvent.click(option);  // same option again
+
+        await waitFor(() => {
+            const answerCalls = vi.mocked(apiClient).mock.calls.filter(
+                ([endpoint]) => endpoint === "/api/exam/attempt-1/answer"
+            );
+            expect(answerCalls).toHaveLength(1);
+        });
+    });
+
+    it("submits only the attempt id, then shows the result page", async () => {
+        mockBackend();
+        renderExam();
+
+        // Act: answer both questions
+        await userEvent.click(await screen.findByRole("radio", { name: "B1" }));
+        await userEvent.click(screen.getByRole("button", { name: "Nästa" }));
+        await userEvent.click(screen.getByRole("radio", { name: "C2" }));
+
+        // Click the always-visible Submit button (opens modal)
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in provet" }));
+
+        // Confirm in modal — both answered, so the confirm button still says "Submit Exam"
+        const confirmButtons = await screen.findAllByRole("button", { name: "Lämna in provet" });
+        await userEvent.click(confirmButtons[confirmButtons.length - 1]);
+
         expect(await screen.findByText("Result page")).toBeInTheDocument();
 
-        // Find the /submit call among everything the mock recorded (see vi.fn's .mock.calls)
         const submitCall = vi.mocked(apiClient).mock.calls.find(
             ([endpoint]) => endpoint === "/api/exam/submit"
         );
         expect(submitCall).toBeDefined();
 
-        // The body is a JSON string; turn it back into an object to compare
         const body = JSON.parse(submitCall![1]!.body as string);
-        expect(body).toEqual({
-            sessionId: "session-1",
-            questionIds: [1, 2],
-            answers: { "1": "B", "2": "C" },
-        });
+        expect(body).toEqual({ attemptId: "attempt-1" });
     });
 
     it("shows an error message when the exam cannot be loaded", async () => {
         vi.mocked(apiClient).mockRejectedValue(new Error("Server down"));
         renderExam();
 
-        expect(await screen.findByText("Failed to load exam questions. Please try again.")).toBeInTheDocument();
+        expect(await screen.findByText("Kunde inte ladda provfrågor. Försök igen.")).toBeInTheDocument();
     });
-
-
-
 
     it("disables Previous on the first question and enables it on subsequent questions", async () => {
         mockBackend();
@@ -111,10 +174,10 @@ describe("Exam page", () => {
 
         await screen.findByText("First question?");
 
-        const prevButton = screen.getByRole("button", { name: "Previous" });
+        const prevButton = screen.getByRole("button", { name: "Föregående" });
         expect(prevButton).toBeDisabled();
 
-        await userEvent.click(screen.getByRole("button", { name: "Next" }));
+        await userEvent.click(screen.getByRole("button", { name: "Nästa" }));
         expect(screen.getByText("Second question?")).toBeInTheDocument();
 
         expect(prevButton).not.toBeDisabled();
@@ -133,12 +196,10 @@ describe("Exam page", () => {
         });
 
         expect(screen.getByText(/59:59/i)).toBeInTheDocument();
-
-        vi.useRealTimers();
     });
 
-    it("automatically submits the exam with current answers when time runs out", async () => {
-       vi.useFakeTimers({ shouldAdvanceTime: true });
+    it("automatically submits the exam when time runs out", async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: true });
 
         mockBackend();
         renderExam();
@@ -159,9 +220,66 @@ describe("Exam page", () => {
         expect(submitCall).toBeDefined();
 
         const body = JSON.parse(submitCall![1]!.body as string);
-        expect(body.answers).toEqual({ "1": "B" });
-
-        vi.useRealTimers();
+        expect(body).toEqual({ attemptId: "attempt-1" });
     });
 
+    it("shows a clear message when there are too few questions (409 conflict)", async () => {
+        vi.mocked(apiClient).mockRejectedValue({
+            status: 409,
+            message: "Det finns inte tillräckligt många frågor för att starta provet."
+        });
+        renderExam();
+
+        expect(await screen.findByText("Det finns inte tillräckligt många frågor för att starta provet.")).toBeInTheDocument();
+    });
+
+    it("can submit from the first question, not only the last", async () => {
+        mockBackend();
+        renderExam();
+
+        await screen.findByText("First question?");
+
+        // Click Submit from question 1
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in provet" }));
+
+        // Modal appears with unanswered warning
+        expect(screen.getByText(/obesvarade frågor/i)).toBeInTheDocument();
+        // Confirm — unanswered > 0 so button says "Submit anyway"
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in ändå" }));
+
+        expect(await screen.findByText("Result page")).toBeInTheDocument();
+
+        const submitCall = vi.mocked(apiClient).mock.calls.find(
+            ([endpoint]) => endpoint === "/api/exam/submit"
+        );
+        expect(submitCall).toBeDefined();
+    });
+
+    it("disables Next on the last question", async () => {
+        mockBackend();
+        renderExam();
+
+        await screen.findByText("First question?");
+        const nextButton = screen.getByRole("button", { name: "Nästa" });
+        expect(nextButton).not.toBeDisabled();
+
+        await userEvent.click(nextButton);    // → Q2
+        expect(screen.getByText("Second question?")).toBeInTheDocument();
+        expect(nextButton).toBeDisabled();
+    });
+
+    it("shows 'Submit anyway' when there are unanswered questions", async () => {
+        mockBackend();
+        renderExam();
+
+        await screen.findByText("First question?");
+        // Don't answer anything, just submit
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in provet" }));
+
+        // Modal should show "Submit anyway" (unanswered > 0)
+        expect(await screen.findByRole("button", { name: "Lämna in ändå" })).toBeInTheDocument();
+
+        // Clean up — cancel so no real submit fires
+        await userEvent.click(screen.getByRole("button", { name: "Gå tillbaka" }));
+    });
     });

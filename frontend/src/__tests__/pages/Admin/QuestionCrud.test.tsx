@@ -9,15 +9,15 @@ vi.mock("../../../api/apiClient", () => ({default: vi.fn()}));
 const subjects = [{id: 1, name: "Safety", description: "Safety", questionCount: 1},
     {id: 2, name: "Wildlife", description: "Wildlife", questionCount: 0}];
 const question: Question = {id: 1, questionText: "Original question?", optionA: "Moose", optionB: "Deer",
-    optionC: "Fox", optionD: "Bear", correctAnswer: "Fox", explanation: "An explanation",
+    optionC: "Fox", optionD: "Bear", correctAnswer: "C", explanation: "An explanation",
     imageUrl: "https://example.com/existing.jpg", subject: subjects[0]};
 
 beforeEach(() => {
     vi.resetAllMocks();
     vi.mocked(apiClient).mockImplementation(async endpoint => {
         if (endpoint === "/api/subjects") return subjects;
-        if (endpoint === "/api/questions?subjectId=1") return [question];
-        if (endpoint === "/api/questions?subjectId=2") return [];
+        if (endpoint === "/api/admin/questions?subjectId=1") return [question];
+        if (endpoint === "/api/admin/questions?subjectId=2") return [];
         throw new Error("Unexpected request");
     });
 });
@@ -39,6 +39,57 @@ async function fillCreate() {
 const mutations = () => vi.mocked(apiClient).mock.calls.filter(([, options]) => options?.method);
 
 describe("Admin question CRUD", () => {
+    it("displays the bank image and handles loading failure", async () => {
+        render(<QuestionBank />);
+        const image = await screen.findByRole("img", {name: "Image for question: Original question?"});
+        expect(image).toHaveAttribute("src", question.imageUrl);
+        fireEvent.error(image);
+        expect(screen.queryByRole("img")).not.toBeInTheDocument();
+        expect(screen.getByText("Question image unavailable.")).toBeInTheDocument();
+        expect(screen.getByRole("heading", {name: "#1: Original question?"})).toBeInTheDocument();
+    });
+
+    it("creates with an image URL and previews it", async () => {
+        await open("create");
+        await fillCreate();
+        const imageUrl = "https://example.com/new.jpg";
+        fireEvent.change(screen.getByLabelText("Image URL (optional)"), {target: {value: ` ${imageUrl} `}});
+        expect(within(screen.getByRole("form")).getByRole("img")).toHaveAttribute("src", imageUrl);
+        vi.mocked(apiClient).mockResolvedValueOnce({...question, id: 2, imageUrl});
+        await userEvent.click(screen.getByRole("button", {name: "Save question"}));
+        expect(JSON.parse(mutations()[0][1]!.body as string)).toEqual({
+            questionText: "New question?", optionA: "Moose", optionB: "Deer", optionC: "Fox", optionD: "Bear",
+            correctAnswer: "C", explanation: "", subjectId: 1, imageUrl});
+    });
+
+    it.each(["replace", "remove", "clear"])("can %s an existing image", async mode => {
+        await open("edit");
+        const input = screen.getByLabelText("Image URL (optional)");
+        expect(input).toHaveValue(question.imageUrl);
+        expect(input).toHaveAttribute("maxlength", "1000");
+        if (mode === "remove") await userEvent.click(screen.getByRole("button", {name: "Remove image"}));
+        else fireEvent.change(input, {target: {value: mode === "replace" ? "https://example.com/replaced.jpg" : ""}});
+        const imageUrl = mode === "replace" ? "https://example.com/replaced.jpg" : null;
+        vi.mocked(apiClient).mockResolvedValueOnce({...question, imageUrl});
+        await userEvent.click(screen.getByRole("button", {name: "Save question"}));
+        expect(JSON.parse(mutations()[0][1]!.body as string)).toEqual({
+            questionText: question.questionText, optionA: "Moose", optionB: "Deer", optionC: "Fox", optionD: "Bear",
+            correctAnswer: "C", explanation: question.explanation, subjectId: 1, imageUrl});
+        await screen.findByText("Question #1 updated in Safety.");
+        if (imageUrl) expect(screen.getByRole("img")).toHaveAttribute("src", imageUrl);
+        else expect(screen.queryByRole("img")).not.toBeInTheDocument();
+    });
+
+    it.each(["javascript:alert(1)", "not a URL", "https://example.com/" + "a".repeat(1000)])(
+        "rejects invalid image input without sending (%#)", async value => {
+            await open("edit");
+            fireEvent.change(screen.getByLabelText("Image URL (optional)"), {target: {value}});
+            await userEvent.click(screen.getByRole("button", {name: "Save question"}));
+            expect(screen.getByRole("alert")).toHaveTextContent(value.length > 1000
+                ? "Image URL must be at most 1000 characters." : "Enter a complete HTTP or HTTPS image URL.");
+            expect(mutations()).toHaveLength(0);
+        });
+
     it("can add a question to an empty subject and cancel without sending", async () => {
         render(<QuestionBank />);
         await screen.findByRole("heading", {name: "#1: Original question?"}, {timeout: 5000});
@@ -85,11 +136,11 @@ describe("Admin question CRUD", () => {
         await fillCreate();
         await userEvent.clear(screen.getByLabelText("Option C (required)"));
         await userEvent.type(screen.getByLabelText("Option C (required)"), "Red fox");
-        vi.mocked(apiClient).mockResolvedValueOnce({...question, id: 2, questionText: "New question?", optionC: "Red fox", correctAnswer: "Red fox"});
+        vi.mocked(apiClient).mockResolvedValueOnce({...question, id: 2, questionText: "New question?", optionC: "Red fox", correctAnswer: "C"});
         await userEvent.click(screen.getByRole("button", {name: "Save question"}));
         expect(apiClient).toHaveBeenCalledWith("/api/admin/questions", {method: "POST", body: JSON.stringify({
             questionText: "New question?", optionA: "Moose", optionB: "Deer", optionC: "Red fox", optionD: "Bear",
-            correctAnswer: "Red fox", explanation: "", subjectId: 1})});
+            correctAnswer: "C", explanation: "", subjectId: 1, imageUrl: null})});
         expect(await screen.findByRole("heading", {name: "#2: New question?"})).toBeInTheDocument();
         expect(screen.getByText("Question #2 created in Safety.")).toBeInTheDocument();
         expect(screen.getByRole("option", {name: "Safety (2)"})).toBeInTheDocument();
@@ -109,13 +160,13 @@ describe("Admin question CRUD", () => {
         await userEvent.type(screen.getByLabelText("Option C (required)"), "Arctic fox");
         await userEvent.clear(screen.getByLabelText("Question text (required)"));
         await userEvent.type(screen.getByLabelText("Question text (required)"), "Updated question?");
-        vi.mocked(apiClient).mockResolvedValueOnce({...question, questionText: "Updated question?", optionC: "Arctic fox", correctAnswer: "Arctic fox"});
+        vi.mocked(apiClient).mockResolvedValueOnce({...question, questionText: "Updated question?", optionC: "Arctic fox", correctAnswer: "C"});
         await userEvent.click(screen.getByRole("button", {name: "Save question"}));
         expect(apiClient).toHaveBeenCalledWith("/api/admin/questions/1", {method: "PUT", body: JSON.stringify({
             questionText: "Updated question?", optionA: "Moose", optionB: "Deer", optionC: "Arctic fox", optionD: "Bear",
-            correctAnswer: "Arctic fox", explanation: question.explanation, subjectId: 1, imageUrl: question.imageUrl})});
+            correctAnswer: "C", explanation: question.explanation, subjectId: 1, imageUrl: question.imageUrl})});
         const card = (await screen.findByRole("heading", {name: "#1: Updated question?"})).closest("article")!;
-        expect(within(card).getByText(/Correct answer:/).parentElement).toHaveTextContent("Arctic fox");
+        expect(within(card).getByText(/Correct answer:/).parentElement).toHaveTextContent("C");
         expect(screen.queryByRole("heading", {name: "#1: Original question?"})).not.toBeInTheDocument();
     });
 
@@ -173,11 +224,15 @@ describe("Admin question CRUD", () => {
         expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     });
 
-    it.each([['{"message":"404 NOT_FOUND \\"Question not found\\""}', "This question no longer exists."],
-        ['API request failed: 403', "You do not have permission to manage questions."],
-        ['{"message":"Subject not found"}', "This subject no longer exists."]])("handles existing backend error %s", async (error, message) => {
+    it.each([
+        ["404", 404, '{"message":"Question not found"}', "This question or its subject no longer exists."],
+        ["403", 403, "API request failed: 403", "You do not have permission to manage questions."],
+        ["400", 400, '{"message":"Correct answer must match one of the option texts"}', "Correct answer must match one of the option texts"],
+        ["500 with code", 500, '{"message":"An unexpected error occurred and has been logged as code 7F3A2C. Please try again."}', "code 7F3A2C"],
+    ])("handles backend error %s", async (_label, status, body, message) => {
         await open("edit");
-        vi.mocked(apiClient).mockRejectedValueOnce(new Error(error));
+        // What apiClient throws for an HTTP error: the response body as message, plus the status.
+        vi.mocked(apiClient).mockRejectedValueOnce(Object.assign(new Error(body), {status}));
         await userEvent.click(screen.getByRole("button", {name: "Save question"}));
         expect(await screen.findByRole("alert")).toHaveTextContent(message);
         expect(screen.getByLabelText("Question text (required)")).toHaveValue(question.questionText);

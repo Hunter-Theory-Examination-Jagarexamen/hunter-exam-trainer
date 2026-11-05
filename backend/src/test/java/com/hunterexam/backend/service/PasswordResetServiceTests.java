@@ -18,14 +18,28 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class PasswordResetServiceTests {
     @Mock UserRepository users;
     @Mock PasswordResetEmailService emails;
+    @Mock PasswordResetRateLimiter rateLimiter;
     @Mock JwtService jwt;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     private PasswordResetService service;
@@ -33,7 +47,7 @@ class PasswordResetServiceTests {
 
     @BeforeEach
     void setUp() {
-        service = new PasswordResetService(users, encoder, emails);
+        service = new PasswordResetService(users, encoder, emails, rateLimiter);
         user = new User();
         user.setEmail("student@example.test");
         user.setRole(Role.STUDENT);

@@ -147,8 +147,8 @@ class AuthServiceTests {
         RuntimeException error = assertThrows(RuntimeException.class,
                 () -> authService.login(login("nobody@example.test", PASSWORD)));
 
-        // GlobalExceptionHandler picks 401 "Invalid email or password" by looking
-        // for "invalid" or "password" in the message, so the message matters here
+        // Same message for unknown email and wrong password, so attackers can't
+        // tell which emails are registered
         assertEquals("Invalid email or password", error.getMessage());
         verifyNoInteractions(jwtService);
     }

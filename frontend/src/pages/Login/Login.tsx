@@ -7,6 +7,7 @@ const Login = () => {
 
     const [searchParams] = useSearchParams();
     const googleError = searchParams.get("error") === "google";
+    const sessionExpired = searchParams.get("expired") === "1";
 
     return (
         <div className="auth-page login">
@@ -26,6 +27,12 @@ const Login = () => {
             {googleError && (
                 <div className="auth-error-banner">
                     Google sign-in failed. Try again or use another method.
+                </div>
+            )}
+
+            {sessionExpired && (
+                <div className="auth-error-banner">
+                    Your session has expired. Please log in again.
                 </div>
             )}
 

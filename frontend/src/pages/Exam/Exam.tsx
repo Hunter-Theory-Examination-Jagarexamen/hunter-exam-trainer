@@ -2,38 +2,51 @@ import "../../styles/exam.css";
 import ExamHeader from "../../components/exam/ExamHeader";
 import QuestionPanel from "../../components/exam/QuestionPanel";
 import ExamNavigation from "../../components/exam/ExamNavigation";
+import ExamOverview from "../../components/exam/ExamOverview";
+import { useExamBookmarks } from "../../hooks/useExamBookmarks";
 import type { ExamQuestion } from "../../types/examQuestion.ts";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import apiClient from "../../api/apiClient.ts";
+import apiClient, { ApiError } from "../../api/apiClient.ts";
+import { useTranslation } from "react-i18next";
 
+
+interface ExamStartResponse {
+    attemptId: string;
+    questions: ExamQuestion[];
+}
 
 const Exam = () => {
 
     const navigate = useNavigate();
 
-    const [sessionId, setSessionId] = useState<string | null>(null);
+    const [attemptId, setAttemptId] = useState<string | null>(null);
     const [questions, setQuestions] = useState<ExamQuestion[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [timeLeft, setTimeLeft] = useState(60 * 60);
+    const { t } = useTranslation();
 
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [overviewOpen, setOverviewOpen] = useState(false);
+    const { bookmarks, toggleBookmark, isBookmarked } = useExamBookmarks(attemptId);
+
+    // The start request, shared by both runs of the load effect. React's
+    // StrictMode (development only) runs effects twice; without this, the page
+    // would start two exams, and both would try to create the same per-subject
+    // totals rows on the server (#174). A ref keeps its value between the runs
+    // and, unlike state, changing it doesn't redraw the page.
+    const startRequest = useRef<Promise<ExamStartResponse> | null>(null);
 
     const submitExam = useCallback(async () => {
 
         try {
-            const questionIds = questions.map(
-                (question) => question.id);
-
             const result = await apiClient("/api/exam/submit", {
                 method: "POST",
-                body: JSON.stringify({
-                    sessionId,
-                    questionIds,
-                    answers
-                })
+                // Only which exam: the answers are already saved on the server.
+                body: JSON.stringify({ attemptId })
             });
 
             console.log("Exam result: ", result);
@@ -43,9 +56,14 @@ const Exam = () => {
         }
         catch (err) {
             console.error("Failed to submit exam: ", err);
-            alert("Failed to submit exam. Please try again");
+
+            if (err instanceof ApiError && err.status === 401) {
+                return;
+            }
+
+            alert(t("exam.submitFailed"));
         }
-    }, [sessionId, questions, answers, navigate]);
+    }, [attemptId, navigate]);
 
 
     //Load exam questions
@@ -57,22 +75,24 @@ const Exam = () => {
                 setIsLoading(true);
                 setError("");
 
-                interface ExamStartResponse {
-                    sessionId: string;
-                    questions: ExamQuestion[];
-                }
-
-                const data: ExamStartResponse =
-                    await apiClient("/api/exam/start", {
+                if (!startRequest.current) {
+                    startRequest.current = apiClient("/api/exam/start", {
                         method: "POST"
                     });
-                setSessionId(data.sessionId);
+                }
+                const data = await startRequest.current;
+                setAttemptId(data.attemptId);
                 setQuestions(data.questions);
             }
 
-            catch (err) {
+            catch (err: unknown) {
                 console.error("Failed to load exam questions.", err);
-                setError("Failed to load exam questions. Please try again.");
+                const errorObj = err as { status?: number; message?: string };
+                if (errorObj.status === 409 || (errorObj?.message && errorObj.message.includes("Not enough questions"))) {
+                    setError(errorObj.message || t("exam.startNotEnough"));
+                } else {
+                    setError(t("exam.startError"));
+                }
             }
             finally {
                 setIsLoading(false);
@@ -84,40 +104,85 @@ const Exam = () => {
 
     // Timer
     useEffect(() => {
-
         if (timeLeft <= 0) {
             return;
         }
 
         const timer = setInterval(() => {
-            setTimeLeft(
-                (previousTime) => previousTime - 1
-            );
+            setTimeLeft((previousTime) => Math.max(0, previousTime - 1));
         }, 1000);
 
         return () => clearInterval(timer);
 
     }, [timeLeft]);
 
-    // Auto-submit when time runs out
+// Auto-submit when time runs out
     useEffect(() => {
-        if (timeLeft === 0 && questions.length > 0) {
+        if (timeLeft <= 0 && questions.length > 0) {
             void submitExam();
         }
     }, [timeLeft, submitExam, questions]);
 
     const handleSubmit = () => {
+        setShowConfirmModal(true);
+    }
+
+    const handleConfirmSubmit = () => {
+        setShowConfirmModal(false);
         void submitExam();
     };
 
+    const handleCancelSubmit = () => {
+        setShowConfirmModal(false);
+    }
+
     const currentQuestion = questions[currentQuestionIndex];
 
-    const handleAnswerChange = (answerId: string) => {
+    const handleAnswerChange = async (answerId: string) => {
+        // Skip if the user re-clicked the same option (no-op on the server too).
+        if (answers[currentQuestion.id] === answerId) {
+            return;
+        }
+
+        // Update local state immediately for UI responsiveness.
         setAnswers((previousAnswers) => ({
             ...previousAnswers,
             [currentQuestion.id]: answerId
         }));
+
+        // Persist to the server (best-effort). If this fails, we keep going:
+
+        // the local state still holds the answer, and the user can try again by selecting a different option (which retries the save).
+        if (!attemptId) {
+            return;
+        }
+
+        try {
+            await apiClient(`/api/exam/${attemptId}/answer`, {
+                method: "POST",
+                body: JSON.stringify({
+                    questionId: currentQuestion.id,
+                    answer: answerId,
+                }),
+            });
+        }
+        catch (err) {
+            // Do not interrupt the user mid-exam.  Log for debugging.
+            console.error("Failed to save answer:", err);
+
+        }
     };
+
+    const handleJumpToQuestion = (index: number) => {
+        setCurrentQuestionIndex(index);
+        setOverviewOpen(false);
+    };
+
+    const handleToggleBookmark = () => {
+        if (!currentQuestion) return;
+        toggleBookmark(currentQuestion.id);
+    };
+
 
     const handleNext = () => {
         if (currentQuestionIndex < questions.length - 1) {
@@ -134,7 +199,7 @@ const Exam = () => {
     if (isLoading) {
         return (
             <div className="exam">
-                <p>Loading exam questions...</p>
+                <p>{t("exam.loading")}</p>
             </div>
         );
     }
@@ -155,27 +220,100 @@ const Exam = () => {
         );
     }
 
+    const answeredCount = Object.keys(answers).length;
+    const totalQuestions = questions.length;
+    const unansweredCount = totalQuestions - answeredCount;
+
     return (
         <div className="exam">
+            <div className="exam-progress-bar text-center my-2">
+                Answered {answeredCount} / {totalQuestions}
+            </div>
+
             <ExamHeader
                 currentQuestion={currentQuestionIndex + 1}
                 totalQuestions={questions.length}
                 timeLeft={timeLeft}
+                onToggleOverview={() => setOverviewOpen((open) => !open)}
+                overviewOpen={overviewOpen}
             />
 
-            <QuestionPanel
-                question={currentQuestion}
-                selectedAnswer={answers[currentQuestion.id]}
-                onAnswerChange={handleAnswerChange}
-            />
+            <div className="exam-with-overview">
+                <div className="exam-main">
+                    <QuestionPanel
+                        question={currentQuestion}
+                        selectedAnswer={answers[currentQuestion.id]}
+                        onAnswerChange={handleAnswerChange}
+                        isBookmarked={isBookmarked(currentQuestion.id)}
+                        onToggleBookmark={handleToggleBookmark}
+                    />
 
-            <ExamNavigation
-                onPrevious={handlePrevious}
-                onNext={handleNext}
-                onSubmit={handleSubmit}
-                isFirstQuestion={currentQuestionIndex === 0}
-                isLastQuestion={currentQuestionIndex === questions.length - 1}
-            />
+                    <ExamNavigation
+                        onPrevious={handlePrevious}
+                        onNext={handleNext}
+                        onSubmit={handleSubmit}
+                        isFirstQuestion={currentQuestionIndex === 0}
+                        isLastQuestion={currentQuestionIndex === questions.length - 1}
+                    />
+                </div>
+
+                <aside className={`exam-overview-sidebar ${overviewOpen ? "is-open" : ""}`}>
+                    <ExamOverview
+                        questions={questions}
+                        answers={answers}
+                        bookmarks={bookmarks}
+                        currentIndex={currentQuestionIndex}
+                        onJumpToQuestion={handleJumpToQuestion}
+                    />
+                </aside>
+            </div>
+
+            {overviewOpen && (
+                <div
+                    className="exam-overview-backdrop"
+                    onClick={() => setOverviewOpen(false)}
+                    aria-hidden="true"
+                />
+            )}
+
+
+            {showConfirmModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                    <div className="question-card text-center max-w-md w-full">
+                        <h3 className="text-xl font-bold mb-3 text-[var(--color-text)]">
+                            {t("exam.confirm.title")}
+                        </h3>
+                        {unansweredCount > 0 ? (
+                            <p className="text-[var(--color-text)] opacity-80 mb-6">
+                                {t("exam.confirm.unanswered", { count: unansweredCount })}
+                            </p>
+                        ) : (
+                            <p className="text-[var(--color-text)] opacity-80 mb-6">
+                                {t("exam.confirm.allAnswered")}
+                            </p>
+                        )}
+                        <div className="flex justify-center">
+                            <button
+                                onClick={handleCancelSubmit}
+                                className="previous-button"
+                                style={{ borderRadius: "8px", padding: "0.5rem 1rem", fontSize: "0.9rem", fontWeight: 600, marginRight: "12px" }}
+                            >
+                                {t("exam.confirm.goBack")}
+                            </button>
+                            <button
+                                onClick={handleConfirmSubmit}
+                                className="next-button"
+                                style={{ borderRadius: "8px", padding: "0.5rem 1rem", fontSize: "0.9rem", fontWeight: 600 }}
+                            >
+                                {unansweredCount > 0
+                                    ? t("exam.confirm.submitAnyway")
+                                    : t("exam.navigation.submit")}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 };

@@ -136,6 +136,7 @@ const Statistics = () => {
                         value={weeksRange}
                         onChange={(e) => setWeeksRange(Number(e.target.value))}
                         className="weeks-select"
+                        aria-label="Time range for progress over time"
                     >
                         <option value={4}>Last 4 weeks</option>
                         <option value={8}>Last 8 weeks</option>
@@ -147,7 +148,7 @@ const Statistics = () => {
                     {isLoadingProgressOverTime && <p>Loading progress...</p>}
 
                     {!isLoadingProgressOverTime && progressOverTimeError && (
-                        <p>{progressOverTimeError}</p>
+                        <p role="alert">{progressOverTimeError}</p>
                     )}
 
                     {!isLoadingProgressOverTime && !progressOverTimeError && (
@@ -163,7 +164,7 @@ const Statistics = () => {
                 )}
 
                 {!isLoadingProgress && progressError && (
-                    <p>{progressError}</p>
+                    <p role="alert">{progressError}</p>
                 )}
 
                 {!isLoadingProgress &&
@@ -200,7 +201,7 @@ const Statistics = () => {
                     )}
 
                     {recentError && (
-                        <p>{recentError}</p>
+                        <p role="alert">{recentError}</p>
                     )}
 
                     {!isLoadingRecent &&

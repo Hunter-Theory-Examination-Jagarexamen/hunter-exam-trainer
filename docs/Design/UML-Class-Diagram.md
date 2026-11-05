@@ -18,12 +18,6 @@ class Role {
     ADMIN
 }
 
-class ExamSession {
-    +Long id
-    +LocalDateTime startedAt
-    +boolean completed
-}
-
 class Subject { 
     +Long id 
     +String name 
@@ -41,29 +35,46 @@ class Question {
     +String explanation
 }
 
-class PracticeResult { 
-    +Long id 
-    +long correctAnswers 
-    +long totalQuestions 
-    +long score 
-    +LocalDateTime completedAt 
-} 
-
-class ExamResult { 
-    +Long id 
-    +int totalQuestions 
-    +int correctAnswers 
-    +int incorrectAnswers 
-    +int unanswered 
-    +int score 
-    +LocalDateTime completedAt 
+class Attempt {
+    +Long id
+    +AttemptType type
+    +LocalDateTime startedAt
+    +LocalDateTime finishedAt
+    +boolean scored
+    +isFinished() boolean
 }
 
-    User "1" --> "*" PracticeResult : has 
-    User "1" --> "*" ExamResult : has 
-    User "1" --> "*" ExamSession : starts 
+class AttemptType {
+    <<enumeration>>
+    SUBJECT_PRACTICE
+    RANDOM_PRACTICE
+    MOCK_EXAM
+}
+
+class AttemptQuestion {
+    +Long id
+    +int position
+    +String chosenOption
+    +Boolean correct
+    +LocalDateTime answeredAt
+    +isAnswered() boolean
+    +recordAnswer(chosenOption, correct, answeredAt)
+}
+
+class SubjectStats {
+    +Long id
+    +long answered
+    +long correct
+    +LocalDateTime lastAnsweredAt
+}
+
     User --> Role : has 
+    User "1" --> "*" Attempt : starts
+    Attempt --> AttemptType : has
+    Attempt "1" --> "*" AttemptQuestion : contains
+    AttemptQuestion "*" --> "1" Question : asks
+    User "1" --> "*" SubjectStats : has
+    SubjectStats "*" --> "1" Subject : counts
     Subject "1" --> "*" Question : contains 
-    PracticeResult "*" --> "1" Subject : for 
     Question "*" --> "1" Subject : belongs to
 ```

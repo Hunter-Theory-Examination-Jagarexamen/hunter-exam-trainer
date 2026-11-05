@@ -34,11 +34,11 @@ The purpose of this project is to develop a digital practice app where participa
 
 **2.2 Delimitations (out of scope for MVP)**
 
-  - Built-in payment function or course booking is not handled in this version.
+  - Built-in payment function or course booking is not handled in this version (payment confirmed out of scope by the supervisor, 2026-10-16).
 
   - Practical elements (shooting test, search test) are not included - the app only trains the theoretical part.
 
-  - Full native mobile app (App Store/Google Play) is not prioritized; an installable web app (PWA) is considered to provide the best benefit in relation to time and resources.
+  - Full native mobile app (App Store/Google Play) is not prioritized; an installable web app (PWA) is considered to provide the best benefit in relation to time and resources (confirmed by the supervisor, 2026-10-16: no native app).
 
 ## 3. Target group and benefit
 
@@ -75,7 +75,7 @@ The schedule is divided into four phases. It is deliberately laid out so that a 
 | -------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Week** | **Phase / focus**                          | **Activities and deliverables**                                                                                                                                                                                                                   |
 | 1–2      | Preliminary study and planning             | Gathering requirements (go through the Jägareförbundet's course material and the test's question types), sketch interfaces, choose technology, set up project environment and Git-repo. Deliverable: requirement specification and system sketch. |
-| 3–4      | Basic structure                            | Build data model and database, set up API skeleton, first interface sketches in code, start collecting and categorizing questions for the question bank (goal: at least 150 questions distributed across all subject areas).                      |
+| 3–4      | Basic structure                            | Build data model and database, set up API skeleton, first interface sketches in code, start collecting and categorizing questions for the question bank (distributed across all subject areas).                      |
 | 5–6      | First Working Version (MVP)                | Quiz mode with correction and results, easy login, basic statistics. Deliverable: internal demo and initial coordination with supervisor/test user.                                                                                               |
 | 7–9      | Further development                        | Exam simulation (70 questions, timed), in-depth statistics and progression over time, admin interface to manage the question bank, mobile customization (PWA, installable).                                                                       |
 | 10       | User tests                                 | Have a test group (eg participants in an ongoing hunter exam course) try out the app, collect feedback and bug reports.                                                                                                                           |
@@ -88,7 +88,7 @@ The schedule is divided into four phases. It is deliberately laid out so that a 
 
   - Admin interface for managing questions and following up on results.
 
-  - Question bank with at least 150–200 categorized and quality-reviewed questions.
+  - Question bank with categorized and quality-reviewed questions.
 
   - Technical documentation: requirements specification, system sketch (see section 9), test report and operation/management guide.
 
@@ -109,7 +109,23 @@ The schedule is divided into four phases. It is deliberately laid out so that a 
 
 Below is a general sketch of the main parts of the system and how they work together. More detailed technical documentation is produced during the preliminary study phase (weeks 1–2).
 
-![System sketch](media/media/image1.png)
+```mermaid
+flowchart TB
+    USER["<b>USER</b><br/>Prospective hunters practising for the theory test - mobile or computer"]
+    CLIENT["<b>CLIENT (Frontend / PWA)</b><br/>Web app + mobile adapted (React/Next.js, installable as an app)<br/>Views: Quiz, Practise mode, Test simulation, Statistic, Profile"]
+    BACKEND["<b>BACKEND / API (REST)</b><br/>Node.js/Express (or equivalent) - business logic & authentication<br/>Random questions, correct answer, calculates results & progression<br/>Endpoints: /quiz /results /users /questions"]
+    AUTH["<b>AUTHENTICATION</b><br/>Login/account<br/>(email + password or Bank ID)"]
+    DB[("<b>DATABASE</b><br/>PostgreSQL / Supabase / Firebase<br/>Tables: Questions & answer options (categorized according to the exam's 11 subject areas), User, Test results, Response history, Progress statistics")]
+    ADMIN["<b>ADMIN - INTERFACE</b><br/>For course leader/content manager: add, edit and categorize questions and follow the group's result"]
+
+    USER <-->|"User Interface (HTTPS)"| CLIENT
+    CLIENT <-->|"JSON/REST calls (JWT authentication)"| BACKEND
+    BACKEND <-->|"Stores / retrieves data (SQL / ORM)"| DB
+    BACKEND -->|"Handles question bank & sees statistics"| ADMIN
+    AUTH ~~~ BACKEND
+```
+
+*Communication takes place via HTTPS/JSON. Frontend is built as a Progressive Web App (PWA) - the same code base works in a browser on a computer and can be installed as an app on a mobile/tablet.*
 
 **This is how the system works in brief**
 

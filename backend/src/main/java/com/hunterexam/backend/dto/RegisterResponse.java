@@ -1,7 +1,6 @@
 package com.hunterexam.backend.dto;
 
 import lombok.Getter;
-import lombok.Setter;
 
 /**
  * Response returned after a successful user registration.

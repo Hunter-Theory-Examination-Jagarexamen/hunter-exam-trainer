@@ -1,0 +1,96 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "back": "Back"
+  },
+  "auth": {
+    "loginTitle": "Log In",
+    "registerTitle": "Register",
+    "emailLabel": "Email Address",
+    "passwordLabel": "Password",
+    "loginButton": "Log In",
+    "registerButton": "Register",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "registerLink": "Register here",
+    "loginLink": "Log in here"
+  },
+  "errors": {
+    "EMAIL_TAKEN": "Email already registered.",
+    "INVALID_CREDENTIALS": "Invalid email or password",
+    "PASSWORD_TOO_SHORT": "Password is too short.",
+    "PASSWORD_TOO_LONG": "Password is too long.",
+    "INVALID_CURRENT_PASSWORD": "Current password is incorrect.",
+    "TOO_MANY_RESET_REQUESTS": "Too many password reset requests. Please try again later.",
+    "EXAM_ALREADY_SUBMITTED": "Exam has already been submitted.",
+    "NOT_FOUND": "Resource is not found",
+    "UNKNOWN_ERROR": "An unexpected error occurred. Please try again."
+  },
+  "practice": {
+    "title": "Practice",
+    "loadingQuestions": "Loading questions...",
+    "subjectNotFound": "Subject not found.",
+    "noQuestionsYet": "There are no questions in this subject yet.",
+    "loadFailed": "Failed to load questions. Please try again.",
+    "subtitle": "Answer the questions and improve your knowledge.",
+    "progress": "Question {{current}} of {{total}}",
+    "checkAnswer": "Check Answer",
+    "correct": "Correct!",
+    "incorrect": "Incorrect. The correct answer is:",
+    "previous": "Previous",
+    "next": "Next",
+    "finish": "Finish",
+    "quitRound": "Quit round",
+    "quitTitle": "Quit this round?",
+    "quitText": "Your answers are already saved.",
+    "quitConfirm": "Quit",
+    "quitCancel": "Keep practising",
+    "resultTitle": "Result",
+    "resultAll": "You got {{correct}} of {{total}} correct.",
+    "resultPartial": "You answered {{answered}} of {{total}} questions and got {{correct}} correct.",
+    "backToSubjects": "Back to subjects",
+    "answerFailed": "Your answer couldn't be saved. Please try again.",
+    "finishFailed": "The round couldn't be finished. Please try again.",
+    "roundClosed": "This round is already finished, for example in another tab. Your answers are saved.",
+    "tryAgain": "Try again"
+  },
+  "exam": {
+    "loading": "Loading exam questions...",
+    "startError": "Failed to load exam questions. Please try again.",
+    "startNotEnough": "Not enough questions available to start the exam.",
+    "submitFailed": "Failed to submit exam. Your answers are saved on the server — please try again.",
+    "questionOf": "Question {{current}} of {{total}}",
+    "toggleOverview": "Overview",
+    "navigation": {
+      "previous": "Previous",
+      "next": "Next",
+      "submit": "Submit Exam"
+    },
+    "overview": {
+      "title": "Overview · {{answered}} / {{total}} answered",
+      "ariaLabel": "Question {{number}}",
+      "stateCurrent": "current",
+      "stateAnswered": "answered",
+      "stateUnanswered": "unanswered",
+      "stateBookmarked": "bookmarked"
+    },
+    "bookmark": {
+      "add": "Bookmark",
+      "remove": "Bookmarked",
+      "ariaLabelAdd": "Bookmark this question",
+      "ariaLabelRemove": "Remove bookmark"
+    },
+    "confirm": {
+      "title": "Submit Exam?",
+      "unanswered_one": "You have {{count}} unanswered question. It will count as wrong. Are you sure you want to submit?",
+      "unanswered_other": "You have {{count}} unanswered questions. They will count as wrong. Are you sure you want to submit?",
+      "allAnswered": "You have answered all questions. Are you sure you want to submit?",
+      "goBack": "Go back",
+      "submitAnyway": "Submit anyway"
+    }
+  }
+}

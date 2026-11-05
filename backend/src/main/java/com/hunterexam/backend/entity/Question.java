@@ -1,6 +1,13 @@
 package com.hunterexam.backend.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -35,14 +42,15 @@ public class Question {
     @Column(nullable = false)
     private String optionD;
 
-    // Stores the correct option's text (not the letter A/B/C/D).
+    // Stores the correct option as a letter: "A", "B", "C", or "D".
+    // Column kept as varchar(255) so the migration to letters doesn't need a schema change.
     @Column(nullable = false)
     private String correctAnswer;
 
     // Optional explanation shown to the user after answering, for learning purposes.
     private String explanation;
 
-    @Column(name = "image_url")
+    @Column(name = "image_url", length = 1000)
     private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -2,7 +2,7 @@ import PageTitle from "../../components/common/PageTitle.tsx";
 import StatisticsCards from "../../components/dashboard/StatisticsCards.tsx";
 import "../../styles/dashboard.css"
 import QuickActions from "../../components/dashboard/QuickActions.tsx";
-import RecentActivity from "../../components/dashboard/RecentActivity.tsx";
+import RecentActivityList from "../../components/dashboard/RecentActivityList.tsx";
 
 const Dashboard = () => {
     return (
@@ -15,7 +15,7 @@ const Dashboard = () => {
 
             <QuickActions />
 
-            <RecentActivity />
+            <RecentActivityList />
         </div>
     );
 };

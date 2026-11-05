@@ -1,14 +1,14 @@
 package com.hunterexam.backend.controller;
 
+import com.hunterexam.backend.dto.ProgressOverTimeResponse;
 import com.hunterexam.backend.dto.SubjectPerformanceResponse;
 import com.hunterexam.backend.service.StatisticsService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.hunterexam.backend.dto.ProgressOverTimeResponse;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 

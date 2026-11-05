@@ -26,16 +26,21 @@ public class PasswordResetService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final PasswordResetEmailService emailService;
+    private final PasswordResetRateLimiter rateLimiter;
 
     public PasswordResetService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-            PasswordResetEmailService emailService) {
+            PasswordResetEmailService emailService, PasswordResetRateLimiter rateLimiter) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.rateLimiter = rateLimiter;
     }
 
     @Transactional
     public void requestReset(String email) {
+        // Refused before any account lookup, token generation or email, so registered
+        // and unregistered addresses share one limit and never reveal account existence.
+        rateLimiter.check(email);
         userRepository.findByEmailForPasswordReset(email)
                 .filter(this::canResetPassword)
                 .ifPresent(user -> {

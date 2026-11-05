@@ -1,27 +1,25 @@
 package com.hunterexam.backend.controller;
 
+import com.hunterexam.backend.dto.ExamSubmitResponse;
 import com.hunterexam.backend.dto.ExamStartResponse;
-import com.hunterexam.backend.entity.User;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-
-
-import com.hunterexam.backend.dto.ExamQuestionResponse;
-import com.hunterexam.backend.dto.ExamResultResponse;
 import com.hunterexam.backend.dto.ExamSubmitRequest;
 import com.hunterexam.backend.service.ExamService;
+import com.hunterexam.backend.dto.ExamAnswerRequest;
+import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 /**
  * REST controller for the mock hunter exam.
  * <p>
- * Provides endpoints for starting a mock exam and submitting
- * the completed exam for evaluation.
+ * Provides endpoints for starting a mock exam, saving answers as they are
+ * given, and submitting the completed exam for evaluation.
  */
 @RestController
 @RequestMapping("/api/exam")
@@ -33,40 +31,61 @@ public class ExamController {
         this.examService = examService;
     }
 
-
     /**
      * Starts a new mock exam.
      * <p>
      * The service selects 70 questions and returns them without
      * exposing the correct answers to the client.
      *
-     * @return list of questions for the mock exam
+     * @param authentication authentication info from Spring Security
+     * @return the exam's attempt id and its 70 questions
      */
-    @PostMapping("/start") 
-    public ExamStartResponse startExam(@AuthenticationPrincipal User user) {
-
-        return examService.startExam(user);
+    @PostMapping("/start")
+    public ExamStartResponse startExam(Authentication authentication) {
+        try {
+            return examService.startExam(authentication.getName());
+        } catch (DataIntegrityViolationException e) {
+            // Two starts at the same moment (double click, two tabs, or a practice
+            // round started at the same time) can both try to create the student's
+            // SubjectStats row for a subject. The losing start's transaction is
+            // rolled back, so it is retried once here, outside it, in a new
+            // transaction; this time the row exists. Same as practice start.
+            return examService.startExam(authentication.getName());
+        }
     }
 
-
     /**
-     * Submits a completed mock exam for evaluation.
+     * Saves (or changes) a single answer in the running mock exam.
      * <p>
-     * The user's email is obtained from the JWT authentication context.
-     * The service evaluates the submitted answers and stores the exam result.
+     * Called as the user answers each question, so a lost connection,
+     * expired token, or closed tab does not lose the attempt. Protected
+     * by the same ownership rules as submit.
      *
-     * @param authentication authentication information from Spring Security
-     * @param request submitted question IDs and user answers
-     * @return calculated exam result
+     * @param authentication authentication info from Spring Security
+     * @param attemptId      the exam's attempt id
+     * @param request        the question id and chosen answer
+     * @return 204 No Content on success
      */
+    @PostMapping("/{attemptId}/answer")
+    public ResponseEntity<Void> saveAnswer(
+        Authentication authentication,
+        @PathVariable Long attemptId,
+        @Valid @RequestBody ExamAnswerRequest request
+    ) {
+        examService.saveAnswer(
+            attemptId,
+            request.getQuestionId(),
+            request.getAnswer(),
+            authentication.getName()
+        );
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/submit")
-    public ExamResultResponse submitExam(
+    public ExamSubmitResponse submitExam(
             Authentication authentication,
             @RequestBody ExamSubmitRequest request
     ) {
-
-        String email = authentication.getName();
-
-        return examService.submitExam(request, email);
+        return examService.submitExam(request, authentication.getName());
     }
 }

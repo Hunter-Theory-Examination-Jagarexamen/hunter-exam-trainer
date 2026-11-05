@@ -6,8 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,11 +29,13 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import javax.crypto.SecretKey;
 import java.util.Arrays;
 import java.util.List;
+
 /**
  * Configures authentication, authorization, JWT validation,
  * password encryption, and CORS for the application.
  */
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
@@ -111,6 +114,14 @@ public class SecurityConfig {
                         // Admin-only endpoints.
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
+                        // Subject writes live under /api/admin/subjects (rule above). The old
+                        // /api/subjects write paths have no handlers anymore, but they stay
+                        // admin-only so they can never be reopened; reads (GET) stay open
+                        // to any authenticated user.
+                        .requestMatchers(HttpMethod.POST,   "/api/subjects").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,    "/api/subjects/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/subjects/**").hasRole("ADMIN")
+
                         // All other endpoints require authentication.
                         .anyRequest().authenticated()
                 )
@@ -126,7 +137,7 @@ public class SecurityConfig {
         if (googleLoginEnabled) {
             http.oauth2Login(oauth2 -> oauth2
                     .successHandler(oAuth2LoginSuccessHandler)
-                    .failureUrl("http://localhost:5173/login?error=google")
+                    .failureUrl(frontendUrl + "/login?error=google")
             );
         }
 
@@ -134,11 +145,18 @@ public class SecurityConfig {
     }
 
     /*
+    Frontend URL used for redirects (e.g., login failure).
+    */
+    @Value("${app.frontend.url:http://localhost:5173}")
+    private String frontendUrl;
+
+    /*
      * JWT secret used to sign and validate authentication tokens.
      * <p>
      * The value is read from the JWT_SECRET environment variable
      * through application.properties.
      */
+
     @Value("${jwt.secret}")
     private String jwtSecret;
 

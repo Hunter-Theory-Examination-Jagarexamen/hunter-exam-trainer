@@ -118,6 +118,20 @@ should not be committed.
 
 Follow these steps when setting up the project on a new computer:
 
+**Local environment variables at a glance.** The backend reads these from its IntelliJ
+Run/Debug configuration (Spring Boot does not read `.env` files). The steps below explain each one.
+
+| Variable | Required? | Example | Details |
+|----------|-----------|---------|---------|
+| `DB_URL` | No, defaults to `jdbc:postgresql://localhost:5432/hunter_exam` | | [Step 3](#3-configure-database-credentials) |
+| `DB_USERNAME` | Yes | `postgres` | [Step 3](#3-configure-database-credentials) |
+| `DB_PASSWORD` | Yes | Your PostgreSQL password | [Step 3](#3-configure-database-credentials) |
+| `JWT_SECRET` | Yes, at least 32 characters | Output of `openssl rand -base64 32` | [Step 4](#4-configure-jwt-secret) |
+| `ADMIN_EMAIL` | Recommended: without it, no admin account is created | `admin@example.com` | [Step 4](#4-configure-jwt-secret) |
+| `ADMIN_PASSWORD` | Recommended, together with `ADMIN_EMAIL` | A password you choose | [Step 4](#4-configure-jwt-secret) |
+| `GOOGLE_LOGIN_ENABLED`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | No, Google login is off by default | | [Optional: Google Login](#optional-google-login) |
+| `MAIL_*` | No, local defaults work | | [Password recovery email](#password-recovery-email-smtp) |
+
 ### 1. Clone the repository
 
 Clone the repository and open the project in IntelliJ IDEA.
@@ -210,8 +224,14 @@ In IntelliJ IDEA:
 2. Select the Spring Boot backend configuration.
 3. Find Environment variables.
 4. Add JWT_SECRET, ADMIN_EMAIL, and ADMIN_PASSWORD.
-5. Paste the generated values.
+5. For `JWT_SECRET`, paste the value generated above. For `ADMIN_EMAIL` and
+   `ADMIN_PASSWORD`, choose your own: they are the login for your local admin account.
 6. Apply the changes and restart the backend.
+
+On startup, the backend creates an admin account with `ADMIN_EMAIL` and `ADMIN_PASSWORD`
+only if the database has no admin yet. If an admin already exists, changing `ADMIN_PASSWORD`
+later does not change that admin's password. If the variables are missing, the backend still
+starts and logs a warning, but no admin is created.
 
 The JWT secret is used only by the local backend and should not be added to `application.properties` or committed to GitHub.
 
@@ -308,8 +328,8 @@ rate-limit recovery requests at their ingress. Response statuses and bodies neve
 disclose account existence.
 
 Backend tests use H2 and mocked email boundaries; they need no external database
-or mail server. With Java 25, run `cd backend` then `./mvnw test` (Windows:
-`mvnw.cmd test`); see [Running the Backend Tests](#running-the-backend-tests). For the frontend run `npm ci` and `npm run build` from `frontend`,
+or mail server. With Java 25, run `cd backend` then `./mvnw test` (PowerShell/cmd:
+`mvnw.cmd test`; in Git Bash on Windows, use `./mvnw test`); see [Running the Backend Tests](#running-the-backend-tests). For the frontend run `npm ci` and `npm run build` from `frontend`,
 then run the frontend tests as described under [Running the Frontend Tests](#running-the-frontend-tests).
 
 ### 5. Start the Backend
@@ -397,7 +417,8 @@ variables or mail server are needed. From the `backend` directory:
 ./mvnw test -Dtest=ExamServiceTests#methodName # one test method
 ```
 
-In PowerShell, quote the option: `-D"test=ExamServiceTests"`. In IntelliJ, click
+In PowerShell or cmd, use `mvnw.cmd` instead of `./mvnw`, and in PowerShell quote the
+option: `-D"test=ExamServiceTests"`. In Git Bash, `./mvnw` works as shown, even on Windows. In IntelliJ, click
 the green run arrow next to a test class or method.
 
 Tests live in `backend/src/test/java/`, in the same packages as the classes they
@@ -496,93 +517,63 @@ Unauthenticated users are redirected to the login page.
 
 Logging out removes the JWT token from local storage and redirects the user to the login page.
 
+### Session expiry
+
+JWTs expire after 1 hour (see `JwtService.generateToken`). When a token expires:
+
+- The next authenticated API call returns `401`
+- The frontend clears the token from `localStorage`
+- The user is redirected to `/login?expired=1` and shown "Your session has expired. Please log in again."
+
+There are no refresh tokens: users must log in again after expiry.
+
+**Note:** a `401` from `/api/auth/login` is **not** treated as session expiry it just means wrong credentials. A `403` (forbidden) also does not log the user out.
+
 ## Main API Endpoints
 
-### Authentication
+The canonical endpoint list (paths, methods and required roles) is
+[docs/APIs/API-Specification.md](docs/APIs/API-Specification.md). Add new
+endpoints there instead of duplicating endpoint tables in this README.
 
-| Method | Endpoint             | Description            |
-|--------|----------------------|------------------------|
-| POST   | `/api/auth/register` | Register a new user    |
-| POST   | `/api/auth/login`    | Log in and receive JWT |
-| POST   | `/api/auth/forgot-password` | Request a password reset email |
-| POST   | `/api/auth/reset-password` | Set a new password using a reset token |
-| GET    | `/api/auth/google/status` | Whether Google login is enabled |
+### Error responses
 
-### User
+Errors return a JSON body `{"message": "..."}`. The status code depends on the
+kind of error, never on the message text (`GlobalExceptionHandler`):
 
-| Method | Endpoint                 | Description                                    |
-|--------|--------------------------|------------------------------------------------|
-| GET    | `/api/users/me`          | Get the currently logged-in user's information |
-| PUT    | `/api/users/me/password` | Change the user's password                     |
+| Status | When | Thrown as |
+|--------|------|-----------|
+| 400 | Invalid input or request body | `IllegalArgumentException`, `@Valid` failures |
+| 401 | Not logged in, or wrong email/password | `BadCredentialsException` |
+| 403 | Logged in but not allowed (e.g. a student calling an admin endpoint) | `AccessDeniedException` |
+| 404 | The user, subject, question or mock exam does not exist | `NotFoundException` |
+| 409 | Clashes with existing data (e.g. email already registered, too few questions for a mock exam), or the database refused the change (e.g. duplicate subject name, deleting a subject in use) | `ConflictException`, `DataIntegrityViolationException` |
+| 429 | Too many requests in a short time (e.g. repeating a password reset request for one email address) | `TooManyRequestsException` |
+| 500 | Unexpected error | anything else |
 
-### Subjects
+A 500 response never contains internal details. Its message includes a short generated
+code (e.g. `7F3A2C`) that is also written to the backend log with the full error,
+so a reported code can be looked up there.
 
-| Method | Endpoint        | Description                          |
-|--------|-----------------|--------------------------------------|
-| GET    | `/api/subjects` | Get all subjects and question counts |
+### Password reset rate limit
 
-### Questions
+`POST /api/auth/forgot-password` accepts **at most one request per email address
+every 60 seconds** (`app.password-reset.rate-limit-window-seconds`). Further
+requests are answered with `429` and the standard `{"message": "..."}` body,
+identically for registered and unregistered addresses, and before any token is
+created or any email is sent. The endpoint never reveals whether an address
+belongs to an account. Addresses are trimmed and lower-cased before counting, so
+`Student@Example.test` and `student@example.test` share one slot.
 
-| Method | Endpoint                        | Description                 |
-|--------|---------------------------------|-----------------------------|
-| GET    | `/api/questions?subjectId={id}` | Get questions for a subject |
+The counter is held **in memory**, so it is **per backend instance** and is
+cleared on application restart. Up to `app.password-reset.rate-limit-max-tracked-emails`
+(default 10000) addresses are remembered at a time; expired entries are dropped
+and, if the cap is reached, the oldest entry is forgotten first. If several
+instances run behind a load balancer, each counts its own requests.
 
-Question management requires a JWT with the `ADMIN` role. Regular users receive
-`403 Forbidden`; requests without authentication receive `401 Unauthorized`.
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/admin/questions` | Create a question (201, with Location header) |
-| PUT | `/api/admin/questions/{id}` | Replace a question (200) |
-| DELETE | `/api/admin/questions/{id}` | Delete a question (204) |
-
-POST and PUT accept the same JSON body:
-
-```json
-{
-  "questionText": "Which option is correct?",
-  "optionA": "First option",
-  "optionB": "Second option",
-  "optionC": "Third option",
-  "optionD": "Fourth option",
-  "correctAnswer": "First option",
-  "explanation": "Optional explanation",
-  "imageUrl": "https//:example.com/images/questions.jpg",
-  "subjectId": 1
-}
-```
-
-All fields except `explanation` and `imageUrl` are required. Text fields have a maximum length of
-255 characters. `imageUrl` is optional and supports an image illustration URL. `subjectId` must be positive and refer to an existing subject.
-`correctAnswer` must exactly match one of the four option texts. Invalid input
-returns 400; a missing question or subject returns 404. PUT replaces all editable
-fields, including clearing the explanation or image URL when omitted.
-
-### Practice
-
-| Method | Endpoint                | Description                       |
-|--------|-------------------------|-----------------------------------|
-| POST   | `/api/practice/results` | Save a completed practice session |
-
-### Mock Exam
-
-| Method | Endpoint           | Description                   |
-|--------|--------------------|-------------------------------|
-| POST   | `/api/exam/start`  | Start a 70-question mock exam |
-| POST   | `/api/exam/submit` | Submit a completed mock exam  |
-
-### Dashboard
-
-| Method | Endpoint                | Description                  |
-|--------|-------------------------|------------------------------|
-| GET    | `/api/dashboard`        | Get dashboard statistics     |
-| GET    | `/api/dashboard/recent` | Get recent mock exam results |
-
-### Statistics
-
-| Method | Endpoint                   | Description                         |
-|--------|----------------------------|-------------------------------------|
-| GET    | `/api/statistics/subjects` | Get practice performance by subject |
+Remaining limitation: only per-address counting is implemented, so one client can
+still request resets for many *different* addresses. There is no per-IP limit, and
+`X-Forwarded-For` is deliberately not used to identify clients because arbitrary
+values in that header cannot be trusted.
 
 
 ## Current Features
@@ -666,6 +657,8 @@ This allows the Hibernate/JPA to update the database schema based on the entity 
 
 This configuration is intended for the current development setup and should be reviewed before production deployment.
 
+Results are stored per answer: each practice round or mock exam is a row in `attempts`, with one row per question in `attempt_questions` (the chosen answer and whether it was correct). Running totals per student and subject are kept in `subject_stats`; see the [ER diagram](docs/Database/ER-Diagram.md).
+
 SQL logging is currently enabled:
 
 ```
@@ -698,15 +691,16 @@ This deployment is **not production, and not a permanent staging environment.** 
 
 **On Render (backend):**
 
-| Variable | Value / Notes |
-|---|---|
-| `DB_URL` | Neon connection string |
-| `DB_USERNAME` | Neon username |
-| `DB_PASSWORD` | Neon password |
-| `JWT_SECRET` | Same Base64 secret used locally |
-| `ADMIN_EMAIL` | Admin seed email |
-| `ADMIN_PASSWORD` | Admin seed password |
-| `APP_CORS_ALLOWED_ORIGINS` | `http://localhost:5173,https://hunter01-kappa.vercel.app` |
+| Variable                   | Value / Notes                                                                                                                               |
+|----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| `DB_URL`                   | Neon connection string                                                                                                                      |
+| `DB_USERNAME`              | Neon username                                                                                                                               |
+| `DB_PASSWORD`              | Neon password                                                                                                                               |
+| `JWT_SECRET`               | Same Base64 secret used locally                                                                                                             |
+| `ADMIN_EMAIL`              | Admin seed email (optional for local development; app starts with a warning if missing)                                                                                                                        |
+| `ADMIN_PASSWORD`           | Admin seed password (optional for local development)                                                                                                                        |
+| `APP_CORS_ALLOWED_ORIGINS` | `http://localhost:5173,https://hunter01-kappa.vercel.app`                                                                                   |
+| `FRONTEND_URL`             | Base URL for frontend redirects after OAuth2 login (e.g. `http://localhost:5173` locally or `https://hunter01-kappa.vercel.app` on staging) |
 
 **On Vercel (frontend):**
 
@@ -852,7 +846,6 @@ Backend:  http://localhost:8080
 ```
 
 Also check the browser console and backend logs for errors.
-
 
 ## Handover Notes
 

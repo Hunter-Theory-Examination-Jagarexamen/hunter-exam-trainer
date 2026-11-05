@@ -2,7 +2,7 @@
     height: 75px;
     background: var(--color-surface);
     border-bottom: 1px solid var(--color-border);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 
     display: flex;
     justify-content: space-between;
@@ -33,6 +33,28 @@
     border-radius: 20px;
 }
 
+/* =========================
+   Burger Menu Toggle
+   ========================= */
+
+.menu-toggle {
+    display: none;
+    border: none;
+    background: transparent;
+    color: var(--color-text, #333);
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-right: 0.25rem;
+}
+
+.menu-toggle:hover {
+    color: var(--color-primary);
+}
+
+/* =========================
+   Mobile
+   ========================= */
+
 @media (max-width: 768px) {
 
     .header {
@@ -40,15 +62,37 @@
         padding: 0 1rem;
     }
 
+    .header-left {
+        gap: 8px;
+        min-width: 0;  /* allow h1 to shrink and ellipsis */
+    }
+
     .header-left h1 {
-        font-size: 1.05rem;
+        font-size: 1rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .header-right {
         font-size: 0.8rem;
+        white-space: nowrap;
     }
 
     .header-logo {
         height: 24px;
+    }
+
+    .menu-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+}
+@media (max-width: 400px) {
+    .header-right {
+        display: none;
     }
 }

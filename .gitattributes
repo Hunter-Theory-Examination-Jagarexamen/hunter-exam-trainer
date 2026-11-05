@@ -1,0 +1,15 @@
+# Line endings: LF everywhere, CRLF for Windows scripts (matches .editorconfig, #150)
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+mvnw text eol=lf
+
+# Binary files: no line-ending conversion, no text diffs
+*.xlsx binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.pdf binary

@@ -5,6 +5,7 @@ import com.hunterexam.backend.service.AuthService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -23,13 +24,15 @@ import java.util.Map;
 @Component
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    private static final String FRONTEND_REDIRECT_URL =
-            "http://localhost:5173/oauth2/redirect?token=";
-
+    private final String frontendUrl;
     private final AuthService authService;
     private final JwtService jwtService;
 
-    public OAuth2LoginSuccessHandler(AuthService authService, JwtService jwtService) {
+    public OAuth2LoginSuccessHandler(
+            @Value("${app.frontend.url:http://localhost:5173}") String frontendUrl,
+            AuthService authService,
+            JwtService jwtService) {
+        this.frontendUrl = frontendUrl;
         this.authService = authService;
         this.jwtService = jwtService;
     }
@@ -55,6 +58,18 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 name == null ? "User" : name
         );
 
-        response.sendRedirect(FRONTEND_REDIRECT_URL + token);
+        String code = java.util.UUID.randomUUID().toString();
+
+        TempTokenStore.saveToken(code, token);
+
+        response.sendRedirect(frontendUrl + "/oauth2/redirect?code=" + code);
+
+    }
+
+    class TempTokenStore {
+        private static final java.util.Map<String, String> cache = new java.util.concurrent.ConcurrentHashMap<>();
+
+        public static void saveToken(String code, String token) { cache.put(code, token); }
+        public static String getToken(String code) { return cache.remove(code); }
     }
 }

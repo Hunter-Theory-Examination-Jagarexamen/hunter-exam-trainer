@@ -11,6 +11,11 @@ How we work in this repository. Short on purpose: if something here is unclear o
 5. Merge when the checklist is done. Self-merging is allowed: you may merge your own PR yourself, so a review by a teammate is optional. Asking someone to review is still welcome, especially for bigger or risky changes.
 6. Delete your branch after merging (GitHub offers this on the merged PR). Don't delete other people's branches without asking them.
 
+## Code Style
+
+- **Formatting:** Code formatting is standardized via the root `.editorconfig` file. If you are using VS Code, make sure to install the [EditorConfig extension](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig).
+- **Styling:** Frontend styling uses plain CSS files located in `src/styles/`. Tailwind CSS is not installed or supported.
+
 ## Shared branches only change through PRs
 
 Every change to `develop` and `main` goes through a pull request, even a one-line docs fix. There is no "small enough to commit directly".
@@ -19,14 +24,7 @@ Every change to `develop` and `main` goes through a pull request, even a one-lin
 
 ## Definition of Done
 
-Before a PR is merged, the author has:
-
-- tested the change in the running app, not just the endpoint,
-- updated every caller if an API request or response changed (search for the endpoint path in both frontend and backend),
-- checked error cases in the browser, so the user actually sees a clear message,
-- updated the README if setup changed (e.g. new environment variables),
-- described database changes that affect existing local databases,
-- written a short "How I tested" note in the PR.
+Before a PR is merged, every item in the Definition of Done in the [PR template](.github/pull_request_template.md) is ticked, or deleted if it doesn't apply to the PR. The template is the single source; update it there.
 
 ## Where things are documented
 

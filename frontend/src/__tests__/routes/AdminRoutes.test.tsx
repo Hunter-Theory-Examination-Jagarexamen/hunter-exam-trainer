@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import AppRoutes from "../../routes/AppRoutes";
 import apiClient from "../../api/apiClient";
 import {UserRole} from "../../types/user";
+import {fakeToken} from "../fakeToken";
 
 vi.mock("../../api/apiClient", () => ({default: vi.fn()}));
 vi.mock("../../services/authService", () => ({
@@ -14,7 +15,7 @@ vi.mock("../../pages/Dashboard/Dashboard", () => ({default: () => <h1>Dashboard 
 
 beforeEach(() => {
     vi.resetAllMocks();
-    localStorage.setItem("token", "test-token");
+    localStorage.setItem("token", fakeToken());
     window.history.replaceState({}, "", "/admin/questions");
 });
 afterEach(() => localStorage.clear());
@@ -23,11 +24,29 @@ function mockUser(role: typeof UserRole[keyof typeof UserRole]) {
     vi.mocked(apiClient).mockImplementation(async endpoint => {
         if (endpoint === "/api/users/me") return {id: 1, fullName: "Test User", email: "test@example.com", role, createdAt: "2026-10-05"};
         if (endpoint === "/api/subjects") return [];
+        if (endpoint === "/api/admin/stats") return {questionCount: 42, subjectCount: 5, studentCount: 17};
         throw new Error(`Unexpected endpoint: ${endpoint}`);
     });
 }
 
 describe("Admin navigation and routing", () => {
+    it("lets ADMIN navigate to subject management", async () => {
+        mockUser(UserRole.ADMIN);
+        render(<AppRoutes />);
+        await userEvent.click(await screen.findByRole("link", {name: "Subjects"}));
+        expect(await screen.findByRole("heading", {name: "Manage Subjects"})).toBeInTheDocument();
+        expect(window.location.pathname).toBe("/admin/subjects");
+    });
+
+    it("blocks a STUDENT opening subject management directly and hides its link", async () => {
+        window.history.replaceState({}, "", "/admin/subjects");
+        mockUser(UserRole.STUDENT);
+        render(<AppRoutes />);
+        expect(await screen.findByRole("heading", {name: "Dashboard page"})).toBeInTheDocument();
+        expect(screen.queryByRole("link", {name: "Subjects"})).not.toBeInTheDocument();
+        expect(apiClient).not.toHaveBeenCalledWith("/api/subjects");
+        expect(window.location.pathname).toBe("/dashboard");
+    });
     it("lets an ADMIN open question creation through the protected route", async () => {
         vi.mocked(apiClient).mockImplementation(async endpoint => {
             if (endpoint === "/api/users/me") return {id: 1, fullName: "Admin", role: UserRole.ADMIN};
@@ -44,7 +63,10 @@ describe("Admin navigation and routing", () => {
         expect(screen.getByText("Loading user details...")).toBeInTheDocument();
         expect(screen.queryByRole("link", {name: "Admin"})).not.toBeInTheDocument();
         expect(await screen.findByRole("heading", {name: "Admin Question Bank"})).toBeInTheDocument();
-        expect(screen.getByRole("link", {name: "Admin"})).toHaveAttribute("href", "/admin/questions");
+        expect(screen.getByRole("link", {name: "Admin"})).toHaveAttribute("href", "/admin");
+        expect(screen.getByRole("link", {name: "Questions"})).toHaveAttribute("href", "/admin/questions");
+        expect(screen.getByRole("link", {name: "Subjects"})).toHaveAttribute("href", "/admin/subjects");
+        expect(screen.getByRole("link", {name: "Learners"})).toHaveAttribute("href", "/admin/learners");
         expect(screen.getByText("Welcome, Test User")).toBeInTheDocument();
         expect(vi.mocked(apiClient).mock.calls.filter(([endpoint]) => endpoint === "/api/users/me")).toHaveLength(1);
     });
@@ -57,6 +79,30 @@ describe("Admin navigation and routing", () => {
         expect(screen.queryByRole("link", {name: "Admin"})).not.toBeInTheDocument();
         expect(apiClient).not.toHaveBeenCalledWith("/api/subjects");
         expect(screen.queryByRole("button", {name: "Add question"})).not.toBeInTheDocument();
+    });
+
+    it("lets an ADMIN open the admin start page with count cards linking to each tool", async () => {
+        window.history.replaceState({}, "", "/admin");
+        mockUser(UserRole.ADMIN);
+        render(<AppRoutes />);
+        expect(await screen.findByRole("heading", {name: "Admin"})).toBeInTheDocument();
+        const questionsCard = await screen.findByRole("link", {name: /Open the question bank/});
+        expect(questionsCard).toHaveAttribute("href", "/admin/questions");
+        expect(questionsCard).toHaveTextContent("42");
+        // Each tool is linked twice on this page: once in the sidebar, once on the overview card.
+        expect(screen.getAllByRole("link", {name: /^Questions/})).toHaveLength(2);
+        expect(screen.getAllByRole("link", {name: /^Subjects/})).toHaveLength(2);
+        expect(screen.getAllByRole("link", {name: /^Learners/})).toHaveLength(2);
+    });
+
+    it("redirects a STUDENT opening the admin start page without requesting the counts", async () => {
+        window.history.replaceState({}, "", "/admin");
+        mockUser(UserRole.STUDENT);
+        render(<AppRoutes />);
+        expect(await screen.findByRole("heading", {name: "Dashboard page"})).toBeInTheDocument();
+        expect(window.location.pathname).toBe("/dashboard");
+        expect(screen.queryByRole("link", {name: "Admin"})).not.toBeInTheDocument();
+        expect(apiClient).not.toHaveBeenCalledWith("/api/admin/stats");
     });
 
     it("redirects unauthenticated access to login without requesting admin data", async () => {

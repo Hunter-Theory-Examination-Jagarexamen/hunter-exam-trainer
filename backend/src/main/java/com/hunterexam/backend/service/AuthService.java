@@ -4,9 +4,11 @@ import com.hunterexam.backend.dto.LoginRequest;
 import com.hunterexam.backend.dto.RegisterRequest;
 import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.entity.User;
+import com.hunterexam.backend.exception.ConflictException;
 import com.hunterexam.backend.repository.UserRepository;
 import com.hunterexam.backend.security.JwtService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -52,7 +54,7 @@ public class AuthService {
 
         // Prevent multiple accounts from being registered with the same email.
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("Email is already registered");
+            throw new ConflictException("Email is already registered");
         }
 
         User user = new User();
@@ -82,18 +84,18 @@ public class AuthService {
     public String login(LoginRequest request) {
 
         if (request == null) {
-            throw new RuntimeException("Login request cannot be null");
+            throw new IllegalArgumentException("Login request cannot be null");
         }
 
         // Find the user using the email provided during login.
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+                .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
         // Compare the entered password with the stored BCrypt hash.
         if (!passwordEncoder.matches(
                 request.getPassword(),
                 user.getPassword())) {
-            throw new RuntimeException("Invalid Email or Password");
+            throw new BadCredentialsException("Invalid email or password");
         }
 
         // Generate a JWT that the frontend uses for authenticated requests.
@@ -102,7 +104,6 @@ public class AuthService {
                 user.getRole().name()
         );
     }
-
 
     /**
      * Authenticates a user coming from Google OAuth2.

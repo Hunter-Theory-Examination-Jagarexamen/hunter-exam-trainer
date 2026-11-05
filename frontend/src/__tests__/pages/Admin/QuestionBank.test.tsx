@@ -14,15 +14,15 @@ const subjects = [
 const questions: Question[] = Array.from({length: 101}, (_, index) => ({
     id: index + 1, questionText: `Safety question ${index + 1}?`,
     optionA: "Safe answer", optionB: "Second answer", optionC: "Third answer", optionD: "Fourth answer",
-    correctAnswer: "Safe answer", explanation: "Keep a safe distance.", subject: subjects[0],
+    correctAnswer: "A", explanation: "Keep a safe distance.", subject: subjects[0],
 }));
 
 beforeEach(() => {
     vi.resetAllMocks();
     vi.mocked(apiClient).mockImplementation(async endpoint => {
         if (endpoint === "/api/subjects") return subjects;
-        if (endpoint === "/api/questions?subjectId=1") return questions;
-        if (endpoint === "/api/questions?subjectId=2") return [{...questions[0], id: 102, questionText: "Identify wildlife?"}];
+        if (endpoint === "/api/admin/questions?subjectId=1") return questions;
+        if (endpoint === "/api/admin/questions?subjectId=2") return [{...questions[0], id: 102, questionText: "Identify wildlife?"}];
         throw new Error(`Unexpected endpoint: ${endpoint}`);
     });
 });

@@ -1,4 +1,5 @@
 import "../../styles/exam.css";
+import { useTranslation } from "react-i18next";
 
 interface ExamNavigationProps {
     onPrevious: () => void;
@@ -9,7 +10,9 @@ interface ExamNavigationProps {
 }
 
 const ExamNavigation = (
-    { onPrevious, onNext, onSubmit, isFirstQuestion, isLastQuestion }: ExamNavigationProps) => {
+    { onPrevious, onNext, onSubmit, isFirstQuestion, isLastQuestion }: ExamNavigationProps
+) => {
+    const { t } = useTranslation();
 
     return (
         <section className="exam-navigation">
@@ -18,14 +21,22 @@ const ExamNavigation = (
                 onClick={onPrevious}
                 disabled={isFirstQuestion}
             >
-                Previous
+                {t("exam.navigation.previous")}
             </button>
 
             <button
                 className="next-button"
-                onClick={isLastQuestion ? onSubmit : onNext}
+                onClick={onNext}
+                disabled={isLastQuestion}
             >
-                {isLastQuestion ? "Submit Exam" : "Next"}
+                {t("exam.navigation.next")}
+            </button>
+
+            <button
+                className="submit-exam-button"
+                onClick={onSubmit}
+            >
+                {t("exam.navigation.submit")}
             </button>
         </section>
     );

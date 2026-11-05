@@ -1,0 +1,96 @@
+{
+  "common": {
+    "loading": "Laddar...",
+    "error": "Ett fel uppstod",
+    "submit": "Skicka",
+    "cancel": "Avbryt",
+    "save": "Spara",
+    "back": "Tillbaka"
+  },
+  "auth": {
+    "loginTitle": "Logga in",
+    "registerTitle": "Skapa konto",
+    "emailLabel": "E-postadress",
+    "passwordLabel": "Lösenord",
+    "loginButton": "Logga in",
+    "registerButton": "Registrera",
+    "noAccount": "Har du inget konto?",
+    "hasAccount": "Har du redan ett konto?",
+    "registerLink": "Registrera dig här",
+    "loginLink": "Logga in här"
+  },
+  "errors": {
+    "EMAIL_TAKEN": "E-postadressen är redan registrerad.",
+    "INVALID_CREDENTIALS": "Fel e-postadress eller lösenord.",
+    "PASSWORD_TOO_SHORT": "Lösenordet är för kort.",
+    "PASSWORD_TOO_LONG": "Lösenordet är för långt.",
+    "INVALID_CURRENT_PASSWORD": "Nuvarande lösenord är felaktigt.",
+    "TOO_MANY_RESET_REQUESTS": "För många förfrågningar om lösenordsåterställning. Försök igen senare.",
+    "EXAM_ALREADY_SUBMITTED": "Provet har redan lämnats in.",
+    "NOT_FOUND": "Resursen hittades inte.",
+    "UNKNOWN_ERROR": "Ett oväntat fel uppstod."
+  },
+  "practice": {
+    "title": "Övning",
+    "loadingQuestions": "Laddar frågor...",
+    "subjectNotFound": "Ämnet hittades inte.",
+    "noQuestionsYet": "Det finns inga frågor i det här ämnet än.",
+    "loadFailed": "Det gick inte att ladda frågorna. Försök igen.",
+    "subtitle": "Svara på frågorna och förbättra dina kunskaper.",
+    "progress": "Fråga {{current}} av {{total}}",
+    "checkAnswer": "Kontrollera svar",
+    "correct": "Rätt!",
+    "incorrect": "Fel. Rätt svar är:",
+    "previous": "Föregående",
+    "next": "Nästa",
+    "finish": "Slutför",
+    "quitRound": "Avsluta omgången",
+    "quitTitle": "Avsluta omgången?",
+    "quitText": "Dina svar är redan sparade.",
+    "quitConfirm": "Avsluta",
+    "quitCancel": "Fortsätt öva",
+    "resultTitle": "Resultat",
+    "resultAll": "Du fick {{correct}} av {{total}} rätt.",
+    "resultPartial": "Du svarade på {{answered}} av {{total}} frågor och fick {{correct}} rätt.",
+    "backToSubjects": "Tillbaka till ämnen",
+    "answerFailed": "Det gick inte att spara svaret. Försök igen.",
+    "finishFailed": "Det gick inte att avsluta omgången. Försök igen.",
+    "roundClosed": "Omgången är redan avslutad, till exempel i en annan flik. Dina svar är sparade.",
+    "tryAgain": "Försök igen"
+  },
+  "exam": {
+    "loading": "Laddar provfrågor...",
+    "startError": "Kunde inte ladda provfrågor. Försök igen.",
+    "startNotEnough": "Det finns inte tillräckligt många frågor för att starta provet.",
+    "submitFailed": "Kunde inte lämna in provet. Dina svar är sparade på servern — försök igen.",
+    "questionOf": "Fråga {{current}} av {{total}}",
+    "toggleOverview": "Översikt",
+    "navigation": {
+      "previous": "Föregående",
+      "next": "Nästa",
+      "submit": "Lämna in provet"
+    },
+    "overview": {
+      "title": "Översikt · {{answered}} / {{total}} besvarade",
+      "ariaLabel": "Fråga {{number}}",
+      "stateCurrent": "aktuell",
+      "stateAnswered": "besvarad",
+      "stateUnanswered": "obesvarad",
+      "stateBookmarked": "bokmärkt"
+    },
+    "bookmark": {
+      "add": "Bokmärk",
+      "remove": "Bokmärkt",
+      "ariaLabelAdd": "Bokmärk denna fråga",
+      "ariaLabelRemove": "Ta bort bokmärke"
+    },
+    "confirm": {
+      "title": "Lämna in provet?",
+      "unanswered_one": "Du har {{count}} obesvarad fråga. Den räknas som fel. Är du säker på att du vill lämna in?",
+      "unanswered_other": "Du har {{count}} obesvarade frågor. De räknas som fel. Är du säker på att du vill lämna in?",
+      "allAnswered": "Du har besvarat alla frågor. Är du säker på att du vill lämna in?",
+      "goBack": "Gå tillbaka",
+      "submitAnyway": "Lämna in ändå"
+    }
+  }
+}

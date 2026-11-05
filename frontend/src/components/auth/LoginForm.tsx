@@ -1,16 +1,24 @@
 import {useEffect, useState} from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {Eye, EyeOff, Lock, Mail} from "lucide-react";
 import logo from "../../assets/images/logo.svg";
 import "../../styles/auth.css";
 import {
     checkGoogleLoginEnabled,
     loginUser
-} from "../../services/authService.ts";
+} from "../../services/authService";
+import { API_BASE_URL } from "../../api/apiClient";
+import { errorStatus, isServerUnreachable } from "../../services/apiErrors";
 
 const LoginForm = () => {
 
     const navigate = useNavigate();
+    const location = useLocation();
+    const [successMessage] = useState(
+        (location.state as { accountCreated?: boolean })?.accountCreated
+        ? "Account created successfully! You can now log in."
+            : ""
+    );
 
     const [showPassword, setShowPassword] = useState(false);
 
@@ -18,6 +26,7 @@ const LoginForm = () => {
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [googleEnabled, setGoogleEnabled] = useState(false);
+    const [error, setError] = useState("");
 
     useEffect(() => {
         checkGoogleLoginEnabled().then(setGoogleEnabled);
@@ -25,9 +34,10 @@ const LoginForm = () => {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError(""); // clear the message from the previous attempt
 
         if(!email || !password) {
-            alert("Please enter your email and password");
+            setError("Please enter your email and password");
             return;
         }
 
@@ -45,26 +55,21 @@ const LoginForm = () => {
 
         } catch (error) {
             console.error("Login/API error:", error);
-            alert("Invalid email or password");
+            if (isServerUnreachable(error)) {
+                setError("Can't reach the server. Please try again in a few minutes.");
+            } else if ((errorStatus(error) ?? 0) >= 500) {
+                setError("Something went wrong on the server. Please try again later.");
+            } else {
+                setError("Invalid email or password");
+            }
         } finally {
             setIsLoading(false);
         }
 
     };
 
-
     const handleGoogleLogin = () => {
-
-        if (!googleEnabled) {
-            alert(
-                "Google sign-in is not configured yet. " +
-                "Use your email and password."
-            );
-            return;
-        }
-
-        window.location.href =
-            "http://localhost:8080/oauth2/authorization/google";
+        window.location.href = `${API_BASE_URL}/oauth2/authorization/google`;
     };
 
     return (
@@ -77,6 +82,12 @@ const LoginForm = () => {
                 <h2>Welcome back!</h2>
                 <p>Log in to continue your practice.</p>
             </div>
+
+            {successMessage && (
+                <p role="status" style={{ color: "#38a169", marginBottom: "1rem", fontSize: "0.875rem", fontWeight: 500 }}>
+                    {successMessage}
+                </p>
+            )}
 
             <form onSubmit={handleLogin}>
                 <div className="form-field">
@@ -136,6 +147,12 @@ const LoginForm = () => {
                     </button>
                 </div>
 
+                {error && (
+                    <p role="alert" style={{ color: "#e53e3e", marginBottom: "1rem", fontSize: "0.875rem" }}>
+                        {error}
+                    </p>
+                )}
+
                 <button
                     type="submit"
                     className="auth-primary-button"
@@ -145,19 +162,24 @@ const LoginForm = () => {
                 </button>
             </form>
 
-            <div className="auth-divider">
-                <span>or</span>
-            </div>
+            {/* Google login is only shown when the backend has it configured (#61). */}
+            {googleEnabled && (
+                <>
+                    <div className="auth-divider">
+                        <span>or</span>
+                    </div>
 
-            <div className="auth-secondary-actions">
-                <button
-                    type="button"
-                    className="auth-secondary-button"
-                    onClick={handleGoogleLogin}
-                >
-                    Continue with Google
-                </button>
-            </div>
+                    <div className="auth-secondary-actions">
+                        <button
+                            type="button"
+                            className="auth-secondary-button"
+                            onClick={handleGoogleLogin}
+                        >
+                            Continue with Google
+                        </button>
+                    </div>
+                </>
+            )}
 
             <p className="auth-switch">
                 Don't have an account?{" "}

@@ -1,0 +1,13 @@
+.question-image {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    max-height: 28rem;
+    object-fit: contain;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.question-image-unavailable {
+    margin-bottom: 1rem;
+}
