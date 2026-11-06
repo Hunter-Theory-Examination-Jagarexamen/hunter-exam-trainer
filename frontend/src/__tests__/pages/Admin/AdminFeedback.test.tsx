@@ -34,7 +34,7 @@ describe("AdminFeedback page", () => {
         expect(await screen.findByText("Fel svar markerat som rätt")).toBeInTheDocument();
         expect(apiClientMock).toHaveBeenCalledWith("/api/admin/feedback?handled=false");
         expect(screen.getByText("Vilket djur är ett hjortdjur?")).toBeInTheDocument();
-        expect(screen.getByRole("link", { name: "Öppna frågan" })).toHaveAttribute("href", "/admin/questions?edit=12");
+        expect(screen.getByRole("link", { name: "Öppna frågan" })).toHaveAttribute("href", "/admin/questions?question=12");
         expect(screen.getByText("Bra app")).toBeInTheDocument();
         expect(screen.getAllByRole("listitem")).toHaveLength(2);
     });

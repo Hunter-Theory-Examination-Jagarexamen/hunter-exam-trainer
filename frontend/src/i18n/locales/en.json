@@ -352,6 +352,7 @@
     "loadQuestionsFailed": "Failed to load questions. Please try again.",
     "loadSubjectsFailed": "Failed to load subjects. Please try again.",
     "linkedQuestionNotFound": "Question {{id}} no longer exists.",
+    "linkedQuestionFailed": "Failed to open question {{id}}. Please try again.",
     "editAria": "Edit question {{id}}",
     "deleteAria": "Delete question {{id}}",
     "pagesAria": "Question pages",

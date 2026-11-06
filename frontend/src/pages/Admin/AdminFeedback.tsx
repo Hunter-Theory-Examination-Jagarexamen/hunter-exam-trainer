@@ -98,7 +98,7 @@ const AdminFeedback = () => {
                                     <strong>{t("feedback.admin.question")}</strong> {item.questionText}
                                     {item.questionId === null
                                         ? <em> {t("feedback.admin.questionDeleted")}</em>
-                                        : <> <Link to={`/admin/questions?edit=${item.questionId}`}>
+                                        : <> <Link to={`/admin/questions?question=${item.questionId}`}>
                                             {t("feedback.admin.openQuestion")}</Link></>}
                                 </p>
                             )}

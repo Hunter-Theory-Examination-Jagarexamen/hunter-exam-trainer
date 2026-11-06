@@ -352,6 +352,7 @@
     "loadQuestionsFailed": "Det gick inte att ladda frågorna. Försök igen.",
     "loadSubjectsFailed": "Det gick inte att ladda ämnena. Försök igen.",
     "linkedQuestionNotFound": "Fråga {{id}} finns inte längre.",
+    "linkedQuestionFailed": "Det gick inte att öppna fråga {{id}}. Försök igen.",
     "editAria": "Redigera fråga {{id}}",
     "deleteAria": "Ta bort fråga {{id}}",
     "pagesAria": "Sidor med frågor",
