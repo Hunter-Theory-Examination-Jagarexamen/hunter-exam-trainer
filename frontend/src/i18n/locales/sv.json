@@ -491,6 +491,8 @@
   "feedback": {
     "title": "Ge feedback",
     "reportQuestion": "Rapportera fel i frågan",
+    "afterExamText": "Hittade du ett fel i en fråga, eller har du synpunkter på provet?",
+    "afterExamButton": "Ge feedback om provet",
     "typeLabel": "Vad gäller det?",
     "types": {
       "QUESTION": "Fel i en fråga",

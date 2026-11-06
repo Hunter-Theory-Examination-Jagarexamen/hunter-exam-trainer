@@ -491,6 +491,8 @@
   "feedback": {
     "title": "Give feedback",
     "reportQuestion": "Report a problem with this question",
+    "afterExamText": "Did you find an error in a question, or do you have thoughts on the exam?",
+    "afterExamButton": "Give feedback on the exam",
     "typeLabel": "What is it about?",
     "types": {
       "QUESTION": "Error in a question",
