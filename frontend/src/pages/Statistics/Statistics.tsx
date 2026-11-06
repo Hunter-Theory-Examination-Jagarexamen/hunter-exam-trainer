@@ -6,6 +6,7 @@ import RecentResults from "../../components/statistics/RecentResults";
 import PerformanceSummary from "../../components/statistics/PerformanceSummary";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import type { RecentActivity } from "../../types/dashboardInfo.ts";
 import apiClient from "../../api/apiClient.ts";
 import type { SubjectPerformance } from "../../types/subjectPerformance.ts";
@@ -13,7 +14,7 @@ import ProgressOverTimeChart from "../../components/statistics/ProgressOverTimeC
 import type { ProgressPoint } from "../../types/progressOverTime.ts";
 
 const Statistics = () => {
-
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
@@ -41,7 +42,7 @@ const Statistics = () => {
 
             } catch (error) {
                 console.error("Failed to load recent results:", error);
-                setRecentError("Failed to load recent results. Please try again.");
+                setRecentError(t("statistics.errorRecent"));
 
             } finally {
                 setIsLoadingRecent(false);
@@ -49,11 +50,10 @@ const Statistics = () => {
         };
 
         void fetchRecentResults();
-    }, []);
+    }, [t]);
 
     useEffect(() => {
         const fetchSubjectPerformance = async () => {
-
             try {
                 setIsLoadingProgress(true);
                 setProgressError("");
@@ -64,12 +64,8 @@ const Statistics = () => {
                 setSubjectPerformance(data);
 
             } catch (error) {
-
                 console.error("Failed to load subject performance:", error);
-
-                setProgressError(
-                    "Failed to load subject performance. Please try again."
-                );
+                setProgressError(t("statistics.errorSubject"));
 
             } finally {
                 setIsLoadingProgress(false);
@@ -77,7 +73,7 @@ const Statistics = () => {
         };
 
         void fetchSubjectPerformance();
-    }, []);
+    }, [t]);
 
     useEffect(() => {
         const fetchProgressOverTime = async () => {
@@ -92,16 +88,14 @@ const Statistics = () => {
                 setProgressOverTime(data);
             } catch (error) {
                 console.error("Failed to load progress over time:", error);
-                setProgressOverTimeError(
-                    "Failed to load progress over time. Please try again."
-                );
+                setProgressOverTimeError(t("statistics.errorProgress"));
             } finally {
                 setIsLoadingProgressOverTime(false);
             }
         };
 
         void fetchProgressOverTime();
-    }, [weeksRange]);
+    }, [weeksRange, t]);
 
     const strongestSubject =
         subjectPerformance.length > 0
@@ -124,28 +118,28 @@ const Statistics = () => {
     return (
         <div className="statistics">
             <PageTitle
-                title="Statistics"
-                subtitle="View your learning progress."
+                title={t("statistics.title")}
+                subtitle={t("statistics.subtitle")}
             />
             <SummaryCards />
 
             <section className="dashboard-section">
                 <div className="section-header">
-                    <h2>Progress over Time</h2>
+                    <h2>{t("statistics.progressOverTimeTitle")}</h2>
                     <select
                         value={weeksRange}
                         onChange={(e) => setWeeksRange(Number(e.target.value))}
                         className="weeks-select"
-                        aria-label="Time range for progress over time"
+                        aria-label={t("statistics.weeksRangeAria")}
                     >
-                        <option value={4}>Last 4 weeks</option>
-                        <option value={8}>Last 8 weeks</option>
-                        <option value={12}>Last 12 weeks</option>
+                        <option value={4}>{t("statistics.last4Weeks")}</option>
+                        <option value={8}>{t("statistics.last8Weeks")}</option>
+                        <option value={12}>{t("statistics.last12Weeks")}</option>
                     </select>
                 </div>
 
                 <div className="statistics-card">
-                    {isLoadingProgressOverTime && <p>Loading progress...</p>}
+                    {isLoadingProgressOverTime && <p>{t("statistics.loadingProgress")}</p>}
 
                     {!isLoadingProgressOverTime && progressOverTimeError && (
                         <p role="alert">{progressOverTimeError}</p>
@@ -158,9 +152,9 @@ const Statistics = () => {
             </section>
 
             <section className="dashboard-section">
-                <h2>Performance by Subject</h2>
+                <h2>{t("statistics.subjectPerformanceTitle")}</h2>
                 {isLoadingProgress && (
-                    <p>Loading subject performance...</p>
+                    <p>{t("statistics.loadingSubjectPerformance")}</p>
                 )}
 
                 {!isLoadingProgress && progressError && (
@@ -170,7 +164,7 @@ const Statistics = () => {
                 {!isLoadingProgress &&
                     !progressError &&
                     subjectPerformance.length === 0 && (
-                        <p>No practice results yet.</p>
+                        <p>{t("statistics.noSubjectPerformance")}</p>
                     )}
 
                 {!isLoadingProgress &&
@@ -192,12 +186,11 @@ const Statistics = () => {
             </section>
 
             <section className="dashboard-section">
-
-                <h2>Recent Results</h2>
+                <h2>{t("statistics.recentResultsTitle")}</h2>
 
                 <div className="statistics-card">
                     {isLoadingRecent && (
-                        <p>Loading recent results...</p>
+                        <p>{t("statistics.loadingRecentResults")}</p>
                     )}
 
                     {recentError && (
@@ -207,7 +200,7 @@ const Statistics = () => {
                     {!isLoadingRecent &&
                         !recentError &&
                         recentActivities.length === 0 && (
-                            <p>No recent results yet.</p>
+                            <p>{t("statistics.noRecentResults")}</p>
                         )}
 
                     {!isLoadingRecent &&
@@ -222,11 +215,11 @@ const Statistics = () => {
             </section>
 
             <section className="dashboard-section">
-                <h2>Performance Summary</h2>
+                <h2>{t("statistics.performanceSummaryTitle")}</h2>
 
                 <div className="statistics-card">
                     {subjectPerformance.length === 0 ? (
-                        <p>No practice results yet.</p>
+                        <p>{t("statistics.noSubjectPerformance")}</p>
                     ) : (
                         <PerformanceSummary
                             strongestSubject={strongestSubject?.subjectName ?? ""}

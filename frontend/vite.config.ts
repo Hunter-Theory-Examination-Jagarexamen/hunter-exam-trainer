@@ -15,9 +15,9 @@ export default defineConfig({
         overrideManifestIcons: true,
       },
       manifest: {
-        name: 'Hunter Exam Trainer',
-        short_name: 'Hunter Exam',
-        description: 'Practice app for the Swedish Hunter Theory Exam (Jägarexamen)',
+        name: 'Jägarexamen Tränare',
+        short_name: 'Jägarexamen',
+        description: 'Övningsapp för teoriprovet i jägarexamen',
         theme_color: '#863bff',
         background_color: '#ffffff',
         display: 'standalone',

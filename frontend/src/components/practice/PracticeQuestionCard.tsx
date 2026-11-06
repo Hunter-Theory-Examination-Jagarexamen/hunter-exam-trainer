@@ -17,13 +17,13 @@ interface PracticeQuestionProps {
 }
 
 const PracticeQuestionCard = ({
-                              question,
-                              selectedAnswer,
-                              feedback,
-                              isChecking = false,
-                              onAnswerSelect,
-                              onCheckAnswer
-                          }: PracticeQuestionProps) => {
+                                  question,
+                                  selectedAnswer,
+                                  feedback,
+                                  isChecking = false,
+                                  onAnswerSelect,
+                                  onCheckAnswer
+                              }: PracticeQuestionProps) => {
 
     const { t } = useTranslation();
 
@@ -56,7 +56,7 @@ const PracticeQuestionCard = ({
                         <label
                             key={option.id}
                             className={`practice-answer ${
-                                selectedAnswer === option.id 
+                                selectedAnswer === option.id
                                     ? showFeedback
                                         ? feedback.correct
                                             ? "correct"

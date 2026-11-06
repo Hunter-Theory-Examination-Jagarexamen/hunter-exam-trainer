@@ -45,7 +45,7 @@ describe("LoginForm", () => {
 
         // Assert: wait until the check has run, then the button should be missing
         await waitFor(() => expect(checkGoogleLoginEnabled).toHaveBeenCalled());
-        expect(screen.queryByRole("button", { name: "Continue with Google" })).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: "Fortsätt med Google" })).not.toBeInTheDocument();
     });
 
     it("shows the Google button when Google login is configured", async () => {
@@ -54,7 +54,7 @@ describe("LoginForm", () => {
         renderLoginForm();
 
         // Assert: findByRole waits until the button appears (or times out)
-        expect(await screen.findByRole("button", { name: "Continue with Google" })).toBeInTheDocument();
+        expect(await screen.findByRole("button", { name: "Fortsätt med Google" })).toBeInTheDocument();
     });
 
     it("shows an error message and does not log in when the fields are empty", async () => {
@@ -62,11 +62,11 @@ describe("LoginForm", () => {
         renderLoginForm();
 
         // Act: click "Log In" without typing anything
-        await userEvent.click(screen.getByRole("button", { name: "Log In" }));
+        await userEvent.click(screen.getByRole("button", { name: "Logga in" }));
 
         // Assert: the user is told what is missing, and the backend is never called
         // role="alert" is how screen readers (and this test) find the error message
-        expect(screen.getByRole("alert")).toHaveTextContent("Please enter your email and password");
+        expect(screen.getByRole("alert")).toHaveTextContent("Vänligen ange både e-postadress och lösenord");
         expect(loginUser).not.toHaveBeenCalled();
     });
 
@@ -76,9 +76,9 @@ describe("LoginForm", () => {
         renderLoginForm();
 
         // Act: fill in the form and log in
-        await userEvent.type(screen.getByLabelText("Email"), "anna@example.com");
-        await userEvent.type(screen.getByLabelText("Password"), "secret123");
-        await userEvent.click(screen.getByRole("button", { name: "Log In" }));
+        await userEvent.type(screen.getByLabelText("E-postadress"), "anna@example.com");
+        await userEvent.type(screen.getByLabelText("Lösenord"), "secret123");
+        await userEvent.click(screen.getByRole("button", { name: "Logga in" }));
 
         // Assert: the backend got what was typed, the token is saved, and the dashboard shows
         expect(loginUser).toHaveBeenCalledWith({ email: "anna@example.com", password: "secret123" });
@@ -93,26 +93,26 @@ describe("LoginForm", () => {
         renderLoginForm();
 
         // Act
-        await userEvent.type(screen.getByLabelText("Email"), "anna@example.com");
-        await userEvent.type(screen.getByLabelText("Password"), "wrong-password");
-        await userEvent.click(screen.getByRole("button", { name: "Log In" }));
+        await userEvent.type(screen.getByLabelText("E-postadress"), "anna@example.com");
+        await userEvent.type(screen.getByLabelText("Lösenord"), "wrong-password");
+        await userEvent.click(screen.getByRole("button", { name: "Logga in" }));
 
         // Assert: findByRole waits until the error message has appeared (or times out)
-        expect(await screen.findByRole("alert")).toHaveTextContent("Invalid email or password");
+        expect(await screen.findByRole("alert")).toHaveTextContent("Fel e-postadress eller lösenord.");
         expect(localStorage.getItem("token")).toBeNull();
     });
 
     it.each([
-        ["the server can't be reached", new ServerUnreachableError(), "Can't reach the server"],
-        ["the server answers with an error", new ApiError("", 500), "Something went wrong on the server"],
+        ["the server can't be reached", new ServerUnreachableError(), "Det går inte att nå servern"],
+        ["the server answers with an error", new ApiError("", 500), "Ett oväntat fel uppstod."],
     ])("says so instead of 'Invalid email or password' when %s", async (_case, error, message) => {
         vi.mocked(loginUser).mockRejectedValue(error);
         vi.spyOn(console, "error").mockImplementation(() => {});
         renderLoginForm();
 
-        await userEvent.type(screen.getByLabelText("Email"), "anna@example.com");
-        await userEvent.type(screen.getByLabelText("Password"), "password");
-        await userEvent.click(screen.getByRole("button", { name: "Log In" }));
+        await userEvent.type(screen.getByLabelText("E-postadress"), "anna@example.com");
+        await userEvent.type(screen.getByLabelText("Lösenord"), "password");
+        await userEvent.click(screen.getByRole("button", { name: "Logga in" }));
 
         expect(await screen.findByRole("alert")).toHaveTextContent(message);
     });
@@ -128,7 +128,7 @@ describe("LoginForm", () => {
         );
 
         // Assert: the success message is shown
-        expect(await screen.findByRole("status")).toHaveTextContent("Account created successfully! You can now log in.");
+        expect(await screen.findByRole("status")).toHaveTextContent("Konto skapat! Du kan nu logga in.");
     });
 
     it("does not show the account creation success message when opened directly", async () => {

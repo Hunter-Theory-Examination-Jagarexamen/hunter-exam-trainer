@@ -8,8 +8,9 @@ import en from './locales/en.json'
 i18n.use(initReactI18next).init({
     resources: {
         sv: { translation: sv },
-        en:{ translation: en },
+        en: { translation: en },
     },
+    // Låt alltid språket vara svenska, även i testmiljö
     lng: 'sv',
     fallbackLng: 'sv',
     interpolation: {
