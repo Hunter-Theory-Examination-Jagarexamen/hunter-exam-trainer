@@ -1,12 +1,13 @@
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
+import {useTranslation} from "react-i18next";
 import {Mail} from "lucide-react";
 import logo from "../../assets/images/logo.svg";
 import "../../styles/auth.css";
 import {forgotPassword} from "../../services/authService.ts";
 
 const ForgotPassword = () => {
-
+    const {t} = useTranslation();
     const navigate = useNavigate();
 
     const [email, setEmail] = useState("");
@@ -18,7 +19,7 @@ const ForgotPassword = () => {
         e.preventDefault();
 
         if (!email) {
-            alert("Please enter your email");
+            alert(t("forgotPassword.emptyEmailAlert"));
             return;
         }
 
@@ -32,7 +33,7 @@ const ForgotPassword = () => {
             setMessage(response.message);
 
         } catch (error) {
-            setError(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+            setError(error instanceof Error ? error.message : t("forgotPassword.defaultError"));
         } finally {
             setIsLoading(false);
         }
@@ -44,11 +45,11 @@ const ForgotPassword = () => {
             <div className="auth-brand-panel">
                 <div className="auth-brand-content">
                     <div className="auth-logo">
-                        <img src={logo} alt="Hunter Exam Trainer" />
+                        <img src={logo} alt={t("brand.logoAlt")} />
                     </div>
-                    <h1>HUNTER EXAM TRAINER</h1>
+                    <h1>{t("brand.title")}</h1>
                     <p>
-                        Reset your password to continue your practice.
+                        {t("forgotPassword.brandSubtitle")}
                     </p>
                 </div>
             </div>
@@ -57,18 +58,18 @@ const ForgotPassword = () => {
 
                 <div className="auth-form-header">
                     <div className="auth-mobile-logo">
-                        <img src={logo} alt="Hunter Exam Trainer" />
+                        <img src={logo} alt={t("brand.logoAlt")} />
                     </div>
-                    <h2>Forgot password</h2>
+                    <h2>{t("forgotPassword.title")}</h2>
                     <p>
-                        Enter your email to receive a password reset link.
+                        {t("forgotPassword.subtitle")}
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-field">
                         <label htmlFor="email">
-                            Email
+                            {t("forgotPassword.emailLabel")}
                         </label>
 
                         <div className="input-wrapper">
@@ -78,7 +79,7 @@ const ForgotPassword = () => {
                                 type="email"
                                 required
                                 autoComplete="email"
-                                placeholder="Enter your email"
+                                placeholder={t("forgotPassword.emailPlaceholder")}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
@@ -90,7 +91,7 @@ const ForgotPassword = () => {
                         className="auth-primary-button"
                         disabled={isLoading}
                     >
-                        {isLoading ? "Sending..." : "Send Reset Link"}
+                        {isLoading ? t("forgotPassword.submittingButton") : t("forgotPassword.submitButton")}
                     </button>
                 </form>
 
@@ -103,12 +104,12 @@ const ForgotPassword = () => {
                 )}
 
                 <p className="auth-switch">
-                    Remembered your password?{" "}
+                    {t("forgotPassword.rememberPassword")}{" "}
                     <button
                         type="button"
                         onClick={() => navigate("/login")}
                     >
-                        Back to Login
+                        {t("forgotPassword.backToLogin")}
                     </button>
                 </p>
 

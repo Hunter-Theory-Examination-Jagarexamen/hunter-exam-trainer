@@ -1,16 +1,17 @@
 import "../../styles/profile.css";
 import {useEffect, useState} from "react";
+import {useTranslation} from "react-i18next";
 import apiClient from "../../api/apiClient.ts";
 import type { User } from "../../types/user.ts";
 
 const UserInformation = () => {
+    const { t } = useTranslation();
 
     const [user, setUser] = useState<User>();
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
 
     useEffect(() => {
-
         const fetchUserInfo = async () => {
             try {
                 setIsLoading(true);
@@ -21,17 +22,17 @@ const UserInformation = () => {
             }
             catch (error) {
                 console.error("Failed to load user details:", error);
-                setError("Failed to load User details. Please try again");
+                setError(t("profile.loadUserError"));
             }
             finally {
                 setIsLoading(false);
             }
         };
         void fetchUserInfo();
-    }, []);
+    }, [t]);
 
     if (isLoading) {
-        return <p>Loading User details...</p>;
+        return <p>{t("profile.loadingUser")}</p>;
     }
 
     if (error) {
@@ -39,31 +40,31 @@ const UserInformation = () => {
     }
 
     if (!user) {
-        return <p>User details not available.</p>;
+        return <p>{t("profile.userNotAvailable")}</p>;
     }
 
     return (
         <section className="profile-section">
-            <h2>User Information</h2>
+            <h2>{t("profile.userInformationTitle")}</h2>
 
             <div className="profile-card">
                 <div className="profile-row">
-                    <span>Name</span>
+                    <span>{t("profile.nameLabel")}</span>
                     <strong>{user.fullName}</strong>
                 </div>
                 <div className="profile-row">
-                    <span>Email</span>
+                    <span>{t("profile.emailLabel")}</span>
                     <strong>{user.email}</strong>
                 </div>
                 <div className="profile-row">
-                    <span>Role</span>
+                    <span>{t("profile.roleLabel")}</span>
                     <strong>{user.role}</strong>
                 </div>
                 <div className="profile-row">
-                    <span>Member Since</span>
+                    <span>{t("profile.memberSinceLabel")}</span>
                     <strong>
                         {new Date(user.createdAt).toLocaleDateString(
-                            "en-US",
+                            "sv-SE",
                             {
                                 month: "long",
                                 year: "numeric"

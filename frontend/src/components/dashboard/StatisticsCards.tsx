@@ -1,17 +1,17 @@
 import Card from "../common/Card.tsx";
-import "../../styles/dashboard.css"
+import "../../styles/dashboard.css";
 import {useEffect, useState} from "react";
+import {useTranslation} from "react-i18next";
 import apiClient from "../../api/apiClient.ts";
 import type {DashboardInfo} from "../../types/dashboardInfo.ts";
 
 const StatisticsCards = () => {
-
+    const {t} = useTranslation();
     const [data, setData] = useState<DashboardInfo | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
 
     useEffect(() => {
-
         const fetchDashboardInfo = async () => {
             try {
                 setIsLoading(true);
@@ -22,17 +22,17 @@ const StatisticsCards = () => {
             }
             catch (error) {
                 console.error("Failed to load dashboard details:", error);
-                setError("Failed to load dashboard details. Please try again");
+                setError(t("dashboard.detailsError"));
             }
             finally {
                 setIsLoading(false);
             }
         };
         void fetchDashboardInfo();
-    }, []);
+    }, [t]);
 
     if (isLoading) {
-        return <p>Loading Dashboard details...</p>;
+        return <p>{t("dashboard.loadingDetails")}</p>;
     }
 
     if (error) {
@@ -40,21 +40,21 @@ const StatisticsCards = () => {
     }
 
     if (!data) {
-        return <p>Dashboard details are not available.</p>;
+        return <p>{t("dashboard.noDetails")}</p>;
     }
 
     return (
         <div className="dashboard-cards">
-            <Card title="Mock Exams" >
+            <Card title={t("dashboard.cardMockExams")}>
                 {data.mockExams}
             </Card>
-            <Card title="Questions Answered" >
+            <Card title={t("dashboard.cardQuestionsAnswered")}>
                 {data.questionsAnswered}
             </Card>
-            <Card title="Average Score" >
+            <Card title={t("dashboard.cardAverageScore")}>
                 {data.averageScore}%
             </Card>
-            <Card title="Best Score" >
+            <Card title={t("dashboard.cardBestScore")}>
                 {data.bestScore}%
             </Card>
         </div>

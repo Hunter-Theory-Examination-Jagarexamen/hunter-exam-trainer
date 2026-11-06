@@ -1,11 +1,13 @@
 import {useEffect, useState} from "react";
 import {useNavigate} from "react-router-dom";
+import {useTranslation} from "react-i18next";
 import {Lock} from "lucide-react";
 import logo from "../../assets/images/logo.svg";
 import "../../styles/auth.css";
 import {resetPassword} from "../../services/authService";
 
 const ResetPassword = () => {
+    const {t} = useTranslation();
     const navigate = useNavigate();
     const [token] = useState(() => new URLSearchParams(window.location.hash.slice(1)).get("token") ?? "");
     const [password, setPassword] = useState("");
@@ -24,11 +26,11 @@ const ResetPassword = () => {
         e.preventDefault();
         setError("");
         if (password !== confirmPassword) {
-            setError("Passwords do not match.");
+            setError(t("resetPassword.passwordMismatch"));
             return;
         }
         if (password.length < 8 || new TextEncoder().encode(password).length > 72) {
-            setError("Password must be at least 8 characters and at most 72 UTF-8 bytes.");
+            setError(t("resetPassword.passwordLengthError"));
             return;
         }
         setIsLoading(true);
@@ -38,7 +40,7 @@ const ResetPassword = () => {
             setPassword("");
             setConfirmPassword("");
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Unable to reset password. Please try again.");
+            setError(err instanceof Error ? err.message : t("resetPassword.defaultError"));
         } finally {
             setIsLoading(false);
         }
@@ -48,22 +50,22 @@ const ResetPassword = () => {
         <div className="auth-page login">
             <div className="auth-brand-panel">
                 <div className="auth-brand-content">
-                    <div className="auth-logo"><img src={logo} alt="Hunter Exam Trainer" /></div>
-                    <h1>HUNTER EXAM TRAINER</h1>
-                    <p>Reset your password to continue your practice.</p>
+                    <div className="auth-logo"><img src={logo} alt={t("brand.logoAlt")} /></div>
+                    <h1>{t("brand.title")}</h1>
+                    <p>{t("resetPassword.brandSubtitle")}</p>
                 </div>
             </div>
             <div className="auth-form-container">
                 <div className="auth-form-header">
-                    <div className="auth-mobile-logo"><img src={logo} alt="Hunter Exam Trainer" /></div>
-                    <h2>Reset password</h2>
-                    <p>Choose a new password of at least 8 characters.</p>
+                    <div className="auth-mobile-logo"><img src={logo} alt={t("brand.logoAlt")} /></div>
+                    <h2>{t("resetPassword.title")}</h2>
+                    <p>{t("resetPassword.subtitle")}</p>
                 </div>
-                {!validToken && <p role="alert">Reset link is invalid. Please request a new reset link.</p>}
+                {!validToken && <p role="alert">{t("resetPassword.invalidToken")}</p>}
                 {validToken && !message && (
                     <form onSubmit={handleSubmit}>
                         <div className="form-field">
-                            <label htmlFor="password">New password</label>
+                            <label htmlFor="password">{t("resetPassword.passwordLabel")}</label>
                             <div className="input-wrapper">
                                 <Lock size={18} />
                                 <input id="password" type="password" autoComplete="new-password"
@@ -72,7 +74,7 @@ const ResetPassword = () => {
                             </div>
                         </div>
                         <div className="form-field">
-                            <label htmlFor="confirmPassword">Confirm new password</label>
+                            <label htmlFor="confirmPassword">{t("resetPassword.confirmPasswordLabel")}</label>
                             <div className="input-wrapper">
                                 <Lock size={18} />
                                 <input id="confirmPassword" type="password" autoComplete="new-password"
@@ -82,13 +84,13 @@ const ResetPassword = () => {
                         </div>
                         {error && <p role="alert" style={{color: "#e53e3e"}}>{error}</p>}
                         <button type="submit" className="auth-primary-button" disabled={isLoading}>
-                            {isLoading ? "Resetting..." : "Reset Password"}
+                            {isLoading ? t("resetPassword.submittingButton") : t("resetPassword.submitButton")}
                         </button>
                     </form>
                 )}
                 {message && <div className="forgot-message" role="status">{message}</div>}
-                {!message && <p className="auth-switch"><button type="button" onClick={() => navigate("/forgot-password")}>Request a new reset link</button></p>}
-                <p className="auth-switch"><button type="button" onClick={() => navigate("/login")}>Back to Login</button></p>
+                {!message && <p className="auth-switch"><button type="button" onClick={() => navigate("/forgot-password")}>{t("resetPassword.requestNewLink")}</button></p>}
+                <p className="auth-switch"><button type="button" onClick={() => navigate("/login")}>{t("resetPassword.backToLogin")}</button></p>
             </div>
         </div>
     );

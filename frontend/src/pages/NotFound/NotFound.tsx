@@ -4,9 +4,9 @@ import { Link } from "react-router-dom";
 export const NotFound: React.FC = () => {
     return (
         <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
-            <h1>404 - Page Not Found</h1>
+            <h1>404 - Sidan hittades inte</h1>
             <p style={{ margin: '1rem 0 2rem' }}>
-                The page you are looking for does not exist or has been moved.
+                Sidan du letar efter finns inte eller har flyttats.
             </p>
             <Link
                 to="/dashboard"
@@ -20,7 +20,7 @@ export const NotFound: React.FC = () => {
                     fontWeight: 600,
                 }}
             >
-                Go to Dashboard
+                Gå till instrumentpanelen
             </Link>
         </div>
     );

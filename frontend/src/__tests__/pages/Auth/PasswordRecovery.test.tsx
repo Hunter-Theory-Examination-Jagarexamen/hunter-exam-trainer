@@ -52,95 +52,93 @@ describe("Password Recovery Pages", () => {
             value: new URL("http://localhost/"),
         });
         vi.spyOn(console, "error").mockImplementation(() => {});
-});
+    });
 
     afterEach(() => {
-    vi.restoreAllMocks();
+        vi.restoreAllMocks();
     });
 
-describe("ForgotPassword Page", () => {
-    it("sends request link on valid email submission", async () => {
-        vi.mocked(forgotPassword).mockResolvedValueOnce({message: "Reset link sent"});
-        renderForgotPassword();
+    describe("ForgotPassword Page", () => {
+        it("sends request link on valid email submission", async () => {
+            vi.mocked(forgotPassword).mockResolvedValueOnce({message: "Återställningslänk skickad"});
+            renderForgotPassword();
 
-        const emailInput = screen.getByLabelText(/email/i);
-        const submitButton = screen.getByRole("button", {name: /send/i});
+            const emailInput = screen.getByLabelText(/e-post/i);
+            const submitButton = screen.getByRole("button", {name: /skicka/i});
 
-        await userEvent.type(emailInput, "test@example.com");
-        await userEvent.click(submitButton);
+            await userEvent.type(emailInput, "test@example.com");
+            await userEvent.click(submitButton);
 
-        expect(forgotPassword).toHaveBeenCalledWith("test@example.com");
-        expect(await screen.findByText(/reset link sent/i)).toBeInTheDocument();
+            expect(forgotPassword).toHaveBeenCalledWith("test@example.com");
+            expect(await screen.findByText(/Återställningslänk skickad/i)).toBeInTheDocument();
+        });
+
+        it("displays error message when backend request fails", async () => {
+            vi.mocked(forgotPassword).mockRejectedValueOnce(new Error("Användaren hittades inte"));
+            renderForgotPassword();
+
+            const emailInput = screen.getByLabelText(/e-post/i);
+            const submitButton = screen.getByRole("button", {name: /skicka/i});
+
+            await userEvent.type(emailInput, "unknown@example.com");
+            await userEvent.click(submitButton);
+
+            expect(await screen.findByRole("alert")).toHaveTextContent("Användaren hittades inte");
+        });
     });
-
-    it("displays error message when backend request fails", async () => {
-        vi.mocked(forgotPassword).mockRejectedValueOnce(new Error("User not found"));
-        renderForgotPassword();
-
-        const emailInput = screen.getByLabelText(/email/i);
-        const submitButton = screen.getByRole("button", {name: /send/i});
-
-        await userEvent.type(emailInput, "unknown@example.com");
-        await userEvent.click(submitButton);
-
-        expect(await screen.findByRole("alert")).toHaveTextContent("User not found");
-    });
-});
 
     describe("ResetPassword Page", () => {
         it("shows error when reset token is missing from URL hash", async () => {
             renderResetPassword("");
 
-            expect(await screen.findByText(/reset link is invalid/i)).toBeInTheDocument();
-            expect(screen.queryByLabelText(/confirm new password/i)).not.toBeInTheDocument();
+            expect(await screen.findByText(/Återställningslänken är ogiltig/i)).toBeInTheDocument();
+            expect(screen.queryByLabelText(/bekräfta nytt lösenord/i)).not.toBeInTheDocument();
         });
 
         it("resets password successfully with valid input and token", async () => {
-            vi.mocked(resetPassword).mockResolvedValueOnce({message: "Password reset successful"});
+            vi.mocked(resetPassword).mockResolvedValueOnce({message: "Lösenordet har återställts"});
             renderResetPassword(`#token=${VALID_TOKEN}`);
 
-            const passwordInput = screen.getByLabelText(/^new password/i);
-            const confirmInput = screen.getByLabelText(/confirm new password/i);
-            const submitButton = screen.getByRole("button", {name: /reset password/i});
+            const passwordInput = screen.getByLabelText(/^nytt lösenord/i);
+            const confirmInput = screen.getByLabelText(/bekräfta nytt lösenord/i);
+            const submitButton = screen.getByRole("button", {name: /återställ lösenord/i});
 
             await userEvent.type(passwordInput, "ValidPassword123");
             await userEvent.type(confirmInput, "ValidPassword123");
             await userEvent.click(submitButton);
 
             expect(resetPassword).toHaveBeenCalledWith(VALID_TOKEN, "ValidPassword123");
-            expect(await screen.findByText(/password reset successful/i)).toBeInTheDocument();
-
+            expect(await screen.findByText(/lösenordet har återställts/i)).toBeInTheDocument();
         });
 
         it("shows error when passwords do not match", async () => {
             renderResetPassword(`#token=${VALID_TOKEN}`);
 
-            const passwordInput = screen.getByLabelText(/^new password/i);
-            const confirmInput = screen.getByLabelText(/confirm new password/i);
-            const submitButton = screen.getByRole("button", {name: /reset password/i});
+            const passwordInput = screen.getByLabelText(/^nytt lösenord/i);
+            const confirmInput = screen.getByLabelText(/bekräfta nytt lösenord/i);
+            const submitButton = screen.getByRole("button", {name: /återställ lösenord/i});
 
             await userEvent.type(passwordInput, "ValidPassword123");
             await userEvent.type(confirmInput, "MismatchPassword123");
             await userEvent.click(submitButton);
 
-            expect(await screen.findByRole("alert")).toHaveTextContent(/passwords do not match/i);
+            expect(await screen.findByRole("alert")).toHaveTextContent(/matchar inte/i);
             expect(resetPassword).not.toHaveBeenCalled();
         });
 
         it("shows error when password is under 8 characters", async () => {
             renderResetPassword(`#token=${VALID_TOKEN}`);
 
-            const passwordInput = screen.getByLabelText(/^new password/i);
-            const confirmInput = screen.getByLabelText(/confirm new password/i);
-            const submitButton = screen.getByRole("button", {name: /reset password/i});
+            const passwordInput = screen.getByLabelText(/^nytt lösenord/i);
+            const confirmInput = screen.getByLabelText(/bekräfta nytt lösenord/i);
+            const submitButton = screen.getByRole("button", {name: /återställ lösenord/i});
 
             await userEvent.type(passwordInput, "Short1");
             await userEvent.type(confirmInput, "Short1");
             await userEvent.click(submitButton);
 
-            expect(await screen.findByRole("alert")).toHaveTextContent(/at least 8 characters/i);
+            expect(await screen.findByRole("alert")).toHaveTextContent(/minst 8 tecken/i);
             expect(resetPassword).not.toHaveBeenCalled();
         });
-
     });
 });

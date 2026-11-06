@@ -31,30 +31,30 @@ describe("Admin question bank", () => {
     it("loads questions, displays read-only details and paginates a bank of 100+ questions", async () => {
         render(<QuestionBank />);
 
-        await waitForElementToBeRemoved(() => screen.queryByText(/Loading/i));
+        await waitForElementToBeRemoved(() => screen.queryByText(/Laddar/i));
         expect(screen.getByRole("heading", {name: "#1: Safety question 1?"})).toBeInTheDocument();
-        expect(screen.getAllByText("Correct answer:")).toHaveLength(20);
+        expect(screen.getAllByText("Rätt svar:")).toHaveLength(20);
         expect(screen.getAllByText("Keep a safe distance.", {exact: false})).toHaveLength(20);
-        expect(screen.getByRole("button", {name: "Previous"})).toBeDisabled();
-        await userEvent.click(screen.getByRole("button", {name: "Next"}));
+        expect(screen.getByRole("button", {name: "Föregående"})).toBeDisabled();
+        await userEvent.click(screen.getByRole("button", {name: "Nästa"}));
         expect(screen.getByRole("heading", {name: "#21: Safety question 21?"})).toBeInTheDocument();
-        expect(screen.getByText("Page 2 of 6")).toBeInTheDocument();
+        expect(screen.getByText("Sida 2 av 6")).toBeInTheDocument();
     });
 
     it("searches by question text and ID, resets pagination, and switches subjects", async () => {
         render(<QuestionBank />);
         const input = await screen.findByRole("searchbox");
-        await userEvent.click(screen.getByRole("button", {name: "Next"}));
+        await userEvent.click(screen.getByRole("button", {name: "Nästa"}));
         await userEvent.type(input, "101");
         expect(screen.getByRole("heading", {name: "#101: Safety question 101?"})).toBeInTheDocument();
         expect(screen.getAllByRole("article")).toHaveLength(1);
         await userEvent.clear(input);
         await userEvent.type(input, "no match");
-        expect(screen.getByText("No questions match your search.")).toBeInTheDocument();
+        expect(screen.getByText("Inga frågor matchar din sökning.")).toBeInTheDocument();
         await userEvent.clear(input);
         await userEvent.type(input, "SAFETY question 99");
         expect(screen.getByRole("heading", {name: "#99: Safety question 99?"})).toBeInTheDocument();
-        await userEvent.selectOptions(screen.getByRole("combobox", {name: "Subject"}), "2");
+        await userEvent.selectOptions(screen.getByRole("combobox", {name: "Ämne"}), "2");
         expect(await screen.findByRole("heading", {name: "#102: Identify wildlife?"})).toBeInTheDocument();
         expect(screen.getByRole("searchbox")).toHaveValue("");
     });
@@ -68,7 +68,7 @@ describe("Admin question bank", () => {
             return [{...questions[0], questionText: "Wildlife question?"}];
         });
         render(<QuestionBank />);
-        expect(screen.getByText("Loading subjects...")).toBeInTheDocument();
+        expect(screen.getByText("Laddar ämnen...")).toBeInTheDocument();
         await act(async () => resolveSubjects(subjects));
         const select = await screen.findByRole("combobox");
         await userEvent.selectOptions(select, "2");
@@ -83,7 +83,7 @@ describe("Admin question bank", () => {
             throw new Error("Server down");
         });
         render(<QuestionBank />);
-        expect(await screen.findByRole("alert")).toHaveTextContent(`Failed to load ${resource}. Please try again.`);
+        expect(await screen.findByRole("alert")).toHaveTextContent(`Det gick inte att ladda ${resource === "subjects" ? "ämnena" : "frågorna"}. Försök igen.`);
     });
 
     it.each(["subjects", "questions"])("shows an empty state for no %s", async resource => {
@@ -92,6 +92,6 @@ describe("Admin question bank", () => {
         render(<QuestionBank />);
 
         expect(await screen.findByText(resource === "subjects"
-        ? "No subjects available." : "No questions available for this subject.")).toBeInTheDocument();
+        ? "Inga ämnen tillgängliga." : "Inga frågor tillgängliga för detta ämne.")).toBeInTheDocument();
     });
 });

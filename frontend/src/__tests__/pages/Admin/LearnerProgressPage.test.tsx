@@ -57,9 +57,9 @@ describe("LearnerProgressPage", () => {
         renderPage();
 
         expect(await screen.findByText("Test Learner")).toBeInTheDocument();
-        expect(screen.getByText("No mock exams yet.")).toBeInTheDocument();
-        expect(screen.getByText("No practice results yet.")).toBeInTheDocument();
-        expect(screen.getByText("Never")).toBeInTheDocument();
+        expect(screen.getByText("Inga övningsprov ännu.")).toBeInTheDocument();
+        expect(screen.getByText("Inga övningsresultat ännu.")).toBeInTheDocument();
+        expect(screen.getByText("Aldrig")).toBeInTheDocument();
     });
 
     it("shows mock exam summary for a learner with only exams", async () => {
@@ -72,7 +72,7 @@ describe("LearnerProgressPage", () => {
                     count: 2,
                     latestScore: 89,
                     latestAt: "2026-10-15T10:00:00",
-                    bestScore: 92,   // ← changed so Latest and Best differ
+                    bestScore: 92,
                     latestPassed: true,
                 },
             },
@@ -80,11 +80,11 @@ describe("LearnerProgressPage", () => {
 
         renderPage();
 
-        expect(await screen.findByText(/2 taken/)).toBeInTheDocument();
+        expect(await screen.findByText(/2 genomförda/)).toBeInTheDocument();
         expect(screen.getByText(/89%/)).toBeInTheDocument();     // latest
         expect(screen.getByText(/92%/)).toBeInTheDocument();     // best
-        expect(screen.getByText(/Passed/)).toBeInTheDocument();
-        expect(screen.getByText("No practice results yet.")).toBeInTheDocument();
+        expect(screen.getByText(/Godkänd/)).toBeInTheDocument();
+        expect(screen.getByText("Inga övningsresultat ännu.")).toBeInTheDocument();
     });
 
     it("shows practice subjects for a learner with only practice", async () => {
@@ -103,7 +103,7 @@ describe("LearnerProgressPage", () => {
 
         expect(await screen.findByText("Ekologi")).toBeInTheDocument();
         expect(screen.getByText("80%")).toBeInTheDocument();
-        expect(screen.getByText("No mock exams yet.")).toBeInTheDocument();
+        expect(screen.getByText("Inga övningsprov ännu.")).toBeInTheDocument();
     });
 
     it("shows both sections for a learner with practice and exams", async () => {
@@ -126,11 +126,11 @@ describe("LearnerProgressPage", () => {
 
         renderPage();
 
-        expect(await screen.findByText(/1 taken/)).toBeInTheDocument();
-        expect(screen.getByText(/Passed/)).toBeInTheDocument();
+        expect(await screen.findByText(/1 genomförda/)).toBeInTheDocument();
+        expect(screen.getByText(/Godkänd/)).toBeInTheDocument();
         expect(screen.getByText("Ekologi")).toBeInTheDocument();
-        expect(screen.queryByText("No mock exams yet.")).not.toBeInTheDocument();
-        expect(screen.queryByText("No practice results yet.")).not.toBeInTheDocument();
+        expect(screen.queryByText("Inga övningsprov ännu.")).not.toBeInTheDocument();
+        expect(screen.queryByText("Inga övningsresultat ännu.")).not.toBeInTheDocument();
     });
 
     it("shows 'Not passed' when the latest exam failed", async () => {
@@ -151,6 +151,6 @@ describe("LearnerProgressPage", () => {
 
         renderPage();
 
-        expect(await screen.findByText(/Not passed/)).toBeInTheDocument();
+        expect(await screen.findByText(/Ej godkänd/)).toBeInTheDocument();
     });
 });

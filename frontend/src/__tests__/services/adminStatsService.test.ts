@@ -26,8 +26,8 @@ describe("Admin stats service HTTP contract", () => {
     it("turns a forbidden response into a permission message and anything else into a load failure", () => {
         const forbidden = Object.assign(new Error('{"message":"You do not have permission to do this"}'), {status: 403});
         expect(adminStatsError(forbidden))
-            .toBe("You do not have permission to view the admin overview. Please sign in with an admin account.");
+            .toBe("Du har inte behörighet att se adminöversikten. Logga in med ett administratörskonto.");
         expect(adminStatsError(new Error("network down")))
-            .toBe("Failed to load the admin overview. Please try again.");
+            .toBe("Det gick inte att ladda adminöversikten. Försök igen.");
     });
 });
