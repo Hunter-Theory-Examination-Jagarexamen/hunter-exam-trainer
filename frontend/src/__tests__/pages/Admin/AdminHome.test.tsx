@@ -6,7 +6,7 @@ import apiClient from "../../../api/apiClient";
 
 vi.mock("../../../api/apiClient", () => ({default: vi.fn()}));
 
-const stats = {questionCount: 42, subjectCount: 5, studentCount: 17};
+const stats = {questionCount: 42, subjectCount: 5, studentCount: 17, unhandledFeedbackCount: 3};
 const httpError = (status: number, body: string) => Object.assign(new Error(body), {status});
 
 const renderPage = () => render(<MemoryRouter><AdminHome /></MemoryRouter>);
@@ -34,14 +34,18 @@ describe("Admin overview cards", () => {
         const learners = screen.getByRole("link", {name: /Elever|Learners|Studenter/i});
         expect(learners).toHaveAttribute("href", "/admin/learners");
         expect(learners).toHaveTextContent("17");
+        const feedback = screen.getByRole("link", {name: /Feedback/});
+        expect(feedback).toHaveAttribute("href", "/admin/feedback");
+        expect(feedback).toHaveTextContent("3");
+        expect(feedback).toHaveTextContent("Ohanterade meddelanden");
         expect(apiClient).toHaveBeenCalledWith("/api/admin/stats");
     });
 
     it("shows genuine zero counts from a successful response", async () => {
-        vi.mocked(apiClient).mockResolvedValue({questionCount: 0, subjectCount: 0, studentCount: 0});
+        vi.mocked(apiClient).mockResolvedValue({questionCount: 0, subjectCount: 0, studentCount: 0, unhandledFeedbackCount: 0});
         renderPage();
         await screen.findByRole("link", {name: /Frågor|Questions/i});
-        expect(screen.getAllByText("0")).toHaveLength(3);
+        expect(screen.getAllByText("0")).toHaveLength(4);
         expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     });
 

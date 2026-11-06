@@ -16,6 +16,7 @@ const AdminHome = () => {
         {to: "/admin/questions", title: t("admin.cards.questions.title"), caption: t("admin.cards.questions.caption"), count: stats => stats.questionCount},
         {to: "/admin/subjects", title: t("admin.cards.subjects.title"), caption: t("admin.cards.subjects.caption"), count: stats => stats.subjectCount},
         {to: "/admin/learners", title: t("admin.cards.learners.title"), caption: t("admin.cards.learners.caption"), count: stats => stats.studentCount},
+        {to: "/admin/feedback", title: t("admin.cards.feedback.title"), caption: t("admin.cards.feedback.caption"), count: stats => stats.unhandledFeedbackCount},
     ];
 
     useEffect(() => {

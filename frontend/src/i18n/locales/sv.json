@@ -267,6 +267,10 @@
       "learners": {
         "title": "Studenter",
         "caption": "Öppna studenternas framsteg"
+      },
+      "feedback": {
+        "title": "Feedback",
+        "caption": "Ohanterade meddelanden"
       }
     },
     "errors": {

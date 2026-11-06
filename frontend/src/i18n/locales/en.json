@@ -267,6 +267,10 @@
       "learners": {
         "title": "Learners",
         "caption": "Open learner progress"
+      },
+      "feedback": {
+        "title": "Feedback",
+        "caption": "Unhandled messages"
       }
     },
     "errors": {
