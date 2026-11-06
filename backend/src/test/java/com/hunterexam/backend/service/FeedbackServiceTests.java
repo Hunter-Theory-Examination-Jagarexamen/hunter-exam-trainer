@@ -1,6 +1,7 @@
 package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.FeedbackRequest;
+import com.hunterexam.backend.dto.FeedbackResponse;
 import com.hunterexam.backend.entity.Feedback;
 import com.hunterexam.backend.entity.FeedbackType;
 import com.hunterexam.backend.entity.Question;
@@ -17,10 +18,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,6 +51,10 @@ class FeedbackServiceTests {
         student = new User();
         student.setId(1L);
         student.setEmail(EMAIL);
+    }
+
+    /** For the send() tests: the logged-in student exists. */
+    private void studentExists() {
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(student));
     }
 
@@ -66,6 +74,7 @@ class FeedbackServiceTests {
 
     @Test
     void generalFeedbackIsSavedWithSenderAndNoQuestion() {
+        studentExists();
         service.send(EMAIL, request(FeedbackType.APP, "  Bra app  ", null));
 
         Feedback saved = savedFeedback();
@@ -78,6 +87,7 @@ class FeedbackServiceTests {
 
     @Test
     void questionReportLinksTheQuestionAndCopiesItsText() {
+        studentExists();
         Question question = new Question();
         question.setId(12L);
         question.setQuestionText("Vilket djur?");
@@ -92,6 +102,7 @@ class FeedbackServiceTests {
 
     @Test
     void twentiethItemInADayIsStillAllowed() {
+        studentExists();
         when(feedbackRepository.countBySenderAndCreatedAtAfter(eq(student), any())).thenReturn(19L);
 
         service.send(EMAIL, request(FeedbackType.APP, "Hej", null));
@@ -101,6 +112,7 @@ class FeedbackServiceTests {
 
     @Test
     void twentyFirstItemInADayIsRefused() {
+        studentExists();
         when(feedbackRepository.countBySenderAndCreatedAtAfter(eq(student), any())).thenReturn(20L);
 
         assertThrows(TooManyRequestsException.class,
@@ -110,6 +122,7 @@ class FeedbackServiceTests {
 
     @Test
     void unknownQuestionGivesNotFound() {
+        studentExists();
         when(questionRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class,
@@ -119,8 +132,44 @@ class FeedbackServiceTests {
 
     @Test
     void questionIdWithAnotherTypeIsRefused() {
+        studentExists();
         assertThrows(IllegalArgumentException.class,
                 () -> service.send(EMAIL, request(FeedbackType.APP, "Hej", 12L)));
         verify(feedbackRepository, never()).save(any());
+    }
+
+    @Test
+    void adminResponseHasTheQuestionIdOrEmptyWhenTheQuestionIsDeleted() {
+        Question question = new Question();
+        question.setId(12L);
+        question.setQuestionText("Vilket djur?");
+        Feedback linked = new Feedback(student, FeedbackType.QUESTION, "Fel", question, LocalDateTime.now());
+        Feedback deleted = new Feedback(student, FeedbackType.QUESTION, "Fel", question, LocalDateTime.now());
+        deleted.setQuestion(null);   // what the database does when the question is deleted
+        when(feedbackRepository.findForAdmin(null, null)).thenReturn(List.of(linked, deleted));
+
+        List<FeedbackResponse> result = service.listForAdmin(null, null);
+
+        assertEquals(12L, result.get(0).questionId());
+        assertNull(result.get(1).questionId());
+        assertEquals("Vilket djur?", result.get(1).questionText());
+    }
+
+    @Test
+    void setHandledChangesTheFlag() {
+        Feedback item = new Feedback(student, FeedbackType.APP, "Hej", null, LocalDateTime.now());
+        when(feedbackRepository.findById(3L)).thenReturn(Optional.of(item));
+
+        FeedbackResponse result = service.setHandled(3L, true);
+
+        assertTrue(item.isHandled());
+        assertTrue(result.handled());
+    }
+
+    @Test
+    void setHandledOnUnknownItemGivesNotFound() {
+        when(feedbackRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> service.setHandled(99L, true));
     }
 }

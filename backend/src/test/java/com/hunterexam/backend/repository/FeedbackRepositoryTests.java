@@ -14,6 +14,7 @@ import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -123,5 +124,23 @@ class FeedbackRepositoryTests {
         saveAndReload(new Feedback(student, FeedbackType.APP, "Open", null, now));
 
         assertEquals(1, feedback.countByHandledFalse());
+    }
+
+    @Test
+    void adminListFiltersByTypeAndHandledNewestFirst() {
+        Feedback oldReport = new Feedback(student, FeedbackType.QUESTION, "Old report", question, now.minusDays(1));
+        Feedback newReport = new Feedback(student, FeedbackType.QUESTION, "New report", question, now);
+        Feedback handledApp = new Feedback(student, FeedbackType.APP, "Handled app", null, now.minusHours(1));
+        handledApp.setHandled(true);
+        feedback.saveAllAndFlush(List.of(oldReport, newReport, handledApp));
+
+        assertEquals(List.of("New report", "Handled app", "Old report"), texts(feedback.findForAdmin(null, null)));
+        assertEquals(List.of("New report", "Old report"), texts(feedback.findForAdmin(FeedbackType.QUESTION, null)));
+        assertEquals(List.of("Handled app"), texts(feedback.findForAdmin(null, true)));
+        assertEquals(List.of(), texts(feedback.findForAdmin(FeedbackType.APP, false)));
+    }
+
+    private List<String> texts(List<Feedback> items) {
+        return items.stream().map(Feedback::getText).toList();
     }
 }

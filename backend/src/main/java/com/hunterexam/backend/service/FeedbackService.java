@@ -1,6 +1,7 @@
 package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.FeedbackRequest;
+import com.hunterexam.backend.dto.FeedbackResponse;
 import com.hunterexam.backend.entity.Feedback;
 import com.hunterexam.backend.entity.FeedbackType;
 import com.hunterexam.backend.entity.Question;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /** Students' feedback and question reports to the course leaders. */
 @Service
@@ -66,5 +68,28 @@ public class FeedbackService {
 
         feedbackRepository.save(new Feedback(
                 sender, request.getType(), request.getText().strip(), question, now));
+    }
+
+    /**
+     * Feedback for the admin list, newest first; {@code null} filters mean "any".
+     */
+    @Transactional(readOnly = true)
+    public List<FeedbackResponse> listForAdmin(FeedbackType type, Boolean handled) {
+        return feedbackRepository.findForAdmin(type, handled).stream()
+                .map(FeedbackResponse::from)
+                .toList();
+    }
+
+    /**
+     * Marks an item as handled, or back to unhandled.
+     *
+     * @throws NotFoundException if no item has this id
+     */
+    @Transactional
+    public FeedbackResponse setHandled(Long id, boolean handled) {
+        Feedback feedback = feedbackRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Feedback not found"));
+        feedback.setHandled(handled);
+        return FeedbackResponse.from(feedback);
     }
 }
