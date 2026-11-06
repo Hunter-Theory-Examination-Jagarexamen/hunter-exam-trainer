@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { sendFeedback, sendFeedbackErrorKey } from "../../services/feedbackService";
+import { sendFeedback, sendFeedbackErrorKey, type SendFeedbackErrorKey } from "../../services/feedbackService";
 import { FEEDBACK_MAX_LENGTH, type FeedbackType } from "../../types/feedback";
 import "../../styles/feedback.css";
 
@@ -14,6 +14,13 @@ interface FeedbackDialogProps {
 
 const TYPES: FeedbackType[] = ["QUESTION", "APP", "OTHER"];
 
+// Keys written in full, so a text search finds them.
+const TYPE_LABEL_KEYS = {
+    QUESTION: "feedback.types.QUESTION",
+    APP: "feedback.types.APP",
+    OTHER: "feedback.types.OTHER",
+} as const;
+
 // A form for sending feedback or reporting a problem with a question. Shown on top
 // of the page (a modal); closes with the close button or the Escape key.
 const FeedbackDialog = ({ onClose, initialType = "APP", questionId }: FeedbackDialogProps) => {
@@ -21,7 +28,7 @@ const FeedbackDialog = ({ onClose, initialType = "APP", questionId }: FeedbackDi
     const [type, setType] = useState<FeedbackType>(initialType);
     const [text, setText] = useState("");
     const [status, setStatus] = useState<"editing" | "sending" | "sent">("editing");
-    const [errorKey, setErrorKey] = useState<string | null>(null);
+    const [errorKey, setErrorKey] = useState<SendFeedbackErrorKey | null>(null);
 
     // Escape closes the dialog. The listener is removed again when the dialog closes.
     useEffect(() => {
@@ -70,7 +77,7 @@ const FeedbackDialog = ({ onClose, initialType = "APP", questionId }: FeedbackDi
                         <select id="feedback-type" value={type}
                                 onChange={event => setType(event.target.value as FeedbackType)}>
                             {TYPES.map(option => (
-                                <option key={option} value={option}>{t(`feedback.types.${option}`)}</option>
+                                <option key={option} value={option}>{t(TYPE_LABEL_KEYS[option])}</option>
                             ))}
                         </select>
 

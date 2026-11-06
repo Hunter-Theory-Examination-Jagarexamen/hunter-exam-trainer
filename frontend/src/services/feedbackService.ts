@@ -20,7 +20,12 @@ export const setFeedbackHandled = (id: number, handled: boolean): Promise<Feedba
 
 // The translation key for a failed send, picked from the HTTP status
 // (not from the wording of the backend's message).
-export function sendFeedbackErrorKey(error: unknown): string {
+export type SendFeedbackErrorKey =
+    | "feedback.errors.unreachable"
+    | "feedback.errors.tooMany"
+    | "feedback.errors.sendFailed";
+
+export function sendFeedbackErrorKey(error: unknown): SendFeedbackErrorKey {
     if (isServerUnreachable(error)) return "feedback.errors.unreachable";
     if (errorStatus(error) === 429) return "feedback.errors.tooMany";
     return "feedback.errors.sendFailed";
