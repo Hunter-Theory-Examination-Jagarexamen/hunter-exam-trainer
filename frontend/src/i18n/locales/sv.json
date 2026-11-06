@@ -268,6 +268,10 @@
         "title": "Studenter",
         "caption": "Öppna studenternas framsteg"
       }
+    },
+    "errors": {
+      "noPermission": "Du har inte behörighet att se adminöversikten. Logga in med ett administratörskonto.",
+      "loadFailed": "Det gick inte att ladda adminöversikten. Försök igen."
     }
   },
   "learnerProgress": {
@@ -345,7 +349,12 @@
     "loadSubjectsFailed": "Det gick inte att ladda ämnena. Försök igen.",
     "editAria": "Redigera fråga {{id}}",
     "deleteAria": "Ta bort fråga {{id}}",
-    "pagesAria": "Sidor med frågor"
+    "pagesAria": "Sidor med frågor",
+    "errors": {
+      "requestFailed": "Något gick fel. Försök igen. Om det fortsätter, uppdatera frågebanken eller kontakta en administratör.",
+      "noPermission": "Du har inte behörighet att hantera frågor. Logga in med ett administratörskonto.",
+      "notFound": "Frågan eller dess ämne finns inte längre. Uppdatera frågebanken innan du försöker igen."
+    }
   },
   "subjects": {
     "title": "Hantera ämnen",
@@ -381,7 +390,15 @@
       }
     },
     "editAria": "Redigera ämne {{name}}",
-    "deleteAria": "Ta bort ämne {{name}}"
+    "deleteAria": "Ta bort ämne {{name}}",
+    "errors": {
+      "requestFailed": "Något gick fel. Försök igen. Om det fortsätter, kontakta en administratör.",
+      "loadFailed": "Det gick inte att ladda ämnena. Försök igen.",
+      "noPermission": "Du har inte behörighet att hantera ämnen. Logga in med ett administratörskonto.",
+      "notFound": "Ämnet finns inte längre. Uppdatera ämneslistan innan du försöker igen.",
+      "inUse": "Ämnet kan inte tas bort just nu eftersom det används av frågor eller övningsresultat. Inget ämne togs bort.",
+      "nameTaken": "Det finns redan ett ämne med det namnet. Välj ett annat namn."
+    }
   },
   "exam": {
     "loading": "Laddar provfrågor...",

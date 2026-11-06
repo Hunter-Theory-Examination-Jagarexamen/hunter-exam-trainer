@@ -48,7 +48,7 @@ describe("Admin overview cards", () => {
     it("shows an error instead of fabricated zero counts when the request fails", async () => {
         vi.mocked(apiClient).mockRejectedValue(httpError(500, '{"message":"Boom"}'));
         renderPage();
-        expect(await screen.findByRole("alert")).toHaveTextContent(/Kunde inte ladda|Failed to load/i);
+        expect(await screen.findByRole("alert")).toHaveTextContent("Det gick inte att ladda adminöversikten. Försök igen.");
         expect(screen.queryByText("0")).not.toBeInTheDocument();
         expect(screen.queryByRole("link", {name: /Frågor|Questions/i})).not.toBeInTheDocument();
     });
@@ -57,7 +57,7 @@ describe("Admin overview cards", () => {
         vi.mocked(apiClient).mockRejectedValue(httpError(403, '{"message":"You do not have permission to do this"}'));
         renderPage();
         expect(await screen.findByRole("alert"))
-            .toHaveTextContent(/behörighet|permission/i);
+            .toHaveTextContent("Du har inte behörighet att se adminöversikten.");
         expect(screen.queryByRole("link", {name: /Frågor|Questions/i})).not.toBeInTheDocument();
     });
 });

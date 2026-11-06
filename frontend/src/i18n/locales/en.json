@@ -268,6 +268,10 @@
         "title": "Learners",
         "caption": "Open learner progress"
       }
+    },
+    "errors": {
+      "noPermission": "You do not have permission to view the admin overview. Please sign in with an admin account.",
+      "loadFailed": "Failed to load the admin overview. Please try again."
     }
   },
   "learnerProgress": {
@@ -345,7 +349,12 @@
     "loadSubjectsFailed": "Failed to load subjects. Please try again.",
     "editAria": "Edit question {{id}}",
     "deleteAria": "Delete question {{id}}",
-    "pagesAria": "Question pages"
+    "pagesAria": "Question pages",
+    "errors": {
+      "requestFailed": "The request failed. Please try again. If it persists, refresh the question bank or contact an administrator.",
+      "noPermission": "You do not have permission to manage questions. Please sign in with an admin account.",
+      "notFound": "This question or its subject no longer exists. Refresh the question bank before trying again."
+    }
   },
   "subjects": {
     "title": "Manage Subjects",
@@ -381,7 +390,15 @@
       }
     },
     "editAria": "Edit subject {{name}}",
-    "deleteAria": "Delete subject {{name}}"
+    "deleteAria": "Delete subject {{name}}",
+    "errors": {
+      "requestFailed": "The request failed. Please try again. If it persists, contact an administrator.",
+      "loadFailed": "Failed to load subjects. Please try again.",
+      "noPermission": "You do not have permission to manage subjects. Please sign in with an admin account.",
+      "notFound": "This subject no longer exists. Refresh the subject list before trying again.",
+      "inUse": "This subject cannot currently be deleted because it is in use by questions or practice results. No subject was deleted.",
+      "nameTaken": "A subject with this name already exists. Choose a different name."
+    }
   },
   "exam": {
     "loading": "Loading exam questions...",

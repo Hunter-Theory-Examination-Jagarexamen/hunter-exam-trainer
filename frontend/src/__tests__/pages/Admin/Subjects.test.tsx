@@ -41,7 +41,7 @@ describe("Subject management", () => {
     it("shows a safe load failure and retries", async () => {
         vi.mocked(apiClient).mockRejectedValueOnce(new Error("SQL secret"));
         render(<Subjects />);
-        expect(await screen.findByRole("alert")).toHaveTextContent("Failed to load subjects. Please try again.");
+        expect(await screen.findByRole("alert")).toHaveTextContent("Det gick inte att ladda ämnena. Försök igen.");
         await userEvent.click(screen.getByRole("button", {name: "Försök ladda ämnen igen"}));
         expect(await screen.findByRole("heading", {name: "Safety"})).toBeInTheDocument();
     });
@@ -83,14 +83,14 @@ describe("Subject management", () => {
         await open(mode); fill();
         vi.mocked(apiClient).mockRejectedValueOnce(httpError(409, '{"message":"This change conflicts with existing data"}'));
         await userEvent.click(screen.getByRole("button", {name: "Spara ämne"}));
-        expect(await screen.findByRole("alert")).toHaveTextContent("A subject with this name already exists. Choose a different name.");
+        expect(await screen.findByRole("alert")).toHaveTextContent("Det finns redan ett ämne med det namnet. Välj ett annat namn.");
         expect(screen.getByLabelText("Namn (obligatoriskt)")).toHaveValue("Wildlife");
     });
     it.each([
-        ["404", httpError(404, '{"message":"Subject not found with id: 1"}'), "This subject no longer exists. Refresh the subject list before trying again."],
-        ["403", httpError(403, "API request failed: 403"), "You do not have permission to manage subjects. Please sign in with an admin account."],
-        ["network failure", new Error("Failed to fetch"), "The request failed. Please try again. If it persists, contact an administrator."],
-        ["400 required", httpError(400, '{"message":"Description is required"}'), "Enter a subject description."],
+        ["404", httpError(404, '{"message":"Subject not found with id: 1"}'), "Ämnet finns inte längre. Uppdatera ämneslistan innan du försöker igen."],
+        ["403", httpError(403, "API request failed: 403"), "Du har inte behörighet att hantera ämnen. Logga in med ett administratörskonto."],
+        ["network failure", new Error("Failed to fetch"), "Något gick fel. Försök igen. Om det fortsätter, kontakta en administratör."],
+        ["400 required", httpError(400, '{"message":"Description is required"}'), "Ange en ämnesbeskrivning."],
         ["400 too long", httpError(400, '{"message":"Name must be at most 255 characters"}'), "Name must be at most 255 characters"],
         ["500 with code", httpError(500, '{"message":"An unexpected error occurred and has been logged as code 7F3A2C. Please try again."}'), "An unexpected error occurred and has been logged as code 7F3A2C. Please try again."],
     ])("handles update failure: %s", async (_label, error, message) => {
@@ -122,7 +122,7 @@ describe("Subject management", () => {
         await open("delete");
         vi.mocked(apiClient).mockRejectedValueOnce(httpError(409, '{"message":"This change conflicts with existing data"}'));
         await userEvent.click(screen.getByRole("button", {name: /Bekräfta borttagning|Confirm/i}));
-        expect(await screen.findByRole("alert")).toHaveTextContent("This subject cannot currently be deleted because it is in use by questions or practice results. No subject was deleted.");
+        expect(await screen.findByRole("alert")).toHaveTextContent("Ämnet kan inte tas bort just nu eftersom det används av frågor eller övningsresultat. Inget ämne togs bort.");
         expect(screen.getByRole("heading", {name: "Safety"})).toBeInTheDocument();
         expect(screen.queryByRole("status")).not.toBeInTheDocument();
     });
@@ -138,7 +138,7 @@ describe("Subject management", () => {
         expect(button).toBeDisabled();
         expect(screen.getByRole("heading", {name: "Safety"})).toBeInTheDocument();
         await act(async () => reject(new Error("Server unavailable")));
-        expect(screen.getByRole("alert")).toHaveTextContent("The request failed. Please try again. If it persists, contact an administrator.");
+        expect(screen.getByRole("alert")).toHaveTextContent("Något gick fel. Försök igen. Om det fortsätter, kontakta en administratör.");
         expect(button).toBeEnabled();
         vi.mocked(apiClient).mockResolvedValueOnce(mode === "delete" ? null : {...subject, name: "Wildlife"});
         await userEvent.click(button);

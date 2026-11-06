@@ -214,7 +214,7 @@ describe("Admin question CRUD", () => {
         expect(button).toBeDisabled();
         expect(screen.getByLabelText("Ämne")).toBeDisabled();
         await act(async () => reject(new Error('{"message":"Database technical details"}')));
-        expect(screen.getByRole("alert")).toHaveTextContent("The request failed. Please try again.");
+        expect(screen.getByRole("alert")).toHaveTextContent("Något gick fel. Försök igen.");
         expect(screen.getByRole("alert")).not.toHaveTextContent("Database technical details");
         expect(button).toBeEnabled();
         expect(screen.getByRole("heading", {name: "#1: Original question?"})).toBeInTheDocument();
@@ -225,8 +225,8 @@ describe("Admin question CRUD", () => {
     });
 
     it.each([
-        ["404", 404, '{"message":"Question not found"}', "This question or its subject no longer exists."],
-        ["403", 403, "API request failed: 403", "You do not have permission to manage questions."],
+        ["404", 404, '{"message":"Question not found"}', "Frågan eller dess ämne finns inte längre."],
+        ["403", 403, "API request failed: 403", "Du har inte behörighet att hantera frågor."],
         ["400", 400, '{"message":"Correct answer must match one of the option texts"}', "Correct answer must match one of the option texts"],
         ["500 with code", 500, '{"message":"An unexpected error occurred and has been logged as code 7F3A2C. Please try again."}', "code 7F3A2C"],
     ])("handles backend error %s", async (_label, status, body, message) => {
