@@ -1,22 +1,25 @@
 import "../../styles/mockexam.css";
+import {useTranslation} from "react-i18next";
 
 const MockExamHeader = () => {
+    const { t } = useTranslation();
+
     return (
         <section className="mockExam-header" >
-            <h2>Provöversikt</h2>
+            <h2>{t("mockExam.headerTitle")}</h2>
 
             <div className="exam-details">
                 <div className="exam-detail">
-                    <span className="label">Ämne</span>
-                    <strong>Alla kategorier</strong>
+                    <span className="label">{t("mockExam.subjectLabel")}</span>
+                    <strong>{t("mockExam.subjectValue")}</strong>
                 </div>
                 <div className="exam-detail">
-                    <span className="label">Frågor</span>
-                    <strong>70</strong>
+                    <span className="label">{t("mockExam.questionsLabel")}</span>
+                    <strong>{t("mockExam.questionsValue")}</strong>
                 </div>
                 <div className="exam-detail">
-                    <span className="label">Tid</span>
-                    <strong>60 minuter</strong>
+                    <span className="label">{t("mockExam.timeLabel")}</span>
+                    <strong>{t("mockExam.timeValue")}</strong>
                 </div>
             </div>
 

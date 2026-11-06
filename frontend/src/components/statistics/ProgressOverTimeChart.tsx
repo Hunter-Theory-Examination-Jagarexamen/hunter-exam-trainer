@@ -7,6 +7,7 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from "recharts";
+import {useTranslation} from "react-i18next";
 import type { ProgressPoint } from "../../types/progressOverTime.ts";
 
 interface Props {
@@ -14,8 +15,10 @@ interface Props {
 }
 
 const ProgressOverTimeChart = ({ data }: Props) => {
+    const { t } = useTranslation();
+
     if (data.length === 0) {
-        return <p>Inga övningsresultat än.</p>;
+        return <p>{t("statistics.noProgressData")}</p>;
     }
 
     const chartData = data.map((point) => ({
@@ -35,7 +38,7 @@ const ProgressOverTimeChart = ({ data }: Props) => {
                 <YAxis domain={[0, 100]} unit="%" />
                 <Tooltip
                     formatter={(value, name) => {
-                        if (name === "accuracy") return [`${value}%`, "Träffsäkerhet"];
+                        if (name === "accuracy") return [`${value}%`, t("statistics.accuracyLabel")];
                         return [String(value), String(name)];
                     }}
                 />

@@ -1,4 +1,5 @@
 import {Check} from "lucide-react";
+import {useTranslation} from "react-i18next";
 import "../../styles/statistics.css"
 import type { RecentActivity } from "../../types/dashboardInfo.ts";
 
@@ -8,13 +9,14 @@ interface RecentResultsProps {
 
 const RecentResults = (
     { activity }: RecentResultsProps) => {
+    const { t } = useTranslation();
 
     return (
         <div className="recent-results">
             <Check size={16} className="recent-result-icon" />
 
             <span className="recent-result-name">
-                Övningsprov
+                {t("statistics.practiceActivityLabel")}
             </span>
             <span className="recent-result-score">
                 {activity.score}%

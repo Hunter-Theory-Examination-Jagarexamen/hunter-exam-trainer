@@ -1,12 +1,13 @@
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
+import {useTranslation} from "react-i18next";
 import {Mail} from "lucide-react";
 import logo from "../../assets/images/logo.svg";
 import "../../styles/auth.css";
 import {forgotPassword} from "../../services/authService.ts";
 
 const ForgotPassword = () => {
-
+    const {t} = useTranslation();
     const navigate = useNavigate();
 
     const [email, setEmail] = useState("");
@@ -18,7 +19,7 @@ const ForgotPassword = () => {
         e.preventDefault();
 
         if (!email) {
-            alert("Vänligen ange din e-postadress");
+            alert(t("forgotPassword.emptyEmailAlert"));
             return;
         }
 
@@ -32,7 +33,7 @@ const ForgotPassword = () => {
             setMessage(response.message);
 
         } catch (error) {
-            setError(error instanceof Error ? error.message : "Något gick fel. Försök igen.");
+            setError(error instanceof Error ? error.message : t("forgotPassword.defaultError"));
         } finally {
             setIsLoading(false);
         }
@@ -46,9 +47,9 @@ const ForgotPassword = () => {
                     <div className="auth-logo">
                         <img src={logo} alt="Hunter Exam Trainer" />
                     </div>
-                    <h1>JÄGAREXAMEN TRÄNARE</h1>
+                    <h1>{t("forgotPassword.brandTitle")}</h1>
                     <p>
-                        Återställ ditt lösenord för att fortsätta träna.
+                        {t("forgotPassword.brandSubtitle")}
                     </p>
                 </div>
             </div>
@@ -59,16 +60,16 @@ const ForgotPassword = () => {
                     <div className="auth-mobile-logo">
                         <img src={logo} alt="Hunter Exam Trainer" />
                     </div>
-                    <h2>Glömt lösenord</h2>
+                    <h2>{t("forgotPassword.title")}</h2>
                     <p>
-                        Ange din e-postadress för att få en länk för återställning av lösenord.
+                        {t("forgotPassword.subtitle")}
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-field">
                         <label htmlFor="email">
-                            E-post
+                            {t("forgotPassword.emailLabel")}
                         </label>
 
                         <div className="input-wrapper">
@@ -78,7 +79,7 @@ const ForgotPassword = () => {
                                 type="email"
                                 required
                                 autoComplete="email"
-                                placeholder="Ange din e-postadress"
+                                placeholder={t("forgotPassword.emailPlaceholder")}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
@@ -90,7 +91,7 @@ const ForgotPassword = () => {
                         className="auth-primary-button"
                         disabled={isLoading}
                     >
-                        {isLoading ? "Skickar..." : "Skicka återställningslänk"}
+                        {isLoading ? t("forgotPassword.submittingButton") : t("forgotPassword.submitButton")}
                     </button>
                 </form>
 
@@ -103,12 +104,12 @@ const ForgotPassword = () => {
                 )}
 
                 <p className="auth-switch">
-                    Kom du ihåg ditt lösenord?{" "}
+                    {t("forgotPassword.rememberPassword")}{" "}
                     <button
                         type="button"
                         onClick={() => navigate("/login")}
                     >
-                        Tillbaka till inloggning
+                        {t("forgotPassword.backToLogin")}
                     </button>
                 </p>
 

@@ -1,16 +1,16 @@
 import "../../styles/dashboard.css";
 import {useEffect, useState} from "react";
+import {useTranslation} from "react-i18next";
 import type { RecentActivity } from "../../types/dashboardInfo.ts";
 import apiClient from "../../api/apiClient.ts";
 
 const RecentActivityList = () => {
-
+    const {t} = useTranslation();
     const [activities, setActivities] = useState<RecentActivity[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
 
     useEffect(() => {
-
         const fetchRecentActivity = async () => {
             try {
                 setIsLoading(true);
@@ -21,17 +21,17 @@ const RecentActivityList = () => {
             }
             catch (error) {
                 console.error("Failed to load recent activities:", error);
-                setError("Kunde inte ladda senaste aktiviteter. Försök igen.");
+                setError(t("dashboard.loadActivityError"));
             }
             finally {
                 setIsLoading(false);
             }
         };
         void fetchRecentActivity();
-    }, []);
+    }, [t]);
 
     if (isLoading) {
-        return <p>Laddar senaste aktiviteter...</p>;
+        return <p>{t("dashboard.loadingActivities")}</p>;
     }
 
     if (error) {
@@ -39,29 +39,28 @@ const RecentActivityList = () => {
     }
 
     if (activities.length === 0) {
-        return <p>Ingen aktivitet än.</p>;
+        return <p>{t("dashboard.noActivities")}</p>;
     }
 
     return (
         <section className="dashboard-section">
-            <h2>Senaste aktivitet</h2>
+            <h2>{t("dashboard.recentActivityTitle")}</h2>
 
             <div className="recent-activity">
                 <div className="recent-activity-header">
-                    <span>Aktivitet</span>
-                    <span>Poäng</span>
-                    <span>Datum</span>
+                    <span>{t("dashboard.activityHeader")}</span>
+                    <span>{t("dashboard.scoreHeader")}</span>
+                    <span>{t("dashboard.dateHeader")}</span>
                 </div>
             </div>
 
             {activities.map((activity) => {
-
                 return (
                     <div
                         className="recent-activity-row"
                         key={activity.id}
                     >
-                        <span>Övningsprov</span>
+                        <span>{t("dashboard.practiceActivityLabel")}</span>
                         <span>
                             {activity.score}%
                             <small>

@@ -3,10 +3,12 @@ import Sidebar from "./Sidebar";
 import "../../styles/layout.css";
 import { Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import apiClient from "../../api/apiClient";
 import type { CurrentUserState, User } from "../../types/user";
 
 const Layout = () => {
+    const { t } = useTranslation();
     const [currentUser, setCurrentUser] = useState<CurrentUserState>({
         user: null, isLoading: true, error: "",
     });
@@ -28,11 +30,11 @@ const Layout = () => {
             if (active) setCurrentUser({
                 user: null,
                 isLoading: false,
-                error: "Kunde inte ladda användardetaljer. Försök igen.",
+                error: t("layout.userLoadError"),
             });
         });
         return () => { active = false; };
-    }, []);
+    }, [t]);
 
     return (
         <div className="layout">

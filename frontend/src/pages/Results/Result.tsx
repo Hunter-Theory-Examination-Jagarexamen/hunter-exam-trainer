@@ -2,6 +2,7 @@ import PageTitle from "../../components/common/PageTitle";
 import ResultSummary from "../../components/results/ResultSummary";
 import "../../styles/result.css";
 import { useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface ResultData {
     score: number;
@@ -12,7 +13,7 @@ interface ResultData {
 }
 
 const Result = () => {
-
+    const { t } = useTranslation();
     const location = useLocation();
 
     const result = location.state as ResultData | undefined;
@@ -22,10 +23,10 @@ const Result = () => {
             <section className="result">
 
                 <PageTitle
-                    title="Resultat"
-                    subtitle="Ingen resultatdata hittades."
+                    title={t("result.title")}
+                    subtitle={t("result.noDataSubtitle")}
                 />
-                <p>Vänligen genomför ett övningsprov för att se dina resultat.</p>
+                <p>{t("result.noDataMessage")}</p>
             </section>
         );
     }
@@ -34,8 +35,8 @@ const Result = () => {
         <section className="result">
 
             <PageTitle
-                title="Resultat"
-                subtitle="Här är ditt resultat för övningsprovet."
+                title={t("result.title")}
+                subtitle={t("result.hasDataSubtitle")}
             />
 
             <ResultSummary

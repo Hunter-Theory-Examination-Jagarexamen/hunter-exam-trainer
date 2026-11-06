@@ -1,4 +1,5 @@
 import {BookOpenText, Trophy} from "lucide-react";
+import {useTranslation} from "react-i18next";
 import "../../styles/statistics.css";
 
 interface PerformanceSummaryProps {
@@ -8,13 +9,14 @@ interface PerformanceSummaryProps {
 
 const PerformanceSummary = (
     { strongestSubject, needsImprovement }: PerformanceSummaryProps) => {
+    const { t } = useTranslation();
 
     return (
         <section>
             <div className="performance-result">
                 <Trophy size={16} className="performance-icon" />
                 <span className="subject-title">
-                     Starkaste ämne
+                     {t("statistics.strongestSubject")}
                 </span>
                 <span className="subject-name">
                     {strongestSubject}
@@ -23,7 +25,7 @@ const PerformanceSummary = (
             <div className="performance-result">
                 <BookOpenText size={16} className="performance-icon" />
                 <span className="subject-title">
-                    Behöver förbättras
+                    {t("statistics.needsImprovement")}
                 </span>
                 <span className="subject-name">
                     {needsImprovement}
