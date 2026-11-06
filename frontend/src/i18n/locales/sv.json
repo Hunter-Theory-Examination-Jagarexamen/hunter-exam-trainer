@@ -111,5 +111,26 @@
       "score": "Ditt resultat visas efter inlämning.",
       "unanswered": "Obesvarade frågor räknas som fel."
     }
+  },
+  "feedback": {
+    "title": "Ge feedback",
+    "typeLabel": "Vad gäller det?",
+    "types": {
+      "QUESTION": "Fel i en fråga",
+      "APP": "Appen",
+      "OTHER": "Övrigt"
+    },
+    "textLabel": "Ditt meddelande",
+    "privacyHint": "Skriv inte ditt namn eller andra personuppgifter.",
+    "send": "Skicka",
+    "sending": "Skickar...",
+    "cancel": "Avbryt",
+    "close": "Stäng",
+    "sent": "Tack! Ditt meddelande har skickats till kursledarna.",
+    "errors": {
+      "tooMany": "Du har skickat många meddelanden i dag. Försök igen i morgon.",
+      "sendFailed": "Det gick inte att skicka meddelandet. Försök igen.",
+      "unreachable": "Servern kan inte nås just nu. Försök igen senare."
+    }
   }
 }

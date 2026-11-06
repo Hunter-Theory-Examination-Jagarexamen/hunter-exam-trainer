@@ -111,5 +111,26 @@
       "score": "Your score will be displayed after submission.",
       "unanswered": "Unanswered questions count as incorrect."
     }
+  },
+  "feedback": {
+    "title": "Give feedback",
+    "typeLabel": "What is it about?",
+    "types": {
+      "QUESTION": "Error in a question",
+      "APP": "The app",
+      "OTHER": "Other"
+    },
+    "textLabel": "Your message",
+    "privacyHint": "Don't write your name or other personal details.",
+    "send": "Send",
+    "sending": "Sending...",
+    "cancel": "Cancel",
+    "close": "Close",
+    "sent": "Thank you! Your message has been sent to the course leaders.",
+    "errors": {
+      "tooMany": "You have sent many messages today. Please try again tomorrow.",
+      "sendFailed": "The message could not be sent. Please try again.",
+      "unreachable": "The server can't be reached right now. Please try again later."
+    }
   }
 }
