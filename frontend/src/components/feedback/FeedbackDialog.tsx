@@ -88,7 +88,7 @@ const FeedbackDialog = ({ onClose, initialType = "APP", questionId }: FeedbackDi
                                   onChange={event => setText(event.target.value)} />
                         <div className="feedback-meta">
                             <span id="feedback-hint">{t("feedback.privacyHint")}</span>
-                            <span id="feedback-count">{text.length} / {FEEDBACK_MAX_LENGTH}</span>
+                            <span id="feedback-count" className="feedback-count">{text.length} / {FEEDBACK_MAX_LENGTH}</span>
                         </div>
 
                         {errorKey && <p className="feedback-error" role="alert">{t(errorKey)}</p>}

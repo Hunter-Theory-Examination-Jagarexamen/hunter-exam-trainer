@@ -59,6 +59,16 @@
     color: var(--color-text-muted);
 }
 
+/* Fixed width for "0 / 2000" up to "2000 / 2000", so the hint next to it doesn't
+   re-wrap (and jump) when the count gets another digit. */
+.feedback-count {
+    flex-shrink: 0;
+    min-width: 11ch;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
 .feedback-error {
     color: var(--color-danger, #b00020);
     font-weight: 600;
