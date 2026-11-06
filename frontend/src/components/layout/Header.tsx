@@ -26,7 +26,7 @@ const Header = ({ user, onMenuToggle }: HeaderProps) => {
 
                 <img
                     src={logo}
-                    alt={t("layout.logoAlt")}
+                    alt={t("brand.logoAlt")}
                     className="header-logo"
                 />
                 <h1>{t("layout.appTitle")}</h1>

@@ -46,10 +46,10 @@
     "goToRegister": "Registrera dig",
     "createPasswordPlaceholder": "Skapa ett lösenord",
     "registerFailed": "Registreringen misslyckades. Försök igen.",
-    "signingIn": "Loggar in dig..."
+    "signingIn": "Loggar in dig...",
+    "registerTagLine": "Skapa ett konto för att följa dina framsteg och förbättra dina resultat."
   },
   "forgotPassword": {
-    "brandTitle": "JÄGAREXAMEN TRÄNARE",
     "brandSubtitle": "Återställ ditt lösenord för att fortsätta träna.",
     "title": "Glömt lösenord",
     "subtitle": "Ange din e-postadress för att få en länk för återställning av lösenord.",
@@ -63,7 +63,6 @@
     "backToLogin": "Tillbaka till inloggning"
   },
   "resetPassword": {
-    "brandTitle": "JÄGAREXAMEN TRÄNARE",
     "brandSubtitle": "Återställ ditt lösenord för att fortsätta träna.",
     "title": "Återställ lösenord",
     "subtitle": "Välj ett nytt lösenord på minst 8 tecken.",
@@ -206,8 +205,7 @@
   },
   "layout": {
     "menuAria": "Växla navigeringsmeny",
-    "logoAlt": "Jägarexamen Teori Logotyp",
-    "appTitle": "Jägarexamen Teori",
+    "appTitle": "Jägarexamen Tränare",
     "welcome": "Välkommen, {{name}}",
     "defaultUser": "Användare",
     "userLoadError": "Kunde inte ladda användardetaljer. Försök igen.",
@@ -479,5 +477,9 @@
   "questionImage": {
     "unavailable": "Frågebilden är inte tillgänglig.",
     "alt": "Bild för fråga: {{questionText}}"
+  },
+  "brand": {
+    "title": "JÄGAREXAMEN TRÄNARE",
+    "logoAlt": "Jägarexamen Tränare logotyp"
   }
 }

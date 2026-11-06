@@ -50,14 +50,14 @@ const ResetPassword = () => {
         <div className="auth-page login">
             <div className="auth-brand-panel">
                 <div className="auth-brand-content">
-                    <div className="auth-logo"><img src={logo} alt="Hunter Exam Trainer" /></div>
-                    <h1>{t("resetPassword.brandTitle")}</h1>
+                    <div className="auth-logo"><img src={logo} alt={t("brand.logoAlt")} /></div>
+                    <h1>{t("brand.title")}</h1>
                     <p>{t("resetPassword.brandSubtitle")}</p>
                 </div>
             </div>
             <div className="auth-form-container">
                 <div className="auth-form-header">
-                    <div className="auth-mobile-logo"><img src={logo} alt="Hunter Exam Trainer" /></div>
+                    <div className="auth-mobile-logo"><img src={logo} alt={t("brand.logoAlt")} /></div>
                     <h2>{t("resetPassword.title")}</h2>
                     <p>{t("resetPassword.subtitle")}</p>
                 </div>

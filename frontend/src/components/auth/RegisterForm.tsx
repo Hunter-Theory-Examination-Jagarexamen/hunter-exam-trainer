@@ -79,7 +79,7 @@ const RegisterForm = () => {
 
             <div className="auth-form-header">
                 <div className="auth-mobile-logo">
-                    <img src={logo} alt="Hunter Exam Trainer" />
+                    <img src={logo} alt={t("brand.logoAlt")} />
                 </div>
 
                 <h2>{t("auth.registerTitle")}</h2>

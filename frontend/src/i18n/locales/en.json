@@ -46,10 +46,10 @@
     "goToRegister": "Sign Up",
     "createPasswordPlaceholder": "Create a password",
     "registerFailed": "Registration failed. Please try again.",
-    "signingIn": "Signing you in..."
+    "signingIn": "Signing you in...",
+    "registerTagLine": "Create an account to track your progress and improve your results."
   },
   "forgotPassword": {
-    "brandTitle": "HUNTER EXAM TRAINER",
     "brandSubtitle": "Reset your password to continue training.",
     "title": "Forgot password",
     "subtitle": "Enter your email address to receive a password reset link.",
@@ -63,7 +63,6 @@
     "backToLogin": "Back to login"
   },
   "resetPassword": {
-    "brandTitle": "HUNTER EXAM TRAINER",
     "brandSubtitle": "Reset your password to continue training.",
     "title": "Reset password",
     "subtitle": "Choose a new password of at least 8 characters.",
@@ -206,7 +205,6 @@
   },
   "layout": {
     "menuAria": "Toggle navigation menu",
-    "logoAlt": "Hunter Exam Trainer Logo",
     "appTitle": "Hunter Exam Trainer",
     "welcome": "Welcome, {{name}}",
     "defaultUser": "User",
@@ -479,5 +477,9 @@
   "questionImage": {
     "unavailable": "Question image unavailable.",
     "alt": "Image for question: {{questionText}}"
+  },
+  "brand": {
+    "title": "HUNTER EXAM TRAINER",
+    "logoAlt": "Hunter Exam Trainer logo"
   }
 }

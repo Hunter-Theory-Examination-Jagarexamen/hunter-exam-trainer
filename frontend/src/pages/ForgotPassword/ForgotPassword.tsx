@@ -45,9 +45,9 @@ const ForgotPassword = () => {
             <div className="auth-brand-panel">
                 <div className="auth-brand-content">
                     <div className="auth-logo">
-                        <img src={logo} alt="Hunter Exam Trainer" />
+                        <img src={logo} alt={t("brand.logoAlt")} />
                     </div>
-                    <h1>{t("forgotPassword.brandTitle")}</h1>
+                    <h1>{t("brand.title")}</h1>
                     <p>
                         {t("forgotPassword.brandSubtitle")}
                     </p>
@@ -58,7 +58,7 @@ const ForgotPassword = () => {
 
                 <div className="auth-form-header">
                     <div className="auth-mobile-logo">
-                        <img src={logo} alt="Hunter Exam Trainer" />
+                        <img src={logo} alt={t("brand.logoAlt")} />
                     </div>
                     <h2>{t("forgotPassword.title")}</h2>
                     <p>

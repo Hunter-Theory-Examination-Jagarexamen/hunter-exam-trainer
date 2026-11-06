@@ -1,19 +1,21 @@
 import RegisterForm from "../../components/auth/RegisterForm";
 import logo from "../../assets/images/logo.svg";
+import { useTranslation } from "react-i18next";
 
 const Register = () => {
+    const { t } = useTranslation();
+
     return (
         <div className="auth-page register">
 
             <div className="auth-brand-panel">
                 <div className="auth-brand-content">
                     <div className="auth-logo">
-                        <img src={logo} alt="Hunter Exam Trainer" />
+                        <img src={logo} alt={t("brand.logoAlt")} />
                     </div>
-                    <h1>JÄGAREXAMEN TRÄNARE</h1>
+                    <h1>{t("brand.title")}</h1>
                     <p>
-                        Skapa ett konto för att följa dina framsteg
-                        och förbättra dina resultat.
+                        {t("auth.registerTagLine")}
                     </p>
                 </div>
             </div>

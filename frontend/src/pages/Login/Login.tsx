@@ -17,9 +17,9 @@ const Login = () => {
             <div className="auth-brand-panel">
                 <div className="auth-brand-content">
                     <div className="auth-logo">
-                        <img src={logo} alt="Hunter Exam Trainer" />
+                        <img src={logo} alt={t("brand.logoAlt")} />
                     </div>
-                    <h1>JÄGAREXAMEN TRÄNARE</h1>
+                    <h1>{t("brand.title")}</h1>
                     <p>
                         {t("auth.brandTagLine")}
                     </p>

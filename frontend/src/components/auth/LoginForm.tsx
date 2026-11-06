@@ -79,7 +79,7 @@ const LoginForm = () => {
 
             <div className="auth-form-header">
                 <div className="auth-mobile-logo">
-                    <img src={logo} alt="Hunter Exam Trainer" />
+                    <img src={logo} alt={t("brand.logoAlt")} />
                 </div>
                 <h2>{t("auth.welcomeBack")}</h2>
                 <p>{t("auth.loginSubtitle")}</p>
