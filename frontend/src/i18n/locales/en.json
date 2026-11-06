@@ -458,5 +458,9 @@
       "feature2": "Timed exam",
       "button": "Start Exam"
     }
+  },
+  "questionImage": {
+    "unavailable": "Question image unavailable.",
+    "alt": "Image for question: {{questionText}}"
   }
 }

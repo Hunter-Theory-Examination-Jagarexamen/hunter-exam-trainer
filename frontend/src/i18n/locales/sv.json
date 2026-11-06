@@ -458,5 +458,9 @@
       "feature2": "Tidsbegränsat prov",
       "button": "Starta prov"
     }
+  },
+  "questionImage": {
+    "unavailable": "Frågebilden är inte tillgänglig.",
+    "alt": "Bild för fråga: {{questionText}}"
   }
 }
