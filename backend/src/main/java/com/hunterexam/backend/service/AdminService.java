@@ -8,6 +8,7 @@ import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.entity.SubjectStats;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.repository.AttemptQuestionRepository;
+import com.hunterexam.backend.repository.FeedbackRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
 import com.hunterexam.backend.repository.SubjectStatsRepository;
@@ -33,19 +34,22 @@ public class AdminService {
     private final QuestionRepository questionRepository;
     private final SubjectRepository subjectRepository;
     private final SubjectStatsRepository subjectStatsRepository;
+    private final FeedbackRepository feedbackRepository;
 
     public AdminService(
             UserRepository userRepository,
             AttemptQuestionRepository attemptQuestionRepository,
             QuestionRepository questionRepository,
             SubjectRepository subjectRepository,
-            SubjectStatsRepository subjectStatsRepository
+            SubjectStatsRepository subjectStatsRepository,
+            FeedbackRepository feedbackRepository
     ) {
         this.userRepository = userRepository;
         this.attemptQuestionRepository = attemptQuestionRepository;
         this.questionRepository = questionRepository;
         this.subjectRepository = subjectRepository;
         this.subjectStatsRepository = subjectStatsRepository;
+        this.feedbackRepository = feedbackRepository;
     }
 
     /**
@@ -56,7 +60,8 @@ public class AdminService {
         return new AdminStatsResponse(
                 questionRepository.count(),
                 subjectRepository.count(),
-                userRepository.countByRole(Role.STUDENT)
+                userRepository.countByRole(Role.STUDENT),
+                feedbackRepository.countByHandledFalse()
         );
     }
 
