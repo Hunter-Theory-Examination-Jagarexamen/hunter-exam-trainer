@@ -21,6 +21,7 @@ import QuestionBank from "../pages/Admin/QuestionBank";
 import LearnerProgressPage from "../pages/Admin/LearnerProgressPage";
 import Subjects from "../pages/Admin/Subjects";
 import AdminHome from "../pages/Admin/AdminHome";
+import AdminFeedback from "../pages/Admin/AdminFeedback";
 import RootLayout from "../components/layout/RootLayout";
 import LazyStatistics from "../pages/Statistics/LazyStatistics";
 
@@ -61,6 +62,7 @@ export const routes = createRoutesFromElements(
                             <Route path="/admin/subjects" element={<Subjects />} />
                             <Route path="/admin/questions" element={<QuestionBank />} />
                             <Route path="/admin/learners" element={<LearnerProgressPage />} />
+                            <Route path="/admin/feedback" element={<AdminFeedback />} />
                         </Route>
 
                     </Route>

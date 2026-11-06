@@ -131,6 +131,22 @@
       "tooMany": "Du har skickat många meddelanden i dag. Försök igen i morgon.",
       "sendFailed": "Det gick inte att skicka meddelandet. Försök igen.",
       "unreachable": "Servern kan inte nås just nu. Försök igen senare."
+    },
+    "admin": {
+      "title": "Feedback",
+      "subtitle": "Meddelanden och felrapporter från studenterna.",
+      "typeFilter": "Typ",
+      "allTypes": "Alla typer",
+      "showHandled": "Visa hanterade",
+      "loading": "Laddar feedback...",
+      "loadFailed": "Det gick inte att ladda feedback. Försök igen.",
+      "updateFailed": "Det gick inte att ändra statusen. Försök igen.",
+      "empty": "Ingen feedback att visa.",
+      "handled": "Hanterad",
+      "question": "Fråga:",
+      "questionDeleted": "(frågan är borttagen)",
+      "markHandled": "Markera som hanterad",
+      "markUnhandled": "Markera som ohanterad"
     }
   }
 }

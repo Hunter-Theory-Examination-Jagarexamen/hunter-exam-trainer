@@ -131,6 +131,22 @@
       "tooMany": "You have sent many messages today. Please try again tomorrow.",
       "sendFailed": "The message could not be sent. Please try again.",
       "unreachable": "The server can't be reached right now. Please try again later."
+    },
+    "admin": {
+      "title": "Feedback",
+      "subtitle": "Messages and problem reports from students.",
+      "typeFilter": "Type",
+      "allTypes": "All types",
+      "showHandled": "Show handled",
+      "loading": "Loading feedback...",
+      "loadFailed": "Failed to load feedback. Please try again.",
+      "updateFailed": "Failed to change the status. Please try again.",
+      "empty": "No feedback to show.",
+      "handled": "Handled",
+      "question": "Question:",
+      "questionDeleted": "(the question has been deleted)",
+      "markHandled": "Mark as handled",
+      "markUnhandled": "Mark as unhandled"
     }
   }
 }
