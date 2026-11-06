@@ -218,6 +218,8 @@
     "navQuestions": "Questions",
     "navSubjects": "Subjects",
     "navLearners": "Learners",
+    "navFeedback": "Feedback",
+    "giveFeedback": "Give feedback",
     "logout": "Log out"
   },
   "result": {

@@ -218,6 +218,8 @@
     "navQuestions": "Frågor",
     "navSubjects": "Ämnen",
     "navLearners": "Elever",
+    "navFeedback": "Feedback",
+    "giveFeedback": "Ge feedback",
     "logout": "Logga ut"
   },
   "result": {

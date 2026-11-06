@@ -7,7 +7,7 @@
     align-items: center;
     justify-content: center;
     padding: 1rem;
-    z-index: 200;
+    z-index: 1100;   /* above the mobile sidebar (1000) */
 }
 
 .feedback-dialog {
