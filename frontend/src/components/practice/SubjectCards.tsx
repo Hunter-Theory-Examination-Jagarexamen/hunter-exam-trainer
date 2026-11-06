@@ -29,7 +29,7 @@ const SubjectCards = () => {
             catch (error) {
 
                 console.error("Failed to fetch subjects: ", error);
-                setError(t("practice.loadSubjectsError", { defaultValue: "Kunde inte ladda ämnen. Försök igen." }));
+                setError(t("practice.loadSubjectsError"));
             }
             finally {
                 setIsLoading(false);
@@ -40,7 +40,7 @@ const SubjectCards = () => {
     }, [t]);
 
     if (isLoading) {
-        return <p>{t("practice.loadingSubjects", { defaultValue: "Laddar ämnen..." })}</p>;
+        return <p>{t("practice.loadingSubjects")}</p>;
     }
 
     if (error) {
@@ -70,12 +70,12 @@ const SubjectCards = () => {
 
                         <div className="subject-card-footer">
                             <span>
-                                {subject.questionCount} {t("practice.questionsCountLabel", { defaultValue: "frågor" })}
+                                {t("practice.subjectQuestionCount", { count: subject.questionCount })}
                             </span>
                             <button
                                 onClick={() => navigate(`/practice/subjects/${subject.id}`)}
                             >
-                                {t("practice.startPracticeButton", { defaultValue: "Börja öva" })}
+                                {t("practice.startPracticeButton")}
                                 <ArrowRight size={16} />
                             </button>
                         </div>

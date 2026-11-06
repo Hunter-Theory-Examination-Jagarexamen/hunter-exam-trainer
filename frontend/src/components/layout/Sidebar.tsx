@@ -102,7 +102,7 @@ const Sidebar = ({ user, isOpen, onClose }: SidebarProps) => {
 
                 <button type="button" className="sidebar-logout" onClick={handleLogout}>
                     <LogOut size={20} />
-                    {t("layout.navLogout", { defaultValue: t("layout.logout") })}
+                    {t("layout.logout")}
                 </button>
             </nav>
         </aside>

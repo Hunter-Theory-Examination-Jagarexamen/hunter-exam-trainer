@@ -168,36 +168,41 @@
   },
   "practice": {
     "title": "Öva",
-    "subtitle": "Välj ett läge för att börja öva.",
+    "subtitle": "Svara på frågorna och förbättra dina kunskaper.",
     "subjectsTitle": "Öva per ämne",
     "subjectsSubtitle": "Välj ett ämnesområde för att börja öva.",
-    "randomTitle": "Slumpmässiga frågor",
+    "randomTitle": "Slumpmässig övning",
     "backToSubjects": "Tillbaka till ämnen",
-    "backToModes": "Tillbaka till övningslägen",
+    "backToModes": "Tillbaka till övning",
     "subjectNotFound": "Ämnet hittades inte.",
-    "randomNoQuestions": "Inga frågor tillgängliga för tillfället.",
-    "noQuestionsYet": "Inga frågor tillgängliga för detta ämne ännu.",
-    "loadFailed": "Kunde inte ladda frågor. Försök igen.",
-    "roundClosed": "Denna övningsomgång har redan avslutats.",
-    "answerFailed": "Kunde inte spara svar. Försök igen.",
-    "finishFailed": "Kunde inte avsluta övningsomgången. Försök igen.",
+    "randomNoQuestions": "Det finns inga frågor att öva på än.",
+    "noQuestionsYet": "Det finns inga frågor i det här ämnet än.",
+    "loadFailed": "Det gick inte att ladda frågorna. Försök igen.",
+    "roundClosed": "Omgången är redan avslutad, till exempel i en annan flik. Dina svar är sparade.",
+    "answerFailed": "Det gick inte att spara svaret. Försök igen.",
+    "finishFailed": "Det gick inte att avsluta omgången. Försök igen.",
     "loadingQuestions": "Laddar frågor...",
-    "quitRound": "Avbryt omgång",
+    "quitRound": "Avsluta omgången",
     "progress": "Fråga {{current}} av {{total}}",
     "tryAgain": "Försök igen",
     "previous": "Föregående",
     "next": "Nästa",
-    "finish": "Avsluta",
+    "finish": "Slutför",
     "checkAnswer": "Kontrollera svar",
-    "correct": "Rätt svar!",
-    "incorrect": "Fel svar. Rätt svar är:",
+    "correct": "Rätt!",
+    "incorrect": "Fel. Rätt svar är:",
     "resultTitle": "Resultat",
     "resultAll": "Du fick {{correct}} av {{total}} rätt.",
-    "resultPartial": "Du besvarade {{answered}} av {{total}} frågor och fick {{correct}} rätt.",
-    "quitTitle": "Avbryt omgång?",
-    "quitText": "Är du säker på att du vill avbryta den här övningsomgången? Dina sparade svar registreras.",
-    "quitConfirm": "Ja, avbryt",
-    "quitCancel": "Fortsätt öva"
+    "resultPartial": "Du svarade på {{answered}} av {{total}} frågor och fick {{correct}} rätt.",
+    "quitTitle": "Avsluta omgången?",
+    "quitText": "Svar du redan har gett är sparade.",
+    "quitConfirm": "Avsluta",
+    "quitCancel": "Fortsätt öva",
+    "modesSubtitle": "Välj ett läge för att börja öva.",
+    "loadSubjectsError": "Kunde inte ladda ämnen. Försök igen.",
+    "loadingSubjects": "Laddar ämnen...",
+    "subjectQuestionCount": "{{count}} frågor",
+    "startPracticeButton": "Börja öva"
   },
   "layout": {
     "menuAria": "Växla navigeringsmeny",
@@ -429,6 +434,29 @@
       "review": "Du kan granska dina svar innan du lämnar in.",
       "score": "Ditt resultat visas efter inlämning.",
       "unanswered": "Obesvarade frågor räknas som fel."
+    }
+  },
+  "practiceCards": {
+    "subject": {
+      "title": "Öva per ämne",
+      "description": "Välj ett ämnesområde och öva på frågor.",
+      "feature1": "Fokusera på specifika ämnen",
+      "feature2": "Förbättra svaga områden",
+      "button": "Välj"
+    },
+    "random": {
+      "title": "Slumpmässig övning",
+      "description": "Svara på slumpmässiga frågor från alla ämnen.",
+      "feature1": "Slumpade frågor",
+      "feature2": "Förbättra din helhetskunskap",
+      "button": "Välj"
+    },
+    "mockExam": {
+      "title": "Övningsprov",
+      "description": "Simulera det riktiga provet (70 frågor, tidsbegränsat).",
+      "feature1": "70 frågor",
+      "feature2": "Tidsbegränsat prov",
+      "button": "Starta prov"
     }
   }
 }

@@ -9,7 +9,7 @@ const Practice = () => {
         <div>
             <PageTitle
                 title={t("practice.title")}
-                subtitle={t("practice.subtitle")}
+                subtitle={t("practice.modesSubtitle")}
             />
 
             <PracticeCards />

@@ -168,19 +168,19 @@
   },
   "practice": {
     "title": "Practice",
-    "subtitle": "Choose a mode to start practicing.",
+    "subtitle": "Answer the questions and improve your knowledge.",
     "subjectsTitle": "Practice by subject",
     "subjectsSubtitle": "Choose a subject area to start practicing.",
-    "randomTitle": "Random questions",
+    "randomTitle": "Random Practice",
     "backToSubjects": "Back to subjects",
-    "backToModes": "Back to practice modes",
+    "backToModes": "Back to practice",
     "subjectNotFound": "Subject not found.",
-    "randomNoQuestions": "No questions available at the moment.",
-    "noQuestionsYet": "No questions available for this subject yet.",
+    "randomNoQuestions": "There are no questions to practise yet.",
+    "noQuestionsYet": "There are no questions in this subject yet.",
     "loadFailed": "Failed to load questions. Please try again.",
-    "roundClosed": "This practice round has already been closed.",
-    "answerFailed": "Failed to save answer. Please try again.",
-    "finishFailed": "Failed to finish practice round. Please try again.",
+    "roundClosed": "This round is already finished, for example in another tab. Your answers are saved.",
+    "answerFailed": "Your answer couldn't be saved. Please try again.",
+    "finishFailed": "The round couldn't be finished. Please try again.",
     "loadingQuestions": "Loading questions...",
     "quitRound": "Quit round",
     "progress": "Question {{current}} of {{total}}",
@@ -188,16 +188,21 @@
     "previous": "Previous",
     "next": "Next",
     "finish": "Finish",
-    "checkAnswer": "Check answer",
-    "correct": "Correct answer!",
+    "checkAnswer": "Check Answer",
+    "correct": "Correct!",
     "incorrect": "Incorrect. The correct answer is:",
-    "resultTitle": "Results",
-    "resultAll": "You got {{correct}} out of {{total}} correct.",
-    "resultPartial": "You answered {{answered}} out of {{total}} questions and got {{correct}} correct.",
-    "quitTitle": "Quit round?",
-    "quitText": "Are you sure you want to quit this practice round? Your saved answers will be recorded.",
-    "quitConfirm": "Yes, quit",
-    "quitCancel": "Continue practicing"
+    "resultTitle": "Result",
+    "resultAll": "You got {{correct}} of {{total}} correct.",
+    "resultPartial": "You answered {{answered}} of {{total}} questions and got {{correct}} correct.",
+    "quitTitle": "Quit this round?",
+    "quitText": "Any answers you have given are saved.",
+    "quitConfirm": "Quit",
+    "quitCancel": "Keep practising",
+    "modesSubtitle": "Choose a mode to start practicing.",
+    "loadSubjectsError": "Failed to load subjects. Please try again.",
+    "loadingSubjects": "Loading subjects...",
+    "subjectQuestionCount": "{{count}} questions",
+    "startPracticeButton": "Start Practice"
   },
   "layout": {
     "menuAria": "Toggle navigation menu",
@@ -429,6 +434,29 @@
       "review": "You can review your answers before submitting.",
       "score": "Your score will be displayed after submission.",
       "unanswered": "Unanswered questions count as incorrect."
+    }
+  },
+  "practiceCards": {
+    "subject": {
+      "title": "Practice by Subject",
+      "description": "Choose a subject area and practice questions.",
+      "feature1": "Focus on specific topics",
+      "feature2": "Improve weak areas",
+      "button": "Select"
+    },
+    "random": {
+      "title": "Random Practice",
+      "description": "Answer random questions from all subjects.",
+      "feature1": "Randomized questions",
+      "feature2": "Improve overall knowledge",
+      "button": "Select"
+    },
+    "mockExam": {
+      "title": "Mock Exam",
+      "description": "Simulate the real exam (70 questions, timed).",
+      "feature1": "70 questions",
+      "feature2": "Timed exam",
+      "button": "Start Exam"
     }
   }
 }

@@ -19,15 +19,15 @@ const PracticeCards = () => {
                     </div>
 
                     <div className="practice-title">
-                        <h3>{t(card.title, { defaultValue: card.title })}</h3>
-                        <p>{t(card.description, { defaultValue: card.description })}</p>
+                        <h3>{t(card.title)}</h3>
+                        <p>{t(card.description)}</p>
                     </div>
 
                     <ul className="practice-features">
                         {card.features.map((feature) => (
                             <li key={feature}>
                                 <Check size={16} className="check-icon" />
-                                <span>{t(feature, { defaultValue: feature })}</span>
+                                <span>{t(feature)}</span>
                             </li>
                         ))}
                     </ul>
@@ -36,7 +36,7 @@ const PracticeCards = () => {
                         className="practice-button"
                         onClick={() => navigate(card.route)}
                     >
-                        {t(card.buttonLabel, { defaultValue: card.buttonLabel })}
+                        {t(card.buttonLabel)}
                     </button>
 
                 </div>

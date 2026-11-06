@@ -88,7 +88,7 @@ describe("Admin navigation and routing", () => {
         mockUser(UserRole.ADMIN);
         render(<AppRoutes />);
         expect(await screen.findByRole("heading", {name: /Admin/i})).toBeInTheDocument();
-        const questionsCard = await screen.findByRole("link", {name: /Frågor/i});
+        const questionsCard = await screen.findByRole("link", {name: /Öppna frågebanken/i});
         expect(questionsCard).toHaveAttribute("href", "/admin/questions");
         expect(questionsCard).toHaveTextContent(/Frågor/i);
         expect(screen.getAllByRole("link", {name: /Frågor|Questions/i}).length).toBeGreaterThan(0);
