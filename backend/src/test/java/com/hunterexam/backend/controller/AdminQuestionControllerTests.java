@@ -1,5 +1,6 @@
 package com.hunterexam.backend.controller;
 
+import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.config.OAuth2LoginSuccessHandler;
 import com.hunterexam.backend.config.SecurityConfig;
 import com.hunterexam.backend.entity.Question;
@@ -84,6 +85,31 @@ class AdminQuestionControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(7))
                 .andExpect(jsonPath("$[0].correctAnswer").value("One"));
+    }
+
+    @Test
+    void adminGetsOneQuestionById() throws Exception {
+        Question question = new Question();
+        question.setId(12L);
+        question.setCorrectAnswer("B");
+        when(service.findById(12L)).thenReturn(question);
+        mvc.perform(get("/api/admin/questions/12")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(12))
+                .andExpect(jsonPath("$.correctAnswer").value("B"));
+    }
+
+    @Test
+    void oneQuestionIsAdminOnlyAndUnknownIdGives404() throws Exception {
+        mvc.perform(get("/api/admin/questions/12")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_STUDENT"))))
+                .andExpect(status().isForbidden());
+
+        when(service.findById(99L)).thenThrow(new NotFoundException("Question not found"));
+        mvc.perform(get("/api/admin/questions/99")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_ADMIN"))))
+                .andExpect(status().isNotFound());
     }
 
     @Test

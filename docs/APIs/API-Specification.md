@@ -33,6 +33,7 @@ endpoints are added to this table, not duplicated elsewhere.
 | GET    | /api/admin/learners           | Get aggregated progress for all learners        | Required (ADMIN) |
 | GET    | /api/admin/stats              | Get question, subject and learner counts, and unhandled feedback | Required (ADMIN) |
 | GET    | /api/admin/questions?subjectId={id} | Get a subject's questions, including the correct answer (admin Question Bank) | Required (ADMIN) |
+| GET    | /api/admin/questions/{id}     | Get one question, including the correct answer (`404` if unknown) | Required (ADMIN) |
 | POST   | /api/admin/questions          | Create a question (201, with `Location` header) | Required (ADMIN) |
 | PUT    | /api/admin/questions/{id}     | Replace a question (200)                        | Required (ADMIN) |
 | DELETE | /api/admin/questions/{id}     | Delete a question (204)                         | Required (ADMIN) |

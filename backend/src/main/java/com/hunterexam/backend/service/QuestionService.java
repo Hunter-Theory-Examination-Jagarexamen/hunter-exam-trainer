@@ -46,6 +46,15 @@ public class QuestionService {
         questionRepository.delete(findQuestion(id));
     }
 
+    /**
+     * One question, with the correct answer, for the admin editor.
+     *
+     * @throws NotFoundException if no question has this id
+     */
+    public Question findById(Long id) {
+        return findQuestion(id);
+    }
+
     private Question findQuestion(Long id) {
         return questionRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Question not found"));
