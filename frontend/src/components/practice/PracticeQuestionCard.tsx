@@ -1,9 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "../../styles/practice.css";
 import type { PracticeQuestion } from "../../types/practiceQuestions";
 import type { PracticeAnswerResponse } from "../../types/practiceAttempt";
 import QuestionImage from "../common/QuestionImage";
+import FeedbackDialog from "../feedback/FeedbackDialog";
 
 interface PracticeQuestionProps {
     question: PracticeQuestion;
@@ -30,6 +31,8 @@ const PracticeQuestionCard = ({
     // A handle to the feedback box on the page, so we can move focus to it.
     const feedbackRef = useRef<HTMLDivElement>(null);
     const showFeedback = feedback !== null;
+    // True while the "report a problem" dialog is open.
+    const [isReporting, setIsReporting] = useState(false);
 
     // When the feedback appears, move focus to it. The Check Answer button is
     // disabled at that moment, so without this, focus falls back to the whole page
@@ -115,7 +118,20 @@ const PracticeQuestionCard = ({
                     </div>
                 )}
 
+                <button type="button" className="practice-report-button" onClick={() => setIsReporting(true)}>
+                    {t("feedback.reportQuestion")}
+                </button>
+
             </div>
+
+            {isReporting && (
+                <FeedbackDialog
+                    initialType="QUESTION"
+                    // The question's id comes as text ("12") on the practice pages.
+                    questionId={Number(question.id)}
+                    onClose={() => setIsReporting(false)}
+                />
+            )}
 
         </section>
     );

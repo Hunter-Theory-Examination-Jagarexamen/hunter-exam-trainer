@@ -98,4 +98,20 @@ describe("PracticeQuestionCard", () => {
         // so this test guards it.
         expect(document.activeElement).toHaveTextContent("Rätt!");
     });
+
+    it("opens a question report with the question's id preset", async () => {
+        const apiClient = (await import("../../../api/apiClient")).default;
+        vi.mocked(apiClient).mockResolvedValue("");
+        renderQuestion({ question: { ...question, id: "12" } });
+
+        await userEvent.click(screen.getByRole("button", { name: "Rapportera fel i frågan" }));
+        expect(screen.getByRole("dialog", { name: "Ge feedback" })).toBeInTheDocument();
+        expect(screen.getByLabelText("Vad gäller det?")).toHaveValue("QUESTION");
+
+        await userEvent.type(screen.getByLabelText("Ditt meddelande"), "Bilden saknas");
+        await userEvent.click(screen.getByRole("button", { name: "Skicka" }));
+
+        expect(JSON.parse(vi.mocked(apiClient).mock.lastCall![1]!.body as string))
+            .toEqual({ type: "QUESTION", text: "Bilden saknas", questionId: 12 });
+    });
 });

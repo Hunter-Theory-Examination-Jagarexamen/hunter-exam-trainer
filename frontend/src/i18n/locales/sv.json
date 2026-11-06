@@ -484,6 +484,7 @@
   },
   "feedback": {
     "title": "Ge feedback",
+    "reportQuestion": "Rapportera fel i frågan",
     "typeLabel": "Vad gäller det?",
     "types": {
       "QUESTION": "Fel i en fråga",

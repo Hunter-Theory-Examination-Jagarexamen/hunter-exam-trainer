@@ -133,3 +133,22 @@
     white-space: pre-wrap;   /* keep the student's line breaks */
     overflow-wrap: anywhere;
 }
+
+/* "Report a problem" link-style button under a practice question */
+.practice-report-button {
+    display: block;
+    margin: 1rem 0 0 auto;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.practice-report-button:hover,
+.practice-report-button:focus-visible {
+    color: var(--color-primary);
+}

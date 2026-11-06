@@ -484,6 +484,7 @@
   },
   "feedback": {
     "title": "Give feedback",
+    "reportQuestion": "Report a problem with this question",
     "typeLabel": "What is it about?",
     "types": {
       "QUESTION": "Error in a question",
