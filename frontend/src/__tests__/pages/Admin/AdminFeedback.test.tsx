@@ -4,6 +4,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import apiClient from "../../../api/apiClient";
 import AdminFeedback from "../../../pages/Admin/AdminFeedback";
 import type { FeedbackItem } from "../../../types/feedback";
@@ -28,26 +29,28 @@ beforeEach(() => vi.resetAllMocks());
 describe("AdminFeedback page", () => {
     it("shows unhandled feedback by default, with the reported question", async () => {
         apiClientMock.mockResolvedValue([report, appFeedback]);
-        render(<AdminFeedback />);
+        render(<MemoryRouter><AdminFeedback /></MemoryRouter>);
 
         expect(await screen.findByText("Fel svar markerat som rätt")).toBeInTheDocument();
         expect(apiClientMock).toHaveBeenCalledWith("/api/admin/feedback?handled=false");
         expect(screen.getByText("Vilket djur är ett hjortdjur?")).toBeInTheDocument();
+        expect(screen.getByRole("link", { name: "Öppna frågan" })).toHaveAttribute("href", "/admin/questions?edit=12");
         expect(screen.getByText("Bra app")).toBeInTheDocument();
         expect(screen.getAllByRole("listitem")).toHaveLength(2);
     });
 
     it("says when a reported question has been deleted", async () => {
         apiClientMock.mockResolvedValue([deletedQuestionReport]);
-        render(<AdminFeedback />);
+        render(<MemoryRouter><AdminFeedback /></MemoryRouter>);
 
         expect(await screen.findByText("Gammal fråga?")).toBeInTheDocument();
         expect(screen.getByText("(frågan är borttagen)")).toBeInTheDocument();
+        expect(screen.queryByRole("link", { name: "Öppna frågan" })).not.toBeInTheDocument();
     });
 
     it("asks for the chosen type, and for handled items too when shown", async () => {
         apiClientMock.mockResolvedValue([]);
-        render(<AdminFeedback />);
+        render(<MemoryRouter><AdminFeedback /></MemoryRouter>);
         await screen.findByText("Ingen feedback att visa.");
 
         await userEvent.selectOptions(screen.getByLabelText("Typ"), "QUESTION");
@@ -60,7 +63,7 @@ describe("AdminFeedback page", () => {
     it("removes an item from the unhandled list when it is marked as handled", async () => {
         apiClientMock.mockImplementation(async (endpoint: string) =>
             endpoint === "/api/admin/feedback/1/handled" ? { ...report, handled: true } : [report, appFeedback]);
-        render(<AdminFeedback />);
+        render(<MemoryRouter><AdminFeedback /></MemoryRouter>);
 
         const item = (await screen.findByText("Fel svar markerat som rätt")).closest("li")!;
         await userEvent.click(within(item).getByRole("button", { name: "Markera som hanterad" }));
@@ -75,7 +78,7 @@ describe("AdminFeedback page", () => {
         const handledReport = { ...report, handled: true };
         apiClientMock.mockImplementation(async (endpoint: string) =>
             endpoint === "/api/admin/feedback/1/handled" ? { ...report, handled: false } : [handledReport]);
-        render(<AdminFeedback />);
+        render(<MemoryRouter><AdminFeedback /></MemoryRouter>);
         await userEvent.click(screen.getByLabelText("Visa hanterade"));
 
         const button = await screen.findByRole("button", { name: "Markera som ohanterad" });
@@ -86,7 +89,7 @@ describe("AdminFeedback page", () => {
 
     it("shows an error when the list can't be loaded", async () => {
         apiClientMock.mockImplementation(() => Promise.reject(Object.assign(new Error("boom"), { status: 500 })));
-        render(<AdminFeedback />);
+        render(<MemoryRouter><AdminFeedback /></MemoryRouter>);
 
         expect(await screen.findByRole("alert"))
             .toHaveTextContent("Det gick inte att ladda feedback. Försök igen.");

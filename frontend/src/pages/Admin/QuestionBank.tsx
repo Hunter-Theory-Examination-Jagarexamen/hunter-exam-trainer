@@ -8,11 +8,14 @@ import QuestionForm from "./QuestionForm";
 import QuestionImage from "../../components/common/QuestionImage";
 import {deleteQuestion, questionMutationError} from "../../services/adminQuestionService";
 import {useTranslation} from "react-i18next";
+import {useSearchParams} from "react-router-dom";
 
 const PAGE_SIZE = 20;
 
-const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onSavedElsewhere}: {
+const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onSavedElsewhere, openOnLoad, onOpenedOnLoad}: {
     subjectId: number; subjects: Subject[]; onCountChange: (id: number, delta: number) => void;
+    // A question to open in the editor once the list has loaded (from a link, ?edit=<id>).
+    openOnLoad?: number | null; onOpenedOnLoad?: () => void;
     onBusyChange: (busy: boolean) => void;
     onSavedElsewhere: (question: Question, created: boolean) => void;
 }) => {
@@ -89,6 +92,12 @@ const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onS
             if (active) {
                 setQuestions(data);
                 setIsLoading(false);
+                const linked = openOnLoad ? data.find(question => question.id === openOnLoad) : undefined;
+                if (linked) {
+                    setEditor(linked);
+                    onBusyChange(true);
+                    onOpenedOnLoad?.();
+                }
             }
         }).catch(() => {
             if (active) {
@@ -181,13 +190,30 @@ const QuestionBank = () => {
     const [subjectId, setSubjectId] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
+    // ?edit=12 (e.g. from a feedback report) opens question 12 in the editor.
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [openOnLoad, setOpenOnLoad] = useState<number | null>(() => Number(searchParams.get("edit")) || null);
+    const [linkError, setLinkError] = useState("");
 
     useEffect(() => {
         let active = true;
-        apiClient("/api/subjects").then((data: Subject[]) => {
+        apiClient("/api/subjects").then(async (data: Subject[]) => {
+            // For a linked question, start in its subject; otherwise in the first one.
+            let startSubject = data[0]?.id ?? null;
+            if (openOnLoad) {
+                try {
+                    const linked: Question = await apiClient(`/api/admin/questions/${openOnLoad}`);
+                    startSubject = linked.subject.id;
+                } catch {
+                    if (active) {
+                        setLinkError(t("questionBank.linkedQuestionNotFound", {id: openOnLoad}));
+                        setOpenOnLoad(null);
+                    }
+                }
+            }
             if (active) {
                 setSubjects(data);
-                setSubjectId(data[0]?.id ?? null);
+                setSubjectId(startSubject);
                 setIsLoading(false);
             }
         }).catch(() => {
@@ -202,6 +228,7 @@ const QuestionBank = () => {
     return <div className="question-bank">
         <PageTitle title={t("questionBank.title")} subtitle={t("questionBank.subtitle")} />
         {success && <p role="status">{success}</p>}
+        {linkError && <p role="alert">{linkError}</p>}
         {isLoading ? <p role="status">{t("questionBank.loadingSubjects")}</p> : error ? <p role="alert">{error}</p> :
             subjects.length === 0 ? <p>{t("questionBank.noSubjects")}</p> : <>
                 <div className="question-bank-field">
@@ -214,6 +241,12 @@ const QuestionBank = () => {
                     </select>
                 </div>
                 {subjectId !== null && <SubjectQuestions key={subjectId} subjectId={subjectId} subjects={subjects}
+                    openOnLoad={openOnLoad}
+                    onOpenedOnLoad={() => {
+                        // Only once: clear it, and take ?edit off the address.
+                        setOpenOnLoad(null);
+                        setSearchParams({}, {replace: true});
+                    }}
                     onBusyChange={value => { setBusy(value); if (value) setSuccess(""); }}
                     onSavedElsewhere={(question, created) => {
                         setSuccess(t(created ? "questionBank.successCreated" : "questionBank.successUpdated",

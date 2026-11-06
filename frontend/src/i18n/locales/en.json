@@ -351,6 +351,7 @@
     },
     "loadQuestionsFailed": "Failed to load questions. Please try again.",
     "loadSubjectsFailed": "Failed to load subjects. Please try again.",
+    "linkedQuestionNotFound": "Question {{id}} no longer exists.",
     "editAria": "Edit question {{id}}",
     "deleteAria": "Delete question {{id}}",
     "pagesAria": "Question pages",
@@ -523,6 +524,7 @@
       "empty": "No feedback to show.",
       "handled": "Handled",
       "question": "Question:",
+      "openQuestion": "Open the question",
       "questionDeleted": "(the question has been deleted)",
       "markHandled": "Mark as handled",
       "markUnhandled": "Mark as unhandled"

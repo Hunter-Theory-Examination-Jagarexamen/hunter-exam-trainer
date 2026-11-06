@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import PageTitle from "../../components/common/PageTitle";
 import { listFeedback, setFeedbackHandled } from "../../services/feedbackService";
 import type { FeedbackItem, FeedbackType } from "../../types/feedback";
@@ -95,8 +96,10 @@ const AdminFeedback = () => {
                             {item.questionText && (
                                 <p className="admin-feedback-question">
                                     <strong>{t("feedback.admin.question")}</strong> {item.questionText}
-                                    {item.questionId === null &&
-                                        <em> {t("feedback.admin.questionDeleted")}</em>}
+                                    {item.questionId === null
+                                        ? <em> {t("feedback.admin.questionDeleted")}</em>
+                                        : <> <Link to={`/admin/questions?edit=${item.questionId}`}>
+                                            {t("feedback.admin.openQuestion")}</Link></>}
                                 </p>
                             )}
 

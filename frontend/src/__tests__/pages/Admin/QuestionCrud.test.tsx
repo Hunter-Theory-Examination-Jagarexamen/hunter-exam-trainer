@@ -1,3 +1,4 @@
+import {MemoryRouter} from "react-router-dom";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 import {act, fireEvent, render, screen, within} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -23,7 +24,7 @@ beforeEach(() => {
 });
 
 async function open(mode: "create" | "edit" | "delete") {
-    render(<QuestionBank />);
+    render(<MemoryRouter><QuestionBank /></MemoryRouter>);
     await screen.findByRole("heading", {name: "#1: Original question?"}, {timeout: 5000});
     await userEvent.click(screen.getByRole("button", {name: mode === "create" ? "Lägg till fråga" : `${mode === "edit" ? "Redigera" : "Ta bort"} fråga 1`}));
 }
@@ -40,7 +41,7 @@ const mutations = () => vi.mocked(apiClient).mock.calls.filter(([, options]) => 
 
 describe("Admin question CRUD", () => {
     it("displays the bank image and handles loading failure", async () => {
-        render(<QuestionBank />);
+        render(<MemoryRouter><QuestionBank /></MemoryRouter>);
         const image = await screen.findByRole("img", {name: "Bild för fråga: Original question?"});
         expect(image).toHaveAttribute("src", question.imageUrl);
         fireEvent.error(image);
@@ -91,7 +92,7 @@ describe("Admin question CRUD", () => {
         });
 
     it("can add a question to an empty subject and cancel without sending", async () => {
-        render(<QuestionBank />);
+        render(<MemoryRouter><QuestionBank /></MemoryRouter>);
         await screen.findByRole("heading", {name: "#1: Original question?"}, {timeout: 5000});
         await userEvent.selectOptions(screen.getByLabelText("Ämne"), "2");
         await screen.findByText("Inga frågor tillgängliga för detta ämne.");
@@ -104,7 +105,7 @@ describe("Admin question CRUD", () => {
     });
 
     it("preserves a matching search after an edit", async () => {
-        render(<QuestionBank />);
+        render(<MemoryRouter><QuestionBank /></MemoryRouter>);
         await userEvent.type(await screen.findByRole("searchbox"), "Original");
         await userEvent.click(screen.getByRole("button", {name: "Redigera fråga 1"}));
         vi.mocked(apiClient).mockResolvedValueOnce({...question, explanation: "Updated explanation"});

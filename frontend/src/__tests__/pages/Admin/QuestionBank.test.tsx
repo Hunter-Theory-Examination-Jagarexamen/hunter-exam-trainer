@@ -1,3 +1,4 @@
+import {MemoryRouter} from "react-router-dom";
 import {beforeEach, describe, expect, it, vi} from "vitest";
 import {act, render, screen, waitForElementToBeRemoved} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -29,7 +30,7 @@ beforeEach(() => {
 
 describe("Admin question bank", () => {
     it("loads questions, displays read-only details and paginates a bank of 100+ questions", async () => {
-        render(<QuestionBank />);
+        render(<MemoryRouter><QuestionBank /></MemoryRouter>);
 
         await waitForElementToBeRemoved(() => screen.queryByText(/Laddar/i));
         expect(screen.getByRole("heading", {name: "#1: Safety question 1?"})).toBeInTheDocument();
@@ -42,7 +43,7 @@ describe("Admin question bank", () => {
     });
 
     it("searches by question text and ID, resets pagination, and switches subjects", async () => {
-        render(<QuestionBank />);
+        render(<MemoryRouter><QuestionBank /></MemoryRouter>);
         const input = await screen.findByRole("searchbox");
         await userEvent.click(screen.getByRole("button", {name: "Nästa"}));
         await userEvent.type(input, "101");
@@ -67,7 +68,7 @@ describe("Admin question bank", () => {
             if (endpoint.endsWith("=1")) return new Promise<Question[]>(resolve => { resolveQuestions = resolve; });
             return [{...questions[0], questionText: "Wildlife question?"}];
         });
-        render(<QuestionBank />);
+        render(<MemoryRouter><QuestionBank /></MemoryRouter>);
         expect(screen.getByText("Laddar ämnen...")).toBeInTheDocument();
         await act(async () => resolveSubjects(subjects));
         const select = await screen.findByRole("combobox");
@@ -82,14 +83,14 @@ describe("Admin question bank", () => {
             if (resource === "questions" && endpoint === "/api/subjects") return subjects;
             throw new Error("Server down");
         });
-        render(<QuestionBank />);
+        render(<MemoryRouter><QuestionBank /></MemoryRouter>);
         expect(await screen.findByRole("alert")).toHaveTextContent(`Det gick inte att ladda ${resource === "subjects" ? "ämnena" : "frågorna"}. Försök igen.`);
     });
 
     it.each(["subjects", "questions"])("shows an empty state for no %s", async resource => {
         vi.mocked(apiClient).mockImplementation(async endpoint =>
             resource === "questions" && endpoint === "/api/subjects" ? subjects : []);
-        render(<QuestionBank />);
+        render(<MemoryRouter><QuestionBank /></MemoryRouter>);
 
         expect(await screen.findByText(resource === "subjects"
         ? "Inga ämnen tillgängliga." : "Inga frågor tillgängliga för detta ämne.")).toBeInTheDocument();

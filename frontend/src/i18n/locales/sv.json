@@ -351,6 +351,7 @@
     },
     "loadQuestionsFailed": "Det gick inte att ladda frågorna. Försök igen.",
     "loadSubjectsFailed": "Det gick inte att ladda ämnena. Försök igen.",
+    "linkedQuestionNotFound": "Fråga {{id}} finns inte längre.",
     "editAria": "Redigera fråga {{id}}",
     "deleteAria": "Ta bort fråga {{id}}",
     "pagesAria": "Sidor med frågor",
@@ -523,6 +524,7 @@
       "empty": "Ingen feedback att visa.",
       "handled": "Hanterad",
       "question": "Fråga:",
+      "openQuestion": "Öppna frågan",
       "questionDeleted": "(frågan är borttagen)",
       "markHandled": "Markera som hanterad",
       "markUnhandled": "Markera som ohanterad"
