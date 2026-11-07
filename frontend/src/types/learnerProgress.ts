@@ -19,3 +19,10 @@ export interface LearnerProgress {
     }[];
     mockExams: MockExamSummary;
 }
+
+// One row from GET /api/admin/learners: admins first, then students, each by name.
+export interface LearnerSummary {
+    userId: number;
+    fullName: string;
+    role: "ADMIN" | "STUDENT";
+}

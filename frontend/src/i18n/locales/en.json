@@ -293,7 +293,14 @@
     "notPassed": " · Not passed",
     "best": "Best:",
     "noPracticeResults": "No practice results yet.",
-    "loadFailed": "Failed to load learner progress. Please try again."
+    "loadFailed": "Failed to load learner progress. Please try again.",
+    "backToList": "Back to the list",
+    "loadingOne": "Loading...",
+    "notFound": "The user doesn't exist.",
+    "admins": "Administrators",
+    "students": "Students",
+    "noStudents": "No students yet.",
+    "listSubtitle": "Choose a person to see their progress."
   },
   "questionBank": {
     "title": "Admin Question Bank",
