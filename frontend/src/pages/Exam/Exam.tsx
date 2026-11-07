@@ -234,6 +234,19 @@ const Exam = () => {
         setShowConfirmModal(false);
     }
 
+    // The "Submit Exam?" pop-up: move focus into it when it opens, so keyboard
+    // and screen reader users land in it, and let Escape close it (#188).
+    const confirmDialogRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        if (!showConfirmModal) return;
+        confirmDialogRef.current?.focus();
+        const closeOnEscape = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setShowConfirmModal(false);
+        };
+        window.addEventListener("keydown", closeOnEscape);
+        return () => window.removeEventListener("keydown", closeOnEscape);
+    }, [showConfirmModal]);
+
     const currentQuestion = questions[currentQuestionIndex];
 
     const handleAnswerChange = async (answerId: string) => {
@@ -376,33 +389,26 @@ const Exam = () => {
 
 
             {showConfirmModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div className="question-card text-center max-w-md w-full">
-                        <h3 className="text-xl font-bold mb-3 text-[var(--color-text)]">
-                            {t("exam.confirm.title")}
-                        </h3>
-                        {unansweredCount > 0 ? (
-                            <p className="text-[var(--color-text)] opacity-80 mb-6">
-                                {t("exam.confirm.unanswered", { count: unansweredCount })}
-                            </p>
-                        ) : (
-                            <p className="text-[var(--color-text)] opacity-80 mb-6">
-                                {t("exam.confirm.allAnswered")}
-                            </p>
-                        )}
-                        <div className="flex justify-center">
-                            <button
-                                onClick={handleCancelSubmit}
-                                className="previous-button"
-                                style={{ borderRadius: "8px", padding: "0.5rem 1rem", fontSize: "0.9rem", fontWeight: 600, marginRight: "12px" }}
-                            >
+                <div className="exam-leave-backdrop">
+                    <div
+                        ref={confirmDialogRef}
+                        className="exam-leave-dialog"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="submit-exam-title"
+                        tabIndex={-1}
+                    >
+                        <h2 id="submit-exam-title">{t("exam.confirm.title")}</h2>
+                        <p>
+                            {unansweredCount > 0
+                                ? t("exam.confirm.unanswered", { count: unansweredCount })
+                                : t("exam.confirm.allAnswered")}
+                        </p>
+                        <div className="exam-leave-actions">
+                            <button type="button" className="previous-button" onClick={handleCancelSubmit}>
                                 {t("exam.confirm.goBack")}
                             </button>
-                            <button
-                                onClick={handleConfirmSubmit}
-                                className="next-button"
-                                style={{ borderRadius: "8px", padding: "0.5rem 1rem", fontSize: "0.9rem", fontWeight: 600 }}
-                            >
+                            <button type="button" className="next-button" onClick={handleConfirmSubmit}>
                                 {unansweredCount > 0
                                     ? t("exam.confirm.submitAnyway")
                                     : t("exam.navigation.submit")}

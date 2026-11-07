@@ -389,7 +389,7 @@
 }
 
 /* =========================
-   Leave Exam Confirmation (#186)
+   Exam pop-ups: Leave Exam (#186) and Submit Exam (#188)
    ========================= */
 
 .exam-leave-backdrop {
@@ -415,6 +415,10 @@
 .exam-leave-dialog h2 {
     margin: 0 0 0.75rem;
     font-size: 1.25rem;
+}
+
+.exam-leave-dialog:focus {
+    outline: none;
 }
 
 .exam-leave-dialog p {
