@@ -27,11 +27,17 @@ const AdminFeedback = () => {
     const [loadFailed, setLoadFailed] = useState(false);
     const [updateFailed, setUpdateFailed] = useState(false);
 
+    // A filter change shows "loading" right away (in the event handler, not in the
+    // effect: setting state directly in an effect makes React draw twice).
+    const changeFilter = (change: () => void) => {
+        setIsLoading(true);
+        setLoadFailed(false);
+        change();
+    };
+
     // Loads again whenever a filter changes.
     useEffect(() => {
         let cancelled = false;
-        setIsLoading(true);
-        setLoadFailed(false);
         listFeedback({
             type: typeFilter || undefined,
             // Showing handled items means "any"; otherwise only unhandled ones.
@@ -64,7 +70,7 @@ const AdminFeedback = () => {
             <div className="admin-feedback-filters">
                 <label htmlFor="feedback-type-filter">{t("feedback.admin.typeFilter")}</label>
                 <select id="feedback-type-filter" value={typeFilter}
-                        onChange={event => setTypeFilter(event.target.value as FeedbackType | "")}>
+                        onChange={event => changeFilter(() => setTypeFilter(event.target.value as FeedbackType | ""))}>
                     <option value="">{t("feedback.admin.allTypes")}</option>
                     {TYPES.map(type => (
                         <option key={type} value={type}>{t(TYPE_LABEL_KEYS[type])}</option>
@@ -72,7 +78,7 @@ const AdminFeedback = () => {
                 </select>
                 <label className="admin-feedback-checkbox">
                     <input type="checkbox" checked={showHandled}
-                           onChange={event => setShowHandled(event.target.checked)} />
+                           onChange={event => changeFilter(() => setShowHandled(event.target.checked))} />
                     {t("feedback.admin.showHandled")}
                 </label>
             </div>
