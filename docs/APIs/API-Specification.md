@@ -31,11 +31,15 @@ endpoints are added to this table, not duplicated elsewhere.
 | GET    | /api/statistics/subjects      | Get the user's performance by subject (practice and mock exams) | Required |
 | GET    | /api/statistics/progress      | Get the user's weekly accuracy over time        | Required         |
 | GET    | /api/admin/learners           | Get aggregated progress for all learners        | Required (ADMIN) |
-| GET    | /api/admin/stats              | Get question, subject and learner counts        | Required (ADMIN) |
+| GET    | /api/admin/stats              | Get question, subject and learner counts, and unhandled feedback | Required (ADMIN) |
 | GET    | /api/admin/questions?subjectId={id} | Get a subject's questions, including the correct answer (admin Question Bank) | Required (ADMIN) |
+| GET    | /api/admin/questions/{id}     | Get one question, including the correct answer (`404` if unknown) | Required (ADMIN) |
 | POST   | /api/admin/questions          | Create a question (201, with `Location` header) | Required (ADMIN) |
 | PUT    | /api/admin/questions/{id}     | Replace a question (200)                        | Required (ADMIN) |
 | DELETE | /api/admin/questions/{id}     | Delete a question (204)                         | Required (ADMIN) |
+| POST   | /api/feedback                 | Send feedback or report a question (201)        | Required         |
+| GET    | /api/admin/feedback?type=&handled= | List feedback, newest first (filters optional) | Required (ADMIN) |
+| PATCH  | /api/admin/feedback/{id}/handled | Mark feedback as handled or unhandled         | Required (ADMIN) |
 
 Subject writes were moved from `/api/subjects` to `/api/admin/subjects`. The old
 paths have no write handlers anymore: an ADMIN call to them answers
@@ -272,6 +276,40 @@ No request body. Response:
 - `totalQuestions` is all questions in the round, `answeredQuestions` how many were answered (skipped questions are not counted, nothing is subtracted).
 - A round that was answered at least once is also saved for the statistics, counting only the answered questions (e.g. 5 of 6, not 5 of 7).
 - `409` if the round is already finished, `403` if it belongs to another user.
+
+## Feedback: request and response
+
+`POST /api/feedback` (any logged-in user) accepts:
+
+```json
+{ "type": "QUESTION", "text": "Fel svar markerat som rätt", "questionId": 12 }
+```
+
+- `type` is `QUESTION`, `APP` or `OTHER` (required). `text` is required, at
+  most 2000 characters; spaces around it are removed.
+- `questionId` is optional and only allowed with `type` `QUESTION`; another
+  type gives `400`, an unknown question `404`.
+- Answers `201` with no body. One user can send at most 20 items in 24 hours;
+  after that the answer is `429`.
+
+`GET /api/admin/feedback` returns items newest first. Optional filters:
+`type` (`QUESTION`, `APP`, `OTHER`) and `handled` (`true`/`false`); an unknown
+value gives `400`.
+
+```json
+[{ "id": 3, "type": "QUESTION", "text": "Fel svar markerat som rätt",
+   "createdAt": "2026-11-06T10:15:00", "handled": false,
+   "questionId": 12, "questionText": "Vilket djur ..." }]
+```
+
+- The sender is stored but never returned, so admins can't see who sent it.
+- `questionText` is the question's text when it was reported. `questionId` is
+  `null` if the question has been deleted since.
+
+`PATCH /api/admin/feedback/{id}/handled` accepts `{ "handled": true }` (or
+`false` to undo) and returns the updated item; unknown id `404`.
+
+`GET /api/admin/stats` also returns `unhandledFeedbackCount`.
 
 **Authentication notes:**
 

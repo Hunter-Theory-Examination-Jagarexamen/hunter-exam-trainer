@@ -218,6 +218,8 @@
     "navQuestions": "Questions",
     "navSubjects": "Subjects",
     "navLearners": "Learners",
+    "navFeedback": "Feedback",
+    "giveFeedback": "Give feedback",
     "logout": "Log out"
   },
   "result": {
@@ -265,6 +267,10 @@
       "learners": {
         "title": "Learners",
         "caption": "Open learner progress"
+      },
+      "feedback": {
+        "title": "Feedback",
+        "caption": "Unhandled messages"
       }
     },
     "errors": {
@@ -345,6 +351,8 @@
     },
     "loadQuestionsFailed": "Failed to load questions. Please try again.",
     "loadSubjectsFailed": "Failed to load subjects. Please try again.",
+    "linkedQuestionNotFound": "Question {{id}} no longer exists.",
+    "linkedQuestionFailed": "Failed to open question {{id}}. Please try again.",
     "editAria": "Edit question {{id}}",
     "deleteAria": "Delete question {{id}}",
     "pagesAria": "Question pages",
@@ -481,5 +489,53 @@
   "brand": {
     "title": "HUNTER EXAM TRAINER",
     "logoAlt": "Hunter Exam Trainer logo"
+  },
+  "feedback": {
+    "title": "Give feedback",
+    "reportQuestion": "Report a problem with this question",
+    "afterExamText": "Did you find an error in a question, or do you have thoughts on the exam?",
+    "afterExamButton": "Give feedback on the exam",
+    "typeLabel": "What is it about?",
+    "types": {
+      "QUESTION": "Error in a question",
+      "APP": "The app",
+      "OTHER": "Other"
+    },
+    "textLabel": "Your message",
+    "privacyHint": "Don't write your name or other personal details.",
+    "send": "Send",
+    "sending": "Sending...",
+    "cancel": "Cancel",
+    "close": "Close",
+    "sent": "Thank you! Your message has been sent to the course leaders.",
+    "errors": {
+      "tooMany": "You have sent many messages today. Please try again tomorrow.",
+      "sendFailed": "The message could not be sent. Please try again.",
+      "unreachable": "The server can't be reached right now. Please try again later."
+    },
+    "admin": {
+      "title": "Feedback",
+      "subtitle": "Messages and problem reports from students.",
+      "typeFilter": "Type",
+      "allTypes": "All types",
+      "showHandled": "Show handled",
+      "loading": "Loading feedback...",
+      "loadFailed": "Failed to load feedback. Please try again.",
+      "updateFailed": "Failed to change the status. Please try again.",
+      "empty": "No feedback to show.",
+      "handled": "Handled",
+      "question": "Question:",
+      "openQuestion": "Open in the question bank",
+      "showQuestion": "Show the question",
+      "hideQuestion": "Hide the question",
+      "loadingQuestion": "Loading the question...",
+      "questionLoadFailed": "Failed to load the question. Please try again.",
+      "questionGone": "The question no longer exists.",
+      "correctAnswer": "Correct answer:",
+      "explanation": "Explanation:",
+      "questionDeleted": "(the question has been deleted)",
+      "markHandled": "Mark as handled",
+      "markUnhandled": "Mark as unhandled"
+    }
   }
 }

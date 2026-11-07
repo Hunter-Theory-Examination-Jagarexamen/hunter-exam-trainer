@@ -9,10 +9,15 @@ import {
     ShieldCheck,
     Users,
     ListChecks,
+    MessageSquare,
+    Inbox,
 } from "lucide-react";
+import { useState } from "react";
+import { createPortal } from "react-dom";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { UserRole, type User as CurrentUser } from "../../types/user";
+import FeedbackDialog from "../feedback/FeedbackDialog";
 
 interface SidebarProps {
     user: CurrentUser | null;
@@ -24,6 +29,8 @@ const Sidebar = ({ user, isOpen, onClose }: SidebarProps) => {
     const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
+    // True while the feedback dialog is open.
+    const [isGivingFeedback, setIsGivingFeedback] = useState(false);
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -75,6 +82,11 @@ const Sidebar = ({ user, isOpen, onClose }: SidebarProps) => {
                     {t("layout.navProfile")}
                 </NavLink>
 
+                <button type="button" onClick={() => { onClose(); setIsGivingFeedback(true); }}>
+                    <MessageSquare size={20} />
+                    {t("layout.giveFeedback")}
+                </button>
+
                 {user?.role === UserRole.ADMIN && (
                     <>
                         {/* "end": only active on /admin itself, not on /admin/questions etc. */}
@@ -97,6 +109,11 @@ const Sidebar = ({ user, isOpen, onClose }: SidebarProps) => {
                             <Users size={20} />
                             {t("layout.navLearners")}
                         </NavLink>
+
+                        <NavLink to="/admin/feedback" onClick={onClose}>
+                            <Inbox size={20} />
+                            {t("layout.navFeedback")}
+                        </NavLink>
                     </>
                 )}
 
@@ -105,6 +122,13 @@ const Sidebar = ({ user, isOpen, onClose }: SidebarProps) => {
                     {t("layout.logout")}
                 </button>
             </nav>
+
+            {/* Drawn at the end of <body>, not inside the sidebar: on mobile the sidebar is
+                moved off-screen with a CSS transform, which would move a fixed dialog with it. */}
+            {isGivingFeedback && createPortal(
+                <FeedbackDialog onClose={() => setIsGivingFeedback(false)} />,
+                document.body
+            )}
         </aside>
     );
 };

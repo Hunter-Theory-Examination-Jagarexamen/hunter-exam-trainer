@@ -9,6 +9,8 @@ erDiagram
     QUESTION ||--o{ ATTEMPT_QUESTIONS : asked_in
     USERS ||--o{ SUBJECT_STATS : has
     SUBJECT ||--o{ SUBJECT_STATS : counted_for
+    USERS |o--o{ FEEDBACK : sends
+    QUESTION |o--o{ FEEDBACK : reported_in
 
     USERS {
         bigint id PK 
@@ -63,5 +65,16 @@ erDiagram
         bigint answered
         bigint correct
         datetime last_answered_at
+    }
+
+    FEEDBACK {
+        bigint id PK
+        varchar type "QUESTION, APP or OTHER"
+        varchar text "max 2000 characters"
+        datetime created_at
+        boolean handled
+        bigint sender_id FK "null if the user is deleted; never shown to admins"
+        bigint question_id FK "null if not a question report, or the question is deleted"
+        varchar question_text_snapshot "question text when reported"
     }
 ```

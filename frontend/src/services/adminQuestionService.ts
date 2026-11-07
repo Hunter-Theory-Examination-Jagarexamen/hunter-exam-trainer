@@ -17,6 +17,10 @@ export interface QuestionRequest {
 
 const endpoint = "/api/admin/questions";
 
+// One question, with the correct answer (admin only).
+export const getQuestion = (id: number): Promise<Question> =>
+    apiClient(`/api/admin/questions/${id}`);
+
 export const createQuestion = (request: QuestionRequest): Promise<Question> =>
     apiClient(endpoint, {method: "POST", body: JSON.stringify(request)});
 

@@ -38,6 +38,15 @@ public class AdminQuestionController {
         return questionService.findBySubjectId(subjectId);
     }
 
+    /**
+     * Returns one question, including the correct answer, so another page
+     * (e.g. a feedback report) can open it in the editor. Unknown id gives 404.
+     */
+    @GetMapping("/{id}")
+    public Question getOne(@PathVariable Long id) {
+        return questionService.findById(id);
+    }
+
     @PostMapping
     public ResponseEntity<Question> create(@Valid @RequestBody QuestionRequest request) {
         Question question = questionService.create(request);

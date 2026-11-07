@@ -8,11 +8,15 @@ import QuestionForm from "./QuestionForm";
 import QuestionImage from "../../components/common/QuestionImage";
 import {deleteQuestion, questionMutationError} from "../../services/adminQuestionService";
 import {useTranslation} from "react-i18next";
+import {errorStatus} from "../../services/apiErrors";
+import {useSearchParams} from "react-router-dom";
 
 const PAGE_SIZE = 20;
 
-const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onSavedElsewhere}: {
+const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onSavedElsewhere, openOnLoad, onOpenedOnLoad}: {
     subjectId: number; subjects: Subject[]; onCountChange: (id: number, delta: number) => void;
+    // A question to show once the list has loaded (from a link, ?question=<id>).
+    openOnLoad?: number | null; onOpenedOnLoad?: () => void;
     onBusyChange: (busy: boolean) => void;
     onSavedElsewhere: (question: Question, created: boolean) => void;
 }) => {
@@ -29,10 +33,20 @@ const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onS
     const [success, setSuccess] = useState("");
     const pending = useRef(false);
     const addButton = useRef<HTMLButtonElement>(null);
+    // The question a link pointed to: scrolled to and highlighted (not opened for editing).
+    const [linkedId, setLinkedId] = useState<number | null>(null);
 
     useEffect(() => {
-        if (editor === null && deleting === null) addButton.current?.focus();
-    }, [editor, deleting]);
+        if (linkedId === null) return;
+        const card = document.getElementById(`question-${linkedId}`);
+        card?.scrollIntoView?.({block: "start"});
+        card?.focus();
+    }, [linkedId]);
+
+    useEffect(() => {
+        // Not when a linked question is shown: focus goes to that question instead.
+        if (editor === null && deleting === null && linkedId === null) addButton.current?.focus();
+    }, [editor, deleting, linkedId]);
 
     function closeEditor() {
         setEditor(null);
@@ -89,6 +103,12 @@ const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onS
             if (active) {
                 setQuestions(data);
                 setIsLoading(false);
+                const index = openOnLoad ? data.findIndex(question => question.id === openOnLoad) : -1;
+                if (index >= 0) {
+                    setPage(Math.floor(index / PAGE_SIZE) + 1);   // the page the question is on
+                    setLinkedId(data[index].id);
+                    onOpenedOnLoad?.();
+                }
             }
         }).catch(() => {
             if (active) {
@@ -143,7 +163,8 @@ const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onS
         {questions.length > 0 && filtered.length === 0 && <p>{t("questionBank.noMatch")}</p>}
         <div className="question-bank-list">
             {filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map(question => (
-                <article className="card" key={question.id}>
+                <article key={question.id} id={`question-${question.id}`} tabIndex={-1}
+                    className={`card${question.id === linkedId ? " question-bank-linked" : ""}`}>
                     <h2 className="card-title">#{question.id}: {question.questionText}</h2>
                     <QuestionImage imageUrl={question.imageUrl} questionText={question.questionText} />
                     <ol type="A">
@@ -181,13 +202,32 @@ const QuestionBank = () => {
     const [subjectId, setSubjectId] = useState<number | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
+    // ?question=12 (e.g. from a feedback report) shows question 12: its subject, its page, highlighted.
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [openOnLoad, setOpenOnLoad] = useState<number | null>(() => Number(searchParams.get("question")) || null);
+    const [linkError, setLinkError] = useState("");
 
     useEffect(() => {
         let active = true;
-        apiClient("/api/subjects").then((data: Subject[]) => {
+        apiClient("/api/subjects").then(async (data: Subject[]) => {
+            // For a linked question, start in its subject; otherwise in the first one.
+            let startSubject = data[0]?.id ?? null;
+            if (openOnLoad) {
+                try {
+                    const linked: Question = await apiClient(`/api/admin/questions/${openOnLoad}`);
+                    startSubject = linked.subject.id;
+                } catch (failure: unknown) {
+                    if (active) {
+                        setLinkError(t(errorStatus(failure) === 404
+                            ? "questionBank.linkedQuestionNotFound"
+                            : "questionBank.linkedQuestionFailed", {id: openOnLoad}));
+                        setOpenOnLoad(null);
+                    }
+                }
+            }
             if (active) {
                 setSubjects(data);
-                setSubjectId(data[0]?.id ?? null);
+                setSubjectId(startSubject);
                 setIsLoading(false);
             }
         }).catch(() => {
@@ -202,6 +242,7 @@ const QuestionBank = () => {
     return <div className="question-bank">
         <PageTitle title={t("questionBank.title")} subtitle={t("questionBank.subtitle")} />
         {success && <p role="status">{success}</p>}
+        {linkError && <p role="alert">{linkError}</p>}
         {isLoading ? <p role="status">{t("questionBank.loadingSubjects")}</p> : error ? <p role="alert">{error}</p> :
             subjects.length === 0 ? <p>{t("questionBank.noSubjects")}</p> : <>
                 <div className="question-bank-field">
@@ -214,6 +255,12 @@ const QuestionBank = () => {
                     </select>
                 </div>
                 {subjectId !== null && <SubjectQuestions key={subjectId} subjectId={subjectId} subjects={subjects}
+                    openOnLoad={openOnLoad}
+                    onOpenedOnLoad={() => {
+                        // Only once: clear it, and take ?question off the address.
+                        setOpenOnLoad(null);
+                        setSearchParams({}, {replace: true});
+                    }}
                     onBusyChange={value => { setBusy(value); if (value) setSuccess(""); }}
                     onSavedElsewhere={(question, created) => {
                         setSuccess(t(created ? "questionBank.successCreated" : "questionBank.successUpdated",

@@ -7,6 +7,7 @@ import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.SubjectStats;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.repository.AttemptQuestionRepository;
+import com.hunterexam.backend.repository.FeedbackRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
 import com.hunterexam.backend.repository.SubjectStatsRepository;
@@ -38,6 +39,7 @@ class AdminServiceTests {
     @Mock QuestionRepository questionRepository;
     @Mock SubjectRepository subjectRepository;
     @Mock SubjectStatsRepository subjectStatsRepository;
+    @Mock FeedbackRepository feedbackRepository;
 
     private AdminService adminService;
     private User learner;
@@ -45,7 +47,7 @@ class AdminServiceTests {
     @BeforeEach
     void setUp() {
         adminService = new AdminService(userRepository, attemptQuestionRepository,
-                questionRepository, subjectRepository, subjectStatsRepository);
+                questionRepository, subjectRepository, subjectStatsRepository, feedbackRepository);
         learner = new User();
         learner.setId(1L);
         learner.setFullName("Test Learner");
@@ -254,12 +256,14 @@ class AdminServiceTests {
         when(questionRepository.count()).thenReturn(42L);
         when(subjectRepository.count()).thenReturn(5L);
         when(userRepository.countByRole(Role.STUDENT)).thenReturn(17L);
+        when(feedbackRepository.countByHandledFalse()).thenReturn(3L);
 
         AdminStatsResponse stats = adminService.getStats();
 
         assertEquals(42L, stats.questionCount());
         assertEquals(5L, stats.subjectCount());
         assertEquals(17L, stats.studentCount());
+        assertEquals(3L, stats.unhandledFeedbackCount());
         // Students are counted by role alone, so inactive accounts stay included.
         verify(userRepository).countByRole(Role.STUDENT);
     }
@@ -275,5 +279,6 @@ class AdminServiceTests {
         assertEquals(0L, stats.questionCount());
         assertEquals(0L, stats.subjectCount());
         assertEquals(0L, stats.studentCount());
+        assertEquals(0L, stats.unhandledFeedbackCount());
     }
 }

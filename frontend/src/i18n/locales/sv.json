@@ -218,6 +218,8 @@
     "navQuestions": "Frågor",
     "navSubjects": "Ämnen",
     "navLearners": "Elever",
+    "navFeedback": "Feedback",
+    "giveFeedback": "Ge feedback",
     "logout": "Logga ut"
   },
   "result": {
@@ -265,6 +267,10 @@
       "learners": {
         "title": "Studenter",
         "caption": "Öppna studenternas framsteg"
+      },
+      "feedback": {
+        "title": "Feedback",
+        "caption": "Ohanterade meddelanden"
       }
     },
     "errors": {
@@ -345,6 +351,8 @@
     },
     "loadQuestionsFailed": "Det gick inte att ladda frågorna. Försök igen.",
     "loadSubjectsFailed": "Det gick inte att ladda ämnena. Försök igen.",
+    "linkedQuestionNotFound": "Fråga {{id}} finns inte längre.",
+    "linkedQuestionFailed": "Det gick inte att öppna fråga {{id}}. Försök igen.",
     "editAria": "Redigera fråga {{id}}",
     "deleteAria": "Ta bort fråga {{id}}",
     "pagesAria": "Sidor med frågor",
@@ -481,5 +489,53 @@
   "brand": {
     "title": "JÄGAREXAMEN TRÄNARE",
     "logoAlt": "Jägarexamen Tränare logotyp"
+  },
+  "feedback": {
+    "title": "Ge feedback",
+    "reportQuestion": "Rapportera fel i frågan",
+    "afterExamText": "Hittade du ett fel i en fråga, eller har du synpunkter på provet?",
+    "afterExamButton": "Ge feedback om provet",
+    "typeLabel": "Vad gäller det?",
+    "types": {
+      "QUESTION": "Fel i en fråga",
+      "APP": "Appen",
+      "OTHER": "Övrigt"
+    },
+    "textLabel": "Ditt meddelande",
+    "privacyHint": "Skriv inte ditt namn eller andra personuppgifter.",
+    "send": "Skicka",
+    "sending": "Skickar...",
+    "cancel": "Avbryt",
+    "close": "Stäng",
+    "sent": "Tack! Ditt meddelande har skickats till kursledarna.",
+    "errors": {
+      "tooMany": "Du har skickat många meddelanden i dag. Försök igen i morgon.",
+      "sendFailed": "Det gick inte att skicka meddelandet. Försök igen.",
+      "unreachable": "Servern kan inte nås just nu. Försök igen senare."
+    },
+    "admin": {
+      "title": "Feedback",
+      "subtitle": "Meddelanden och felrapporter från studenterna.",
+      "typeFilter": "Typ",
+      "allTypes": "Alla typer",
+      "showHandled": "Visa hanterade",
+      "loading": "Laddar feedback...",
+      "loadFailed": "Det gick inte att ladda feedback. Försök igen.",
+      "updateFailed": "Det gick inte att ändra statusen. Försök igen.",
+      "empty": "Ingen feedback att visa.",
+      "handled": "Hanterad",
+      "question": "Fråga:",
+      "openQuestion": "Öppna i frågebanken",
+      "showQuestion": "Visa frågan",
+      "hideQuestion": "Dölj frågan",
+      "loadingQuestion": "Laddar frågan...",
+      "questionLoadFailed": "Det gick inte att ladda frågan. Försök igen.",
+      "questionGone": "Frågan finns inte längre.",
+      "correctAnswer": "Rätt svar:",
+      "explanation": "Förklaring:",
+      "questionDeleted": "(frågan är borttagen)",
+      "markHandled": "Markera som hanterad",
+      "markUnhandled": "Markera som ohanterad"
+    }
   }
 }
