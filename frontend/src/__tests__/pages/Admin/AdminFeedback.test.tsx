@@ -34,7 +34,7 @@ describe("AdminFeedback page", () => {
         expect(await screen.findByText("Fel svar markerat som rätt")).toBeInTheDocument();
         expect(apiClientMock).toHaveBeenCalledWith("/api/admin/feedback?handled=false");
         expect(screen.getByText("Vilket djur är ett hjortdjur?")).toBeInTheDocument();
-        expect(screen.getByRole("link", { name: "Öppna frågan" })).toHaveAttribute("href", "/admin/questions?question=12");
+        expect(screen.getByRole("button", { name: "Visa frågan" })).toBeInTheDocument();
         expect(screen.getByText("Bra app")).toBeInTheDocument();
         expect(screen.getAllByRole("listitem")).toHaveLength(2);
     });
@@ -45,7 +45,7 @@ describe("AdminFeedback page", () => {
 
         expect(await screen.findByText("Gammal fråga?")).toBeInTheDocument();
         expect(screen.getByText("(frågan är borttagen)")).toBeInTheDocument();
-        expect(screen.queryByRole("link", { name: "Öppna frågan" })).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: "Visa frågan" })).not.toBeInTheDocument();
     });
 
     it("asks for the chosen type, and for handled items too when shown", async () => {

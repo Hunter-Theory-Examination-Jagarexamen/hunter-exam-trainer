@@ -2,7 +2,7 @@
 // (used by the feedback page for a reported question).
 
 import {beforeEach, describe, expect, it, vi} from "vitest";
-import {render, screen} from "@testing-library/react";
+import {render, screen, waitFor} from "@testing-library/react";
 import {MemoryRouter} from "react-router-dom";
 import apiClient from "../../../api/apiClient";
 import QuestionBank from "../../../pages/Admin/QuestionBank";
@@ -42,7 +42,8 @@ describe("Question Bank opened from a link", () => {
         const card = (await screen.findByRole("heading", {name: "#40: Fråga nummer 40?"}, {timeout: 5000}))
             .closest("article")!;
         expect(card).toHaveClass("question-bank-linked");
-        expect(card).toHaveFocus();
+        // Focus is moved in an effect after the list is drawn, so wait for it.
+        await waitFor(() => expect(card).toHaveFocus());
         expect(subjectSelect()).toHaveValue("3");
         expect(screen.getByText("Sida 2 av 2")).toBeInTheDocument();
         expect(screen.queryByLabelText("Frågetext (obligatoriskt)")).not.toBeInTheDocument();

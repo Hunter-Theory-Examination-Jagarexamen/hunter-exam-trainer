@@ -182,3 +182,35 @@
 .result-feedback p {
     margin: 0;
 }
+
+/* The reported question, shown inside a feedback item */
+.reported-question {
+    margin: 0.5rem 0 0;
+}
+
+.reported-question-toggle {
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    color: var(--color-primary);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.reported-question-panel {
+    margin-top: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-left: 3px solid var(--color-border);
+    background: var(--color-background);
+    border-radius: 4px;
+}
+
+.reported-question-panel h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+}
+
+.reported-question-panel ol {
+    margin: 0.5rem 0;
+}
