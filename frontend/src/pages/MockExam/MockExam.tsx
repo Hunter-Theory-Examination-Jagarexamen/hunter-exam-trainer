@@ -4,9 +4,10 @@ import ExamInstructions from "../../components/mockexam/ExamInstructions";
 import StartExam from "../../components/mockexam/StartExam";
 import "../../styles/mockexam.css";
 import {useNavigate} from "react-router-dom";
+import {useTranslation} from "react-i18next";
 
 const MockExam = () => {
-
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const handleStartExam = () => {
@@ -17,8 +18,8 @@ const MockExam = () => {
         <div className="mockExam">
 
             <PageTitle
-                title="Mock Exam"
-                subtitle="Prepare yourself with a full exam simulation."
+                title={t("mockExam.title")}
+                subtitle={t("mockExam.subtitle")}
             />
             <MockExamHeader />
             <ExamInstructions />

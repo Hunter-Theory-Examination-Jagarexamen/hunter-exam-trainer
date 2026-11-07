@@ -68,6 +68,22 @@ class SubjectStats {
     +LocalDateTime lastAnsweredAt
 }
 
+class Feedback {
+    +Long id
+    +FeedbackType type
+    +String text
+    +LocalDateTime createdAt
+    +boolean handled
+    +String questionTextSnapshot
+}
+
+class FeedbackType {
+    <<enumeration>>
+    QUESTION
+    APP
+    OTHER
+}
+
     User --> Role : has 
     User "1" --> "*" Attempt : starts
     Attempt --> AttemptType : has
@@ -77,4 +93,7 @@ class SubjectStats {
     SubjectStats "*" --> "1" Subject : counts
     Subject "1" --> "*" Question : contains 
     Question "*" --> "1" Subject : belongs to
+    Feedback --> FeedbackType : has
+    Feedback "*" --> "0..1" User : sent by
+    Feedback "*" --> "0..1" Question : reports
 ```

@@ -6,9 +6,11 @@ package com.hunterexam.backend.dto;
  * @param questionCount total questions across all subjects
  * @param subjectCount  total subjects
  * @param studentCount  users with the STUDENT role, including inactive accounts
+ * @param unhandledFeedbackCount feedback items not yet marked as handled
  */
 public record AdminStatsResponse(
         long questionCount,
         long subjectCount,
-        long studentCount
+        long studentCount,
+        long unhandledFeedbackCount
 ) {}

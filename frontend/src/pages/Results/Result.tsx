@@ -2,6 +2,9 @@ import PageTitle from "../../components/common/PageTitle";
 import ResultSummary from "../../components/results/ResultSummary";
 import "../../styles/result.css";
 import { useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useState } from "react";
+import FeedbackDialog from "../../components/feedback/FeedbackDialog";
 
 interface ResultData {
     score: number;
@@ -12,8 +15,10 @@ interface ResultData {
 }
 
 const Result = () => {
-
+    const { t } = useTranslation();
     const location = useLocation();
+    // True while the feedback dialog is open.
+    const [isGivingFeedback, setIsGivingFeedback] = useState(false);
 
     const result = location.state as ResultData | undefined;
 
@@ -22,10 +27,10 @@ const Result = () => {
             <section className="result">
 
                 <PageTitle
-                    title="Result"
-                    subtitle="No result data found."
+                    title={t("result.title")}
+                    subtitle={t("result.noDataSubtitle")}
                 />
-                <p>Please complete a mock exam to see your results.</p>
+                <p>{t("result.noDataMessage")}</p>
             </section>
         );
     }
@@ -34,8 +39,8 @@ const Result = () => {
         <section className="result">
 
             <PageTitle
-                title="Result"
-                subtitle="Here is your result for the mock exam."
+                title={t("result.title")}
+                subtitle={t("result.hasDataSubtitle")}
             />
 
             <ResultSummary
@@ -45,6 +50,17 @@ const Result = () => {
                 incorrectAnswers={result.incorrectAnswers}
                 totalQuestions={result.totalQuestions}
             />
+
+            {/* Only after the exam, never during it; no specific question is attached. */}
+            <div className="result-feedback">
+                <p>{t("feedback.afterExamText")}</p>
+                <button type="button" className="practice-secondary-button"
+                        onClick={() => setIsGivingFeedback(true)}>
+                    {t("feedback.afterExamButton")}
+                </button>
+            </div>
+
+            {isGivingFeedback && <FeedbackDialog onClose={() => setIsGivingFeedback(false)} />}
         </section>
     );
 };

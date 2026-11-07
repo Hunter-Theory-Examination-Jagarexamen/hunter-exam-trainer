@@ -9,14 +9,16 @@ import {
 } from "../../services/authService";
 import { API_BASE_URL } from "../../api/apiClient";
 import { errorStatus, isServerUnreachable } from "../../services/apiErrors";
+import { useTranslation } from "react-i18next";
 
 const LoginForm = () => {
 
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const [successMessage] = useState(
         (location.state as { accountCreated?: boolean })?.accountCreated
-        ? "Account created successfully! You can now log in."
+        ? t("auth.accountCreatedSuccess")
             : ""
     );
 
@@ -37,7 +39,7 @@ const LoginForm = () => {
         setError(""); // clear the message from the previous attempt
 
         if(!email || !password) {
-            setError("Please enter your email and password");
+            setError(t("auth.enterEmailAndPassword"));
             return;
         }
 
@@ -56,11 +58,11 @@ const LoginForm = () => {
         } catch (error) {
             console.error("Login/API error:", error);
             if (isServerUnreachable(error)) {
-                setError("Can't reach the server. Please try again in a few minutes.");
+                setError(t("serverStatus.error"));
             } else if ((errorStatus(error) ?? 0) >= 500) {
-                setError("Something went wrong on the server. Please try again later.");
+                setError(t("errors.UNKNOWN_ERROR"));
             } else {
-                setError("Invalid email or password");
+                setError(t("errors.INVALID_CREDENTIALS"));
             }
         } finally {
             setIsLoading(false);
@@ -77,10 +79,10 @@ const LoginForm = () => {
 
             <div className="auth-form-header">
                 <div className="auth-mobile-logo">
-                    <img src={logo} alt="Hunter Exam Trainer" />
+                    <img src={logo} alt={t("brand.logoAlt")} />
                 </div>
-                <h2>Welcome back!</h2>
-                <p>Log in to continue your practice.</p>
+                <h2>{t("auth.welcomeBack")}</h2>
+                <p>{t("auth.loginSubtitle")}</p>
             </div>
 
             {successMessage && (
@@ -91,9 +93,7 @@ const LoginForm = () => {
 
             <form onSubmit={handleLogin}>
                 <div className="form-field">
-                    <label htmlFor="email">
-                        Email
-                    </label>
+                    <label htmlFor="email">{t("auth.emailLabel")}</label>
 
                     <div className="input-wrapper">
 
@@ -101,7 +101,7 @@ const LoginForm = () => {
                         <input
                             id="email"
                             type="email"
-                            placeholder="Enter your email"
+                            placeholder={t("auth.emailPlaceholder")}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
@@ -110,9 +110,7 @@ const LoginForm = () => {
                 </div>
 
                 <div className="form-field">
-                    <label htmlFor="password">
-                        Password
-                    </label>
+                    <label htmlFor="password">{t("auth.passwordLabel")}</label>
 
                     <div className="input-wrapper">
 
@@ -120,7 +118,7 @@ const LoginForm = () => {
                         <input
                             id="password"
                             type={showPassword ? "text" : "password"}
-                            placeholder="Enter your password"
+                            placeholder={t("auth.passwordPlaceholder")}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
@@ -129,7 +127,7 @@ const LoginForm = () => {
                             type="button"
                             className="password-toggle"
                             onClick={() => setShowPassword(!showPassword)}
-                            aria-label={showPassword ? "Hide Password" : "Show Password"}
+                            aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
                         >
                             {showPassword ? <EyeOff size={18} /> : <Eye size={18} /> }
                         </button>
@@ -143,7 +141,7 @@ const LoginForm = () => {
                         type="button"
                         onClick={() => navigate("/forgot-password")}
                     >
-                        Forgot Password?
+                        {t("auth.forgotPassword")}
                     </button>
                 </div>
 
@@ -158,7 +156,7 @@ const LoginForm = () => {
                     className="auth-primary-button"
                     disabled={isLoading}
                 >
-                    {isLoading ? "Logging in..." : "Log In"}
+                    {isLoading ? t("auth.loggingIn") : t("auth.loginButton")}
                 </button>
             </form>
 
@@ -166,7 +164,7 @@ const LoginForm = () => {
             {googleEnabled && (
                 <>
                     <div className="auth-divider">
-                        <span>or</span>
+                        <span>{t("common.or")}</span>
                     </div>
 
                     <div className="auth-secondary-actions">
@@ -175,19 +173,19 @@ const LoginForm = () => {
                             className="auth-secondary-button"
                             onClick={handleGoogleLogin}
                         >
-                            Continue with Google
+                            {t("auth.continueWithGoogle")}
                         </button>
                     </div>
                 </>
             )}
 
             <p className="auth-switch">
-                Don't have an account?{" "}
+                {t("auth.noAccount")}{" "}
                 <button
                     type="button"
                     onClick={() => navigate("/register")}
                 >
-                    Sign Up
+                    {t("auth.goToRegister")}
                 </button>
             </p>
         </div>

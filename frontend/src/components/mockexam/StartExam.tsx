@@ -1,10 +1,13 @@
 import "../../styles/mockexam.css";
+import {useTranslation} from "react-i18next";
 
 interface StartExamProps {
     onStartExam: () => void;
 }
 
 const StartExam = ({ onStartExam }: StartExamProps) => {
+    const { t } = useTranslation();
+
     return (
         <section className="mockexam-section">
 
@@ -12,7 +15,7 @@ const StartExam = ({ onStartExam }: StartExamProps) => {
                 className="start-exam-btn"
                 onClick={onStartExam}
             >
-                Start Mock Exam
+                {t("mockExam.startButton")}
             </button>
 
         </section>

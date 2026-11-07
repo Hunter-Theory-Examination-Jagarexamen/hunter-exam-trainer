@@ -2,12 +2,13 @@ import {ArrowRight, BookOpen} from "lucide-react";
 import "../../styles/practice.css";
 import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
+import {useTranslation} from "react-i18next";
 import type { Subject } from "../../types/subject.ts";
 import {subjectIcons} from "../../types/subjects.ts";
 import apiClient from "../../api/apiClient.ts";
 
 const SubjectCards = () => {
-
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -28,7 +29,7 @@ const SubjectCards = () => {
             catch (error) {
 
                 console.error("Failed to fetch subjects: ", error);
-                setError("Failed to load subjects. Please try again");
+                setError(t("practice.loadSubjectsError"));
             }
             finally {
                 setIsLoading(false);
@@ -36,10 +37,10 @@ const SubjectCards = () => {
         };
         fetchSubjects();
 
-    }, []);
+    }, [t]);
 
     if (isLoading) {
-        return <p>Loading Subjects...</p>;
+        return <p>{t("practice.loadingSubjects")}</p>;
     }
 
     if (error) {
@@ -69,12 +70,12 @@ const SubjectCards = () => {
 
                         <div className="subject-card-footer">
                             <span>
-                                {subject.questionCount} questions
+                                {t("practice.subjectQuestionCount", { count: subject.questionCount })}
                             </span>
                             <button
                                 onClick={() => navigate(`/practice/subjects/${subject.id}`)}
                             >
-                                Start Practice
+                                {t("practice.startPracticeButton")}
                                 <ArrowRight size={16} />
                             </button>
                         </div>

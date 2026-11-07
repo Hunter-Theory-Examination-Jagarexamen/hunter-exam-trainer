@@ -313,7 +313,7 @@ const Exam = () => {
     if (questions.length === 0) {
         return (
             <div className="exam">
-                <p>No exam questions available.</p>
+                <p>{t("exam.noQuestionsAvailable")}</p>
             </div>
         );
     }
@@ -325,7 +325,7 @@ const Exam = () => {
     return (
         <div className="exam">
             <div className="exam-progress-bar text-center my-2">
-                Answered {answeredCount} / {totalQuestions}
+                {t("exam.answeredProgress", { answered: answeredCount, total: totalQuestions })}
             </div>
 
             <ExamHeader

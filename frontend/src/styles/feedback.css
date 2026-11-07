@@ -1,0 +1,216 @@
+/* Feedback dialog: shown on top of any page. */
+.feedback-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 1100;   /* above the mobile sidebar (1000) */
+}
+
+.feedback-dialog {
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-radius: 12px;
+    padding: 1.5rem;
+    max-width: 32rem;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.feedback-dialog h2 {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+}
+
+.feedback-dialog form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.feedback-dialog label {
+    font-weight: 600;
+}
+
+.feedback-dialog select,
+.feedback-dialog textarea {
+    font: inherit;
+    padding: 0.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-background);
+    color: var(--color-text);
+}
+
+.feedback-dialog textarea {
+    resize: vertical;
+}
+
+.feedback-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+/* Fixed width for "0 / 2000" up to "2000 / 2000", so the hint next to it doesn't
+   re-wrap (and jump) when the count gets another digit. */
+.feedback-count {
+    flex-shrink: 0;
+    min-width: 11ch;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.feedback-error {
+    color: var(--color-danger, #b00020);
+    font-weight: 600;
+    margin: 0.5rem 0 0;
+}
+
+.feedback-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+/* Admin page: /admin/feedback */
+.admin-feedback-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.admin-feedback-filters select {
+    font: inherit;
+    padding: 0.4rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+
+.admin-feedback-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.admin-feedback-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.admin-feedback-item {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.admin-feedback-item.is-handled {
+    opacity: 0.7;
+}
+
+.admin-feedback-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+.admin-feedback-question {
+    margin: 0.5rem 0 0;
+}
+
+.admin-feedback-text {
+    margin: 0.5rem 0 0.75rem;
+    white-space: pre-wrap;   /* keep the student's line breaks */
+    overflow-wrap: anywhere;
+}
+
+/* "Report a problem" link-style button under a practice question */
+.practice-report-button {
+    display: block;
+    margin: 1rem 0 0 auto;
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.practice-report-button:hover,
+.practice-report-button:focus-visible {
+    color: var(--color-primary);
+}
+
+/* Feedback prompt under a mock exam result: a card with the same width and look
+   as the result cards above it (.result-summary, .result-details in result.css). */
+.result-feedback {
+    max-width: 500px;
+    box-sizing: border-box;
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.result-feedback p {
+    margin: 0;
+}
+
+/* The reported question, shown inside a feedback item */
+.reported-question {
+    margin: 0 0 0.75rem;
+}
+
+.reported-question-toggle {
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    color: var(--color-primary);
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.reported-question-panel {
+    margin-top: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-left: 3px solid var(--color-border);
+    background: var(--color-background);
+    border-radius: 4px;
+}
+
+.reported-question-panel h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+}
+
+.reported-question-panel ol {
+    margin: 0.5rem 0;
+}

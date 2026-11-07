@@ -1,10 +1,12 @@
 import "../../styles/profile.css";
-import {Lock} from "lucide-react";
-import {useState} from "react";
+import { Lock } from "lucide-react";
+import { useState } from "react";
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 import apiClient from "../../api/apiClient.ts";
 
 const AccountSettings = () => {
+    const { t } = useTranslation();
 
     const [showChangePassword, setShowChangePassword] = useState(false);
 
@@ -25,7 +27,7 @@ const AccountSettings = () => {
         setError("");
 
         if (newPassword !== confirmPassword) {
-            setError("New password and confirmation password do not match.");
+            setError(t("profile.passwordMismatch"));
             return;
         }
 
@@ -39,7 +41,7 @@ const AccountSettings = () => {
                     newPassword
                 })
             });
-            setMessage("Password changed successfully");
+            setMessage(t("profile.passwordSuccess"));
 
             setCurrentPassword("");
             setNewPassword("");
@@ -50,7 +52,7 @@ const AccountSettings = () => {
             setError(
                 error instanceof Error
                     ? error.message
-                    : "Failed to change password. Please try again."
+                    : t("profile.defaultPasswordError")
             );
         }
         finally {
@@ -69,7 +71,7 @@ const AccountSettings = () => {
 
     return (
         <section className="profile-section">
-            <h2>Account Settings</h2>
+            <h2>{t("profile.accountSettingsTitle")}</h2>
 
             <div className="account-settings">
 
@@ -79,7 +81,7 @@ const AccountSettings = () => {
                         onClick={() => setShowChangePassword(true)}
                     >
                         <Lock size={16}/>
-                        Change Password
+                        {t("profile.changePasswordButton")}
                     </button>
                 )}
 
@@ -90,7 +92,7 @@ const AccountSettings = () => {
                     >
                         <div className="form-group">
                             <label htmlFor="currentPassword">
-                                Current Password
+                                {t("profile.currentPasswordLabel")}
                             </label>
                             <input
                                 id="currentPassword"
@@ -105,7 +107,7 @@ const AccountSettings = () => {
 
                         <div className="form-group">
                             <label htmlFor="newPassword">
-                                New Password
+                                {t("profile.newPasswordLabel")}
                             </label>
                             <input
                                 id="newPassword"
@@ -120,7 +122,7 @@ const AccountSettings = () => {
 
                         <div className="form-group">
                             <label htmlFor="confirmPassword">
-                                Confirm Password
+                                {t("profile.confirmPasswordLabel")}
                             </label>
                             <input
                                 id="confirmPassword"
@@ -151,14 +153,14 @@ const AccountSettings = () => {
                                 onClick={handleCancel}
                                 disabled={isLoading}
                             >
-                                Cancel
+                                {t("profile.cancelButton")}
                             </button>
 
                             <button
                                 type="submit"
                                 disabled={isLoading}
                             >
-                                {isLoading ? "Changing..." : "Change Password"}
+                                {isLoading ? t("profile.changingButton") : t("profile.changePasswordButton")}
                             </button>
                         </div>
                     </form>

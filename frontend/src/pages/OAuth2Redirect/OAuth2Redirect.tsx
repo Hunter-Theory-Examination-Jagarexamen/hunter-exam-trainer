@@ -1,8 +1,9 @@
 import {useEffect} from "react";
 import {useNavigate, useSearchParams} from "react-router-dom";
+import {useTranslation} from "react-i18next";
 
 const OAuth2Redirect = () => {
-
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
@@ -23,7 +24,7 @@ const OAuth2Redirect = () => {
     return (
         <div className="auth-page login">
             <div className="auth-form-container">
-                <p className="auth-switch">Signing you in...</p>
+                <p className="auth-switch">{t("auth.signingIn")}</p>
             </div>
         </div>
     );

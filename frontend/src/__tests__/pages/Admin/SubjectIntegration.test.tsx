@@ -34,24 +34,24 @@ describe("Subject synchronization on navigation", () => {
         });
         render(<AppRoutes />);
         await screen.findByRole("heading", {name: "Safety"}, {timeout: 5000});
-        await userEvent.click(screen.getByRole("button", {name: mode === "create" ? "Create subject" : `${mode === "edit" ? "Edit" : "Delete"} subject Safety`}));
-        if (mode === "delete") await userEvent.click(screen.getByRole("button", {name: "Confirm deletion"}));
+        await userEvent.click(screen.getByRole("button", {name: mode === "create" ? "Skapa ämne" : `${mode === "edit" ? "Redigera" : "Ta bort"} ämne Safety`}));
+        if (mode === "delete") await userEvent.click(screen.getByRole("button", {name: "Bekräfta borttagning"}));
         else {
-            await userEvent.clear(screen.getByLabelText("Name (required)"));
-            await userEvent.type(screen.getByLabelText("Name (required)"), "New subject");
-            await userEvent.clear(screen.getByLabelText("Description (required)"));
-            await userEvent.type(screen.getByLabelText("Description (required)"), "New description");
-            await userEvent.click(screen.getByRole("button", {name: "Save subject"}));
+            await userEvent.clear(screen.getByLabelText("Namn (obligatoriskt)"));
+            await userEvent.type(screen.getByLabelText("Namn (obligatoriskt)"), "New subject");
+            await userEvent.clear(screen.getByLabelText("Beskrivning (obligatoriskt)"));
+            await userEvent.type(screen.getByLabelText("Beskrivning (obligatoriskt)"), "New description");
+            await userEvent.click(screen.getByRole("button", {name: "Spara ämne"}));
         }
-        await screen.findByText(new RegExp(`Subject .* ${mode === "create" ? "created" : mode === "edit" ? "updated" : "deleted"}\\.`));
-        await userEvent.click(screen.getByRole("link", {name: "Questions"}));
+        await screen.findByText(new RegExp(`Ämne .* ${mode === "create" ? "skapades" : mode === "edit" ? "uppdaterades" : "har tagits bort"}\\.`));
+        await userEvent.click(screen.getByRole("link", {name: "Frågor"}));
         await screen.findByRole("option", {name: `${mode === "delete" ? "Wildlife" : "New subject"} (0)`});
         if (mode !== "create") expect(screen.queryByRole("option", {name: "Safety (0)"})).not.toBeInTheDocument();
-        await userEvent.click(screen.getByRole("button", {name: "Add question"}));
-        expect(screen.getByLabelText("Question subject (required)")).toHaveTextContent(mode === "delete" ? "Wildlife" : "New subject");
-        await userEvent.click(screen.getByRole("link", {name: "Practice"}));
-        const practiceCard = (await screen.findByRole("heading", {name: "Practice by Subject"})).closest(".practice-card")!;
-        await userEvent.click(within(practiceCard as HTMLElement).getByRole("button", {name: "Select"}));
+        await userEvent.click(screen.getByRole("button", {name: "Lägg till fråga"}));
+        expect(screen.getByLabelText("Frågans ämne (obligatoriskt)")).toHaveTextContent(mode === "delete" ? "Wildlife" : "New subject");
+        await userEvent.click(screen.getByRole("link", {name: "Öva"}));
+        const practiceCard = (await screen.findByRole("heading", {name: "Öva per ämne"})).closest(".practice-card")!;
+        await userEvent.click(within(practiceCard as HTMLElement).getByRole("button", {name: "Välj"}));
         expect(await screen.findByRole("heading", {name: mode === "delete" ? "Wildlife" : "New subject"})).toBeInTheDocument();
         if (mode !== "delete") expect(screen.getByText("New description")).toBeInTheDocument();
         if (mode !== "create") expect(screen.queryByRole("heading", {name: "Safety"})).not.toBeInTheDocument();
