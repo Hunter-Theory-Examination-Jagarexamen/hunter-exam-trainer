@@ -100,17 +100,17 @@ const AdminFeedback = () => {
                             </div>
 
                             {item.questionText && (
-                                <>
-                                    <p className="admin-feedback-question">
-                                        <strong>{t("feedback.admin.question")}</strong> {item.questionText}
-                                        {item.questionId === null &&
-                                            <em> {t("feedback.admin.questionDeleted")}</em>}
-                                    </p>
-                                    {item.questionId !== null && <ReportedQuestion questionId={item.questionId} />}
-                                </>
+                                <p className="admin-feedback-question">
+                                    <strong>{t("feedback.admin.question")}</strong> {item.questionText}
+                                    {item.questionId === null &&
+                                        <em> {t("feedback.admin.questionDeleted")}</em>}
+                                </p>
                             )}
 
                             <p className="admin-feedback-text">{item.text}</p>
+
+                            {/* Below the student's text, so opening it doesn't push the text away. */}
+                            {item.questionId !== null && <ReportedQuestion questionId={item.questionId} />}
 
                             <button type="button" className="practice-secondary-button"
                                     onClick={() => void toggleHandled(item)}>
