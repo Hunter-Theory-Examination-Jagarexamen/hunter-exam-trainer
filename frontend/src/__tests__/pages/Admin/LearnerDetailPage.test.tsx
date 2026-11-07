@@ -1,9 +1,9 @@
-// Tests for src/pages/Admin/LearnerProgressPage.tsx
+// Tests for src/pages/Admin/LearnerDetailPage.tsx (one user's progress)
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router-dom";
-import LearnerProgressPage from "../../../pages/Admin/LearnerProgressPage";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+import LearnerDetailPage from "../../../pages/Admin/LearnerDetailPage";
 import apiClient from "../../../api/apiClient.ts";
 import type { LearnerProgress } from "../../../types/learnerProgress.ts";
 
@@ -28,13 +28,15 @@ const emptyMockExams = {
 
 function renderPage() {
     render(
-        <MemoryRouter>
-            <LearnerProgressPage />
+        <MemoryRouter initialEntries={["/admin/learners/1"]}>
+            <Routes>
+                <Route path="/admin/learners/:userId" element={<LearnerDetailPage />} />
+            </Routes>
         </MemoryRouter>
     );
 }
 
-describe("LearnerProgressPage", () => {
+describe("LearnerDetailPage", () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -45,14 +47,14 @@ describe("LearnerProgressPage", () => {
     });
 
     it("shows a learner with no results as empty (not as an error)", async () => {
-        vi.mocked(apiClient).mockResolvedValue([
+        vi.mocked(apiClient).mockResolvedValue(
             {
                 ...baseLearner,
                 lastActivityAt: null,
                 subjectPerformances: [],
                 mockExams: emptyMockExams,
             },
-        ]);
+        );
 
         renderPage();
 
@@ -63,7 +65,7 @@ describe("LearnerProgressPage", () => {
     });
 
     it("shows mock exam summary for a learner with only exams", async () => {
-        vi.mocked(apiClient).mockResolvedValue([
+        vi.mocked(apiClient).mockResolvedValue(
             {
                 ...baseLearner,
                 lastActivityAt: "2026-10-15T10:00:00",
@@ -76,7 +78,7 @@ describe("LearnerProgressPage", () => {
                     latestPassed: true,
                 },
             },
-        ]);
+        );
 
         renderPage();
 
@@ -88,7 +90,7 @@ describe("LearnerProgressPage", () => {
     });
 
     it("shows practice subjects for a learner with only practice", async () => {
-        vi.mocked(apiClient).mockResolvedValue([
+        vi.mocked(apiClient).mockResolvedValue(
             {
                 ...baseLearner,
                 lastActivityAt: "2026-10-16T10:00:00",
@@ -97,7 +99,7 @@ describe("LearnerProgressPage", () => {
                 ],
                 mockExams: emptyMockExams,
             },
-        ]);
+        );
 
         renderPage();
 
@@ -107,7 +109,7 @@ describe("LearnerProgressPage", () => {
     });
 
     it("shows both sections for a learner with practice and exams", async () => {
-        vi.mocked(apiClient).mockResolvedValue([
+        vi.mocked(apiClient).mockResolvedValue(
             {
                 ...baseLearner,
                 lastActivityAt: "2026-10-15T10:00:00",
@@ -122,7 +124,7 @@ describe("LearnerProgressPage", () => {
                     latestPassed: true,
                 },
             },
-        ]);
+        );
 
         renderPage();
 
@@ -134,7 +136,7 @@ describe("LearnerProgressPage", () => {
     });
 
     it("shows 'Not passed' when the latest exam failed", async () => {
-        vi.mocked(apiClient).mockResolvedValue([
+        vi.mocked(apiClient).mockResolvedValue(
             {
                 ...baseLearner,
                 lastActivityAt: "2026-10-15T10:00:00",
@@ -147,10 +149,30 @@ describe("LearnerProgressPage", () => {
                     latestPassed: false,
                 },
             },
-        ]);
+        );
 
         renderPage();
 
         expect(await screen.findByText(/Ej godkänd/)).toBeInTheDocument();
+    });
+
+    it("asks for the user from the address and shows their name and email", async () => {
+        vi.mocked(apiClient).mockResolvedValue({
+            ...baseLearner, lastActivityAt: null, subjectPerformances: [], mockExams: emptyMockExams,
+        });
+        renderPage();
+
+        expect(await screen.findByRole("heading", { name: "Test Learner" })).toBeInTheDocument();
+        expect(screen.getByText("test@learner.com")).toBeInTheDocument();
+        expect(apiClient).toHaveBeenCalledWith("/api/admin/learners/1");
+        expect(screen.getByRole("link", { name: "Tillbaka till listan" })).toHaveAttribute("href", "/admin/learners");
+    });
+
+    it("says when the user doesn't exist", async () => {
+        vi.mocked(apiClient).mockImplementation(() =>
+            Promise.reject(Object.assign(new Error("not found"), { status: 404 })));
+        renderPage();
+
+        expect(await screen.findByRole("alert")).toHaveTextContent("Användaren finns inte.");
     });
 });

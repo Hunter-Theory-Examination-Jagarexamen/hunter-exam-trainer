@@ -293,7 +293,10 @@
     "notPassed": " · Ej godkänd",
     "best": "Bästa:",
     "noPracticeResults": "Inga övningsresultat ännu.",
-    "loadFailed": "Kunde inte ladda studenternas framsteg. Försök igen."
+    "loadFailed": "Kunde inte ladda studenternas framsteg. Försök igen.",
+    "backToList": "Tillbaka till listan",
+    "loadingOne": "Laddar...",
+    "notFound": "Användaren finns inte."
   },
   "questionBank": {
     "title": "Admin - Frågebank",
