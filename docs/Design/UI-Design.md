@@ -21,6 +21,11 @@ flowchart TD
 
     H --> I[Statistics]
 
+    D --> P[Feedback Form]
+    F --> P
+    H --> P
+    B --> P
+
     A --> J[Admin Dashboard]
 
     J --> K[Manage Questions]
@@ -30,5 +35,9 @@ flowchart TD
     J --> M[View Statistics]
 
     J --> N[View Learner Progress]
+
+    J --> O[Review Feedback]
+
+    O --> K
 
 ```
