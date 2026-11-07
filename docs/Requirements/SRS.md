@@ -288,6 +288,7 @@ The system shall provide an administration interface that enables instructors to
 | FR-048 | The system shall allow administrators to view each learner's progress across subjects. | Medium  |
 | FR-050 | The system shall allow administrators to read student feedback, filter it by type and mark it as handled, without seeing who sent it. | High    |
 | FR-051 | The system shall let administrators open a reported question from the feedback. | Medium  |
+| FR-052 | The system shall list all users by name, administrators first, so administrators can see who has admin access and open each user's progress. | Medium  |
 
 
 ## 3.8 General System Functions

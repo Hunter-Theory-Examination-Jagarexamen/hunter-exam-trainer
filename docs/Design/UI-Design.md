@@ -34,7 +34,9 @@ flowchart TD
 
     J --> M[View Statistics]
 
-    J --> N[View Learner Progress]
+    J --> N[Learners List: admins and students]
+
+    N --> Q[Learner Progress: one user]
 
     J --> O[Review Feedback]
 
