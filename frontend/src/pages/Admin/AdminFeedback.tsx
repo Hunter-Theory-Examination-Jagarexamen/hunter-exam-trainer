@@ -25,13 +25,15 @@ const AdminFeedback = () => {
     const [showHandled, setShowHandled] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [loadFailed, setLoadFailed] = useState(false);
-    const [updateFailed, setUpdateFailed] = useState(false);
+    // The item whose "mark as handled" failed; its error is shown in that item only.
+    const [failedId, setFailedId] = useState<number | null>(null);
 
     // A filter change shows "loading" right away (in the event handler, not in the
     // effect: setting state directly in an effect makes React draw twice).
     const changeFilter = (change: () => void) => {
         setIsLoading(true);
         setLoadFailed(false);
+        setFailedId(null);
         change();
     };
 
@@ -51,7 +53,7 @@ const AdminFeedback = () => {
     }, [typeFilter, showHandled]);
 
     const toggleHandled = async (item: FeedbackItem) => {
-        setUpdateFailed(false);
+        setFailedId(null);
         try {
             const updated = await setFeedbackHandled(item.id, !item.handled);
             setItems(current => showHandled
@@ -59,7 +61,7 @@ const AdminFeedback = () => {
                 // When only unhandled items are shown, a handled item leaves the list.
                 : current.filter(other => other.id !== updated.id));
         } catch {
-            setUpdateFailed(true);
+            setFailedId(item.id);
         }
     };
 
@@ -83,7 +85,6 @@ const AdminFeedback = () => {
                 </label>
             </div>
 
-            {updateFailed && <p className="feedback-error" role="alert">{t("feedback.admin.updateFailed")}</p>}
 
             {isLoading && <p role="status">{t("feedback.admin.loading")}</p>}
             {!isLoading && loadFailed && <p className="feedback-error" role="alert">{t("feedback.admin.loadFailed")}</p>}
@@ -111,6 +112,9 @@ const AdminFeedback = () => {
 
                             {/* Below the student's text, so opening it doesn't push the text away. */}
                             {item.questionId !== null && <ReportedQuestion questionId={item.questionId} />}
+
+                            {failedId === item.id &&
+                                <p className="feedback-error" role="alert">{t("feedback.admin.updateFailed")}</p>}
 
                             <button type="button" className="practice-secondary-button"
                                     onClick={() => void toggleHandled(item)}>

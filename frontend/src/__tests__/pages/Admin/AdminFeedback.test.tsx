@@ -87,6 +87,25 @@ describe("AdminFeedback page", () => {
         expect(await screen.findByRole("button", { name: "Markera som hanterad" })).toBeInTheDocument();
     });
 
+    it("shows a failed status change in that item only, and clears it when the filter changes", async () => {
+        apiClientMock.mockImplementation(async (endpoint: string) => {
+            if (endpoint === "/api/admin/feedback/1/handled") throw Object.assign(new Error("boom"), { status: 500 });
+            return [report, appFeedback];
+        });
+        render(<MemoryRouter><AdminFeedback /></MemoryRouter>);
+
+        const item = (await screen.findByText("Fel svar markerat som rätt")).closest("li")!;
+        await userEvent.click(within(item).getByRole("button", { name: "Markera som hanterad" }));
+
+        expect(within(item).getByRole("alert")).toHaveTextContent("Det gick inte att ändra statusen. Försök igen.");
+        const other = screen.getByText("Bra app").closest("li")!;
+        expect(within(other).queryByRole("alert")).not.toBeInTheDocument();
+
+        await userEvent.click(screen.getByLabelText("Visa hanterade"));
+        await screen.findByText("Fel svar markerat som rätt");
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+
     it("shows an error when the list can't be loaded", async () => {
         apiClientMock.mockImplementation(() => Promise.reject(Object.assign(new Error("boom"), { status: 500 })));
         render(<MemoryRouter><AdminFeedback /></MemoryRouter>);
