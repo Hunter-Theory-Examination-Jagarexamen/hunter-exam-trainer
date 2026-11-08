@@ -249,6 +249,7 @@
   "serverStatus": {
     "starting": "Servern startar. Det kan ta upp till en minut…",
     "error": "Det går inte att nå servern. Kontrollera din internetanslutning eller försök igen om en stund.",
+    "stillDown": "Fortfarande ingen kontakt.",
     "tryAgain": "Försök igen"
   },
   "admin": {
