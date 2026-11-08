@@ -184,6 +184,31 @@ describe("Exam page", () => {
         expect(body).toEqual({ attemptId: "attempt-1" });
     });
 
+    it("shows a failed submit on the page, not in an alert, and can retry", async () => {
+        // #188: was a browser alert(), gone once closed.
+        mockBackend();
+        failOnce("/api/exam/submit", 500);
+        const alertSpy = vi.spyOn(window, "alert").mockImplementation(() => {});
+        renderExam();
+        await screen.findByText("First question?");
+
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in provet" }));
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in ändå" }));
+
+        expect(await screen.findByRole("alert")).toHaveTextContent(
+            "Kunde inte lämna in provet. Dina svar är sparade på servern — försök igen."
+        );
+        expect(alertSpy).not.toHaveBeenCalled();
+        expect(screen.getByText("First question?")).toBeInTheDocument();
+
+        // Trying again can succeed now; the message is cleared on the new try.
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in provet" }));
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in ändå" }));
+
+        expect(await screen.findByText("Result page")).toBeInTheDocument();
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+
     it("shows an error message when the exam cannot be loaded", async () => {
         vi.mocked(apiClient).mockRejectedValue(new Error("Server down"));
         renderExam();
