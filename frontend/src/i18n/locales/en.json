@@ -467,7 +467,8 @@
       "oneCorrect": "Each question has only one correct answer.",
       "review": "You can review your answers before submitting.",
       "score": "Your score will be displayed after submission.",
-      "unanswered": "Unanswered questions count as incorrect."
+      "unanswered": "Unanswered questions count as incorrect.",
+      "noMinusPoints": "Wrong answers don't give minus points."
     }
   },
   "practiceCards": {

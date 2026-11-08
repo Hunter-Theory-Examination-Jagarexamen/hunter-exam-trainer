@@ -467,7 +467,8 @@
       "oneCorrect": "Varje fråga har endast ett rätt svar.",
       "review": "Du kan granska dina svar innan du lämnar in.",
       "score": "Ditt resultat visas efter inlämning.",
-      "unanswered": "Obesvarade frågor räknas som fel."
+      "unanswered": "Obesvarade frågor räknas som fel.",
+      "noMinusPoints": "Felaktiga svar ger inga minuspoäng."
     }
   },
   "practiceCards": {
