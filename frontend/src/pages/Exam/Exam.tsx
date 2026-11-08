@@ -373,6 +373,17 @@ const Exam = () => {
                         onToggleBookmark={handleToggleBookmark}
                     />
 
+                    {/* Handing in early: below the answers, out of the way of
+                        Previous / Next. The last question has Submit in the
+                        bottom bar instead (#188). */}
+                    {currentQuestionIndex < questions.length - 1 && (
+                        <div className="exam-submit-early">
+                            <button type="button" className="submit-exam-button" onClick={handleSubmit}>
+                                {t("exam.navigation.submit")}
+                            </button>
+                        </div>
+                    )}
+
                     {/* Pinned to the bottom of the screen, so the buttons stay
                         in the same place for every question (#188). */}
                     <div className="exam-bottom-bar">

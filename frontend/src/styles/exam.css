@@ -177,10 +177,20 @@
     color: white;
 }
 
-/* Submit: pushed to the right, distinct from Next */
+/* Submit below the question (#188): on the right, outlined so it stands
+   apart from Next */
+
+.exam-submit-early {
+    display: flex;
+    justify-content: flex-end;
+}
 
 .submit-exam-button {
-    margin-left: auto;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
     background-color: var(--color-surface);
     border: 2px solid var(--color-primary);
     color: var(--color-primary);
@@ -199,17 +209,11 @@
     color: white;
 }
 
-/* Mobile: Submit moves to its own row, full width */
+/* Mobile: Submit below the question takes the full width */
 
 @media (max-width: 768px) {
-    .exam-navigation {
-        flex-wrap: wrap;
-    }
-
     .submit-exam-button {
-        flex-basis: 100%;
-        margin-left: 0;
-        order: 3;
+        width: 100%;
     }
 }
 

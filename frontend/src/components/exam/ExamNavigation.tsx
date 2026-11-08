@@ -24,20 +24,18 @@ const ExamNavigation = (
                 {t("exam.navigation.previous")}
             </button>
 
-            <button
-                className="next-button"
-                onClick={onNext}
-                disabled={isLastQuestion}
-            >
-                {t("exam.navigation.next")}
-            </button>
-
-            <button
-                className="submit-exam-button"
-                onClick={onSubmit}
-            >
-                {t("exam.navigation.submit")}
-            </button>
+            {/* Submit lives below the question (rarely used, easy to hit by
+                mistake here). Only on the last question, where Next has
+                nowhere to go, does it take Next's place (#188). */}
+            {isLastQuestion ? (
+                <button className="next-button" onClick={onSubmit}>
+                    {t("exam.navigation.submit")}
+                </button>
+            ) : (
+                <button className="next-button" onClick={onNext}>
+                    {t("exam.navigation.next")}
+                </button>
+            )}
         </section>
     );
 };

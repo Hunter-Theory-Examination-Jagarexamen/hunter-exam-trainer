@@ -278,7 +278,7 @@ describe("Exam page", () => {
         expect(submitCall).toBeDefined();
     });
 
-    it("disables Next on the last question", async () => {
+    it("shows Submit instead of Next on the last question", async () => {
         mockBackend();
         renderExam();
 
@@ -288,7 +288,10 @@ describe("Exam page", () => {
 
         await userEvent.click(nextButton);    // → Q2
         expect(screen.getByText("Second question?")).toBeInTheDocument();
-        expect(nextButton).toBeDisabled();
+        // Last question: Submit takes Next's place, and there is only one
+        // Submit button (the one below the question is hidden) (#188).
+        expect(screen.queryByRole("button", { name: "Nästa" })).not.toBeInTheDocument();
+        expect(screen.getAllByRole("button", { name: "Lämna in provet" })).toHaveLength(1);
     });
 
     it("shows 'Submit anyway' when there are unanswered questions", async () => {
