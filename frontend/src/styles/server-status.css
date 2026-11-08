@@ -1,10 +1,11 @@
-/* At the bottom of the screen, so it doesn't cover page messages at the
-   top (e.g. "Your session has expired" on the login page). */
+/* At the top of the page, in the normal flow: it pushes the page down
+   instead of covering it, so it hides neither page messages at the top
+   (e.g. "Your session has expired" on the login page) nor buttons pinned
+   to the bottom (the mock exam's Previous / Next, #188). Sticky keeps it
+   in view while scrolling. */
 .server-status-banner {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    position: sticky;
+    top: 0;
     z-index: 20;
 
     display: flex;

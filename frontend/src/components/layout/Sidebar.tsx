@@ -32,10 +32,11 @@ const Sidebar = ({ user, isOpen, onClose }: SidebarProps) => {
     // True while the feedback dialog is open.
     const [isGivingFeedback, setIsGivingFeedback] = useState(false);
 
+    // The /logout page forgets the login. Going there as a navigation lets
+    // the mock exam ask first, without logging out a student who stays (#188).
     const handleLogout = () => {
-        localStorage.removeItem("token");
         onClose();
-        navigate("/login");
+        navigate("/logout");
     };
 
     const sidebarClass = `sidebar${isOpen ? " open" : ""}`;
