@@ -41,14 +41,14 @@ Mark each row ✅ (as expected), ❌ (not as expected; note what happened) or �
 | 4 | Hand in a mock exam, then "Ge feedback om provet" on the result page; then Admin → Feedback | Hand-in works; both messages are listed | #140, #188 | ✅ Hand-in worked (result page: 7 %, 5 / 70 Rätt). "Ge feedback om provet" sent; Admin → Feedback lists it (2026-11-08 21:41:20) with the message from row 3. Filed as type "Appen" (see Notes) |
 | 5 | Admin → Elever: open the list, search for the test student | Student found; details open | #156 | ✅ Elever lists "Administratörer (1)" and "Studenter (14)" by name; "Release Test" opens its details: last activity, 4 mock exams, latest 0 % · "Ej godkänd", best 4 %, and per-subject percentages. There is no search field (the list has no search; the step's "search" was wrong), finding a name means scrolling |
 | 6 | During a mock exam: click a menu item, then "Stanna kvar"; then "Logga ut", then "Lämna provet" | Asks both times; stays on the exam, then lands on the login page | #186, #188 | ✅ Menu click: "Lämna provet?" shown; "Stanna kvar" kept the exam (question 5 answered after it: 4 → 5 / 70 besvarade). "Logga ut": asked again; "Lämna provet" led to the normal login page (no "session expired", no browser prompt) |
-| 7 | After deployment, on a real phone: log in, start a mock exam, answer, use the overview, hand in | Buttons stay in place; the overview scrolls; result shown | #188, row 18 of 2026-11-05 | ➖ Not yet: the Vercel frontend builds from another repository (see Notes) |
+| 7 | After deployment, on a real phone: log in, start a mock exam, answer, use the overview, hand in | Buttons stay in place; the overview scrolls; result shown | #188, row 18 of 2026-11-05 | ➖ Not part of this round: needs the deployed app, which isn't ready (see Notes). Tested separately in a phone test log |
 
 ## Result
 
 - Automated: backend 226 tests, frontend 277 tests and the frontend build
   all pass.
-- Manual: rows 1–6 as expected. Row 7 not tested yet (deployment, see
-  Notes).
+- Manual: rows 1–6 as expected. Row 7 is left to a separate phone test
+  on the deployed app (see Conclusion).
 - No errors that block use. Smaller findings are in the Notes and in
   `docs/local/known-gaps/` (wording, exam feedback type) and
   `design-notes/` (search in the learners list).
@@ -60,7 +60,8 @@ Mark each row ✅ (as expected), ❌ (not as expected; note what happened) or �
 Before the user test on 2026-11-09:
 - The Vercel frontend must build from our repository's `main` (row 7,
   asked Sikdar 2026-11-08). Check: the login page is in Swedish.
-- Then row 7 on a real phone.
+- Then a separate phone test on the deployed app (row 7), in its own log:
+  `docs/Testing/2026-11-09-phone-test.md`.
 
 ## Notes
 - Row 2: Profile shows the role as "ADMIN" (the value from the database,
