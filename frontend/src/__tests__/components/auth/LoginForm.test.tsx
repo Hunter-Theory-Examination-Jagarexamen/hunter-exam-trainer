@@ -39,6 +39,22 @@ describe("LoginForm", () => {
         localStorage.clear(); // remove any saved token
     });
 
+    it("shows a notice from the login page in the form, as an alert (#188)", () => {
+        render(
+            <MemoryRouter>
+                <LoginForm notice="Din session har gått ut." />
+            </MemoryRouter>
+        );
+
+        expect(screen.getByRole("alert")).toHaveTextContent("Din session har gått ut.");
+    });
+
+    it("shows no notice when there is none", () => {
+        renderLoginForm();
+
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+
     it("hides the Google button when Google login is not configured", async () => {
         // Arrange: the mock at the top answers "not configured" (false)
         renderLoginForm();

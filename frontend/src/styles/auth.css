@@ -318,14 +318,10 @@
     font-size: 0.9rem;
 }
 
-.auth-error-banner {
-    position: fixed;
-    top: 1rem;
-    left: 50%;
-    transform: translateX(-50%);
-
-    z-index: 10;
-
+/* "Session expired" / Google login error, at the top of the login form
+   (#188; was fixed to the top of the screen, under the server banner) */
+.auth-notice {
+    margin: 0 0 1.25rem;
     padding: 0.75rem 1.25rem;
 
     border-radius: 8px;
