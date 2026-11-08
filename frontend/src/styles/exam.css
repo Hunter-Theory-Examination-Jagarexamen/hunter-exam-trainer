@@ -433,6 +433,13 @@
     font-weight: 600;
 }
 
+/* Failed submit, shown above the navigation buttons (#188) */
+.exam-submit-error {
+    color: #b00020;
+    font-weight: 600;
+    margin: 1rem 0 0;
+}
+
 .exam-leave-actions {
     display: flex;
     justify-content: flex-end;

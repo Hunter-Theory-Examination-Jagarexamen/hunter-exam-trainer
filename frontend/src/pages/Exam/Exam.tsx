@@ -32,6 +32,9 @@ const Exam = () => {
     const { t } = useTranslation();
 
     const [showConfirmModal, setShowConfirmModal] = useState(false);
+    // Shown on the page when submitting fails, so the student can read it
+    // and try again (#188). Was a browser alert() before.
+    const [submitError, setSubmitError] = useState<string | null>(null);
     const [overviewOpen, setOverviewOpen] = useState(false);
     const { bookmarks, toggleBookmark, isBookmarked } = useExamBookmarks(attemptId);
 
@@ -107,7 +110,7 @@ const Exam = () => {
     };
 
     const submitExam = useCallback(async () => {
-
+        setSubmitError(null);
         try {
             const result = await apiClient("/api/exam/submit", {
                 method: "POST",
@@ -134,9 +137,9 @@ const Exam = () => {
                 return;
             }
 
-            alert(t("exam.submitFailed"));
+            setSubmitError(t("exam.submitFailed"));
         }
-    }, [attemptId, navigate]);
+    }, [attemptId, navigate, t]);
 
 
     //Load exam questions
@@ -359,6 +362,9 @@ const Exam = () => {
                         onToggleBookmark={handleToggleBookmark}
                     />
 
+                    {submitError && (
+                        <p role="alert" className="exam-submit-error">{submitError}</p>
+                    )}
                     <ExamNavigation
                         onPrevious={handlePrevious}
                         onNext={handleNext}
