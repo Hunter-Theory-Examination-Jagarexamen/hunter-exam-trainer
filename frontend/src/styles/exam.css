@@ -177,10 +177,20 @@
     color: white;
 }
 
-/* Submit: pushed to the right, distinct from Next */
+/* Submit below the question (#188): on the right, outlined so it stands
+   apart from Next */
+
+.exam-submit-early {
+    display: flex;
+    justify-content: flex-end;
+}
 
 .submit-exam-button {
-    margin-left: auto;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
     background-color: var(--color-surface);
     border: 2px solid var(--color-primary);
     color: var(--color-primary);
@@ -199,17 +209,11 @@
     color: white;
 }
 
-/* Mobile: Submit moves to its own row, full width */
+/* Mobile: Submit below the question takes the full width */
 
 @media (max-width: 768px) {
-    .exam-navigation {
-        flex-wrap: wrap;
-    }
-
     .submit-exam-button {
-        flex-basis: 100%;
-        margin-left: 0;
-        order: 3;
+        width: 100%;
     }
 }
 
@@ -229,6 +233,22 @@
     flex-direction: column;
     gap: 1.5rem;
     min-width: 0;   /* prevents overflow */
+    /* At least one screen tall, so the bottom bar's natural place is always
+       below the screen's bottom edge and sticky keeps it pinned there, even
+       for short questions (#188). */
+    min-height: 100dvh;
+}
+
+/* Error message + Previous / Next / Submit, pinned to the bottom of the
+   screen (#188). The background hides the question scrolling under it. */
+.exam-bottom-bar {
+    position: sticky;
+    bottom: 0;
+    margin-top: auto;
+    z-index: 10;
+    background-color: var(--color-background);
+    border-top: 1px solid var(--color-border);
+    padding: 0.75rem 0;
 }
 
 .exam-overview-sidebar {
@@ -383,7 +403,78 @@
 }
 
 .question-bookmark-toggle.is-bookmarked {
-    background: var(--color-secondary);
+    background-color: var(--color-secondary);
     border-color: var(--color-primary);
     color: var(--color-primary);
+}
+
+/* =========================
+   Exam pop-ups: Leave Exam (#186) and Submit Exam (#188)
+   ========================= */
+
+.exam-leave-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 200;
+}
+
+.exam-leave-dialog {
+    background: var(--color-surface);
+    border-radius: 12px;
+    padding: 1.5rem;
+    max-width: 28rem;
+    width: 100%;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.exam-leave-dialog h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.25rem;
+}
+
+.exam-leave-dialog:focus {
+    outline: none;
+}
+
+.exam-leave-dialog p {
+    margin: 0 0 1rem;
+    color: var(--color-text);
+    opacity: 0.85;
+}
+
+.exam-leave-error {
+    color: #b00020;
+    opacity: 1;
+    font-weight: 600;
+}
+
+/* Failed submit, shown above the navigation buttons (#188) */
+.exam-submit-error {
+    color: #b00020;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+}
+
+.exam-leave-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.exam-leave-actions button {
+    padding: 0.7rem 1.4rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.exam-leave-actions button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }

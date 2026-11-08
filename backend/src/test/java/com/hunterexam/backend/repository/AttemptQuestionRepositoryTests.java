@@ -173,4 +173,20 @@ class AttemptQuestionRepositoryTests {
         assertTrue(attemptQuestions.findCountedAnswersSince(student, now.minusMinutes(30)).isEmpty());
         assertFalse(attemptQuestions.findCountedAnswersSince(student, now.minusHours(2)).isEmpty());
     }
+
+    @Test
+    void abandonedExamsAreNeitherResultsNorCountedAnswers() {
+        // Arrange: an abandoned exam (#186) is closed but never scored, even
+        // though its answers are saved on its rows.
+        saveRound(student, AttemptType.MOCK_EXAM, now, false,
+                true, true, false, true);
+
+        // Act
+        List<MockExamScore> scores = attemptQuestions.findScoredMockExams(List.of(student));
+        List<AnswerOutcome> answers = attemptQuestions.findCountedAnswersSince(student, now.minusDays(1));
+
+        // Assert: no result, and its answers don't count toward statistics
+        assertTrue(scores.isEmpty());
+        assertTrue(answers.isEmpty());
+    }
 }

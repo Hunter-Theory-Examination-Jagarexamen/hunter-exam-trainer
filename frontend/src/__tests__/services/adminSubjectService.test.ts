@@ -31,11 +31,11 @@ describe("Subject HTTP contract", () => {
             await updateSubject(7, request);
             expect.fail("Expected request to fail");
         } catch (error) {
-            expect(subjectError(error, "save")).toContain(status === 404 ? "no longer exists" : "permission");
+            expect(subjectError(error, "save")).toContain(status === 404 ? "finns inte längre" : "behörighet");
         }
     });
     it("does not classify unknown server failures as blocked deletion", () => {
-        expect(subjectError(new Error("Internal server error"), "delete")).toContain("Please try again");
+        expect(subjectError(new Error("Internal server error"), "delete")).toContain("Försök igen");
         expect(subjectError(new Error("Internal server error"), "delete")).not.toContain("in use");
     });
 });

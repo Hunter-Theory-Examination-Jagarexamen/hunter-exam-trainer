@@ -55,6 +55,23 @@ public class PracticeAttemptController {
     }
 
     /**
+     * Starts a random practice round: the server picks up to 20 questions
+     * from the whole bank, across all subjects (#151).
+     *
+     * @param authentication authentication info from Spring Security
+     * @return the round's id and its questions, without correct answers
+     */
+    @PostMapping("/random")
+    public PracticeStartResponse startRandom(Authentication authentication) {
+        try {
+            return practiceAttemptService.startRandom(authentication.getName());
+        } catch (DataIntegrityViolationException e) {
+            // Same race on the student's SubjectStats rows as start(): retry once.
+            return practiceAttemptService.startRandom(authentication.getName());
+        }
+    }
+
+    /**
      * Checks and saves the answer to one question in the round.
      *
      * @param authentication authentication info from Spring Security

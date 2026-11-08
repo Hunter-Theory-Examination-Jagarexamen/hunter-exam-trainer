@@ -12,6 +12,10 @@ const endpoint = "/api/practice/attempts";
 export const startPracticeRound = (subjectId: number): Promise<PracticeStartResponse> =>
     apiClient(endpoint, {method: "POST", body: JSON.stringify({subjectId})});
 
+// Starts a random round: the server picks the questions from all subjects (#151).
+export const startRandomPracticeRound = (): Promise<PracticeStartResponse> =>
+    apiClient(`${endpoint}/random`, {method: "POST"});
+
 export const answerPracticeQuestion = (
     attemptId: number, questionId: number, chosenOption: OptionLetter
 ): Promise<PracticeAnswerResponse> =>

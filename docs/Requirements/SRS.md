@@ -117,6 +117,7 @@ Students can:
 - Take simulated examinations
 - Review previous quiz attempts
 - View learning statistics and progress
+- Send feedback to the course leaders and report a problem with a question
 
 ### Administrator / Instructor
 
@@ -130,6 +131,7 @@ Administrators can:
 - Organize questions into categories
 - Review learner performance
 - Monitor overall statistics
+- Read and handle feedback and question reports from students
 
 ## 2.3 Product Features
 
@@ -145,6 +147,7 @@ The application provides the following core features:
 - Responsive user interface
 - Progressive Web Application support
 - Administration panel for question management
+- Student feedback and question reports, handled by administrators
 
 ## 2.4 Operating Environment
 
@@ -283,6 +286,9 @@ The system shall provide an administration interface that enables instructors to
 | FR-040 | The system shall display learner performance statistics.                         | Medium  |
 | FR-041 | The system shall display the number of registered users.                         | Low     |
 | FR-048 | The system shall allow administrators to view each learner's progress across subjects. | Medium  |
+| FR-050 | The system shall allow administrators to read student feedback, filter it by type and mark it as handled, without seeing who sent it. | High    |
+| FR-051 | The system shall let administrators open a reported question from the feedback. | Medium  |
+| FR-052 | The system shall list all users by name, administrators first, so administrators can see who has admin access and open each user's progress. | Medium  |
 
 
 ## 3.8 General System Functions
@@ -297,6 +303,7 @@ The system shall provide general functionality required to support usability, ac
 | FR-045 | The system shall securely store user data in the database.                               | High     |
 | FR-046 | The system shall maintain user sessions until logout or session expiration.              | Medium   |
 | FR-047 | The system shall support future expansion without significant architectural changes.     | Low      |
+| FR-049 | The system shall allow students to send feedback to the course leaders from any page, and to report a problem with a specific question during practice. | High     |
 
 ### Summary
 

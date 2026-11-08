@@ -14,13 +14,16 @@ import PracticeQuestions from "../pages/Practice/PracticeQuestions";
 import Register from "../pages/Register/Register";
 import ResetPassword from "../pages/ResetPassword/ResetPassword";
 import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
+import Logout from "../pages/Logout/Logout";
 import OAuth2Redirect from "../pages/OAuth2Redirect/OAuth2Redirect";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import AdminRoute from "../components/auth/AdminRoute";
 import QuestionBank from "../pages/Admin/QuestionBank";
 import LearnerProgressPage from "../pages/Admin/LearnerProgressPage";
+import LearnerDetailPage from "../pages/Admin/LearnerDetailPage";
 import Subjects from "../pages/Admin/Subjects";
 import AdminHome from "../pages/Admin/AdminHome";
+import AdminFeedback from "../pages/Admin/AdminFeedback";
 import RootLayout from "../components/layout/RootLayout";
 import LazyStatistics from "../pages/Statistics/LazyStatistics";
 
@@ -31,6 +34,7 @@ export const routes = createRoutesFromElements(
 
                 {/* Public Routes */}
                 <Route path="/login" element={ <Login /> } />
+                <Route path="/logout" element={ <Logout /> } />
                 <Route path="/register" element={ <Register /> } />
                 <Route path="/reset-password" element={ <ResetPassword /> } />
                 <Route path="/forgot-password" element={ <ForgotPassword /> } />
@@ -61,6 +65,8 @@ export const routes = createRoutesFromElements(
                             <Route path="/admin/subjects" element={<Subjects />} />
                             <Route path="/admin/questions" element={<QuestionBank />} />
                             <Route path="/admin/learners" element={<LearnerProgressPage />} />
+                            <Route path="/admin/learners/:userId" element={<LearnerDetailPage />} />
+                            <Route path="/admin/feedback" element={<AdminFeedback />} />
                         </Route>
 
                     </Route>

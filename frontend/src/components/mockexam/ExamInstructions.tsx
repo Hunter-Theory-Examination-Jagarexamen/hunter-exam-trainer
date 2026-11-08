@@ -1,17 +1,23 @@
 import "../../styles/mockexam.css";
+import { useTranslation } from "react-i18next";
 
 const ExamInstructions = () => {
+    const { t } = useTranslation();
+
     return (
         <section className="mockExam-section">
 
-            <h2>Instructions</h2>
+            <h2>{t("exam.instructions.title")}</h2>
 
             <ul className="instructions-list">
-                <li>The exam contains 70 multiple-choice questions.</li>
-                <li>You have 60 minutes to complete the exam.</li>
-                <li>Each question has only one correct answer.</li>
-                <li>You can review your answers before submitting.</li>
-                <li>Your score will be displayed after submission.</li>
+                <li>{t("exam.instructions.questions")}</li>
+                <li>{t("exam.instructions.time")}</li>
+                <li>{t("exam.instructions.oneCorrect")}</li>
+                <li>{t("exam.instructions.review")}</li>
+                <li>{t("exam.instructions.score")}</li>
+                <li>{t("exam.instructions.passMark")}</li>
+                <li>{t("exam.instructions.unanswered")}</li>
+                <li>{t("exam.instructions.noMinusPoints")}</li>
             </ul>
 
         </section>

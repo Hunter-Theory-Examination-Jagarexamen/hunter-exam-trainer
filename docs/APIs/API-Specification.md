@@ -19,21 +19,28 @@ endpoints are added to this table, not duplicated elsewhere.
 | PUT    | /api/admin/subjects/{id}      | Update an existing subject                      | Required (ADMIN) |
 | DELETE | /api/admin/subjects/{id}      | Delete a subject                                | Required (ADMIN) |
 | POST   | /api/practice/attempts        | Start a practice round for a subject            | Required         |
+| POST   | /api/practice/attempts/random | Start a random practice round (questions from all subjects) | Required |
 | POST   | /api/practice/attempts/{id}/answers | Answer one question in a practice round (checked by the server) | Required |
 | POST   | /api/practice/attempts/{id}/finish | Finish a practice round and get its totals | Required         |
 | POST   | /api/exam/start               | Start a mock exam and receive 70 questions      | Required         |
 | POST   | /api/exam/{attemptId}/answer | Save or change one answer in the running mock exam | Required |
 | POST   | /api/exam/submit              | Submit the mock exam; the server scores the saved answers | Required |
+| POST   | /api/exam/{attemptId}/abandon | End the running mock exam without scoring it | Required         |
 | GET    | /api/dashboard                | Get dashboard statistics for the logged-in user | Required         |
 | GET    | /api/dashboard/recent         | Get the user's 5 most recent scored mock exams  | Required         |
 | GET    | /api/statistics/subjects      | Get the user's performance by subject (practice and mock exams) | Required |
 | GET    | /api/statistics/progress      | Get the user's weekly accuracy over time        | Required         |
-| GET    | /api/admin/learners           | Get aggregated progress for all learners        | Required (ADMIN) |
-| GET    | /api/admin/stats              | Get question, subject and learner counts        | Required (ADMIN) |
+| GET    | /api/admin/learners           | List all users (admins first, then students) | Required (ADMIN) |
+| GET    | /api/admin/learners/{userId}  | Get one user's progress (`404` if the id doesn't exist) | Required (ADMIN) |
+| GET    | /api/admin/stats              | Get question, subject and learner counts, and unhandled feedback | Required (ADMIN) |
 | GET    | /api/admin/questions?subjectId={id} | Get a subject's questions, including the correct answer (admin Question Bank) | Required (ADMIN) |
+| GET    | /api/admin/questions/{id}     | Get one question, including the correct answer (`404` if unknown) | Required (ADMIN) |
 | POST   | /api/admin/questions          | Create a question (201, with `Location` header) | Required (ADMIN) |
 | PUT    | /api/admin/questions/{id}     | Replace a question (200)                        | Required (ADMIN) |
 | DELETE | /api/admin/questions/{id}     | Delete a question (204)                         | Required (ADMIN) |
+| POST   | /api/feedback                 | Send feedback or report a question (201)        | Required         |
+| GET    | /api/admin/feedback?type=&handled= | List feedback, newest first (filters optional) | Required (ADMIN) |
+| PATCH  | /api/admin/feedback/{id}/handled | Mark feedback as handled or unhandled         | Required (ADMIN) |
 
 Subject writes were moved from `/api/subjects` to `/api/admin/subjects`. The old
 paths have no write handlers anymore: an ADMIN call to them answers
@@ -94,6 +101,10 @@ No request body. Creates a mock exam for the logged-in user with 70 random
 questions, stored in the order shown, and returns them without the correct
 answers. `409 Conflict` if there are fewer than 70 questions.
 
+Any mock exam of the same student that is still running (tab closed, abandoned
+through the menu, ...) is closed **without scoring it** first, so at most one
+mock exam can be open at a time. Practice rounds are never touched by this.
+
 ```json
 {
   "attemptId": 12,
@@ -140,9 +151,26 @@ Response:
 { "totalQuestions": 70, "correctAnswers": 52, "incorrectAnswers": 10, "unanswered": 8, "score": 74 }
 ```
 
+### `POST /api/exam/{attemptId}/abandon`
+
+No request body. Ends the student's running mock exam **without scoring it**:
+the attempt is closed (finish time set, `scored` stays `false`), so it can never
+be answered or submitted again and never appears as a result, in statistics, or
+in the subject totals. Used when the student confirms leaving a running exam
+through the menu or the browser's back button.
+
+- Response: `204 No Content`.
+- `409` if the exam is already submitted or abandoned (treat as "already
+  ended"), `403` if it belongs to another user, `404` if it doesn't exist —
+  a practice round's id also gives `404`.
+
 **MockExams notes:**
 
-- `GET /api/admin/learners` returns one entry per learner with:
+- `GET /api/admin/learners` returns one entry per user with `userId`, `fullName`
+  and `role` (`ADMIN` or `STUDENT`): admins first, then students, each group
+  sorted by name.
+- `GET /api/admin/learners/{userId}` returns one user's progress (student or
+  admin) with `userId`, `fullName`, `email`, `createdAt` and:
 - `subjectPerformances` — performance per subject, weakest first (same numbers as `/api/statistics/subjects`)
 - `mockExams` — mock exam summary (count, latest/best score, latest pass/fail), scored mock exams only
 - `lastActivityAt` — the latest answer (practice or mock exam) or mock exam submit; `null` if none
@@ -162,7 +190,7 @@ The statistics are calculated from the stored answers (`attempts`,
   questions are not counted as answers (in a mock exam's score they count as
   not correct).
 - **Per subject** (`/api/statistics/subjects`, `subjectPerformances` in
-  `/api/admin/learners`): `percentage` = correct ÷ answered over all counted
+  `/api/admin/learners/{userId}`): `percentage` = correct ÷ answered over all counted
   answers in the subject, rounded. Only subjects with at least one answer are
   listed. Student and admin see the same numbers.
 - **Progress over time** (`/api/statistics/progress?weeks=N`): one point per
@@ -199,7 +227,33 @@ Starts a round with all questions of the subject. Response (no `correctAnswer` o
 ```
 
 - `400` if `subjectId` is missing, `404` if the subject doesn't exist, `409` if it has no questions.
-- Starting a round closes the student's earlier unfinished practice round (one open practice round per student).
+- Starting a round (either start endpoint) closes the student's earlier unfinished practice round (one open practice round per student).
+
+### `POST /api/practice/attempts/random`
+
+No request body. Starts a random practice round: the server picks up to
+**20 questions** at random from the whole question bank, across all subjects.
+The questions are spread over as many subjects as the round size allows (a
+subject with many questions can't fill the round alone), each question appears
+at most once, and the order is random. A smaller bank gives a shorter round.
+
+Response has the same shape as `/api/practice/attempts`, but `subjectName` is
+`null`, because a random round mixes subjects:
+
+```json
+{
+  "attemptId": 11,
+  "subjectName": null,
+  "questions": [
+    { "id": 8, "questionText": "...", "optionA": "...", "optionB": "...", "optionC": "...", "optionD": "...", "imageUrl": null }
+  ]
+}
+```
+
+- `409 Conflict` if the question bank is empty.
+- The round is answered and finished exactly like a subject round: `/answers`
+  saves and checks each answer (attributed to that question's subject in the
+  statistics), `/finish` returns the totals.
 
 ### `POST /api/practice/attempts/{id}/answers`
 
@@ -227,6 +281,40 @@ No request body. Response:
 - `totalQuestions` is all questions in the round, `answeredQuestions` how many were answered (skipped questions are not counted, nothing is subtracted).
 - A round that was answered at least once is also saved for the statistics, counting only the answered questions (e.g. 5 of 6, not 5 of 7).
 - `409` if the round is already finished, `403` if it belongs to another user.
+
+## Feedback: request and response
+
+`POST /api/feedback` (any logged-in user) accepts:
+
+```json
+{ "type": "QUESTION", "text": "Fel svar markerat som rätt", "questionId": 12 }
+```
+
+- `type` is `QUESTION`, `APP` or `OTHER` (required). `text` is required, at
+  most 2000 characters; spaces around it are removed.
+- `questionId` is optional and only allowed with `type` `QUESTION`; another
+  type gives `400`, an unknown question `404`.
+- Answers `201` with no body. One user can send at most 20 items in 24 hours;
+  after that the answer is `429`.
+
+`GET /api/admin/feedback` returns items newest first. Optional filters:
+`type` (`QUESTION`, `APP`, `OTHER`) and `handled` (`true`/`false`); an unknown
+value gives `400`.
+
+```json
+[{ "id": 3, "type": "QUESTION", "text": "Fel svar markerat som rätt",
+   "createdAt": "2026-11-06T10:15:00", "handled": false,
+   "questionId": 12, "questionText": "Vilket djur ..." }]
+```
+
+- The sender is stored but never returned, so admins can't see who sent it.
+- `questionText` is the question's text when it was reported. `questionId` is
+  `null` if the question has been deleted since.
+
+`PATCH /api/admin/feedback/{id}/handled` accepts `{ "handled": true }` (or
+`false` to undo) and returns the updated item; unknown id `404`.
+
+`GET /api/admin/stats` also returns `unhandledFeedbackCount`.
 
 **Authentication notes:**
 

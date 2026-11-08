@@ -1,22 +1,23 @@
 import {useEffect, useState} from "react";
 import {Link} from "react-router-dom";
+import {useTranslation} from "react-i18next";
 import PageTitle from "../../components/common/PageTitle";
 import {adminStatsError, getAdminStats} from "../../services/adminStatsService";
 import type {AdminStats} from "../../types/adminStats";
 import "../../styles/admin.css";
 
-// The three admin tools, each rendered as a large card on /admin.
-const CARDS: {to: string; title: string; caption: string; count: (stats: AdminStats) => number}[] = [
-    {to: "/admin/questions", title: "Questions", caption: "Open the question bank", count: stats => stats.questionCount},
-    {to: "/admin/subjects", title: "Subjects", caption: "Open subject management", count: stats => stats.subjectCount},
-    {to: "/admin/learners", title: "Learners", caption: "Open learner progress", count: stats => stats.studentCount},
-];
-
-// Start page of the admin area (/admin): overview cards with the backend counts.
 const AdminHome = () => {
+    const {t} = useTranslation();
     const [stats, setStats] = useState<AdminStats | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState("");
+
+    const CARDS: {to: string; title: string; caption: string; count: (stats: AdminStats) => number}[] = [
+        {to: "/admin/questions", title: t("admin.cards.questions.title"), caption: t("admin.cards.questions.caption"), count: stats => stats.questionCount},
+        {to: "/admin/subjects", title: t("admin.cards.subjects.title"), caption: t("admin.cards.subjects.caption"), count: stats => stats.subjectCount},
+        {to: "/admin/learners", title: t("admin.cards.learners.title"), caption: t("admin.cards.learners.caption"), count: stats => stats.studentCount},
+        {to: "/admin/feedback", title: t("admin.cards.feedback.title"), caption: t("admin.cards.feedback.caption"), count: stats => stats.unhandledFeedbackCount},
+    ];
 
     useEffect(() => {
         let active = true;
@@ -36,11 +37,10 @@ const AdminHome = () => {
 
     return (
         <div className="admin-overview">
-            <PageTitle title="Admin" subtitle="Choose an admin tool." />
+            <PageTitle title={t("admin.title")} subtitle={t("admin.subtitle")} />
 
-            {isLoading && <p role="status">Loading admin overview...</p>}
+            {isLoading && <p role="status">{t("admin.loadingOverview")}</p>}
 
-            {/* No cards while counts are unknown, so a failed request never shows a fabricated 0. */}
             {!isLoading && error && <p role="alert">{error}</p>}
 
             {!isLoading && !error && stats && (

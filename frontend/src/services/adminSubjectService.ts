@@ -1,5 +1,6 @@
 import apiClient from "../api/apiClient";
 import {backendMessage, errorStatus} from "./apiErrors";
+import i18n from "../i18n/config";
 import type {Subject} from "../types/subject";
 
 export interface SubjectRequest {
@@ -19,32 +20,32 @@ export const deleteSubject = async (id: number): Promise<void> => {
 // Picks the user message from the HTTP status (see "Error responses" in the README),
 // not from the wording of the backend's message.
 export function subjectError(error: unknown, operation: "load" | "save" | "delete"): string {
-    const fallback = "The request failed. Please try again. If it persists, contact an administrator.";
+    const fallback = i18n.t("subjects.errors.requestFailed");
     const status = errorStatus(error);
     if (status === undefined) {
         // No HTTP response at all, e.g. the network is down.
-        return operation === "load" ? "Failed to load subjects. Please try again." : fallback;
+        return operation === "load" ? i18n.t("subjects.errors.loadFailed") : fallback;
     }
     const message = backendMessage(error);
 
     switch (status) {
         case 401:
         case 403:
-            return "You do not have permission to manage subjects. Please sign in with an admin account.";
+            return i18n.t("subjects.errors.noPermission");
         case 404:
-            return "This subject no longer exists. Refresh the subject list before trying again.";
+            return i18n.t("subjects.errors.notFound");
         case 409:
             return operation === "delete"
-                ? "This subject cannot currently be deleted because it is in use by questions or practice results. No subject was deleted."
-                : "A subject with this name already exists. Choose a different name.";
+                ? i18n.t("subjects.errors.inUse")
+                : i18n.t("subjects.errors.nameTaken");
         case 400:
-            if (message === "Name is required") return "Enter a subject name.";
-            if (message === "Description is required") return "Enter a subject description.";
+            if (message === "Name is required") return i18n.t("subjects.editor.errors.missingName");
+            if (message === "Description is required") return i18n.t("subjects.editor.errors.missingDescription");
             // Other 400 messages are our own validation texts, safe to show.
             return message ?? fallback;
     }
     // 500 messages are safe too and contain the reference code from the server log.
     if (status >= 500 && message) return message;
-    return operation === "load" ? "Failed to load subjects. Please try again." : fallback;
+    return operation === "load" ? i18n.t("subjects.errors.loadFailed") : fallback;
 }
 

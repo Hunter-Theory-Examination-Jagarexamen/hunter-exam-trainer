@@ -13,6 +13,7 @@ public class PracticeStartResponse {
 
     private final Long attemptId;
     // For the page title; the questions don't carry their subject.
+    // Null for a random round (#151), which mixes subjects.
     private final String subjectName;
 
     // Reuses the mock exam's question shape, which already leaves out the correct answer.
