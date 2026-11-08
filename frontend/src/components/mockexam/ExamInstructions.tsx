@@ -15,6 +15,7 @@ const ExamInstructions = () => {
                 <li>{t("exam.instructions.oneCorrect")}</li>
                 <li>{t("exam.instructions.review")}</li>
                 <li>{t("exam.instructions.score")}</li>
+                <li>{t("exam.instructions.passMark")}</li>
                 <li>{t("exam.instructions.unanswered")}</li>
                 <li>{t("exam.instructions.noMinusPoints")}</li>
             </ul>

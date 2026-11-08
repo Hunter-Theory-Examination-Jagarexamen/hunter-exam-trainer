@@ -21,7 +21,8 @@ describe("Mock exam instructions", () => {
         expect(screen.getByText("Du har 60 minuter på dig att slutföra provet.")).toBeInTheDocument();
         expect(screen.getByText("Varje fråga har endast ett rätt svar.")).toBeInTheDocument();
         expect(screen.getByText("Du kan granska dina svar innan du lämnar in.")).toBeInTheDocument();
-        expect(screen.getByText("Ditt resultat visas efter inlämning.")).toBeInTheDocument();
+        expect(screen.getByText("Antal rätt svar visas efter inlämning.")).toBeInTheDocument();
+        expect(screen.getByText("Du behöver minst 60 rätt för godkänt.")).toBeInTheDocument();
         expect(screen.getByText("Obesvarade frågor räknas som fel.")).toBeInTheDocument();
         expect(screen.getByText("Felaktiga svar ger inga minuspoäng.")).toBeInTheDocument();
     });

@@ -466,7 +466,8 @@
       "time": "Du har 60 minuter på dig att slutföra provet.",
       "oneCorrect": "Varje fråga har endast ett rätt svar.",
       "review": "Du kan granska dina svar innan du lämnar in.",
-      "score": "Ditt resultat visas efter inlämning.",
+      "score": "Antal rätt svar visas efter inlämning.",
+      "passMark": "Du behöver minst 60 rätt för godkänt.",
       "unanswered": "Obesvarade frågor räknas som fel.",
       "noMinusPoints": "Felaktiga svar ger inga minuspoäng."
     }

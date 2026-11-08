@@ -466,7 +466,8 @@
       "time": "You have 60 minutes to complete the exam.",
       "oneCorrect": "Each question has only one correct answer.",
       "review": "You can review your answers before submitting.",
-      "score": "Your score will be displayed after submission.",
+      "score": "The number of correct answers is shown after you hand in.",
+      "passMark": "You need at least 60 correct answers to pass.",
       "unanswered": "Unanswered questions count as incorrect.",
       "noMinusPoints": "Wrong answers don't give minus points."
     }
