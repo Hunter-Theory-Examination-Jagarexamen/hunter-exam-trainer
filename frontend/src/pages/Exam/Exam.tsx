@@ -35,6 +35,9 @@ const Exam = () => {
     // Shown on the page when submitting fails, so the student can read it
     // and try again (#188). Was a browser alert() before.
     const [submitError, setSubmitError] = useState<string | null>(null);
+    // Shown when an answer could not be saved; the answer is then taken
+    // back, so the page never shows an answer the server doesn't have (#188).
+    const [answerSaveError, setAnswerSaveError] = useState<string | null>(null);
     // True while a hand-in is on its way: the Submit buttons say "Submitting…"
     // and are disabled, so a retry is visible and can't be sent twice (#188).
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -295,15 +298,15 @@ const Exam = () => {
             return;
         }
 
+        const questionId = currentQuestion.id;
+        const previousAnswer = answers[questionId];
+
         // Update local state immediately for UI responsiveness.
         setAnswers((previousAnswers) => ({
             ...previousAnswers,
-            [currentQuestion.id]: answerId
+            [questionId]: answerId
         }));
 
-        // Persist to the server (best-effort). If this fails, we keep going:
-
-        // the local state still holds the answer, and the user can try again by selecting a different option (which retries the save).
         if (!attemptId) {
             return;
         }
@@ -318,10 +321,32 @@ const Exam = () => {
             });
         }
         catch (err) {
-            // Do not interrupt the user mid-exam.  Log for debugging.
             console.error("Failed to save answer:", err);
 
+            if (errorStatus(err) === 401) {
+                // Session expired: apiClient is already redirecting to login.
+                return;
+            }
+
+            // Hand-in only scores what the server has saved, so an answer
+            // that wasn't saved must not look answered (#188). Take it back,
+            // unless the student has picked another option in the meantime.
+            setAnswers((currentAnswers) => {
+                if (currentAnswers[questionId] !== answerId) {
+                    return currentAnswers;
+                }
+                const restored = { ...currentAnswers };
+                if (previousAnswer === undefined) {
+                    delete restored[questionId];
+                } else {
+                    restored[questionId] = previousAnswer;
+                }
+                return restored;
+            });
+            setAnswerSaveError(t("exam.answerSaveFailed"));
+            return;
         }
+        setAnswerSaveError(null);
     };
 
     const handleJumpToQuestion = (index: number) => {
@@ -414,6 +439,9 @@ const Exam = () => {
                     {/* Pinned to the bottom of the screen, so the buttons stay
                         in the same place for every question (#188). */}
                     <div className="exam-bottom-bar">
+                        {answerSaveError && (
+                            <p role="alert" className="exam-submit-error">{answerSaveError}</p>
+                        )}
                         {submitError && (
                             <p role="alert" className="exam-submit-error">{submitError}</p>
                         )}

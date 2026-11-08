@@ -227,6 +227,26 @@ describe("Exam page", () => {
         expect(await screen.findByRole("button", { name: "Lämnar in…" })).toBeDisabled();
     });
 
+    it("takes back an answer that could not be saved, and says so (#188)", async () => {
+        mockBackend();
+        failOnce("/api/exam/attempt-1/answer", 500);
+        renderExam();
+        await screen.findByText("First question?");
+
+        await userEvent.click(screen.getByRole("radio", { name: "B1" }));
+
+        expect(await screen.findByRole("alert")).toHaveTextContent(
+            "Svaret kunde inte sparas. Välj det igen när servern svarar."
+        );
+        expect(screen.getByRole("radio", { name: "B1" })).not.toBeChecked();
+
+        // Choosing it again works once the server answers; the message goes.
+        await userEvent.click(screen.getByRole("radio", { name: "B1" }));
+
+        await waitFor(() => expect(screen.queryByRole("alert")).not.toBeInTheDocument());
+        expect(screen.getByRole("radio", { name: "B1" })).toBeChecked();
+    });
+
     it("shows an error message when the exam cannot be loaded", async () => {
         vi.mocked(apiClient).mockRejectedValue(new Error("Server down"));
         renderExam();

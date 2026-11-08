@@ -419,6 +419,7 @@
     "answeredProgress": "Answered {{answered}} / {{total}}",
     "startError": "Failed to load exam questions. Please try again.",
     "startNotEnough": "Not enough questions available to start the exam.",
+    "answerSaveFailed": "Your answer could not be saved. Select it again when the server is back.",
     "submitFailed": "Failed to submit exam. Your answers are saved on the server — please try again.",
     "questionOf": "Question {{current}} of {{total}}",
     "toggleOverview": "Overview",

@@ -419,6 +419,7 @@
     "answeredProgress": "Besvarade {{answered}} / {{total}}",
     "startError": "Kunde inte ladda provfrågor. Försök igen.",
     "startNotEnough": "Det finns inte tillräckligt många frågor för att starta provet.",
+    "answerSaveFailed": "Svaret kunde inte sparas. Välj det igen när servern svarar.",
     "submitFailed": "Kunde inte lämna in provet. Dina svar är sparade på servern — försök igen.",
     "questionOf": "Fråga {{current}} av {{total}}",
     "toggleOverview": "Översikt",
