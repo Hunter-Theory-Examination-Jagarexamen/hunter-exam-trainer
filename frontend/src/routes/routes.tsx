@@ -14,6 +14,7 @@ import PracticeQuestions from "../pages/Practice/PracticeQuestions";
 import Register from "../pages/Register/Register";
 import ResetPassword from "../pages/ResetPassword/ResetPassword";
 import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
+import Logout from "../pages/Logout/Logout";
 import OAuth2Redirect from "../pages/OAuth2Redirect/OAuth2Redirect";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import AdminRoute from "../components/auth/AdminRoute";
@@ -33,6 +34,7 @@ export const routes = createRoutesFromElements(
 
                 {/* Public Routes */}
                 <Route path="/login" element={ <Login /> } />
+                <Route path="/logout" element={ <Logout /> } />
                 <Route path="/register" element={ <Register /> } />
                 <Route path="/reset-password" element={ <ResetPassword /> } />
                 <Route path="/forgot-password" element={ <ForgotPassword /> } />

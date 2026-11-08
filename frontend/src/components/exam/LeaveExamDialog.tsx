@@ -7,11 +7,13 @@ interface LeaveExamDialogProps {
     isLeaving?: boolean;
     // Set when ending the exam failed; shown so the student can retry or stay.
     error?: string | null;
+    // After a failed try: the confirm button becomes "Leave anyway" (#188).
+    leaveAnyway?: boolean;
 }
 
 // Asks before leaving a running mock exam through the menu or the back
 // button (#186). Confirming ends the exam on the server without scoring it.
-const LeaveExamDialog = ({ onConfirm, onCancel, isLeaving = false, error }: LeaveExamDialogProps) => {
+const LeaveExamDialog = ({ onConfirm, onCancel, isLeaving = false, error, leaveAnyway = false }: LeaveExamDialogProps) => {
     const { t } = useTranslation();
 
     return (
@@ -28,7 +30,7 @@ const LeaveExamDialog = ({ onConfirm, onCancel, isLeaving = false, error }: Leav
                         onClick={onConfirm}
                         disabled={isLeaving}
                     >
-                        {t("exam.leave.confirm")}
+                        {leaveAnyway ? t("exam.leave.confirmAnyway") : t("exam.leave.confirm")}
                     </button>
                     <button
                         type="button"

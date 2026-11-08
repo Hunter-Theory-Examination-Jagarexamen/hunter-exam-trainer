@@ -35,6 +35,10 @@ const Exam = () => {
     // Shown on the page when submitting fails, so the student can read it
     // and try again (#188). Was a browser alert() before.
     const [submitError, setSubmitError] = useState<string | null>(null);
+    // True while a hand-in is on its way: the Submit buttons say "Submitting…"
+    // and are disabled, so a retry is visible and can't be sent twice (#188).
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const submitRequest = useRef(false);
     const [overviewOpen, setOverviewOpen] = useState(false);
     const { bookmarks, toggleBookmark, isBookmarked } = useExamBookmarks(attemptId);
 
@@ -59,6 +63,10 @@ const Exam = () => {
 
     const [isLeaving, setIsLeaving] = useState(false);
     const [leaveError, setLeaveError] = useState<string | null>(null);
+    // Set after ending the exam failed once: the dialog then offers "Leave
+    // anyway", which leaves even if the server still can't end it (#188).
+    // The exam stays open on the server and is closed by the next start.
+    const [leaveFailed, setLeaveFailed] = useState(false);
     // One abandon request at a time: a double click must not send two (#186).
     const leaveRequest = useRef(false);
 
@@ -96,7 +104,15 @@ const Exam = () => {
                 return;
             }
 
+            if (leaveFailed) {
+                // "Leave anyway": the student has seen the error and chose to go.
+                examActiveRef.current = false;
+                blocker.proceed?.();
+                return;
+            }
+
             setLeaveError(t("exam.leave.failed"));
+            setLeaveFailed(true);
         }
         finally {
             leaveRequest.current = false;
@@ -106,10 +122,16 @@ const Exam = () => {
 
     const handleLeaveCancelled = () => {
         setLeaveError(null);
+        setLeaveFailed(false);
         blocker.reset?.();
     };
 
     const submitExam = useCallback(async () => {
+        if (submitRequest.current) {
+            return;
+        }
+        submitRequest.current = true;
+        setIsSubmitting(true);
         setSubmitError(null);
         try {
             const result = await apiClient("/api/exam/submit", {
@@ -138,6 +160,10 @@ const Exam = () => {
             }
 
             setSubmitError(t("exam.submitFailed"));
+        }
+        finally {
+            submitRequest.current = false;
+            setIsSubmitting(false);
         }
     }, [attemptId, navigate, t]);
 
@@ -378,8 +404,9 @@ const Exam = () => {
                         bottom bar instead (#188). */}
                     {currentQuestionIndex < questions.length - 1 && (
                         <div className="exam-submit-early">
-                            <button type="button" className="submit-exam-button" onClick={handleSubmit}>
-                                {t("exam.navigation.submit")}
+                            <button type="button" className="submit-exam-button"
+                                    onClick={handleSubmit} disabled={isSubmitting}>
+                                {isSubmitting ? t("exam.navigation.submitting") : t("exam.navigation.submit")}
                             </button>
                         </div>
                     )}
@@ -396,6 +423,7 @@ const Exam = () => {
                             onSubmit={handleSubmit}
                             isFirstQuestion={currentQuestionIndex === 0}
                             isLastQuestion={currentQuestionIndex === questions.length - 1}
+                            isSubmitting={isSubmitting}
                         />
                     </div>
                 </div>
@@ -456,6 +484,7 @@ const Exam = () => {
                     onCancel={handleLeaveCancelled}
                     isLeaving={isLeaving}
                     error={leaveError}
+                    leaveAnyway={leaveFailed}
                 />
             )}
 

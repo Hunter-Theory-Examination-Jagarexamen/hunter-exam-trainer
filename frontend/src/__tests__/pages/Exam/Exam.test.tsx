@@ -209,6 +209,24 @@ describe("Exam page", () => {
         expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     });
 
+    it("shows 'Submitting…' while the hand-in is on its way (#188)", async () => {
+        mockBackend();
+        const normal = vi.mocked(apiClient).getMockImplementation()!;
+        vi.mocked(apiClient).mockImplementation(async (url: string, options?: RequestInit) => {
+            if (url === "/api/exam/submit") {
+                return new Promise(() => {});   // never answers
+            }
+            return normal(url, options);
+        });
+        renderExam();
+        await screen.findByText("First question?");
+
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in provet" }));
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in ändå" }));
+
+        expect(await screen.findByRole("button", { name: "Lämnar in…" })).toBeDisabled();
+    });
+
     it("shows an error message when the exam cannot be loaded", async () => {
         vi.mocked(apiClient).mockRejectedValue(new Error("Server down"));
         renderExam();
@@ -398,15 +416,65 @@ describe("Exam page", () => {
         await act(() => router.navigate("/statistics"));
         await userEvent.click(await screen.findByRole("button", { name: "Lämna provet" }));
 
-        expect(await screen.findByRole("alert")).toHaveTextContent("Det gick inte att avsluta provet. Försök igen.");
+        expect(await screen.findByRole("alert")).toHaveTextContent(
+            "Det gick inte att avsluta provet på servern. Du kan stanna kvar, eller avsluta ändå."
+        );
         expect(router.state.location.pathname).toBe("/exam");
         expect(screen.getByText("First question?")).toBeInTheDocument();
 
-        // Trying again can succeed now.
-        await userEvent.click(screen.getByRole("button", { name: "Lämna provet" }));
+        // "End anyway" tries the server once more; it succeeds now (#188).
+        await userEvent.click(screen.getByRole("button", { name: "Avsluta ändå" }));
 
         expect(await screen.findByText("Statistics page")).toBeInTheDocument();
         expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+        expect(calledEndpoints().filter((e) => e === "/api/exam/attempt-1/abandon")).toHaveLength(2);
+    });
+
+    it("leaves anyway when the exam still cannot be ended (server down, #188)", async () => {
+        mockBackend();
+        const normal = vi.mocked(apiClient).getMockImplementation()!;
+        vi.mocked(apiClient).mockImplementation(async (url: string, options?: RequestInit) => {
+            if (url === "/api/exam/attempt-1/abandon") {
+                throw new Error("Failed to fetch");   // no status: server unreachable
+            }
+            return normal(url, options);
+        });
+        const router = renderExam();
+        await screen.findByText("First question?");
+
+        await act(() => router.navigate("/statistics"));
+        await userEvent.click(await screen.findByRole("button", { name: "Lämna provet" }));
+        await userEvent.click(await screen.findByRole("button", { name: "Avsluta ändå" }));
+
+        expect(await screen.findByText("Statistics page")).toBeInTheDocument();
+    });
+
+    it("asks again from the start after Stay (#188)", async () => {
+        mockBackend();
+        failOnce("/api/exam/attempt-1/abandon", 500);
+        const router = renderExam();
+        await screen.findByText("First question?");
+
+        await act(() => router.navigate("/statistics"));
+        await userEvent.click(await screen.findByRole("button", { name: "Lämna provet" }));
+        await userEvent.click(await screen.findByRole("button", { name: "Stanna kvar" }));
+
+        await act(() => router.navigate("/statistics"));
+        expect(await screen.findByRole("button", { name: "Lämna provet" })).toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: "Avsluta ändå" })).not.toBeInTheDocument();
+    });
+
+    it("keeps the login when logging out is stopped by the leave dialog (#188)", async () => {
+        localStorage.setItem("token", "test-token");
+        mockBackend();
+        const router = renderExam();
+        await screen.findByText("First question?");
+
+        await act(() => router.navigate("/logout"));   // what the menu's Log out does
+
+        expect(await screen.findByRole("dialog", { name: "Lämna provet?" })).toBeInTheDocument();
+        expect(localStorage.getItem("token")).toBe("test-token");
+        localStorage.clear();
     });
 
     it("goes on without a prompt when the exam was already ended elsewhere (409)", async () => {

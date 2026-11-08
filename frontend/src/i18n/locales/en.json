@@ -425,7 +425,8 @@
     "navigation": {
       "previous": "Previous",
       "next": "Next",
-      "submit": "Submit Exam"
+      "submit": "Submit Exam",
+      "submitting": "Submitting…"
     },
     "overview": {
       "title": "Overview · {{answered}} / {{total}} answered",
@@ -454,7 +455,8 @@
       "text": "If you leave, the exam ends without a result and you cannot continue later.",
       "stay": "Stay",
       "confirm": "Leave exam",
-      "failed": "Could not end the exam. Please try again."
+      "confirmAnyway": "End anyway",
+      "failed": "Could not end the exam on the server. You can stay, or end anyway."
     },
     "instructions": {
       "title": "Instructions",

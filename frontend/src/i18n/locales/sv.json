@@ -425,7 +425,8 @@
     "navigation": {
       "previous": "Föregående",
       "next": "Nästa",
-      "submit": "Lämna in provet"
+      "submit": "Lämna in provet",
+      "submitting": "Lämnar in…"
     },
     "overview": {
       "title": "Översikt · {{answered}} / {{total}} besvarade",
@@ -454,7 +455,8 @@
       "text": "Om du lämnar avslutas provet utan resultat och du kan inte fortsätta senare.",
       "stay": "Stanna kvar",
       "confirm": "Lämna provet",
-      "failed": "Det gick inte att avsluta provet. Försök igen."
+      "confirmAnyway": "Avsluta ändå",
+      "failed": "Det gick inte att avsluta provet på servern. Du kan stanna kvar, eller avsluta ändå."
     },
     "instructions": {
       "title": "Instruktioner",
