@@ -252,6 +252,17 @@ const Exam = () => {
 
     const currentQuestion = questions[currentQuestionIndex];
 
+    // On a new question, scroll back up to it if the student had scrolled
+    // past its start (long question on a phone); otherwise leave the page
+    // where it is (#188).
+    const questionTopRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const questionTop = questionTopRef.current;
+        if (questionTop && questionTop.getBoundingClientRect().top < 0) {
+            questionTop.scrollIntoView({ block: "start" });
+        }
+    }, [currentQuestionIndex]);
+
     const handleAnswerChange = async (answerId: string) => {
         // Skip if the user re-clicked the same option (no-op on the server too).
         if (answers[currentQuestion.id] === answerId) {
@@ -353,7 +364,7 @@ const Exam = () => {
             />
 
             <div className="exam-with-overview">
-                <div className="exam-main">
+                <div className="exam-main" ref={questionTopRef}>
                     <QuestionPanel
                         question={currentQuestion}
                         selectedAnswer={answers[currentQuestion.id]}
@@ -362,16 +373,20 @@ const Exam = () => {
                         onToggleBookmark={handleToggleBookmark}
                     />
 
-                    {submitError && (
-                        <p role="alert" className="exam-submit-error">{submitError}</p>
-                    )}
-                    <ExamNavigation
-                        onPrevious={handlePrevious}
-                        onNext={handleNext}
-                        onSubmit={handleSubmit}
-                        isFirstQuestion={currentQuestionIndex === 0}
-                        isLastQuestion={currentQuestionIndex === questions.length - 1}
-                    />
+                    {/* Pinned to the bottom of the screen, so the buttons stay
+                        in the same place for every question (#188). */}
+                    <div className="exam-bottom-bar">
+                        {submitError && (
+                            <p role="alert" className="exam-submit-error">{submitError}</p>
+                        )}
+                        <ExamNavigation
+                            onPrevious={handlePrevious}
+                            onNext={handleNext}
+                            onSubmit={handleSubmit}
+                            isFirstQuestion={currentQuestionIndex === 0}
+                            isLastQuestion={currentQuestionIndex === questions.length - 1}
+                        />
+                    </div>
                 </div>
 
                 <aside className={`exam-overview-sidebar ${overviewOpen ? "is-open" : ""}`}>
