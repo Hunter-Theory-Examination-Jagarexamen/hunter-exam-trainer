@@ -26,8 +26,6 @@ import AdminHome from "../pages/Admin/AdminHome";
 import AdminFeedback from "../pages/Admin/AdminFeedback";
 import RootLayout from "../components/layout/RootLayout";
 import LazyStatistics from "../pages/Statistics/LazyStatistics";
-import TermsPage from "../pages/Legal/TermsPage";
-import PrivacyPage from "../pages/Legal/PrivacyPage";
 
 // The app's route tree. Kept in its own file so tests can use the same routes
 // with a memory router (see __tests__/routes/AppRoutes.test.tsx).
@@ -41,8 +39,6 @@ export const routes = createRoutesFromElements(
                 <Route path="/reset-password" element={ <ResetPassword /> } />
                 <Route path="/forgot-password" element={ <ForgotPassword /> } />
                 <Route path="/oauth2/redirect" element={ <OAuth2Redirect /> } />
-                <Route path="/terms" element={ <TermsPage /> } />
-                <Route path="/privacy" element={ <PrivacyPage /> } />
 
                 {/* Protected Routes */}
                 <Route element={<ProtectedRoute />} >

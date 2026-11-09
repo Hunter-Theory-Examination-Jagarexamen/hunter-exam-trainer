@@ -414,16 +414,6 @@
     cursor: pointer;
 }
 
-.terms-field a {
-    color: var(--color-primary);
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.terms-field a:hover {
-    text-decoration: underline;
-}
-
 /* The Terms/Privacy links are buttons that open a pop-up (#212), styled as links. */
 .terms-field .terms-link {
     background: none;

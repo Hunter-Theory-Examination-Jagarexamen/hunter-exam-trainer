@@ -20,6 +20,7 @@
     max-height: 90vh;
     overflow-y: auto;
     line-height: 1.6;
+    text-align: left;   /* don't inherit centring from .legal-links */
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
@@ -36,22 +37,6 @@
     padding-left: 1.25rem;
 }
 
-.legal-page {
-    max-width: 40rem;
-    margin: 0 auto;
-    padding: 2rem 1rem;
-    line-height: 1.6;
-}
-
-.legal-page h3 {
-    margin: 1rem 0 0.25rem;
-    font-size: 1rem;
-}
-
-.legal-back {
-    margin-top: 2rem;
-}
-
 .legal-temporary {
     font-style: italic;
     font-size: 0.9rem;
@@ -61,4 +46,24 @@
     display: flex;
     justify-content: flex-end;
     margin-top: 1rem;
+}
+
+/* "Användarvillkor · Integritetspolicy" links at the bottom of the Profile page. */
+.legal-links {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--color-text-muted, var(--color-text));
+}
+
+.legal-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: var(--color-primary);
+    cursor: pointer;
+}
+
+.legal-link:hover {
+    text-decoration: underline;
 }
