@@ -1,0 +1,36 @@
+{
+  "temporaryNote": "Tillfällig version under testperioden (senast ändrad 2026-11-09).",
+  "backToLogin": "Till inloggningen",
+  "terms": {
+    "title": "Användarvillkor",
+    "intro": "Jägarexamen Träning är ett övningsverktyg inför teoriprovet i jägarexamen. Det här är en testversion.",
+    "forPractice": "Appen är till för övning. Den är inte det riktiga provet, och ett bra resultat här är ingen garanti för att du klarar jägarexamen.",
+    "mayChange": "Under testperioden kan appen ändras, och data kan behöva nollställas.",
+    "personalAccount": "Kontot är personligt. Dela inte ditt lösenord med någon.",
+    "reportErrors": "Frågorna kan innehålla fel. Hittar du ett fel, eller har du frågor om appen, använd knappen för synpunkter i appen."
+  },
+  "privacy": {
+    "title": "Integritetspolicy",
+    "whatTitle": "Vad vi sparar",
+    "whatNameEmail": "Ditt namn och din e-postadress.",
+    "whatPassword": "Ditt lösenord, sparat krypterat (ingen kan läsa det, inte heller vi).",
+    "whatAnswers": "Dina svar i övningar och övningsprov, om de var rätt eller fel, och när du svarade.",
+    "whatStats": "Din statistik per ämne och dina provresultat.",
+    "whatFeedback": "Synpunkter du skickar via appen.",
+    "whyTitle": "Varför",
+    "whyOwnProgress": "För att du ska kunna logga in, öva och följa din egen utveckling.",
+    "whyCourseLeader": "För att kursledaren ska kunna följa hur det går för kursens deltagare.",
+    "whoTitle": "Vem ser uppgifterna",
+    "whoYou": "Du ser dina egna resultat.",
+    "whoAdmins": "Kursledare (administratörer) ser ditt namn, din e-postadress och dina resultat.",
+    "whoFeedback": "Synpunkter visas utan namn för kursledare. Utvecklingsteamet kan se vem som skickade dem.",
+    "whoNotShared": "Uppgifterna säljs inte och delas inte med någon annan.",
+    "whereTitle": "Var de sparas",
+    "whereProviders": "Hos externa driftleverantörer. Databasen ligger i dag i USA.",
+    "howLongTitle": "Hur länge",
+    "howLongPeriod": "Under praktikperioden, längst till och med 31 december 2026. Därefter raderas de.",
+    "rightsTitle": "Dina rättigheter",
+    "rightsText": "Du kan be att få se vilka uppgifter vi har om dig, få dem rättade eller få ditt konto och dina uppgifter raderade. Använd knappen för synpunkter i appen.",
+    "responsible": "Ansvarig för uppgifterna: utvecklingsteamet bakom Jägarexamen Träning."
+  }
+}
