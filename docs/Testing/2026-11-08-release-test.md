@@ -49,9 +49,8 @@ Mark each row ✅ (as expected), ❌ (not as expected; note what happened) or �
   all pass.
 - Manual: rows 1–6 as expected. Row 7 is left to a separate phone test
   on the deployed app (see Conclusion).
-- No errors that block use. Smaller findings are in the Notes and in
-  `docs/local/known-gaps/` (wording, exam feedback type) and
-  `design-notes/` (search in the learners list).
+- No errors that block use. Smaller findings are in the Notes (wording,
+  exam feedback type, search in the learners list), kept for later issues.
 
 ## Conclusion
 

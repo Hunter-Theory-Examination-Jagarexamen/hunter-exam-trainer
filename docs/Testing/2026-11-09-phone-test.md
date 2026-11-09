@@ -35,8 +35,7 @@ frontend now runs our `main` (Swedish login page). Findings, none blocking
 the user test:
 
 - Cold start: the server banner turns red while the server is only waking
-  (`docs/local/known-gaps/server-banner-red-while-waking.md`); clicking again
-  works.
+  (#206); clicking again works.
 - The first visit after a deployment may run the old cached app once (PWA),
   e.g. questions not opening at their start.
 - Swiping on the open overview scrolls the exam page behind it.
@@ -48,8 +47,7 @@ The deployed app is ready for the user test on 2026-11-09.
 ## Notes
 - Row 1: on a cold start the banner showed orange "Servern startar…", then
   red "Det går inte att nå servern…" while the server was still waking; it
-  went away after logging in again. Not a blocker (click again); logged in
-  `docs/local/known-gaps/server-banner-red-while-waking.md`.
+  went away after logging in again. Not a blocker (click again); issue #206.
 - Row 3: for the first few questions, a new question kept the scroll
   position (Hans had to scroll up); after that it worked. Likely cause: the
   app is a PWA (`registerType: 'autoUpdate'`), so the phone first ran the
