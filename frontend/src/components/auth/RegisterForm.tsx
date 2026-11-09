@@ -5,10 +5,14 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Eye, EyeOff } from "lucide-react";
 import logo from "../../assets/images/logo.svg";
+import LegalDialog from "../legal/LegalDialog";
+import TermsContent from "../legal/TermsContent";
+import PrivacyContent from "../legal/PrivacyContent";
 
 const RegisterForm = () => {
 
     const { t } = useTranslation();
+    const { t: tLegal } = useTranslation("legal");
     const navigate = useNavigate();
 
     const [showPassword, setShowPassword] = useState(false);
@@ -19,6 +23,8 @@ const RegisterForm = () => {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [acceptedTerms, setAcceptedTerms] = useState(false);
+    // Which legal text is open in a pop-up, if any (#212).
+    const [openLegal, setOpenLegal] = useState<"terms" | "privacy" | null>(null);
 
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -189,12 +195,27 @@ const RegisterForm = () => {
                         />
                         <span>
                             {t("auth.termsAgreement")}{" "}
-                            <a href="/terms">{t("auth.termsOfUse")}</a>{" "}
+                            <button type="button" className="terms-link" onClick={() => setOpenLegal("terms")}>
+                                {t("auth.termsOfUse")}
+                            </button>{" "}
                             {t("auth.and")}{" "}
-                            <a href="/privacy">{t("auth.privacyPolicy")}</a>
+                            <button type="button" className="terms-link" onClick={() => setOpenLegal("privacy")}>
+                                {t("auth.privacyPolicy")}
+                            </button>
                         </span>
                     </label>
                 </div>
+
+                {openLegal === "terms" && (
+                    <LegalDialog title={tLegal("terms.title")} onClose={() => setOpenLegal(null)}>
+                        <TermsContent />
+                    </LegalDialog>
+                )}
+                {openLegal === "privacy" && (
+                    <LegalDialog title={tLegal("privacy.title")} onClose={() => setOpenLegal(null)}>
+                        <PrivacyContent />
+                    </LegalDialog>
+                )}
 
                 {error && (
                     <p role="alert" style={{ color: "#e53e3e", marginBottom: "1rem", fontSize: "0.875rem" }}>
