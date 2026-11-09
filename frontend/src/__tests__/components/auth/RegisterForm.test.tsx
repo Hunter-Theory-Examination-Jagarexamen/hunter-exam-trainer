@@ -83,6 +83,27 @@ describe("RegisterForm", () => {
         expect(apiClient).not.toHaveBeenCalled();
     });
 
+    it("opens the Terms of Use in a pop-up without ticking the box or losing typed text (#212)", async () => {
+        renderRegisterForm();
+        await userEvent.type(screen.getByLabelText("Fullständigt namn"), "Anna Andersson");
+
+        await userEvent.click(screen.getByRole("button", { name: "användarvillkoren" }));
+        expect(screen.getByRole("dialog", { name: "Användarvillkor" })).toBeInTheDocument();
+
+        await userEvent.click(screen.getByRole("button", { name: "Stäng" }));
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+        expect(screen.getByRole("checkbox")).not.toBeChecked();
+        expect(screen.getByLabelText("Fullständigt namn")).toHaveValue("Anna Andersson");
+    });
+
+    it("opens the Privacy Policy in a pop-up (#212)", async () => {
+        renderRegisterForm();
+
+        await userEvent.click(screen.getByRole("button", { name: "integritetspolicyn" }));
+
+        expect(screen.getByRole("dialog", { name: "Integritetspolicy" })).toBeInTheDocument();
+    });
+
     it("shows an error when the terms are not accepted", async () => {
         renderRegisterForm();
 
