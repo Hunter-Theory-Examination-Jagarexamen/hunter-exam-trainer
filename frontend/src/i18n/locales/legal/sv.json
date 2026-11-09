@@ -1,9 +1,10 @@
 {
   "temporaryNote": "Tillfällig version under testperioden (senast ändrad 2026-11-09).",
-  "backToLogin": "Till inloggningen",
+  "close": "Stäng",
+  "toStart": "Till startsidan",
   "terms": {
     "title": "Användarvillkor",
-    "intro": "Jägarexamen Träning är ett övningsverktyg inför teoriprovet i jägarexamen. Det här är en testversion.",
+    "intro": "Jägarexamen Tränare är ett övningsverktyg inför teoriprovet i jägarexamen. Det här är en testversion.",
     "forPractice": "Appen är till för övning. Den är inte det riktiga provet, och ett bra resultat här är ingen garanti för att du klarar jägarexamen.",
     "mayChange": "Under testperioden kan appen ändras, och data kan behöva nollställas.",
     "personalAccount": "Kontot är personligt. Dela inte ditt lösenord med någon.",
@@ -31,6 +32,6 @@
     "howLongPeriod": "Under praktikperioden, längst till och med 31 december 2026. Därefter raderas de.",
     "rightsTitle": "Dina rättigheter",
     "rightsText": "Du kan be att få se vilka uppgifter vi har om dig, få dem rättade eller få ditt konto och dina uppgifter raderade. Använd knappen för synpunkter i appen.",
-    "responsible": "Ansvarig för uppgifterna: utvecklingsteamet bakom Jägarexamen Träning."
+    "responsible": "Ansvarig för uppgifterna: utvecklingsteamet bakom Jägarexamen Tränare."
   }
 }

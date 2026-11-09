@@ -1,9 +1,10 @@
 {
   "temporaryNote": "Temporary version during the test period (last changed 2026-11-09).",
-  "backToLogin": "Back to login",
+  "close": "Close",
+  "toStart": "To the start page",
   "terms": {
     "title": "Terms of Use",
-    "intro": "Jägarexamen Träning is a practice tool for the theory test of the Swedish hunting exam. This is a test version.",
+    "intro": "Jägarexamen Tränare is a practice tool for the theory test of the Swedish hunting exam. This is a test version.",
     "forPractice": "The app is for practice. It is not the real test, and a good result here is no guarantee that you will pass the hunting exam.",
     "mayChange": "During the test period the app may change, and data may need to be reset.",
     "personalAccount": "Your account is personal. Don't share your password with anyone.",
@@ -31,6 +32,6 @@
     "howLongPeriod": "During the internship period, at the latest until 31 December 2026. After that it is deleted.",
     "rightsTitle": "Your rights",
     "rightsText": "You can ask to see what data we have about you, have it corrected, or have your account and data deleted. Use the feedback button in the app.",
-    "responsible": "Responsible for the data: the development team behind Jägarexamen Träning."
+    "responsible": "Responsible for the data: the development team behind Jägarexamen Tränare."
   }
 }

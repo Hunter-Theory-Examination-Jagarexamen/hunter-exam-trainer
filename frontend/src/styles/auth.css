@@ -424,6 +424,21 @@
     text-decoration: underline;
 }
 
+/* The Terms/Privacy links are buttons that open a pop-up (#212), styled as links. */
+.terms-field .terms-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: var(--color-primary);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.terms-field .terms-link:hover {
+    text-decoration: underline;
+}
+
 
 @media (max-width: 768px) {
 

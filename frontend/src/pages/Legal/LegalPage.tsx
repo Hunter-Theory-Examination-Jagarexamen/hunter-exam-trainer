@@ -1,23 +1,26 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import "../../styles/legal.css";
 
-// Shared frame for the Terms of Use and Privacy Policy pages (#212):
-// a title, a "temporary version" note, the page's own text, and a link back.
 interface LegalPageProps {
     title: string;
     children: React.ReactNode;
 }
 
+// Full-page frame for the Terms of Use and Privacy Policy (#212), so they can be
+// read again after registration. The same texts open as a pop-up in the
+// registration form (LegalDialog).
 export const LegalPage: React.FC<LegalPageProps> = ({ title, children }) => {
     const { t } = useTranslation("legal");
     return (
-        <main style={{ maxWidth: "40rem", margin: "0 auto", padding: "2rem 1rem", lineHeight: 1.6 }}>
+        <main className="legal-page">
             <h1>{title}</h1>
-            <p style={{ fontStyle: "italic" }}>{t("temporaryNote")}</p>
+            <p className="legal-temporary">{t("temporaryNote")}</p>
             {children}
-            <p style={{ marginTop: "2rem" }}>
-                <Link to="/login">{t("backToLogin")}</Link>
+            {/* Logged-out visitors are sent on to the login page by the protected route. */}
+            <p className="legal-back">
+                <Link to="/dashboard">{t("toStart")}</Link>
             </p>
         </main>
     );
