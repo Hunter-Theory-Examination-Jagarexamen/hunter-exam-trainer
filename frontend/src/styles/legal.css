@@ -1,0 +1,69 @@
+/* Terms of Use / Privacy Policy pop-up (#212). Same look as the feedback dialog. */
+.legal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 1100;   /* above the mobile sidebar (1000) */
+}
+
+.legal-dialog {
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-radius: 12px;
+    padding: 1.5rem;
+    max-width: 36rem;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    line-height: 1.6;
+    text-align: left;   /* don't inherit centring from .legal-links */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.legal-dialog h2 {
+    margin-top: 0;
+}
+
+.legal-dialog h3 {
+    margin: 1rem 0 0.25rem;
+    font-size: 1rem;
+}
+
+.legal-dialog ul {
+    padding-left: 1.25rem;
+}
+
+.legal-temporary {
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.legal-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+/* "Användarvillkor · Integritetspolicy" links at the bottom of the Profile page. */
+.legal-links {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--color-text-muted, var(--color-text));
+}
+
+.legal-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: var(--color-primary);
+    cursor: pointer;
+}
+
+.legal-link:hover {
+    text-decoration: underline;
+}

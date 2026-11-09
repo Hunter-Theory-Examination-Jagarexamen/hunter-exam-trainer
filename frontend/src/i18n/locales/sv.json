@@ -249,6 +249,7 @@
   "serverStatus": {
     "starting": "Servern startar. Det kan ta upp till en minut…",
     "error": "Det går inte att nå servern. Kontrollera din internetanslutning eller försök igen om en stund.",
+    "stillDown": "Fortfarande ingen kontakt.",
     "tryAgain": "Försök igen"
   },
   "admin": {
@@ -419,13 +420,15 @@
     "answeredProgress": "Besvarade {{answered}} / {{total}}",
     "startError": "Kunde inte ladda provfrågor. Försök igen.",
     "startNotEnough": "Det finns inte tillräckligt många frågor för att starta provet.",
+    "answerSaveFailed": "Svaret kunde inte sparas. Välj det igen när servern svarar.",
     "submitFailed": "Kunde inte lämna in provet. Dina svar är sparade på servern — försök igen.",
     "questionOf": "Fråga {{current}} av {{total}}",
     "toggleOverview": "Översikt",
     "navigation": {
       "previous": "Föregående",
       "next": "Nästa",
-      "submit": "Lämna in provet"
+      "submit": "Lämna in provet",
+      "submitting": "Lämnar in…"
     },
     "overview": {
       "title": "Översikt · {{answered}} / {{total}} besvarade",
@@ -454,7 +457,8 @@
       "text": "Om du lämnar avslutas provet utan resultat och du kan inte fortsätta senare.",
       "stay": "Stanna kvar",
       "confirm": "Lämna provet",
-      "failed": "Det gick inte att avsluta provet. Försök igen."
+      "confirmAnyway": "Avsluta ändå",
+      "failed": "Det gick inte att avsluta provet på servern. Du kan stanna kvar, eller avsluta ändå."
     },
     "instructions": {
       "title": "Instruktioner",
@@ -462,8 +466,10 @@
       "time": "Du har 60 minuter på dig att slutföra provet.",
       "oneCorrect": "Varje fråga har endast ett rätt svar.",
       "review": "Du kan granska dina svar innan du lämnar in.",
-      "score": "Ditt resultat visas efter inlämning.",
-      "unanswered": "Obesvarade frågor räknas som fel."
+      "score": "Antal rätt svar visas efter inlämning.",
+      "passMark": "Du behöver minst 60 rätt för godkänt.",
+      "unanswered": "Obesvarade frågor räknas som fel.",
+      "noMinusPoints": "Felaktiga svar ger inga minuspoäng."
     }
   },
   "practiceCards": {

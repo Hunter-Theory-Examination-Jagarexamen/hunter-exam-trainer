@@ -10,6 +10,9 @@ const Login = () => {
     const [searchParams] = useSearchParams();
     const googleError = searchParams.get("error") === "google";
     const sessionExpired = searchParams.get("expired") === "1";
+    const notice = googleError ? t("auth.googleError")
+        : sessionExpired ? t("auth.sessionExpired")
+        : null;
 
     return (
         <div className="auth-page login">
@@ -26,19 +29,9 @@ const Login = () => {
                 </div>
             </div>
 
-            {googleError && (
-                <div className="auth-error-banner">
-                    {t("auth.googleError")}
-                </div>
-            )}
-
-            {sessionExpired && (
-                <div className="auth-error-banner">
-                    {t("auth.sessionExpired")}
-                </div>
-            )}
-
-            <LoginForm />
+            {/* In the form, not floating at the top of the screen, so the
+                server status banner can't cover it (#188). */}
+            <LoginForm notice={notice} />
         </div>
     );
 };

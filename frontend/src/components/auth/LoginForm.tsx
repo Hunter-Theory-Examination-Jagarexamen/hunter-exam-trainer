@@ -11,7 +11,13 @@ import { API_BASE_URL } from "../../api/apiClient";
 import { errorStatus, isServerUnreachable } from "../../services/apiErrors";
 import { useTranslation } from "react-i18next";
 
-const LoginForm = () => {
+interface LoginFormProps {
+    // A message from before the form was shown, e.g. "your session has
+    // expired" (from the page address). Shown at the top of the form (#188).
+    notice?: string | null;
+}
+
+const LoginForm = ({ notice }: LoginFormProps) => {
 
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -84,6 +90,10 @@ const LoginForm = () => {
                 <h2>{t("auth.welcomeBack")}</h2>
                 <p>{t("auth.loginSubtitle")}</p>
             </div>
+
+            {notice && (
+                <p role="alert" className="auth-notice">{notice}</p>
+            )}
 
             {successMessage && (
                 <p role="status" style={{ color: "#38a169", marginBottom: "1rem", fontSize: "0.875rem", fontWeight: 500 }}>
