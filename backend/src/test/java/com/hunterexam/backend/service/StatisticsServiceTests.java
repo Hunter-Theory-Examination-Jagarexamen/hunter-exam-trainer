@@ -75,7 +75,7 @@ class StatisticsServiceTests {
         Subject weapons = subject(1, "Weapons");
         Subject wildlife = subject(2, "Wildlife");
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(subjectStatsRepository.findAnsweredByUser(user)).thenReturn(List.of(
+        when(subjectStatsRepository.findAnsweredByUser(user.getId())).thenReturn(List.of(
                 stats(weapons, 20, 17),
                 stats(wildlife, 3, 1)));
 
@@ -94,7 +94,7 @@ class StatisticsServiceTests {
     void percentageRoundsHalfUp() {
         // Arrange: 2 of 3 correct = 66.67 %
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(subjectStatsRepository.findAnsweredByUser(user)).thenReturn(List.of(
+        when(subjectStatsRepository.findAnsweredByUser(user.getId())).thenReturn(List.of(
                 stats(subject(1, "Weapons"), 3, 2)));
 
         // Act + Assert
@@ -105,7 +105,7 @@ class StatisticsServiceTests {
     void newUserWithNoAnswersGetsAnEmptyList() {
         // Arrange: a brand-new student who hasn't answered anything yet
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(subjectStatsRepository.findAnsweredByUser(user)).thenReturn(List.of());
+        when(subjectStatsRepository.findAnsweredByUser(user.getId())).thenReturn(List.of());
 
         // Act
         List<SubjectPerformanceResponse> rows = statisticsService.getSubjectPerformance(EMAIL);

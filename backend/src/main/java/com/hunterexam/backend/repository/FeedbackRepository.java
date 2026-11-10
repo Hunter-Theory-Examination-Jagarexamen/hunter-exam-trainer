@@ -4,6 +4,7 @@ import com.hunterexam.backend.entity.Feedback;
 import com.hunterexam.backend.entity.FeedbackType;
 import com.hunterexam.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -29,4 +30,9 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
             order by f.createdAt desc
             """)
     List<Feedback> findForAdmin(@Param("type") FeedbackType type, @Param("handled") Boolean handled);
+
+
+    @Modifying
+    @Query("update Feedback f set f.sender = null where f.sender = :user")
+    int detachFromSender(@Param("user") User user);
 }

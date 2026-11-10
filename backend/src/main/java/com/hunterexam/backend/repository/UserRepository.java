@@ -15,6 +15,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
 
+    boolean existsByEmail(String email);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select u from User u where u.email = :email")
     Optional<User> findByEmailForPasswordReset(@Param("email") String email);
@@ -23,6 +25,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("select u from User u where u.passwordResetTokenHash = :hash")
     Optional<User> findByPasswordResetTokenHash(@Param("hash") String hash);
 
-    /** Counts every user with the role, regardless of login flags such as passwordLoginEnabled. */
     long countByRole(Role role);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select u from User u where u.id = :id")
+    Optional<User> findByIdForUpdate(@Param("id") Long id);
+
 }
