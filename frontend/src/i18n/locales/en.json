@@ -9,6 +9,11 @@
     "back": "Back",
     "or": "or"
   },
+  "notFound": {
+    "title": "404 - Page not found",
+    "message": "The page you are looking for does not exist or has been moved.",
+    "dashboardButton": "Go to the dashboard"
+  },
   "auth": {
     "loginTitle": "Log In",
     "registerTitle": "Register",

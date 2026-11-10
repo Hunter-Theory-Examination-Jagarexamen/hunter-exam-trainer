@@ -9,6 +9,11 @@
     "back": "Tillbaka",
     "or": "eller"
   },
+  "notFound": {
+    "title": "404 - Sidan hittades inte",
+    "message": "Sidan du letar efter finns inte eller har flyttats.",
+    "dashboardButton": "Gå till instrumentpanelen"
+  },
   "auth": {
     "loginTitle": "Logga in",
     "registerTitle": "Skapa konto",
