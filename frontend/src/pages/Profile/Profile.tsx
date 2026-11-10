@@ -4,6 +4,7 @@ import "../../styles/profile.css";
 import UserInformation from "../../components/profile/UserInformation";
 import AccountSettings from "../../components/profile/AccountSettings";
 import DangerZone from "../../components/profile/DangerZone";
+import LegalLinks from "../../components/legal/LegalLinks";
 
 const Profile = () => {
     const { t } = useTranslation();
@@ -16,7 +17,8 @@ const Profile = () => {
             />
             <UserInformation />
             <AccountSettings />
-            <DangerZone /> {/* NEW */}
+            <DangerZone />
+            <LegalLinks />
         </div>
     );
 };

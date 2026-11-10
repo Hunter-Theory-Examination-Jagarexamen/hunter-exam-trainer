@@ -1,0 +1,36 @@
+{
+  "temporaryNote": "Temporary version during the test period (last changed 2026-11-09).",
+  "close": "Close",
+  "terms": {
+    "title": "Terms of Use",
+    "intro": "Jägarexamen Tränare is a practice tool for the theory test of the Swedish hunting exam. This is a test version.",
+    "forPractice": "The app is for practice. It is not the real test, and a good result here is no guarantee that you will pass the hunting exam.",
+    "mayChange": "During the test period the app may change, and data may need to be reset.",
+    "personalAccount": "Your account is personal. Don't share your password with anyone.",
+    "reportErrors": "The questions may contain errors. If you find an error, or have questions about the app, use the feedback button in the app."
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "whatTitle": "What we store",
+    "whatNameEmail": "Your name and email address.",
+    "whatPassword": "Your password, stored encrypted (no one can read it, not even us).",
+    "whatAnswers": "Your answers in practice and mock exams, whether they were right or wrong, and when you answered.",
+    "whatStats": "Your statistics per subject and your exam results.",
+    "whatFeedback": "Feedback you send through the app.",
+    "whyTitle": "Why",
+    "whyOwnProgress": "So that you can log in, practise and follow your own progress.",
+    "whyCourseLeader": "So that the course leader can follow how the course participants are doing.",
+    "whoTitle": "Who sees the data",
+    "whoYou": "You see your own results.",
+    "whoAdmins": "Course leaders (administrators) see your name, email address and results.",
+    "whoFeedback": "Feedback is shown to course leaders without your name. The development team can see who sent it.",
+    "whoNotShared": "The data is not sold or shared with anyone else.",
+    "whereTitle": "Where it is stored",
+    "whereProviders": "With external hosting providers. The database is currently in the USA.",
+    "howLongTitle": "How long",
+    "howLongPeriod": "During the internship period, at the latest until 31 December 2026. After that it is deleted.",
+    "rightsTitle": "Your rights",
+    "rightsText": "You can ask to see what data we have about you, have it corrected, or have your account and data deleted. Use the feedback button in the app.",
+    "responsible": "Responsible for the data: the development team behind Jägarexamen Tränare."
+  }
+}
