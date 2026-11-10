@@ -70,8 +70,9 @@ public class StatisticsService {
      * @return one row per subject with at least one answer, ordered by subject id
      */
     public List<SubjectPerformanceResponse> subjectPerformanceFor(User user) {
+        Long userId = user.getId();
 
-        return toSubjectPerformance(subjectStatsRepository.findAnsweredByUser(user));
+        return toSubjectPerformance(subjectStatsRepository.findAnsweredByUser(userId));
     }
 
     /**

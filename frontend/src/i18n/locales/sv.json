@@ -47,7 +47,9 @@
     "createPasswordPlaceholder": "Skapa ett lösenord",
     "registerFailed": "Registreringen misslyckades. Försök igen.",
     "signingIn": "Loggar in dig...",
-    "registerTagLine": "Skapa ett konto för att följa dina framsteg och förbättra dina resultat."
+    "registerTagLine": "Skapa ett konto för att följa dina framsteg och förbättra dina resultat.",
+    "accountDeletedSuccess": "Ditt konto har tagits bort."
+
   },
   "forgotPassword": {
     "brandSubtitle": "Återställ ditt lösenord för att fortsätta träna.",
@@ -153,7 +155,13 @@
     "nameLabel": "Namn",
     "emailLabel": "E-post",
     "roleLabel": "Roll",
-    "memberSinceLabel": "Medlem sedan"
+    "memberSinceLabel": "Medlem sedan",
+    "dangerZoneTitle": "Riskzon",
+    "dangerZoneText": "Om du tar bort ditt konto raderas allt permanent. Detta kan inte ångras.",
+    "deleteAccountButton": "Ta bort konto",
+    "deleteAccountWarning": "Ditt konto, alla dina svar och all din statistik raderas permanent. Detta kan inte ångras. Säkerhetskopior rensas helt inom några dagar.",
+    "deleteAccountConfirm": "Ta bort mitt konto",
+    "deletingAccount": "Tar bort..."
   },
   "mockExam": {
     "title": "Övningsprov",
