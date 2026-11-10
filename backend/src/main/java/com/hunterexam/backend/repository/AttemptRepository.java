@@ -4,12 +4,22 @@ import com.hunterexam.backend.entity.Attempt;
 import com.hunterexam.backend.entity.AttemptType;
 import com.hunterexam.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
 
 public interface AttemptRepository extends JpaRepository<Attempt, Long> {
 
-    // The user's running rounds of the given types: WHERE user = ? AND finishedAt IS NULL AND type IN (...)
     List<Attempt> findByUserAndFinishedAtIsNullAndTypeIn(User user, Collection<AttemptType> types);
+
+    @Query("select a.id from Attempt a where a.user.id = :userId")
+    List<Long> findIdsByUser(@Param("userId") Long userId);
+
+    @Modifying
+    @Query("delete from Attempt a where a.user.id = :userId")
+    int deleteByUser(@Param("userId") Long userId);
+
 }

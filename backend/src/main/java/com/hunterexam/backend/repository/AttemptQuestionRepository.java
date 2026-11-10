@@ -5,6 +5,7 @@ import com.hunterexam.backend.repository.projection.MockExamScore;
 import com.hunterexam.backend.entity.AttemptQuestion;
 import com.hunterexam.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -58,4 +59,8 @@ public interface AttemptQuestionRepository extends JpaRepository<AttemptQuestion
             """)
     List<AnswerOutcome> findCountedAnswersSince(@Param("user") User user,
                                                 @Param("since") LocalDateTime since);
+
+    @Modifying
+    @Query("delete from AttemptQuestion aq where aq.attempt.id in :attemptIds")
+    int deleteByAttemptIds(@Param("attemptIds") Collection<Long> attemptIds);
 }
