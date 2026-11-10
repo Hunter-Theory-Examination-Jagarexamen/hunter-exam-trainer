@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { getTokenStatus } from "../../utils/authToken.ts";
 
 export const NotFound: React.FC = () => {
     const { t } = useTranslation();
+    const isLoggedIn = getTokenStatus() === "valid";
     return (
         <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
             <h1>{t("notFound.title")}</h1>
@@ -11,7 +13,7 @@ export const NotFound: React.FC = () => {
                 {t("notFound.message")}
             </p>
             <Link
-                to="/dashboard"
+                to={isLoggedIn ? "/dashboard" : "/login"}
                 style={{
                     display: 'inline-block',
                     padding: '0.75rem 1.5rem',
@@ -22,7 +24,7 @@ export const NotFound: React.FC = () => {
                     fontWeight: 600,
                 }}
             >
-                {t("notFound.dashboardButton")}
+                {isLoggedIn ? t("notFound.dashboardButton") : t("notFound.loginButton")}
             </Link>
         </div>
     );
