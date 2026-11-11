@@ -221,7 +221,7 @@
   },
   "layout": {
     "menuAria": "Toggle navigation menu",
-    "appTitle": "Hunter Exam Trainer",
+    "appTitle": "JägarQuizzen",
     "welcome": "Welcome, {{name}}",
     "defaultUser": "User",
     "userLoadError": "Failed to load user details. Please try again.",
@@ -531,7 +531,7 @@
   },
   "brand": {
     "title": "HUNTER EXAM TRAINER",
-    "logoAlt": "Hunter Exam Trainer logo"
+    "logoAlt": "JägarQuizzen logo"
   },
   "feedback": {
     "title": "Give feedback",

@@ -1,6 +1,6 @@
 {
-  "short_name": "Jägarexamen",
-  "name": "Jägarexamen Trainer",
+  "short_name": "JägarQuizzen",
+  "name": "JägarQuizzen",
   "description": "Träna inför jägarexamen",
   "start_url": "/",
   "display": "standalone",

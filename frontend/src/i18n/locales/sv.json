@@ -221,7 +221,7 @@
   },
   "layout": {
     "menuAria": "Växla navigeringsmeny",
-    "appTitle": "Jägarexamen Tränare",
+    "appTitle": "JägarQuizzen",
     "welcome": "Välkommen, {{name}}",
     "defaultUser": "Användare",
     "userLoadError": "Kunde inte ladda användardetaljer. Försök igen.",
@@ -531,7 +531,7 @@
   },
   "brand": {
     "title": "JÄGAREXAMEN TRÄNARE",
-    "logoAlt": "Jägarexamen Tränare logotyp"
+    "logoAlt": "JägarQuizzen logotyp"
   },
   "feedback": {
     "title": "Ge feedback",
