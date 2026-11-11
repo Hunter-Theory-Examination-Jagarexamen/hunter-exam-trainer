@@ -233,7 +233,7 @@
     "navAdmin": "Admin",
     "navQuestions": "Frågor",
     "navSubjects": "Ämnen",
-    "navLearners": "Elever",
+    "navLearners": "Deltagare",
     "navFeedback": "Feedback",
     "giveFeedback": "Ge feedback",
     "logout": "Logga ut"
@@ -282,8 +282,8 @@
         "caption": "Öppna ämneshanteringen"
       },
       "learners": {
-        "title": "Studenter",
-        "caption": "Öppna studenternas framsteg"
+        "title": "Deltagare",
+        "caption": "Öppna deltagarnas framsteg"
       },
       "feedback": {
         "title": "Feedback",
@@ -296,10 +296,10 @@
     }
   },
   "learnerProgress": {
-    "title": "Studenternas framsteg",
-    "subtitle": "Följ studenternas utveckling.",
-    "loading": "Laddar studenter...",
-    "noLearners": "Inga studenter ännu.",
+    "title": "Deltagarnas framsteg",
+    "subtitle": "Följ deltagarnas utveckling.",
+    "loading": "Laddar deltagare...",
+    "noLearners": "Inga deltagare ännu.",
     "lastActivity": "Senaste aktivitet:",
     "never": "Aldrig",
     "noMockExams": "Inga övningsprov ännu.",
@@ -310,18 +310,18 @@
     "notPassed": " · Ej godkänd",
     "best": "Bästa:",
     "noPracticeResults": "Inga övningsresultat ännu.",
-    "loadFailed": "Kunde inte ladda studenternas framsteg. Försök igen.",
+    "loadFailed": "Kunde inte ladda deltagarnas framsteg. Försök igen.",
     "backToList": "Tillbaka till listan",
     "loadingOne": "Laddar...",
     "notFound": "Användaren finns inte.",
     "admins": "Administratörer",
-    "students": "Studenter",
-    "noStudents": "Inga studenter ännu.",
+    "students": "Deltagare",
+    "noStudents": "Inga deltagare ännu.",
     "listSubtitle": "Välj en person för att se framstegen.",
     "detail": {
       "dangerZoneTitle": "Riskzon",
-      "dangerZoneText": "Om du tar bort kontot raderas det permanent. Alla studentens svar och all statistik försvinner. Detta kan inte ångras.",
-      "deleteButton": "Ta bort studentkonto",
+      "dangerZoneText": "Om du tar bort kontot raderas det permanent. Alla deltagarens svar och all statistik försvinner. Detta kan inte ångras.",
+      "deleteButton": "Ta bort deltagarkonto",
       "deleteConfirmTitle": "Ta bort {{name}}s konto?",
       "deleteConfirmText": "{{name}}s konto, alla deras svar och all deras statistik raderas permanent. Detta kan inte ångras.",
       "deleteConfirmCancel": "Avbryt",
@@ -558,7 +558,7 @@
     },
     "admin": {
       "title": "Feedback",
-      "subtitle": "Meddelanden och felrapporter från studenterna.",
+      "subtitle": "Meddelanden och felrapporter från deltagarna.",
       "typeFilter": "Typ",
       "allTypes": "Alla typer",
       "showHandled": "Visa hanterade",

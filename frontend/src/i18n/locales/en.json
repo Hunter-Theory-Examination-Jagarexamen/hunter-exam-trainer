@@ -233,7 +233,7 @@
     "navAdmin": "Admin",
     "navQuestions": "Questions",
     "navSubjects": "Subjects",
-    "navLearners": "Learners",
+    "navLearners": "Participants",
     "navFeedback": "Feedback",
     "giveFeedback": "Give feedback",
     "logout": "Log out"
@@ -282,8 +282,8 @@
         "caption": "Open subject management"
       },
       "learners": {
-        "title": "Learners",
-        "caption": "Open learner progress"
+        "title": "Participants",
+        "caption": "Open participant progress"
       },
       "feedback": {
         "title": "Feedback",
@@ -296,10 +296,10 @@
     }
   },
   "learnerProgress": {
-    "title": "Learner Progress",
-    "subtitle": "Follow the learners' progress.",
-    "loading": "Loading learners...",
-    "noLearners": "No learners yet.",
+    "title": "Participant Progress",
+    "subtitle": "Follow the participants' progress.",
+    "loading": "Loading participants...",
+    "noLearners": "No participants yet.",
     "lastActivity": "Last activity:",
     "never": "Never",
     "noMockExams": "No mock exams yet.",
@@ -310,18 +310,18 @@
     "notPassed": " · Not passed",
     "best": "Best:",
     "noPracticeResults": "No practice results yet.",
-    "loadFailed": "Failed to load learner progress. Please try again.",
+    "loadFailed": "Failed to load participant progress. Please try again.",
     "backToList": "Back to the list",
     "loadingOne": "Loading...",
     "notFound": "The user doesn't exist.",
     "admins": "Administrators",
-    "students": "Students",
-    "noStudents": "No students yet.",
+    "students": "Participants",
+    "noStudents": "No participants yet.",
     "listSubtitle": "Choose a person to see their progress.",
     "detail": {
       "dangerZoneTitle": "Danger zone",
-      "dangerZoneText": "Deleting this account is permanent. All of the student's answers and statistics will be removed. This cannot be undone.",
-      "deleteButton": "Delete student account",
+      "dangerZoneText": "Deleting this account is permanent. All of the participant's answers and statistics will be removed. This cannot be undone.",
+      "deleteButton": "Delete participant account",
       "deleteConfirmTitle": "Delete {{name}}'s account?",
       "deleteConfirmText": "{{name}}'s account, all their answers, and all their statistics will be deleted permanently. This cannot be undone.",
       "deleteConfirmCancel": "Cancel",
@@ -558,7 +558,7 @@
     },
     "admin": {
       "title": "Feedback",
-      "subtitle": "Messages and problem reports from students.",
+      "subtitle": "Messages and problem reports from participants.",
       "typeFilter": "Type",
       "allTypes": "All types",
       "showHandled": "Show handled",
