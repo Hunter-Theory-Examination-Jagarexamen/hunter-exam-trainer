@@ -10,6 +10,7 @@ export interface LearnerProgress {
     userId: number;
     fullName: string;
     email: string;
+    role: "STUDENT" | "ADMIN";
     createdAt: string;
     lastActivityAt: string | null;
     subjectPerformances: {

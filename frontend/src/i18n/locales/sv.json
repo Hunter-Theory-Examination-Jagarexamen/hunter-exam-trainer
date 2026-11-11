@@ -317,7 +317,21 @@
     "admins": "Administratörer",
     "students": "Studenter",
     "noStudents": "Inga studenter ännu.",
-    "listSubtitle": "Välj en person för att se framstegen."
+    "listSubtitle": "Välj en person för att se framstegen.",
+    "detail": {
+      "dangerZoneTitle": "Riskzon",
+      "dangerZoneText": "Om du tar bort kontot raderas det permanent. Alla studentens svar och all statistik försvinner. Detta kan inte ångras.",
+      "deleteButton": "Ta bort studentkonto",
+      "deleteConfirmTitle": "Ta bort {{name}}s konto?",
+      "deleteConfirmText": "{{name}}s konto, alla deras svar och all deras statistik raderas permanent. Detta kan inte ångras.",
+      "deleteConfirmCancel": "Avbryt",
+      "deleteConfirmButton": "Ta bort konto",
+      "deleteConfirmDeleting": "Tar bort…",
+      "deleteFailed": "Kunde inte ta bort kontot. Försök igen."
+    },
+    "list": {
+      "deleteSuccess": "{{name}}s konto har tagits bort."
+    }
   },
   "questionBank": {
     "title": "Admin - Frågebank",
