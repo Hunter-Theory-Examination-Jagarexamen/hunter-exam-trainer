@@ -211,9 +211,7 @@ Both are out of scope for the MVP in the Project Plan; Klas did not answer on 20
 
 **Answer**
 
-Partly answered (Klas, 2026-10-16): payment does not need to be handled in this app.
-
-_Follow-up pending: course booking and the practical parts._
+Answered (Klas): payment does not need to be handled in this app (email, 2026-10-16). Course booking and the practical parts are out of scope too (in person, 2026-10-20), as in the Project Plan.
 
 ---
 

@@ -10,6 +10,8 @@
 2. **User testing:** Henric starts a new group of hunting students next week,
    and they will test the app. The MVP must therefore be online by Thursday
    2026-10-29.
+3. **Scope (Q-012):** Klas confirmed that course booking and the practical
+   parts (shooting test, search test) are out of scope, as in the Project Plan.
 
 ## Follow-up work
 
