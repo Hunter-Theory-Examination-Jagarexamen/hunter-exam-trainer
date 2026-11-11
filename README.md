@@ -278,7 +278,8 @@ Start the backend with the local defaults, request a link using Forgot Password,
 and open the email at `http://localhost:8025`. Follow the link, enter and confirm
 a new password, then log in. Restart the backend after changing its environment.
 Production needs an SMTP provider, authorized sender and any required domain
-verification, authentication, STARTTLS, and an HTTPS `FRONTEND_URL`. Configure
+verification, authentication, STARTTLS, and an HTTPS `FRONTEND_URL`. The temporary
+deployment uses Brevo: see [Password Reset Email (Brevo)](#password-reset-email-brevo). Configure
 `APP_CORS_ALLOWED_ORIGINS` and `VITE_API_BASE_URL` as usual. The frontend host must
 serve its SPA at `/reset-password`; the existing Vercel rewrite supports this.
 
@@ -711,6 +712,48 @@ This deployment is **not production, and not a permanent staging environment.** 
 ⚠️ **Vite env vars are baked in at build time.** Changing `VITE_API_BASE_URL` on Vercel has no effect until the frontend is redeployed with the cache disabled.
 
 ⚠️ **Set Vercel env vars for all environments** (Production, Preview, Development) — otherwise preview deployments fall back to `localhost:8080`.
+
+### Password Reset Email (Brevo)
+
+The deployed backend sends password reset emails through [Brevo](https://www.brevo.com)'s
+SMTP relay (free plan: 300 emails per day; EU-based company). The Brevo account
+is owned by the development team for the temporary deployment; ask Hans for
+access. Allez can take it over, or use their own provider, for the real
+deployment: only the settings below change, not the code.
+
+Add these on Render (backend), next to the variables above. The SMTP key is a
+secret: only in Render's settings, never in the repo, an issue or a chat.
+
+| Variable | Value |
+|---|---|
+| `MAIL_HOST` | `smtp-relay.brevo.com` |
+| `MAIL_PORT` | `2525` (see below) |
+| `MAIL_USERNAME` | The SMTP login from Brevo, **Settings → SMTP & API** (`...@smtp-brevo.com`) |
+| `MAIL_PASSWORD` | An SMTP key from the same page (shown only once; generate a new one if lost) |
+| `MAIL_SMTP_AUTH` | `true` |
+| `MAIL_STARTTLS_ENABLED` | `true` |
+| `MAIL_FROM` | Sender name and a verified sender address, e.g. `Jägarexamen Tränare <address@gmail.com>` |
+| `FRONTEND_URL` | The deployed frontend address, so the link in the email opens the reset page |
+
+Things to know:
+
+- **Port 2525, not 587.** Render's free plan blocks outgoing traffic on the usual
+  mail ports 25, 465 and 587. Brevo also accepts port 2525, which Render doesn't block.
+- **The sender address must be verified** in Brevo under **Settings → Senders,
+  domains & dedicated IPs**. The sender name in `MAIL_FROM` is what students see;
+  renaming the app only changes this setting.
+- **Free address (Gmail) as sender:** Brevo sends such emails from its own domain
+  (`<address>@<number>.brevosend.com`) so they pass spam checks. Some emails may
+  still land in the spam folder. For the real deployment, authenticate the
+  owner's own domain in Brevo instead.
+- **The SMTP key expires** (the current one in May 2027). Generate a new key in
+  Brevo and update `MAIL_PASSWORD` on Render before then.
+- **Checking delivery:** Brevo's **Transactional → Logs** shows each email and
+  what happened to it. The backend only logs a generic warning when sending fails.
+
+To test locally against Brevo instead of Mailpit, put the same values in the
+backend's IntelliJ Run Configuration with `FRONTEND_URL=http://localhost:5173`.
+Real emails are sent, so use an address you can read.
 
 ### Known Limitations
 

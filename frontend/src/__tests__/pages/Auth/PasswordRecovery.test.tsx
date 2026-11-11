@@ -70,7 +70,7 @@ describe("Password Recovery Pages", () => {
             await userEvent.click(submitButton);
 
             expect(forgotPassword).toHaveBeenCalledWith("test@example.com");
-            expect(await screen.findByText(/Återställningslänk skickad/i)).toBeInTheDocument();
+            expect(await screen.findByText(/har vi skickat en länk för att återställa lösenordet/i)).toBeInTheDocument();
         });
 
         it("displays error message when backend request fails", async () => {
@@ -108,7 +108,7 @@ describe("Password Recovery Pages", () => {
             await userEvent.click(submitButton);
 
             expect(resetPassword).toHaveBeenCalledWith(VALID_TOKEN, "ValidPassword123");
-            expect(await screen.findByText(/lösenordet har återställts/i)).toBeInTheDocument();
+            expect(await screen.findByText(/Lösenordet är ändrat/i)).toBeInTheDocument();
         });
 
         it("shows error when passwords do not match", async () => {

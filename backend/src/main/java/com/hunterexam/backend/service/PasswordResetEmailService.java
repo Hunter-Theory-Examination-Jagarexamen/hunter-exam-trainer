@@ -24,12 +24,14 @@ public class PasswordResetEmailService {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(from);
         message.setTo(email);
-        message.setSubject("Hunter Exam Trainer: reset your password");
+        // Swedish, like the app (#209). No app name in the text: the sender name
+        // (MAIL_FROM) shows it, so a rename only changes that setting.
+        message.setSubject("Återställ ditt lösenord");
         // A fragment keeps the token out of HTTP access logs and referrer headers.
-        message.setText("Reset your password using this link:\n"
+        message.setText("Återställ ditt lösenord med den här länken:\n"
                 + frontendUrl + "/reset-password#token=" + token
-                + "\n\nThis link expires in 30 minutes and can only be used once."
-                + "\nIf you did not request this, you can ignore this email.");
+                + "\n\nLänken gäller i 30 minuter och kan bara användas en gång."
+                + "\nOm du inte har bett om att återställa lösenordet kan du strunta i det här mejlet.");
         mailSender.send(message);
     }
 }

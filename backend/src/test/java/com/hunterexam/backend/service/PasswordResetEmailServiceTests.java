@@ -22,7 +22,7 @@ class PasswordResetEmailServiceTests {
         assertEquals("no-reply@example.test", message.getValue().getFrom());
         assertArrayEquals(new String[]{"student@example.test"}, message.getValue().getTo());
         assertTrue(message.getValue().getText().contains("https://frontend.example.test/reset-password#token=test-token"));
-        assertTrue(message.getValue().getText().contains("30 minutes"));
-        assertTrue(message.getValue().getText().contains("only be used once"));
+        assertTrue(message.getValue().getText().contains("30 minuter"));
+        assertTrue(message.getValue().getText().contains("kan bara användas en gång"));
     }
 }
