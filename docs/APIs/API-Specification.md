@@ -341,8 +341,8 @@ Admin-only endpoint to delete a student account. Admin accounts cannot be delete
 - **403 Forbidden**: The target is an admin.
 - **404 Not Found**: The user doesn't exist.
 
-_Used by the student detail page (Admin → Elever → name). The confirmation naming
-the student and the danger-zone styling are frontend-only._
+_Used by the participant detail page (Admin → Deltagare → name). The confirmation naming
+the participant and the danger-zone styling are frontend-only._
 
 ## Roles
 
