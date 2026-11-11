@@ -670,23 +670,23 @@ This is useful during development and debugging.
 
 ## Temporary Deployment (PWA Testing)
 
-The app is temporarily deployed to free hosting so we can test the **PWA install workflow on a real mobile device** — mobile browsers require HTTPS to install a PWA, which `localhost` cannot provide.
+The app is temporarily deployed to free hosting so the PWA can be installed on real phones (mobile browsers require HTTPS, which `localhost` cannot provide) and so Allez's students can use it in the user test (from 2026-11-09).
 
-This deployment is **not production, and not a permanent staging environment.** It exists to validate the PWA install flow and to let the team demo the app on real phones. If it stops being useful, it can be torn down without affecting local development.
+This is **not the real deployment.** Allez decides later where and how the app is hosted (see Q-013 in `docs/ProjectManagement/Clarifications.md`). Real students use it, so treat its data with care.
 
 ### URLs
 
 | Service | URL | Platform |
 |---|---|---|
 | Backend | https://hunter-exam-trainer-bak.onrender.com | Render (Docker) |
-| Frontend | https://hunter01-kappa.vercel.app | Vercel (Vite) |
-| Database | Neon (same instance as local dev) | — |
+| Frontend | https://hunter-exam.vercel.app | Vercel (Vite) |
+| Database | Neon (PostgreSQL), used only by the deployment | — |
 
 ### How It Works
 
-- Both services are connected to the repo and pick up code changes from `develop`.
+- Both services deploy from `main`. `develop` is merged into `main` only after a release test (see `docs/Testing/`, e.g. `2026-11-08-release-test.md`), so only tested versions reach the students.
 - Configuration is via environment variables on each platform. No secrets are committed to the repo.
-- The deployed backend uses the same Neon database as local development — test data created on the deployment will also appear locally.
+- The deployed database holds real students' data. Local development uses its own database (Docker, see [First-Time Setup](#first-time-setup)); never point a local backend at the deployed database.
 
 ### Environment Variables
 
@@ -694,14 +694,14 @@ This deployment is **not production, and not a permanent staging environment.** 
 
 | Variable                   | Value / Notes                                                                                                                               |
 |----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
-| `DB_URL`                   | Neon connection string                                                                                                                      |
+| `DB_URL`                   | Connection string of the deployment's Neon database                                                                                         |
 | `DB_USERNAME`              | Neon username                                                                                                                               |
 | `DB_PASSWORD`              | Neon password                                                                                                                               |
 | `JWT_SECRET`               | Same Base64 secret used locally                                                                                                             |
 | `ADMIN_EMAIL`              | Admin seed email (optional for local development; app starts with a warning if missing)                                                                                                                        |
 | `ADMIN_PASSWORD`           | Admin seed password (optional for local development)                                                                                                                        |
-| `APP_CORS_ALLOWED_ORIGINS` | `http://localhost:5173,https://hunter01-kappa.vercel.app`                                                                                   |
-| `FRONTEND_URL`             | Base URL for frontend redirects after OAuth2 login (e.g. `http://localhost:5173` locally or `https://hunter01-kappa.vercel.app` on staging) |
+| `APP_CORS_ALLOWED_ORIGINS` | Comma-separated; must include `https://hunter-exam.vercel.app`                                                                              |
+| `FRONTEND_URL`             | `https://hunter-exam.vercel.app`: used in password reset links and after Google login (locally `http://localhost:5173`)                     |
 
 **On Vercel (frontend):**
 
@@ -758,7 +758,7 @@ Real emails are sent, so use an address you can read.
 ### Known Limitations
 
 - **Render free tier sleeps after ~15 minutes of inactivity.** The first request after sleep takes 30–60 seconds.
-- **No test gate before deploy.** Pushing to `develop` deploys whatever is on `develop` — a broken `develop` will produce a broken deployed app.
+- **No automatic test gate.** Whatever is merged into `main` is deployed, so run the release test on `develop` before merging it into `main`.
 - **CORS origins must match exactly** — including `https://` vs `http://` and no trailing slash.
 
 ### Testing on Mobile (PWA Install)
@@ -770,13 +770,10 @@ Once installed, the app launches full-screen and behaves like a native app.
 
 ### Current Deployment Setup Is Temporary
 
-The Vercel project is deployed from a **standalone copy of the frontend repo** because the main `hunter-exam-trainer` repo is org-owned and requires org-level approval for the Vercel GitHub App. Once that approval is granted, the plan is to:
-
-1. Create a new Vercel project on the main repo, watching `develop`
-2. Update `APP_CORS_ALLOWED_ORIGINS` on Render with the new URL
-3. Retire the standalone frontend repo
-
-Until then, treat this deployment as a **test rig for PWA workflows**, not as our canonical staging environment.
+The hosting accounts (Render, Vercel, Neon, and Brevo for email) are on free
+plans and owned by the development team for the internship. When Allez decides
+on the real deployment, they take over or replace them; settings change, the
+code doesn't.
 
 ### Frontend API Configuration
 

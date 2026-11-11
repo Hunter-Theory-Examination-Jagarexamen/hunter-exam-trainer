@@ -348,6 +348,7 @@ This chapter defines the quality attributes and constraints that the Hunter Exam
 | NFR-012 | Navigation shall remain consistent across all pages.                 | High     |
 | NFR-013 | Users shall be able to complete a quiz without prior training.       | Medium   |
 | NFR-014 | Important actions shall provide visual feedback to the user.         | Medium   |
+| NFR-023 | The user interface shall be in Swedish. All texts the user sees are kept in translation files, so another language can be added without changing the components. | High     |
 
 ## 4.5 Compatibility
 
