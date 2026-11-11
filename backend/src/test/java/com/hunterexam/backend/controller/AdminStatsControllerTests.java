@@ -1,17 +1,11 @@
 package com.hunterexam.backend.controller;
 
-import com.hunterexam.backend.config.OAuth2LoginSuccessHandler;
-import com.hunterexam.backend.config.SecurityConfig;
 import com.hunterexam.backend.dto.AdminStatsResponse;
 import com.hunterexam.backend.service.AdminService;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -21,13 +15,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = AdminStatsController.class)
-@ActiveProfiles("test")
-@Import(SecurityConfig.class)
-class AdminStatsControllerTests {
+class AdminStatsControllerTests extends ControllerTestBase {
 
-    @Autowired MockMvc mvc;
     @MockitoBean AdminService service;
-    @MockitoBean OAuth2LoginSuccessHandler loginHandler;
 
     @Test
     void anonymousAndStudentsCannotReadStats() throws Exception {

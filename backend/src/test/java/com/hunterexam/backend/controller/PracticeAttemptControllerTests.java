@@ -1,7 +1,5 @@
 package com.hunterexam.backend.controller;
 
-import com.hunterexam.backend.config.OAuth2LoginSuccessHandler;
-import com.hunterexam.backend.config.SecurityConfig;
 import com.hunterexam.backend.dto.QuestionResponse;
 import com.hunterexam.backend.dto.PracticeAnswerResponse;
 import com.hunterexam.backend.dto.PracticeFinishResponse;
@@ -11,15 +9,11 @@ import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.service.PracticeAttemptService;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.util.List;
@@ -41,16 +35,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * themselves are tested in PracticeAttemptServiceTests.
  */
 @WebMvcTest(PracticeAttemptController.class)
-@ActiveProfiles("test")
-@Import(SecurityConfig.class)
-class PracticeAttemptControllerTests {
+class PracticeAttemptControllerTests extends ControllerTestBase {
 
     private static final String EMAIL = "student@example.test";
 
-    @Autowired MockMvc mvc;
     @MockitoBean PracticeAttemptService practiceAttemptService;
-    // Needed by SecurityConfig; not used in these tests
-    @MockitoBean OAuth2LoginSuccessHandler loginHandler;
 
     // A fake valid token for a student; its subject becomes authentication.getName().
     private static RequestPostProcessor student() {
