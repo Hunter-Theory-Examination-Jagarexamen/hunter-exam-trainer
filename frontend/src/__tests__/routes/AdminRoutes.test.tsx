@@ -68,7 +68,7 @@ describe("Admin navigation and routing", () => {
         expect(screen.getByRole("link", {name: /^Admin$/i})).toHaveAttribute("href", "/admin");
         expect(screen.getByRole("link", {name: /Frågor|Questions/i})).toHaveAttribute("href", "/admin/questions");
         expect(screen.getByRole("link", {name: /Ämnen|Subjects/i})).toHaveAttribute("href", "/admin/subjects");
-        expect(screen.getByRole("link", {name: /Studenter|Elever|Learners/i})).toHaveAttribute("href", "/admin/learners");
+        expect(screen.getByRole("link", {name: /Deltagare|Participants/i})).toHaveAttribute("href", "/admin/learners");
         expect(screen.getByText("Välkommen, Test User")).toBeInTheDocument();
         expect(vi.mocked(apiClient).mock.calls.filter(([endpoint]) => endpoint === "/api/users/me")).toHaveLength(1);
     });
@@ -93,7 +93,7 @@ describe("Admin navigation and routing", () => {
         expect(questionsCard).toHaveTextContent(/Frågor/i);
         expect(screen.getAllByRole("link", {name: /Frågor|Questions/i}).length).toBeGreaterThan(0);
         expect(screen.getAllByRole("link", {name: /Ämnen|Subjects/i}).length).toBeGreaterThan(0);
-        expect(screen.getAllByRole("link", {name: /Studenter|Elever|Learners/i}).length).toBeGreaterThan(0);
+        expect(screen.getAllByRole("link", {name: /Deltagare|Participants/i}).length).toBeGreaterThan(0);
     });
 
     it("redirects a STUDENT opening the admin start page without requesting the counts", async () => {
