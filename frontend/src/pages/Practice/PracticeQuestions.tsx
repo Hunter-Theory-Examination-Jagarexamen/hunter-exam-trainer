@@ -383,23 +383,24 @@ const PracticeQuestions = ({ mode = "subject" }: PracticeQuestionsProps) => {
                 onCheckAnswer={handleCheckAnswer}
             />
 
-            {actionError && (
-                <PracticeErrorMessage
-                    message={t(errorMessageKey)}
-                    // Trying again can't help once the round is closed.
-                    onRetry={actionError.roundClosed ? undefined : retryFailedAction}
-                    onBack={actionError.roundClosed ? goBack : undefined}
-                    backLabelKey={backLabelKey}
-                />
-            )}
+            <div className="practice-bottom-bar">
+                {actionError && (
+                    <PracticeErrorMessage
+                        message={t(errorMessageKey)}
+                        onRetry={actionError.roundClosed ? undefined : retryFailedAction}
+                        onBack={actionError.roundClosed ? goBack : undefined}
+                        backLabelKey={backLabelKey}
+                    />
+                )}
 
-            <PracticeNavigation
-                onPrevious={handlePrevious}
-                onNext={handleNext}
-                isFirstQuestion={currentQuestionIndex === 0}
-                isLastQuestion={currentQuestionIndex === questions.length - 1}
-                canGoNext={currentAnswer !== undefined}
-            />
+                <PracticeNavigation
+                    onPrevious={handlePrevious}
+                    onNext={handleNext}
+                    isFirstQuestion={currentQuestionIndex === 0}
+                    isLastQuestion={currentQuestionIndex === questions.length - 1}
+                    canGoNext={currentAnswer !== undefined}
+                />
+            </div>
         </div>
     );
 };
