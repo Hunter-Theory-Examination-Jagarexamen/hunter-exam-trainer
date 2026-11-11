@@ -113,6 +113,7 @@ public class AdminService {
                 learner.getId(),
                 learner.getFullName(),
                 learner.getEmail(),
+                learner.getRole(),
                 learner.getCreatedAt(),
                 lastActivity,
                 perSubject,

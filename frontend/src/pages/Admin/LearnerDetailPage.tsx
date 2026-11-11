@@ -35,7 +35,7 @@ const LearnerDetailPage = () => {
             {learner && <>
                 <PageTitle title={learner.fullName} subtitle={learner.email} />
                 <LearnerProgressCard learner={learner} />
-                {(learner as any).role === "STUDENT" && (
+                {learner.role === "STUDENT" && (
                     <DangerZone userId={learner.userId} userName={learner.fullName} />
                 )}
             </>}
