@@ -12,7 +12,7 @@
   "notFound": {
     "title": "404 - Sidan hittades inte",
     "message": "Sidan du letar efter finns inte eller har flyttats.",
-    "dashboardButton": "Gå till instrumentpanelen",
+    "dashboardButton": "Gå till Hem",
     "loginButton": "Gå till inloggningen"
   },
   "auth": {
@@ -88,10 +88,10 @@
     "defaultError": "Kunde inte återställa lösenordet. Försök igen."
   },
   "dashboard": {
-    "title": "Instrumentpanel",
+    "title": "Hem",
     "subtitle": "Följ dina inlärningsframsteg.",
     "quickActionsTitle": "Snabbåtgärder",
-    "startPractice": "Börja öva",
+    "startPractice": "Starta Quiz",
     "startMockExam": "Starta övningsprov",
     "recentActivityTitle": "Senaste aktivitet",
     "activityHeader": "Aktivitet",
@@ -101,9 +101,9 @@
     "loadingActivities": "Laddar senaste aktiviteter...",
     "noActivities": "Ingen aktivitet än.",
     "loadActivityError": "Kunde inte ladda senaste aktiviteter. Försök igen.",
-    "loadingDetails": "Laddar instrumentpanelens detaljer...",
-    "detailsError": "Kunde inte ladda instrumentpanelens detaljer. Försök igen.",
-    "noDetails": "Instrumentpanelens detaljer är inte tillgängliga.",
+    "loadingDetails": "Laddar översikten...",
+    "detailsError": "Kunde inte ladda översikten. Försök igen.",
+    "noDetails": "Översikten är inte tillgänglig.",
     "cardMockExams": "Övningsprov",
     "cardQuestionsAnswered": "Besvarade frågor",
     "cardAverageScore": "Genomsnittspoäng",
@@ -182,13 +182,13 @@
     "startButton": "Starta övningsprov"
   },
   "practice": {
-    "title": "Öva",
+    "title": "Quiz",
     "subtitle": "Svara på frågorna och förbättra dina kunskaper.",
     "subjectsTitle": "Öva per ämne",
     "subjectsSubtitle": "Välj ett ämnesområde för att börja öva.",
     "randomTitle": "Slumpmässig övning",
     "backToSubjects": "Tillbaka till ämnen",
-    "backToModes": "Tillbaka till övning",
+    "backToModes": "Tillbaka till Quiz",
     "subjectNotFound": "Ämnet hittades inte.",
     "randomNoQuestions": "Det finns inga frågor att öva på än.",
     "noQuestionsYet": "Det finns inga frågor i det här ämnet än.",
@@ -212,12 +212,12 @@
     "quitTitle": "Avsluta omgången?",
     "quitText": "Svar du redan har gett är sparade.",
     "quitConfirm": "Avsluta",
-    "quitCancel": "Fortsätt öva",
+    "quitCancel": "Fortsätt Quiz",
     "modesSubtitle": "Välj ett läge för att börja öva.",
     "loadSubjectsError": "Kunde inte ladda ämnen. Försök igen.",
     "loadingSubjects": "Laddar ämnen...",
     "subjectQuestionCount": "{{count}} frågor",
-    "startPracticeButton": "Börja öva"
+    "startPracticeButton": "Starta Quiz"
   },
   "layout": {
     "menuAria": "Växla navigeringsmeny",
@@ -225,8 +225,8 @@
     "welcome": "Välkommen, {{name}}",
     "defaultUser": "Användare",
     "userLoadError": "Kunde inte ladda användardetaljer. Försök igen.",
-    "navDashboard": "Instrumentpanel",
-    "navPractice": "Öva",
+    "navDashboard": "Hem",
+    "navPractice": "Quiz",
     "navMockExam": "Övningsprov",
     "navStatistics": "Statistik",
     "navProfile": "Profil",
@@ -515,7 +515,7 @@
       "description": "Svara på slumpmässiga frågor från alla ämnen.",
       "feature1": "Slumpade frågor",
       "feature2": "Förbättra din helhetskunskap",
-      "button": "Välj"
+      "button": "Starta Quiz"
     },
     "mockExam": {
       "title": "Övningsprov",

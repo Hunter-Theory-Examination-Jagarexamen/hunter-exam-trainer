@@ -12,7 +12,7 @@
   "notFound": {
     "title": "404 - Page not found",
     "message": "The page you are looking for does not exist or has been moved.",
-    "dashboardButton": "Go to the dashboard",
+    "dashboardButton": "Go to Home",
     "loginButton": "Go to login"
   },
   "auth": {
@@ -88,10 +88,10 @@
     "defaultError": "Could not reset password. Please try again."
   },
   "dashboard": {
-    "title": "Dashboard",
+    "title": "Home",
     "subtitle": "Track your learning progress.",
     "quickActionsTitle": "Quick Actions",
-    "startPractice": "Start practicing",
+    "startPractice": "Start Quiz",
     "startMockExam": "Start mock exam",
     "recentActivityTitle": "Recent Activity",
     "activityHeader": "Activity",
@@ -101,9 +101,9 @@
     "loadingActivities": "Loading recent activities...",
     "noActivities": "No activity yet.",
     "loadActivityError": "Failed to load recent activities. Please try again.",
-    "loadingDetails": "Loading dashboard details...",
-    "detailsError": "Failed to load dashboard details. Please try again.",
-    "noDetails": "Dashboard details are not available.",
+    "loadingDetails": "Loading the overview...",
+    "detailsError": "Failed to load the overview. Please try again.",
+    "noDetails": "The overview is not available.",
     "cardMockExams": "Mock exams",
     "cardQuestionsAnswered": "Questions answered",
     "cardAverageScore": "Average score",
@@ -182,13 +182,13 @@
     "startButton": "Start mock exam"
   },
   "practice": {
-    "title": "Practice",
+    "title": "Quiz",
     "subtitle": "Answer the questions and improve your knowledge.",
     "subjectsTitle": "Practice by subject",
     "subjectsSubtitle": "Choose a subject area to start practicing.",
     "randomTitle": "Random Practice",
     "backToSubjects": "Back to subjects",
-    "backToModes": "Back to practice",
+    "backToModes": "Back to Quiz",
     "subjectNotFound": "Subject not found.",
     "randomNoQuestions": "There are no questions to practise yet.",
     "noQuestionsYet": "There are no questions in this subject yet.",
@@ -212,12 +212,12 @@
     "quitTitle": "Quit this round?",
     "quitText": "Any answers you have given are saved.",
     "quitConfirm": "Quit",
-    "quitCancel": "Keep practising",
+    "quitCancel": "Continue Quiz",
     "modesSubtitle": "Choose a mode to start practicing.",
     "loadSubjectsError": "Failed to load subjects. Please try again.",
     "loadingSubjects": "Loading subjects...",
     "subjectQuestionCount": "{{count}} questions",
-    "startPracticeButton": "Start Practice"
+    "startPracticeButton": "Start Quiz"
   },
   "layout": {
     "menuAria": "Toggle navigation menu",
@@ -225,8 +225,8 @@
     "welcome": "Welcome, {{name}}",
     "defaultUser": "User",
     "userLoadError": "Failed to load user details. Please try again.",
-    "navDashboard": "Dashboard",
-    "navPractice": "Practice",
+    "navDashboard": "Home",
+    "navPractice": "Quiz",
     "navMockExam": "Mock Exam",
     "navStatistics": "Statistics",
     "navProfile": "Profile",
@@ -515,7 +515,7 @@
       "description": "Answer random questions from all subjects.",
       "feature1": "Randomized questions",
       "feature2": "Improve overall knowledge",
-      "button": "Select"
+      "button": "Start Quiz"
     },
     "mockExam": {
       "title": "Mock Exam",
