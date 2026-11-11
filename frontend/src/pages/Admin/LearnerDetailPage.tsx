@@ -3,14 +3,13 @@ import { Link, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import PageTitle from "../../components/common/PageTitle";
 import LearnerProgressCard from "../../components/admin/LearnerProgressCard";
+import DangerZone from "../../components/admin/DangerZone";
 import { getLearnerProgress } from "../../services/adminLearnerService";
 import { errorStatus } from "../../services/apiErrors";
 import type { LearnerProgress } from "../../types/learnerProgress";
 
-// /admin/learners/:userId — one user's progress (student or admin).
 const LearnerDetailPage = () => {
     const { t } = useTranslation();
-    // The id from the address, e.g. "7" in /admin/learners/7.
     const { userId } = useParams();
     const [learner, setLearner] = useState<LearnerProgress | null>(null);
     const [error, setError] = useState("");
@@ -36,6 +35,9 @@ const LearnerDetailPage = () => {
             {learner && <>
                 <PageTitle title={learner.fullName} subtitle={learner.email} />
                 <LearnerProgressCard learner={learner} />
+                {learner.role === "STUDENT" && (
+                    <DangerZone userId={learner.userId} userName={learner.fullName} />
+                )}
             </>}
         </div>
     );

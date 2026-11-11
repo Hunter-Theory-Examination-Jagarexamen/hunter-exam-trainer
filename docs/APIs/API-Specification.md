@@ -334,7 +334,15 @@ Request body:
 ```json
 { "password": "current_password_here" }
 ```
+### `DELETE /api/admin/users/{id}`
+Admin-only endpoint to delete a student account. Admin accounts cannot be deleted via this endpoint.
 
+- **204 No Content**: Success.
+- **403 Forbidden**: The target is an admin.
+- **404 Not Found**: The user doesn't exist.
+
+_Used by the student detail page (Admin → Elever → name). The confirmation naming
+the student and the danger-zone styling are frontend-only._
 
 ## Roles
 
