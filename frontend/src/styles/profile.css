@@ -109,3 +109,38 @@ Change Password
     color: #16a34a;
     margin: 0;
 }
+
+.danger-zone {
+    margin-top: 3rem;
+    padding: 1.5rem;
+    border: 1px solid #e5b4b4;
+    border-radius: 8px;
+    background: #fff6f6;
+}
+
+.danger-zone h2 {
+    color: #b3261e;
+    margin-top: 0;
+}
+
+.danger-warning {
+    color: #b3261e;
+    font-weight: 500;
+}
+
+.btn-danger {
+    background: #b3261e;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-danger:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+.form-error {
+    color: #b3261e;
+}

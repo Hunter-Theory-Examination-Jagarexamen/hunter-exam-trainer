@@ -65,7 +65,7 @@ class SubjectStatsRepositoryTests {
         saveStats(other, weapons, 5, 5);
 
         // Act
-        List<SubjectStats> rows = subjectStats.findAnsweredByUser(student);
+        List<SubjectStats> rows = subjectStats.findAnsweredByUser(student.getId());
 
         // Assert: the 0-answer row and the other student's row are left out,
         // and the rows come ordered by subject id (Weapons was saved first)

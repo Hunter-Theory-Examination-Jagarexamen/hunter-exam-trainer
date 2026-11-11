@@ -47,7 +47,9 @@
     "createPasswordPlaceholder": "Skapa ett lösenord",
     "registerFailed": "Registreringen misslyckades. Försök igen.",
     "signingIn": "Loggar in dig...",
-    "registerTagLine": "Skapa ett konto för att följa dina framsteg och förbättra dina resultat."
+    "registerTagLine": "Skapa ett konto för att följa dina framsteg och förbättra dina resultat.",
+    "accountDeletedSuccess": "Ditt konto har tagits bort."
+
   },
   "forgotPassword": {
     "brandSubtitle": "Återställ ditt lösenord för att fortsätta träna.",
@@ -58,6 +60,7 @@
     "emptyEmailAlert": "Vänligen ange din e-postadress",
     "submitButton": "Skicka återställningslänk",
     "submittingButton": "Skickar...",
+    "sent": "Om det finns ett konto för den e-postadressen har vi skickat en länk för att återställa lösenordet. Kolla även skräpposten.",
     "defaultError": "Något gick fel. Försök igen.",
     "rememberPassword": "Kom du ihåg ditt lösenord?",
     "backToLogin": "Tillbaka till inloggning"
@@ -66,6 +69,7 @@
     "brandSubtitle": "Återställ ditt lösenord för att fortsätta träna.",
     "title": "Återställ lösenord",
     "subtitle": "Välj ett nytt lösenord på minst 8 tecken.",
+    "success": "Lösenordet är ändrat. Nu kan du logga in.",
     "invalidToken": "Återställningslänken är ogiltig. Vänligen begär en ny återställningslänk.",
     "passwordLabel": "Nytt lösenord",
     "confirmPasswordLabel": "Bekräfta nytt lösenord",
@@ -151,7 +155,13 @@
     "nameLabel": "Namn",
     "emailLabel": "E-post",
     "roleLabel": "Roll",
-    "memberSinceLabel": "Medlem sedan"
+    "memberSinceLabel": "Medlem sedan",
+    "dangerZoneTitle": "Riskzon",
+    "dangerZoneText": "Om du tar bort ditt konto raderas allt permanent. Detta kan inte ångras.",
+    "deleteAccountButton": "Ta bort konto",
+    "deleteAccountWarning": "Ditt konto, alla dina svar och all din statistik raderas permanent. Detta kan inte ångras. Säkerhetskopior rensas helt inom några dagar.",
+    "deleteAccountConfirm": "Ta bort mitt konto",
+    "deletingAccount": "Tar bort..."
   },
   "mockExam": {
     "title": "Övningsprov",
