@@ -1,19 +1,13 @@
 package com.hunterexam.backend.controller;
 
-import com.hunterexam.backend.config.OAuth2LoginSuccessHandler;
-import com.hunterexam.backend.config.SecurityConfig;
 import com.hunterexam.backend.dto.ExamStartResponse;
 import com.hunterexam.backend.exception.ConflictException;
 import com.hunterexam.backend.service.ExamService;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
@@ -34,16 +28,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * with MockMvc, a fake HTTP client, so no server or database is started.
  */
 @WebMvcTest(ExamController.class)
-@ActiveProfiles("test")
-@Import(SecurityConfig.class)
-class ExamControllerTests {
+class ExamControllerTests extends ControllerTestBase {
 
     private static final String EMAIL = "student@example.test";
 
-    @Autowired MockMvc mvc;
     @MockitoBean ExamService examService;
-    // Needed by SecurityConfig; not used in these tests
-    @MockitoBean OAuth2LoginSuccessHandler loginHandler;
 
     @Test
     void loggedOutUserCannotStartAnExam() throws Exception {
