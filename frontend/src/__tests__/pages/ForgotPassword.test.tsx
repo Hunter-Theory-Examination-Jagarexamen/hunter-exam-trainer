@@ -72,7 +72,7 @@ describe("ForgotPassword", () => {
         );
 
         expect(
-            await screen.findByText("Kontrollera din e-post för en återställningslänk.")
+            await screen.findByText(/har vi skickat en länk för att återställa lösenordet/)
         ).toBeInTheDocument();
 
         expect(screen.queryByRole("alert")).not.toBeInTheDocument();

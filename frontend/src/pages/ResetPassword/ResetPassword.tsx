@@ -35,8 +35,8 @@ const ResetPassword = () => {
         }
         setIsLoading(true);
         try {
-            const response = await resetPassword(token, password);
-            setMessage(response.message);
+            await resetPassword(token, password);
+            setMessage(t("resetPassword.success"));  // Swedish text from sv.json, not the backend's English message (#209)
             setPassword("");
             setConfirmPassword("");
         } catch (err) {

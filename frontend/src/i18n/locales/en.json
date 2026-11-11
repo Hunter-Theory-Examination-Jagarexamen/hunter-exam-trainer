@@ -66,6 +66,7 @@
     "emptyEmailAlert": "Please enter your email address",
     "submitButton": "Send reset link",
     "submittingButton": "Sending...",
+    "sent": "If an account exists for that email address, we have sent a link to reset the password. Also check your spam folder.",
     "defaultError": "Something went wrong. Please try again.",
     "rememberPassword": "Remembered your password?",
     "backToLogin": "Back to login"
@@ -74,6 +75,7 @@
     "brandSubtitle": "Reset your password to continue training.",
     "title": "Reset password",
     "subtitle": "Choose a new password of at least 8 characters.",
+    "success": "Your password has been changed. You can now log in.",
     "invalidToken": "The reset link is invalid. Please request a new reset link.",
     "passwordLabel": "New password",
     "confirmPasswordLabel": "Confirm new password",

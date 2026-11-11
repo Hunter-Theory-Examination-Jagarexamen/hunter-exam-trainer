@@ -66,6 +66,7 @@
     "emptyEmailAlert": "Vänligen ange din e-postadress",
     "submitButton": "Skicka återställningslänk",
     "submittingButton": "Skickar...",
+    "sent": "Om det finns ett konto för den e-postadressen har vi skickat en länk för att återställa lösenordet. Kolla även skräpposten.",
     "defaultError": "Något gick fel. Försök igen.",
     "rememberPassword": "Kom du ihåg ditt lösenord?",
     "backToLogin": "Tillbaka till inloggning"
@@ -74,6 +75,7 @@
     "brandSubtitle": "Återställ ditt lösenord för att fortsätta träna.",
     "title": "Återställ lösenord",
     "subtitle": "Välj ett nytt lösenord på minst 8 tecken.",
+    "success": "Lösenordet är ändrat. Nu kan du logga in.",
     "invalidToken": "Återställningslänken är ogiltig. Vänligen begär en ny återställningslänk.",
     "passwordLabel": "Nytt lösenord",
     "confirmPasswordLabel": "Bekräfta nytt lösenord",

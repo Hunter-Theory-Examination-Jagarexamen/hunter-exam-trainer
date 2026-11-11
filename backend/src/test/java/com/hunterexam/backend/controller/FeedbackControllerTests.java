@@ -1,21 +1,15 @@
 package com.hunterexam.backend.controller;
 
-import com.hunterexam.backend.config.OAuth2LoginSuccessHandler;
-import com.hunterexam.backend.config.SecurityConfig;
 import com.hunterexam.backend.dto.FeedbackRequest;
 import com.hunterexam.backend.entity.FeedbackType;
 import com.hunterexam.backend.exception.TooManyRequestsException;
 import com.hunterexam.backend.service.FeedbackService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,15 +25,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = FeedbackController.class)
-@ActiveProfiles("test")
-@Import(SecurityConfig.class)
-class FeedbackControllerTests {
+class FeedbackControllerTests extends ControllerTestBase {
 
     private static final String EMAIL = "student@example.test";
 
-    @Autowired MockMvc mvc;
     @MockitoBean FeedbackService service;
-    @MockitoBean OAuth2LoginSuccessHandler loginHandler;
 
     private MockHttpServletRequestBuilder postAsStudent(String body) {
         return post("/api/feedback")
