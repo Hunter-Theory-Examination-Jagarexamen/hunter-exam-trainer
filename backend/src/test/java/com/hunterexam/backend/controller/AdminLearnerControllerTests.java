@@ -1,20 +1,14 @@
 package com.hunterexam.backend.controller;
 
-import com.hunterexam.backend.config.OAuth2LoginSuccessHandler;
-import com.hunterexam.backend.config.SecurityConfig;
 import com.hunterexam.backend.dto.LearnerProgressResponse;
 import com.hunterexam.backend.dto.LearnerSummaryResponse;
 import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.service.AdminService;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
@@ -26,13 +20,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = AdminLearnerController.class)
-@ActiveProfiles("test")
-@Import(SecurityConfig.class)
-class AdminLearnerControllerTests {
+class AdminLearnerControllerTests extends ControllerTestBase {
 
-    @Autowired MockMvc mvc;
     @MockitoBean AdminService service;
-    @MockitoBean OAuth2LoginSuccessHandler loginHandler;
 
     private static final SimpleGrantedAuthority ADMIN = new SimpleGrantedAuthority("ROLE_ADMIN");
 

@@ -1,18 +1,12 @@
 package com.hunterexam.backend.controller;
 
-import com.hunterexam.backend.config.OAuth2LoginSuccessHandler;
-import com.hunterexam.backend.config.SecurityConfig;
 import com.hunterexam.backend.dto.SubjectResponse;
 import com.hunterexam.backend.service.SubjectService;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
@@ -33,13 +27,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * accept ADMIN and reject everyone else.
  */
 @WebMvcTest(controllers = AdminSubjectController.class)
-@ActiveProfiles("test")
-@Import(SecurityConfig.class)
-class AdminSubjectControllerTests {
+class AdminSubjectControllerTests extends ControllerTestBase {
 
-    @Autowired MockMvc mvc;
     @MockitoBean SubjectService service;
-    @MockitoBean OAuth2LoginSuccessHandler loginHandler;
 
     private static final String BODY = """
             {"name":"Test Subject","description":"Test description"}
