@@ -317,7 +317,21 @@
     "admins": "Administrators",
     "students": "Students",
     "noStudents": "No students yet.",
-    "listSubtitle": "Choose a person to see their progress."
+    "listSubtitle": "Choose a person to see their progress.",
+    "detail": {
+      "dangerZoneTitle": "Danger zone",
+      "dangerZoneText": "Deleting this account is permanent. All of the student's answers and statistics will be removed. This cannot be undone.",
+      "deleteButton": "Delete student account",
+      "deleteConfirmTitle": "Delete {{name}}'s account?",
+      "deleteConfirmText": "{{name}}'s account, all their answers, and all their statistics will be deleted permanently. This cannot be undone.",
+      "deleteConfirmCancel": "Cancel",
+      "deleteConfirmButton": "Delete account",
+      "deleteConfirmDeleting": "Deleting…",
+      "deleteFailed": "Could not delete the account. Please try again."
+    },
+    "list": {
+      "deleteSuccess": "{{name}}'s account has been deleted."
+    }
   },
   "questionBank": {
     "title": "Admin Question Bank",
