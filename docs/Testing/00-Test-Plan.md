@@ -1,6 +1,6 @@
 # Test Plan
 
-How we test the Hunter Exam Trainer, and where the results are recorded. The project plan asks for "a working, tested application" and a test report; the SRS lists the Test Plan and Test Report as deliverables.
+How we test JägarQuizzen, and where the results are recorded. The project plan asks for "a working, tested application" and a test report; the SRS lists the Test Plan and Test Report as deliverables.
 
 ## Scope
 

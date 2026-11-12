@@ -173,7 +173,7 @@ describe("PracticeQuestions", () => {
         renderPage();
 
         await userEvent.click(await screen.findByRole("button", { name: "Avsluta omgången" }));
-        await userEvent.click(screen.getByRole("button", { name: "Fortsätt öva" }));
+        await userEvent.click(screen.getByRole("button", { name: "Fortsätt Quiz" }));
 
         expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
         expect(screen.getByText("First question?")).toBeInTheDocument();
@@ -211,7 +211,7 @@ describe("PracticeQuestions", () => {
         await act(() => router.navigate("/statistics"));
 
         expect(await screen.findByRole("dialog", { name: "Avsluta omgången?" })).toBeInTheDocument();
-        await userEvent.click(screen.getByRole("button", { name: "Fortsätt öva" }));
+        await userEvent.click(screen.getByRole("button", { name: "Fortsätt Quiz" }));
 
         expect(screen.getByText("First question?")).toBeInTheDocument();
         expect(router.state.location.pathname).toBe("/practice/subjects/3");

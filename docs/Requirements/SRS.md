@@ -2,7 +2,7 @@
 
 | Field                | Value               |
 |----------------------|---------------------|
-| **Project Name**     | Hunter Exam Trainer |
+| **Project Name**     | JägarQuizzen        |
 | **Document Version** | 1.0                 |
 | **Prepared By**      | Sangeetha           |
 | **Reviewed By**      | Paul and Gregory    |
@@ -35,7 +35,7 @@
 
 ## 1.1 Purpose
 
-The purpose of this Software Requirements Specification (SRS) is to define the functional and non-functional requirements for the Hunter Exam Trainer, a Progressive Web Application (PWA) designed to help learners prepare for the Swedish Hunter Examination (Jägarexamen) theoretical knowledge test.
+The purpose of this Software Requirements Specification (SRS) is to define the functional and non-functional requirements for JägarQuizzen, a Progressive Web Application (PWA) designed to help learners prepare for the Swedish Hunter Examination (Jägarexamen) theoretical knowledge test.
 
 This document serves as the primary reference for the development team, project coordinator, and other stakeholders throughout the project lifecycle. It establishes a common understanding of the project's objectives, system functionality, user requirements, and project scope before development begins.
 
@@ -43,7 +43,7 @@ The SRS also provides a foundation for system design, implementation, testing, a
 
 ## 1.2 Project Scope
 
-The Hunter Exam Trainer is a web-based learning application that enables users to practice and prepare for the theoretical portion of the Swedish Hunter Examination.
+JägarQuizzen is a web-based learning application that enables users to practice and prepare for the theoretical portion of the Swedish Hunter Examination.
 
 The application will provide multiple learning modes to accommodate different study preferences, including:
 
@@ -180,7 +180,7 @@ The development of the application is based on the following assumptions:
 
 ## 2.6 Project Constraints
 
-The development of the Hunter Exam Trainer is subject to the following constraints:
+The development of JägarQuizzen is subject to the following constraints:
 
 - The project must be completed within a 12-week internship period.
 - Development is carried out by a team of three interns.
@@ -307,13 +307,13 @@ The system shall provide general functionality required to support usability, ac
 
 ### Summary
 
-The Hunter Exam Trainer includes functional requirements grouped into eight functional areas. These requirements define the expected behavior of the application from both the student and administrator perspectives. Each requirement will serve as a reference during system design, implementation, testing, and project evaluation.
+JägarQuizzen includes functional requirements grouped into eight functional areas. These requirements define the expected behavior of the application from both the student and administrator perspectives. Each requirement will serve as a reference during system design, implementation, testing, and project evaluation.
 
 ---
 
 # 4. Non-Functional Requirements
 
-This chapter defines the quality attributes and constraints that the Hunter Exam Trainer shall satisfy. These requirements ensure that the application is reliable, secure, responsive, and easy to use across different platforms.
+This chapter defines the quality attributes and constraints that JägarQuizzen shall satisfy. These requirements ensure that the application is reliable, secure, responsive, and easy to use across different platforms.
 
 ## 4.1 Performance
 
@@ -375,7 +375,7 @@ This chapter defines the quality attributes and constraints that the Hunter Exam
 
 ### Summary
 
-The non-functional requirements define the expected quality characteristics of the Hunter Exam Trainer. These requirements ensure that the application remains secure, reliable, maintainable, and user-friendly throughout its lifecycle.
+The non-functional requirements define the expected quality characteristics of JägarQuizzen. These requirements ensure that the application remains secure, reliable, maintainable, and user-friendly throughout its lifecycle.
 
 ---
 
@@ -383,7 +383,7 @@ The non-functional requirements define the expected quality characteristics of t
 
 ## 5.1 Overview
 
-The Hunter Exam Trainer shall provide a responsive and intuitive user interface that supports desktop, tablet, and mobile devices. The interface shall be designed to minimize the learning curve and provide easy access to all major features of the application.
+JägarQuizzen shall provide a responsive and intuitive user interface that supports desktop, tablet, and mobile devices. The interface shall be designed to minimize the learning curve and provide easy access to all major features of the application.
 
 The application shall follow a consistent layout, navigation structure, and visual design across all pages to provide a seamless user experience.
 
@@ -617,7 +617,7 @@ The user interface should follow basic accessibility principles.
 
 ### Summary
 
-The user interface requirements define the expected layout and interaction behavior for the Hunter Exam Trainer. The interface is designed to provide a consistent and user-friendly experience across desktop and mobile devices while supporting both students and administrators.
+The user interface requirements define the expected layout and interaction behavior for JägarQuizzen. The interface is designed to provide a consistent and user-friendly experience across desktop and mobile devices while supporting both students and administrators.
 
 ---
 
@@ -625,7 +625,7 @@ The user interface requirements define the expected layout and interaction behav
 
 ## 6.1 Overview
 
-The Hunter Exam Trainer shall be considered complete when all mandatory functional and non-functional requirements have been implemented, tested, and accepted by the project coordinator. The following acceptance criteria define the minimum requirements for successful project completion.
+JägarQuizzen shall be considered complete when all mandatory functional and non-functional requirements have been implemented, tested, and accepted by the project coordinator. The following acceptance criteria define the minimum requirements for successful project completion.
 
 ## 6.2 Functional Acceptance Criteria
 
@@ -689,7 +689,7 @@ The project shall be considered successfully completed when:
 
 ## 7.1 Overview
 
-The Hunter Exam Trainer is designed with future scalability in mind. Although the current project focuses on delivering the Minimum Viable Product (MVP), several additional features may be implemented in future versions to improve the user experience and extend the application's functionality.
+JägarQuizzen is designed with future scalability in mind. Although the current project focuses on delivering the Minimum Viable Product (MVP), several additional features may be implemented in future versions to improve the user experience and extend the application's functionality.
 
 ## 7.2 Planned Enhancements
 
