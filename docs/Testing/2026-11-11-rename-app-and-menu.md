@@ -23,9 +23,9 @@ Run: `cd frontend && npx vitest run src/__tests__/pages/Admin src/__tests__/page
 - [x] After a random round: back link says "Tillbaka till Quiz"
 - [x] Admin menu and admin start page say "Deltagare"; participant progress page "Deltagarnas framsteg"
 - [x] Participant detail page: delete button "Ta bort deltagarkonto"
-- [ ] Feedback page subtitle "Meddelanden och felrapporter från deltagarna."
-- [ ] Unknown URL (404): button "Gå till Hem"
-- [ ] Terms of Use and Privacy Policy name "JägarQuizzen"
+- [x] Feedback page subtitle "Meddelanden och felrapporter från deltagarna."
+- [x] Unknown URL (404): button "Gå till Hem"
+- [x] Terms of Use and Privacy Policy name "JägarQuizzen"
 
 ## Manual Verification (English)
 - [ ] Switch language: menu "Home", "Quiz", "Participants"; app name stays "JägarQuizzen"
