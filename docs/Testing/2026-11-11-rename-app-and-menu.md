@@ -12,7 +12,7 @@ New app name "JägarQuizzen", menu "Hem" / "Quiz", app users "Deltagare". Text c
 
 Run: `cd frontend && npx vitest run src/__tests__/pages/Admin src/__tests__/pages/NotFound.test.tsx src/__tests__/pages/Practice src/__tests__/routes/AdminRoutes.test.tsx`
 
-## Manual Verification (Swedish)
+## Manual Verification
 - [x] Browser tab and header say "JägarQuizzen"
 - [x] Login, register and password pages show "JägarQuizzen" as the big title (was still the old name in capitals; fixed after the first check)
 - [x] Menu shows "Hem" and "Quiz"; the pages' headings match
@@ -27,8 +27,6 @@ Run: `cd frontend && npx vitest run src/__tests__/pages/Admin src/__tests__/page
 - [x] Unknown URL (404): button "Gå till Hem"
 - [x] Terms of Use and Privacy Policy name "JägarQuizzen"
 
-## Manual Verification (English)
-- [ ] Switch language: menu "Home", "Quiz", "Participants"; app name stays "JägarQuizzen"
 
 ## Not covered here
 - The name under the app icon on a phone (PWA manifest) shows after the next deployment; reinstalling the app may be needed.
