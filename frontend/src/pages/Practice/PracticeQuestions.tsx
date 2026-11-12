@@ -171,6 +171,17 @@ const PracticeQuestions = ({ mode = "subject" }: PracticeQuestionsProps) => {
     const currentQuestion = questions[currentQuestionIndex];
     const currentAnswer = answers[currentQuestionIndex];
 
+    // On a new question, scroll back up to it if the student
+    // had scrolled past its start (long question on a phone);
+    // otherwise, leave the page where it is (#207)
+    const questionTopRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const questionTop = questionTopRef.current;
+        if (questionTop && questionTop.getBoundingClientRect().top < 0) {
+            questionTop.scrollIntoView({ block: "start" });
+        }
+    }, [currentQuestionIndex]);
+
     // A 409 means the server already closed the round, so leaving shouldn't ask.
     const markRoundClosedIfConflict = (error: unknown) => {
         if (errorStatus(error) === 409) {
@@ -370,18 +381,20 @@ const PracticeQuestions = ({ mode = "subject" }: PracticeQuestionsProps) => {
                 />
             )}
 
-            <div className="practice-progress">
-                {t("practice.progress", { current: currentQuestionIndex + 1, total: questions.length })}
-            </div>
+            <div ref={questionTopRef}>
+                <div className="practice-progress">
+                    {t("practice.progress", { current: currentQuestionIndex + 1, total: questions.length })}
+                </div>
 
-            <PracticeQuestionCard
-                question={currentQuestion}
-                selectedAnswer={currentAnswer?.chosen ?? selectedAnswer}
-                feedback={currentAnswer?.check ?? null}
-                isChecking={isChecking}
-                onAnswerSelect={handleAnswerSelect}
-                onCheckAnswer={handleCheckAnswer}
-            />
+                <PracticeQuestionCard
+                    question={currentQuestion}
+                    selectedAnswer={currentAnswer?.chosen ?? selectedAnswer}
+                    feedback={currentAnswer?.check ?? null}
+                    isChecking={isChecking}
+                    onAnswerSelect={handleAnswerSelect}
+                    onCheckAnswer={handleCheckAnswer}
+                />
+            </div>
 
             <div className="practice-bottom-bar">
                 {actionError && (
