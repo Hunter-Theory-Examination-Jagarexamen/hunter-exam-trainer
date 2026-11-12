@@ -2,148 +2,216 @@ package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.ProgressOverTimeResponse;
 import com.hunterexam.backend.dto.SubjectPerformanceResponse;
-import com.hunterexam.backend.entity.SubjectStats;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.repository.AttemptQuestionRepository;
-import com.hunterexam.backend.repository.SubjectStatsRepository;
+import com.hunterexam.backend.repository.QuestionRepository;
+import com.hunterexam.backend.repository.SubjectRepository;
 import com.hunterexam.backend.repository.UserRepository;
-import com.hunterexam.backend.repository.projection.AnswerOutcome;
+import com.hunterexam.backend.repository.projection.CountedAnswer;
+import com.hunterexam.backend.repository.projection.SubjectQuestionCount;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
- * Handles calculation of practice performance statistics.
+ * The student's statistics, measured as mastery of the question bank.
  * <p>
- * This service aggregates a user's practice results by subject and
- * calculates the average score per subject, used for the Statistics page.
+ * A question is <b>mastered</b> when the student's latest answer to it is
+ * correct; a later wrong answer makes it not mastered again. The numbers are
+ * worked out from the stored answers on each request, nothing is saved.
  */
 @Service
 public class StatisticsService {
 
+    /** Ranges up to this many weeks get one point per day, longer ones one per week. */
+    private static final int MAX_WEEKS_WITH_DAILY_POINTS = 4;
+
     private final AttemptQuestionRepository attemptQuestionRepository;
-    private final SubjectStatsRepository subjectStatsRepository;
+    private final QuestionRepository questionRepository;
+    private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
 
     public StatisticsService(
             AttemptQuestionRepository attemptQuestionRepository,
-            SubjectStatsRepository subjectStatsRepository,
+            QuestionRepository questionRepository,
+            SubjectRepository subjectRepository,
             UserRepository userRepository
     ) {
         this.attemptQuestionRepository = attemptQuestionRepository;
-        this.subjectStatsRepository = subjectStatsRepository;
+        this.questionRepository = questionRepository;
+        this.subjectRepository = subjectRepository;
         this.userRepository = userRepository;
     }
 
 
     /**
-     * The logged-in student's performance per subject, for the Statistics page.
+     * The logged-in student's mastery per subject, for the Statistics page.
      *
      * @param email user's email id
-     * @return one row per subject the student has answered questions in
+     * @return one row per subject that has questions
      */
     public List<SubjectPerformanceResponse> getSubjectPerformance(String email) {
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+        User user = findUser(email);
 
-        return subjectPerformanceFor(user);
+        return toSubjectMastery(
+                attemptQuestionRepository.findCountedAnswers(user),
+                subjectRepository.findQuestionCounts());
     }
 
     /**
-     * Performance per subject: correct answers / answered questions, from
-     * {@link SubjectStats}. Counts every answered question, from practice and
-     * mock exams alike, so each answer weighs the same.
+     * Mastery per subject: mastered questions / questions in the subject.
+     * Subjects without answers yet are included (0 mastered); subjects without
+     * questions are left out (nothing to master).
      * <p>
-     * Shared by the Statistics page and the admin's Learner Progress, so a
-     * student and an admin always see the same numbers.
+     * {@code static} because it only uses its arguments, so
+     * {@code AdminService} can call it for Learner Progress with rows it
+     * loaded itself, and a student and an admin always see the same numbers.
      *
-     * @param user the student
-     * @return one row per subject with at least one answer, ordered by subject id
+     * @param answers  the student's counted answers, oldest first
+     * @param subjects every subject with its number of questions
+     * @return one row per subject with questions, in the order of {@code subjects}
      */
-    public List<SubjectPerformanceResponse> subjectPerformanceFor(User user) {
-        Long userId = user.getId();
+    public static List<SubjectPerformanceResponse> toSubjectMastery(
+            List<CountedAnswer> answers,
+            List<SubjectQuestionCount> subjects
+    ) {
+        // Count the mastered questions per subject id.
+        Map<Long, Long> masteredPerSubject = latestAnswerPerQuestion(answers).values().stream()
+                .filter(CountedAnswer::isCorrect)
+                .collect(Collectors.groupingBy(CountedAnswer::subjectId, Collectors.counting()));
 
-        return toSubjectPerformance(subjectStatsRepository.findAnsweredByUser(userId));
-    }
+        return subjects.stream()
+                .filter(subject -> subject.questionCount() > 0)
+                .map(subject -> {
+                    long mastered = masteredPerSubject.getOrDefault(subject.subjectId(), 0L);
+                    long total = subject.questionCount();
 
-    /**
-     * The shared calculation: one row per {@link SubjectStats}, with
-     * correct / answered as a rounded percentage. {@code static} because it
-     * only uses its argument, so {@code AdminService} can call it for rows it
-     * loaded itself.
-     *
-     * @param subjectStats one student's totals, one per subject
-     * @return one row per subject, in the same order
-     */
-    public static List<SubjectPerformanceResponse> toSubjectPerformance(List<SubjectStats> subjectStats) {
-
-        return subjectStats.stream()
-                .map(stats -> new SubjectPerformanceResponse(
-                        stats.getSubject().getId(),
-                        stats.getSubject().getName(),
-                        percentage(stats.getCorrect(), stats.getAnswered())
-                ))
+                    return new SubjectPerformanceResponse(
+                            subject.subjectId(),
+                            subject.subjectName(),
+                            percentage(mastered, total),
+                            mastered,
+                            total);
+                })
                 .toList();
     }
 
-    /** Rounded percentage; 0 when nothing was answered. */
-    private static long percentage(long correct, long answered) {
-        return answered == 0 ? 0 : Math.round(correct * 100.0 / answered);
+    /**
+     * Each question's latest answer. The answers come oldest first, so a later
+     * answer to the same question replaces the earlier one in the map.
+     */
+    static Map<Long, CountedAnswer> latestAnswerPerQuestion(List<CountedAnswer> answers) {
+        Map<Long, CountedAnswer> latest = new HashMap<>();
+
+        for (CountedAnswer answer : answers) {
+            latest.put(answer.questionId(), answer);
+        }
+        return latest;
     }
 
     /**
-     * Calculates the user's accuracy (correct / answered) grouped by ISO week
-     * (Monday–Sunday) for the last N weeks, from each stored answer: practice
-     * and scored mock exams, the same answers as {@code SubjectStats}.
-     *
-     * <p>Only weeks in which the user answered questions are included in the
-     * result, ordered from oldest to newest.
+     * The share of the whole question bank the student had mastered, for the
+     * last {@code weeks} weeks: as it was at the end of each day the student
+     * answered something, or, for ranges longer than
+     * {@value #MAX_WEEKS_WITH_DAILY_POINTS} weeks, at the end of each such week.
+     * <p>
+     * Every answer is read, also those from before the range, so the first
+     * point starts from what the student already knew.
      *
      * @param email user's email
      * @param weeks number of weeks to look back
-     * @return list of weekly progress points
+     * @return the points, oldest first; days or weeks without answers have none
      */
     public List<ProgressOverTimeResponse> getProgressOverTime(String email, int weeks) {
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+        User user = findUser(email);
 
-        LocalDateTime since = LocalDateTime.now()
+        LocalDate firstDay = LocalDate.now()
                 .minusWeeks(weeks)
-                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-                .toLocalDate()
-                .atStartOfDay();
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 
-        List<AnswerOutcome> answers =
-                attemptQuestionRepository.findCountedAnswersSince(user, since);
+        List<ProgressOverTimeResponse> days =
+                masteryPerDay(attemptQuestionRepository.findCountedAnswers(user), questionRepository.count())
+                        .stream()
+                        .filter(point -> !point.date().isBefore(firstDay))
+                        .toList();
 
-        // Group by the Monday of the week each answer was given. A TreeMap keeps
-        // its keys sorted, so the weeks come out oldest first.
-        Map<LocalDate, List<AnswerOutcome>> byWeek = answers.stream()
-                .collect(Collectors.groupingBy(
-                        answer -> answer.answeredAt().toLocalDate()
-                                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)),
-                        TreeMap::new,
-                        Collectors.toList()));
+        return weeks <= MAX_WEEKS_WITH_DAILY_POINTS ? days : lastDayPerWeek(days);
+    }
 
-        return byWeek.entrySet().stream()
-                .map(entry -> {
-                    long total = entry.getValue().size();
-                    long correct = entry.getValue().stream()
-                            .filter(AnswerOutcome::isCorrect)
-                            .count();
+    /**
+     * One point per day with answers: the mastery at the end of that day.
+     * <p>
+     * Goes through the answers in time order and keeps a running count of
+     * mastered questions, updated by each answer (a question that was mastered
+     * and is now answered wrong takes one away).
+     *
+     * @param answers        the student's counted answers, oldest first
+     * @param totalQuestions questions in the whole bank
+     * @return the points, oldest first
+     */
+    static List<ProgressOverTimeResponse> masteryPerDay(List<CountedAnswer> answers, long totalQuestions) {
+        Map<Long, Boolean> masteredByQuestion = new HashMap<>();
+        long mastered = 0;
 
-                    return new ProgressOverTimeResponse(entry.getKey(), percentage(correct, total), total);
-                })
-                .toList();
+        // A TreeMap keeps its keys sorted, so the days come out oldest first.
+        // A later answer the same day replaces the day's point: the last one is the end of the day.
+        Map<LocalDate, ProgressOverTimeResponse> byDay = new TreeMap<>();
+
+        for (CountedAnswer answer : answers) {
+            // put returns the question's previous value (null if never answered).
+            Boolean wasMastered = masteredByQuestion.put(answer.questionId(), answer.isCorrect());
+
+            if (Boolean.TRUE.equals(wasMastered)) {
+                mastered--;
+            }
+            if (answer.isCorrect()) {
+                mastered++;
+            }
+
+            LocalDate day = answer.answeredAt().toLocalDate();
+            byDay.put(day, new ProgressOverTimeResponse(
+                    day, percentage(mastered, totalQuestions), mastered, totalQuestions));
+        }
+        return new ArrayList<>(byDay.values());
+    }
+
+    /**
+     * One point per week instead of per day: the last day of each week, dated
+     * to the week's Monday. Mastery only builds on earlier answers, so the
+     * last day's value is the value at the end of the week.
+     *
+     * @param days the points per day, oldest first
+     * @return the points per week, oldest first
+     */
+    static List<ProgressOverTimeResponse> lastDayPerWeek(List<ProgressOverTimeResponse> days) {
+        Map<LocalDate, ProgressOverTimeResponse> byWeek = new TreeMap<>();
+
+        for (ProgressOverTimeResponse day : days) {
+            LocalDate monday = day.date().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+            byWeek.put(monday, new ProgressOverTimeResponse(
+                    monday, day.percentage(), day.mastered(), day.total()));
+        }
+        return new ArrayList<>(byWeek.values());
+    }
+
+    /** Rounded percentage; 0 when there is nothing to count. */
+    private static long percentage(long part, long whole) {
+        return whole == 0 ? 0 : Math.round(part * 100.0 / whole);
+    }
+
+    private User findUser(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User not found"));
     }
 }

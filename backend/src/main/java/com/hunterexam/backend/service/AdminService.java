@@ -103,7 +103,10 @@ public class AdminService {
 
         // Same calculation as the student's own Statistics page; weakest subject first.
         List<SubjectPerformanceResponse> perSubject =
-                StatisticsService.toSubjectPerformance(subjectStats).stream()
+                StatisticsService.toSubjectMastery(
+                                attemptQuestionRepository.findCountedAnswers(learner),
+                                subjectRepository.findQuestionCounts())
+                        .stream()
                         .sorted(Comparator.comparingLong(SubjectPerformanceResponse::getPercentage))
                         .toList();
         MockExamSummary mockExams = aggregateMockExams(examScores);

@@ -51,12 +51,12 @@ public class StatisticsController {
     }
 
     /**
-     * Returns the authenticated user's practice accuracy grouped by week,
-     * for the last {@code weeks} weeks (default 8).
+     * Returns the authenticated user's mastery of the question bank over the
+     * last {@code weeks} weeks (default 8): per day up to 4 weeks, per week after.
      *
      * @param authentication authentication info from Spring Security
-     * @param weeks          number of weeks to look back (1–52)
-     * @return weekly progress data, oldest first
+     * @param weeks          number of weeks to look back (1–12)
+     * @return the points, oldest first
      */
     @GetMapping("/progress")
     public ResponseEntity<List<ProgressOverTimeResponse>> getProgressOverTime(
@@ -64,7 +64,7 @@ public class StatisticsController {
             @RequestParam(defaultValue = "8") int weeks) {
 
         // Guard against invalid values
-        int safeWeeks = Math.max(1, Math.min(weeks, 52));
+        int safeWeeks = Math.max(1, Math.min(weeks, 12));
 
         return ResponseEntity.ok(
                 statisticsService.getProgressOverTime(
