@@ -1,6 +1,7 @@
 package com.hunterexam.backend.repository;
 
 import com.hunterexam.backend.repository.projection.AnswerOutcome;
+import com.hunterexam.backend.repository.projection.CountedAnswer;
 import com.hunterexam.backend.repository.projection.MockExamScore;
 import com.hunterexam.backend.entity.AttemptQuestion;
 import com.hunterexam.backend.entity.User;
@@ -59,6 +60,24 @@ public interface AttemptQuestionRepository extends JpaRepository<AttemptQuestion
             """)
     List<AnswerOutcome> findCountedAnswersSince(@Param("user") User user,
                                                 @Param("since") LocalDateTime since);
+
+    /**
+     * All of the student's counted answers, oldest first, with the question
+     * and subject each answer belongs to. Same rule as {@code SubjectStats}:
+     * practice answers, plus mock exam answers only when the exam was scored.
+     * Rows not answered yet (questions of an open exam) are left out.
+     */
+    @Query("""
+            SELECT new com.hunterexam.backend.repository.projection.CountedAnswer(
+                q.question.id, q.question.subject.id, q.answeredAt, q.correct)
+            FROM AttemptQuestion q JOIN q.attempt a
+            WHERE a.user = :user
+              AND q.answeredAt IS NOT NULL
+              AND (a.type <> com.hunterexam.backend.entity.AttemptType.MOCK_EXAM
+                   OR a.scored = true)
+            ORDER BY q.answeredAt, q.id
+            """)
+    List<CountedAnswer> findCountedAnswers(@Param("user") User user);
 
     @Modifying
     @Query("delete from AttemptQuestion aq where aq.attempt.id in :attemptIds")
