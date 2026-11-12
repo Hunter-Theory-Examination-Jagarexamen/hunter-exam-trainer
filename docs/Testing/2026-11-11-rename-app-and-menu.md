@@ -14,12 +14,12 @@ Run: `cd frontend && npx vitest run src/__tests__/pages/Admin src/__tests__/page
 
 ## Manual Verification (Swedish)
 - [x] Browser tab and header say "JägarQuizzen"
-- [ ] Login, register and password pages show "JägarQuizzen" as the big title (was still the old name in capitals; fixed after the first check)
+- [x] Login, register and password pages show "JägarQuizzen" as the big title (was still the old name in capitals; fixed after the first check)
 - [x] Menu shows "Hem" and "Quiz"; the pages' headings match
 - [x] Hem page button says "Starta Quiz"
 - [x] Quiz page: "Öva per ämne" button "Välj"; "Slumpmässig övning" button "Starta Quiz"
-- [ ] Subject list: subject cards say "Starta Quiz"
-- [ ] During a round, click a menu item: dialog button says "Fortsätt Quiz"
+- [x] Subject list: subject cards say "Starta Quiz"
+- [x] During a round, "Avsluta omgången": dialog button says "Fortsätt Quiz" (same text as the dialog shown when clicking a menu item)
 - [ ] After a random round: back link says "Tillbaka till Quiz"
 - [ ] Admin menu and admin start page say "Deltagare"; participant progress page "Deltagarnas framsteg"
 - [ ] Participant detail page: delete button "Ta bort deltagarkonto"
