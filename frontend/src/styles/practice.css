@@ -190,7 +190,11 @@ Practice Subject-Wise Questions
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    /* At least one screen tall, so the bottom bar sits at the bottom of the screen even for short questions (#207). */
+}
+/* The question view only: at least one screen tall, so the bottom bar sits
+ at the bottom of the screen even for short questions. The result view has
+ no bar, so it doesn't get this (#207). */
+.practice-questions--with-bar {
     min-height: 100dvh;
 }
 

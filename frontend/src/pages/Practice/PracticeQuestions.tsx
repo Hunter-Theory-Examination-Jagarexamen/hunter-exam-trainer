@@ -352,7 +352,7 @@ const PracticeQuestions = ({ mode = "subject" }: PracticeQuestionsProps) => {
     }
 
     return (
-        <div className="practice-questions">
+        <div className="practice-questions practice-questions--with-bar">
             <PageTitle
                 title={pageTitle}
                 subtitle={t("practice.subtitle")}
