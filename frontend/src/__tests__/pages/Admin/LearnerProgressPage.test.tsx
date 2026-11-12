@@ -25,7 +25,7 @@ describe("LearnerProgressPage (list)", () => {
         renderPage();
 
         const admins = await screen.findByRole("region", { name: "Administratörer (1)" });
-        const students = screen.getByRole("region", { name: "Studenter (2)" });
+        const students = screen.getByRole("region", { name: "Deltagare (2)" });
         expect(within(admins).getByRole("link", { name: "Zara Admin" })).toHaveAttribute("href", "/admin/learners/5");
         expect(within(students).getAllByRole("link").map(link => link.textContent))
             .toEqual(["Anna Andersson", "Bertil Berg"]);
@@ -37,14 +37,14 @@ describe("LearnerProgressPage (list)", () => {
         vi.mocked(apiClient).mockResolvedValue([people[0]]);
         renderPage();
 
-        expect(await screen.findByText("Inga studenter ännu.")).toBeInTheDocument();
-        expect(screen.queryByRole("region", { name: /Studenter/ })).not.toBeInTheDocument();
+        expect(await screen.findByText("Inga deltagare ännu.")).toBeInTheDocument();
+        expect(screen.queryByRole("region", { name: /Deltagare/ })).not.toBeInTheDocument();
     });
 
     it("shows an error when the list can't be loaded", async () => {
         vi.mocked(apiClient).mockImplementation(() => Promise.reject(Object.assign(new Error("boom"), { status: 500 })));
         renderPage();
 
-        expect(await screen.findByRole("alert")).toHaveTextContent("Kunde inte ladda studenternas framsteg. Försök igen.");
+        expect(await screen.findByRole("alert")).toHaveTextContent("Kunde inte ladda deltagarnas framsteg. Försök igen.");
     });
 });

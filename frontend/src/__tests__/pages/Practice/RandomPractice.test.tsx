@@ -131,7 +131,7 @@ describe("RandomPractice", () => {
         expect(await screen.findByText("Du fick 1 av 2 rätt.")).toBeInTheDocument();
 
         // Back leads to the practice mode cards, not the subject list.
-        await userEvent.click(screen.getByRole("button", { name: "Tillbaka till övning" }));
+        await userEvent.click(screen.getByRole("button", { name: "Tillbaka till Quiz" }));
         expect(await screen.findByText("Practice modes")).toBeInTheDocument();
     });
 
@@ -167,7 +167,7 @@ describe("RandomPractice", () => {
         renderPage();
 
         await userEvent.click(await screen.findByRole("button", { name: "Avsluta omgången" }));
-        await userEvent.click(screen.getByRole("button", { name: "Fortsätt öva" }));
+        await userEvent.click(screen.getByRole("button", { name: "Fortsätt Quiz" }));
 
         expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
         expect(screen.getByText("Wildlife question?")).toBeInTheDocument();
@@ -181,7 +181,7 @@ describe("RandomPractice", () => {
         await act(() => router.navigate("/statistics"));
 
         expect(await screen.findByRole("dialog", { name: "Avsluta omgången?" })).toBeInTheDocument();
-        await userEvent.click(screen.getByRole("button", { name: "Fortsätt öva" }));
+        await userEvent.click(screen.getByRole("button", { name: "Fortsätt Quiz" }));
 
         expect(screen.getByText("Wildlife question?")).toBeInTheDocument();
         expect(router.state.location.pathname).toBe("/practice/random");

@@ -5,7 +5,7 @@ A Progressive Web App (PWA) for practicing the Swedish Hunter Exam theory test (
 
 ## Project Overview
 
-Hunter Exam Trainer is a web and mobile-friendly application designed to help users prepare for the Swedish Hunter Theory Examination (Jägarexamen).
+JägarQuizzen is a web and mobile-friendly application designed to help users prepare for the Swedish Hunter Theory Examination (Jägarexamen).
 
 The application provides:
 
@@ -732,7 +732,7 @@ secret: only in Render's settings, never in the repo, an issue or a chat.
 | `MAIL_PASSWORD` | An SMTP key from the same page (shown only once; generate a new one if lost) |
 | `MAIL_SMTP_AUTH` | `true` |
 | `MAIL_STARTTLS_ENABLED` | `true` |
-| `MAIL_FROM` | Sender name and a verified sender address, e.g. `Jägarexamen Tränare <address@gmail.com>` |
+| `MAIL_FROM` | Sender name and a verified sender address, e.g. `JägarQuizzen <address@gmail.com>` |
 | `FRONTEND_URL` | The deployed frontend address, so the link in the email opens the reset page |
 
 Things to know:
@@ -740,7 +740,7 @@ Things to know:
 - **Port 2525, not 587.** Render's free plan blocks outgoing traffic on the usual
   mail ports 25, 465 and 587. Brevo also accepts port 2525, which Render doesn't block.
 - **The sender address must be verified** in Brevo under **Settings → Senders,
-  domains & dedicated IPs**. The sender name in `MAIL_FROM` is what students see;
+  domains & dedicated IPs**. The sender name in `MAIL_FROM` is what users see;
   renaming the app only changes this setting.
 - **Free address (Gmail) as sender:** Brevo sends such emails from its own domain
   (`<address>@<number>.brevosend.com`) so they pass spam checks. Some emails may

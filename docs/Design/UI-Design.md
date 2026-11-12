@@ -5,9 +5,9 @@ flowchart TD
 
     A[Login]
 
-    A --> B[Dashboard]
+    A --> B[Home]
 
-    B --> C[Choose Study Mode]
+    B --> C[Quiz: choose mode]
 
     C --> D[Practice by Subject]
     C --> E[Mock Exam]
@@ -34,9 +34,9 @@ flowchart TD
 
     J --> M[View Statistics]
 
-    J --> N[Learners List: admins and students]
+    J --> N[Participants list, admins included]
 
-    N --> Q[Learner Progress: one user]
+    N --> Q[Participant progress: one user]
 
     J --> O[Review Feedback]
 

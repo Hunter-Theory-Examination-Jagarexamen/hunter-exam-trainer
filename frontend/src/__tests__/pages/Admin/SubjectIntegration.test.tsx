@@ -49,7 +49,7 @@ describe("Subject synchronization on navigation", () => {
         if (mode !== "create") expect(screen.queryByRole("option", {name: "Safety (0)"})).not.toBeInTheDocument();
         await userEvent.click(screen.getByRole("button", {name: "Lägg till fråga"}));
         expect(screen.getByLabelText("Frågans ämne (obligatoriskt)")).toHaveTextContent(mode === "delete" ? "Wildlife" : "New subject");
-        await userEvent.click(screen.getByRole("link", {name: "Öva"}));
+        await userEvent.click(screen.getByRole("link", {name: "Quiz"}));
         const practiceCard = (await screen.findByRole("heading", {name: "Öva per ämne"})).closest(".practice-card")!;
         await userEvent.click(within(practiceCard as HTMLElement).getByRole("button", {name: "Välj"}));
         expect(await screen.findByRole("heading", {name: mode === "delete" ? "Wildlife" : "New subject"})).toBeInTheDocument();
