@@ -20,9 +20,9 @@ Run: `cd frontend && npx vitest run src/__tests__/pages/Admin src/__tests__/page
 - [x] Quiz page: "Öva per ämne" button "Välj"; "Slumpmässig övning" button "Starta Quiz"
 - [x] Subject list: subject cards say "Starta Quiz"
 - [x] During a round, "Avsluta omgången": dialog button says "Fortsätt Quiz" (same text as the dialog shown when clicking a menu item)
-- [ ] After a random round: back link says "Tillbaka till Quiz"
-- [ ] Admin menu and admin start page say "Deltagare"; participant progress page "Deltagarnas framsteg"
-- [ ] Participant detail page: delete button "Ta bort deltagarkonto"
+- [x] After a random round: back link says "Tillbaka till Quiz"
+- [x] Admin menu and admin start page say "Deltagare"; participant progress page "Deltagarnas framsteg"
+- [x] Participant detail page: delete button "Ta bort deltagarkonto"
 - [ ] Feedback page subtitle "Meddelanden och felrapporter från deltagarna."
 - [ ] Unknown URL (404): button "Gå till Hem"
 - [ ] Terms of Use and Privacy Policy name "JägarQuizzen"
