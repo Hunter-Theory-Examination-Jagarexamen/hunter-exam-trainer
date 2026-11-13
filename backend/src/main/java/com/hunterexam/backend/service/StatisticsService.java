@@ -103,7 +103,12 @@ public class StatisticsService {
     /**
      * Calculates the user's accuracy (correct / answered) grouped by ISO week
      * (Monday–Sunday) for the last N weeks, from each stored answer: practice
-     * and scored mock exams, the same answers as {@code SubjectStats}.
+     * answers, scored mock exam answers, and the answers of mock exams that
+     * ended without a result but fall inside the exam's answer window — the
+     * same answers as {@code SubjectStats} ({@code AttemptQuestionRepository}
+     * applies the rule). Answers of exams still open, and answers given after
+     * the time limit, are left out; every answer appears once, under the
+     * timestamp it was given.
      *
      * <p>Only weeks in which the user answered questions are included in the
      * result, ordered from oldest to newest.

@@ -44,8 +44,13 @@ public interface AttemptQuestionRepository extends JpaRepository<AttemptQuestion
 
     /**
      * The student's answers since the given time, oldest first. Same rule as
-     * {@code SubjectStats}: practice answers, plus mock exam answers only when
-     * the exam was scored (open and late exams don't count).
+     * {@code SubjectStats}: every practice answer, plus mock exam answers
+     * when the exam was scored, or when it was ended without a result and
+     * the answer falls within the exam's answer window — 60 minutes + 2
+     * minutes grace from the stored start, the same bound
+     * {@code ExamService} uses when counting such answers (#187). Answers
+     * given after that bound and answers of exams still open don't count;
+     * each stored answer appears at most once.
      */
     @Query("""
             SELECT new com.hunterexam.backend.repository.projection.AnswerOutcome(
@@ -54,7 +59,9 @@ public interface AttemptQuestionRepository extends JpaRepository<AttemptQuestion
             WHERE a.user = :user
               AND q.answeredAt >= :since
               AND (a.type <> com.hunterexam.backend.entity.AttemptType.MOCK_EXAM
-                   OR a.scored = true)
+                   OR a.scored = true
+                   OR (a.finishedAt IS NOT NULL
+                       AND q.answeredAt <= (a.startedAt + 62 minute)))
             ORDER BY q.answeredAt
             """)
     List<AnswerOutcome> findCountedAnswersSince(@Param("user") User user,
