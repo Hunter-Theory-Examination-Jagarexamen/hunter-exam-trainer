@@ -41,6 +41,8 @@ endpoints are added to this table, not duplicated elsewhere.
 | POST   | /api/feedback                 | Send feedback or report a question (201)        | Required         |
 | GET    | /api/admin/feedback?type=&handled= | List feedback, newest first (filters optional) | Required (ADMIN) |
 | PATCH  | /api/admin/feedback/{id}/handled | Mark feedback as handled or unhandled         | Required (ADMIN) |
+| DELETE | /api/users/me                 | Delete own account and all personal data        | Required         |
+| DELETE | /api/admin/users/{id}         | Delete a student account                        | Required (ADMIN) |
 
 Subject writes were moved from `/api/subjects` to `/api/admin/subjects`. The old
 paths have no write handlers anymore: an ADMIN call to them answers
@@ -321,6 +323,26 @@ value gives `400`.
 - `401 Unauthorized` — the JWT is missing, expired, or invalid. The frontend clears the token and redirects to `/login?expired=1`.
 - `403 Forbidden` — the user is logged in but not authorized for this endpoint. The frontend does **not** log them out.
 - `401` from `/api/auth/login` means wrong credentials, not session expiry — the frontend does not redirect.
+
+
+## Account Deletion (GDPR): request and response
+
+### `DELETE /api/users/me`
+Deletes the logged-in user's account and all personal data (attempts, answers, subject stats). Feedback is kept but de-linked from the user. The token is invalidated immediately.
+
+Request body:
+```json
+{ "password": "current_password_here" }
+```
+### `DELETE /api/admin/users/{id}`
+Admin-only endpoint to delete a student account. Admin accounts cannot be deleted via this endpoint.
+
+- **204 No Content**: Success.
+- **403 Forbidden**: The target is an admin.
+- **404 Not Found**: The user doesn't exist.
+
+_Used by the participant detail page (Admin → Deltagare → name). The confirmation naming
+the participant and the danger-zone styling are frontend-only._
 
 ## Roles
 

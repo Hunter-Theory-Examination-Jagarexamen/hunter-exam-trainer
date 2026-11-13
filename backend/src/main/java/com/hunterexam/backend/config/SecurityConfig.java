@@ -1,5 +1,6 @@
 package com.hunterexam.backend.config;
 
+import com.hunterexam.backend.security.UserExistsJwtAuthenticationConverter;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,6 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -39,10 +41,13 @@ import java.util.List;
 public class SecurityConfig {
 
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final UserExistsJwtAuthenticationConverter userExistsJwtAuthenticationConverter;
 
     public SecurityConfig(
-            @Lazy OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
+        @Lazy OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
+        UserExistsJwtAuthenticationConverter userExistsJwtAuthenticationConverter) {
         this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
+        this.userExistsJwtAuthenticationConverter = userExistsJwtAuthenticationConverter;
     }
 
     /**
@@ -68,6 +73,7 @@ public class SecurityConfig {
      * @return JWT authentication converter
      */
     @Bean
+    @Primary
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
         authoritiesConverter.setAuthorityPrefix("ROLE_");
@@ -126,11 +132,13 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 // Use JWT tokens to authenticate protected requests.
-                .oauth2ResourceServer(oauth2 ->
-                        oauth2.jwt(jwt ->
-                                jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())
-                        )
-                );
+            .oauth2ResourceServer(oauth2 ->
+                oauth2.jwt(jwt ->
+                    jwt.jwtAuthenticationConverter(userExistsJwtAuthenticationConverter)
+                )
+            );
+
+
 
         // Google OAuth2 login is optional; it is only activated when the
         // corresponding environment variables are configured.

@@ -9,6 +9,12 @@
     "back": "Back",
     "or": "or"
   },
+  "notFound": {
+    "title": "404 - Page not found",
+    "message": "The page you are looking for does not exist or has been moved.",
+    "dashboardButton": "Go to Home",
+    "loginButton": "Go to login"
+  },
   "auth": {
     "loginTitle": "Log In",
     "registerTitle": "Register",
@@ -47,7 +53,9 @@
     "createPasswordPlaceholder": "Create a password",
     "registerFailed": "Registration failed. Please try again.",
     "signingIn": "Signing you in...",
-    "registerTagLine": "Create an account to track your progress and improve your results."
+    "registerTagLine": "Create an account to track your progress and improve your results.",
+    "accountDeletedSuccess": "Your account has been deleted."
+
   },
   "forgotPassword": {
     "brandSubtitle": "Reset your password to continue training.",
@@ -58,6 +66,7 @@
     "emptyEmailAlert": "Please enter your email address",
     "submitButton": "Send reset link",
     "submittingButton": "Sending...",
+    "sent": "If an account exists for that email address, we have sent a link to reset the password. Also check your spam folder.",
     "defaultError": "Something went wrong. Please try again.",
     "rememberPassword": "Remembered your password?",
     "backToLogin": "Back to login"
@@ -66,6 +75,7 @@
     "brandSubtitle": "Reset your password to continue training.",
     "title": "Reset password",
     "subtitle": "Choose a new password of at least 8 characters.",
+    "success": "Your password has been changed. You can now log in.",
     "invalidToken": "The reset link is invalid. Please request a new reset link.",
     "passwordLabel": "New password",
     "confirmPasswordLabel": "Confirm new password",
@@ -78,10 +88,10 @@
     "defaultError": "Could not reset password. Please try again."
   },
   "dashboard": {
-    "title": "Dashboard",
+    "title": "Home",
     "subtitle": "Track your learning progress.",
     "quickActionsTitle": "Quick Actions",
-    "startPractice": "Start practicing",
+    "startPractice": "Start Quiz",
     "startMockExam": "Start mock exam",
     "recentActivityTitle": "Recent Activity",
     "activityHeader": "Activity",
@@ -91,9 +101,9 @@
     "loadingActivities": "Loading recent activities...",
     "noActivities": "No activity yet.",
     "loadActivityError": "Failed to load recent activities. Please try again.",
-    "loadingDetails": "Loading dashboard details...",
-    "detailsError": "Failed to load dashboard details. Please try again.",
-    "noDetails": "Dashboard details are not available.",
+    "loadingDetails": "Loading the overview...",
+    "detailsError": "Failed to load the overview. Please try again.",
+    "noDetails": "The overview is not available.",
     "cardMockExams": "Mock exams",
     "cardQuestionsAnswered": "Questions answered",
     "cardAverageScore": "Average score",
@@ -151,7 +161,13 @@
     "nameLabel": "Name",
     "emailLabel": "Email",
     "roleLabel": "Role",
-    "memberSinceLabel": "Member since"
+    "memberSinceLabel": "Member since",
+    "dangerZoneTitle": "Danger zone",
+    "dangerZoneText": "Deleting your account removes everything permanently. This cannot be undone.",
+    "deleteAccountButton": "Delete account",
+    "deleteAccountWarning": "Your account, all your answers, and all your statistics will be deleted permanently. This cannot be undone. Backups are purged completely within a few days.",
+    "deleteAccountConfirm": "Delete my account",
+    "deletingAccount": "Deleting..."
   },
   "mockExam": {
     "title": "Mock Exam",
@@ -166,13 +182,13 @@
     "startButton": "Start mock exam"
   },
   "practice": {
-    "title": "Practice",
+    "title": "Quiz",
     "subtitle": "Answer the questions and improve your knowledge.",
     "subjectsTitle": "Practice by subject",
     "subjectsSubtitle": "Choose a subject area to start practicing.",
     "randomTitle": "Random Practice",
     "backToSubjects": "Back to subjects",
-    "backToModes": "Back to practice",
+    "backToModes": "Back to Quiz",
     "subjectNotFound": "Subject not found.",
     "randomNoQuestions": "There are no questions to practise yet.",
     "noQuestionsYet": "There are no questions in this subject yet.",
@@ -196,28 +212,28 @@
     "quitTitle": "Quit this round?",
     "quitText": "Any answers you have given are saved.",
     "quitConfirm": "Quit",
-    "quitCancel": "Keep practising",
+    "quitCancel": "Continue Quiz",
     "modesSubtitle": "Choose a mode to start practicing.",
     "loadSubjectsError": "Failed to load subjects. Please try again.",
     "loadingSubjects": "Loading subjects...",
     "subjectQuestionCount": "{{count}} questions",
-    "startPracticeButton": "Start Practice"
+    "startPracticeButton": "Start Quiz"
   },
   "layout": {
     "menuAria": "Toggle navigation menu",
-    "appTitle": "Hunter Exam Trainer",
+    "appTitle": "JägarQuizzen",
     "welcome": "Welcome, {{name}}",
     "defaultUser": "User",
     "userLoadError": "Failed to load user details. Please try again.",
-    "navDashboard": "Dashboard",
-    "navPractice": "Practice",
+    "navDashboard": "Home",
+    "navPractice": "Quiz",
     "navMockExam": "Mock Exam",
     "navStatistics": "Statistics",
     "navProfile": "Profile",
     "navAdmin": "Admin",
     "navQuestions": "Questions",
     "navSubjects": "Subjects",
-    "navLearners": "Learners",
+    "navLearners": "Participants",
     "navFeedback": "Feedback",
     "giveFeedback": "Give feedback",
     "logout": "Log out"
@@ -266,8 +282,8 @@
         "caption": "Open subject management"
       },
       "learners": {
-        "title": "Learners",
-        "caption": "Open learner progress"
+        "title": "Participants",
+        "caption": "Open participant progress"
       },
       "feedback": {
         "title": "Feedback",
@@ -280,10 +296,10 @@
     }
   },
   "learnerProgress": {
-    "title": "Learner Progress",
-    "subtitle": "Follow the learners' progress.",
-    "loading": "Loading learners...",
-    "noLearners": "No learners yet.",
+    "title": "Participant Progress",
+    "subtitle": "Follow the participants' progress.",
+    "loading": "Loading participants...",
+    "noLearners": "No participants yet.",
     "lastActivity": "Last activity:",
     "never": "Never",
     "noMockExams": "No mock exams yet.",
@@ -294,14 +310,28 @@
     "notPassed": " · Not passed",
     "best": "Best:",
     "noPracticeResults": "No practice results yet.",
-    "loadFailed": "Failed to load learner progress. Please try again.",
+    "loadFailed": "Failed to load participant progress. Please try again.",
     "backToList": "Back to the list",
     "loadingOne": "Loading...",
     "notFound": "The user doesn't exist.",
     "admins": "Administrators",
-    "students": "Students",
-    "noStudents": "No students yet.",
-    "listSubtitle": "Choose a person to see their progress."
+    "students": "Participants",
+    "noStudents": "No participants yet.",
+    "listSubtitle": "Choose a person to see their progress.",
+    "detail": {
+      "dangerZoneTitle": "Danger zone",
+      "dangerZoneText": "Deleting this account is permanent. All of the participant's answers and statistics will be removed. This cannot be undone.",
+      "deleteButton": "Delete participant account",
+      "deleteConfirmTitle": "Delete {{name}}'s account?",
+      "deleteConfirmText": "{{name}}'s account, all their answers, and all their statistics will be deleted permanently. This cannot be undone.",
+      "deleteConfirmCancel": "Cancel",
+      "deleteConfirmButton": "Delete account",
+      "deleteConfirmDeleting": "Deleting…",
+      "deleteFailed": "Could not delete the account. Please try again."
+    },
+    "list": {
+      "deleteSuccess": "{{name}}'s account has been deleted."
+    }
   },
   "questionBank": {
     "title": "Admin Question Bank",
@@ -485,7 +515,7 @@
       "description": "Answer random questions from all subjects.",
       "feature1": "Randomized questions",
       "feature2": "Improve overall knowledge",
-      "button": "Select"
+      "button": "Start Quiz"
     },
     "mockExam": {
       "title": "Mock Exam",
@@ -500,8 +530,8 @@
     "alt": "Image for question: {{questionText}}"
   },
   "brand": {
-    "title": "HUNTER EXAM TRAINER",
-    "logoAlt": "Hunter Exam Trainer logo"
+    "title": "JägarQuizzen",
+    "logoAlt": "JägarQuizzen logo"
   },
   "feedback": {
     "title": "Give feedback",
@@ -528,7 +558,7 @@
     },
     "admin": {
       "title": "Feedback",
-      "subtitle": "Messages and problem reports from students.",
+      "subtitle": "Messages and problem reports from participants.",
       "typeFilter": "Type",
       "allTypes": "All types",
       "showHandled": "Show handled",

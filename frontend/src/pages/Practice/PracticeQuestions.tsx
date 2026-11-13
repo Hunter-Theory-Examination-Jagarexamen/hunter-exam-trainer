@@ -171,6 +171,17 @@ const PracticeQuestions = ({ mode = "subject" }: PracticeQuestionsProps) => {
     const currentQuestion = questions[currentQuestionIndex];
     const currentAnswer = answers[currentQuestionIndex];
 
+    // On a new question, scroll back up to it if the student
+    // had scrolled past its start (long question on a phone);
+    // otherwise, leave the page where it is (#207)
+    const questionTopRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        const questionTop = questionTopRef.current;
+        if (questionTop && questionTop.getBoundingClientRect().top < 0) {
+            questionTop.scrollIntoView({ block: "start" });
+        }
+    }, [currentQuestionIndex]);
+
     // A 409 means the server already closed the round, so leaving shouldn't ask.
     const markRoundClosedIfConflict = (error: unknown) => {
         if (errorStatus(error) === 409) {
@@ -341,7 +352,7 @@ const PracticeQuestions = ({ mode = "subject" }: PracticeQuestionsProps) => {
     }
 
     return (
-        <div className="practice-questions">
+        <div className="practice-questions practice-questions--with-bar">
             <PageTitle
                 title={pageTitle}
                 subtitle={t("practice.subtitle")}
@@ -370,36 +381,39 @@ const PracticeQuestions = ({ mode = "subject" }: PracticeQuestionsProps) => {
                 />
             )}
 
-            <div className="practice-progress">
-                {t("practice.progress", { current: currentQuestionIndex + 1, total: questions.length })}
+            <div ref={questionTopRef}>
+                <div className="practice-progress">
+                    {t("practice.progress", { current: currentQuestionIndex + 1, total: questions.length })}
+                </div>
+
+                <PracticeQuestionCard
+                    question={currentQuestion}
+                    selectedAnswer={currentAnswer?.chosen ?? selectedAnswer}
+                    feedback={currentAnswer?.check ?? null}
+                    isChecking={isChecking}
+                    onAnswerSelect={handleAnswerSelect}
+                    onCheckAnswer={handleCheckAnswer}
+                />
             </div>
 
-            <PracticeQuestionCard
-                question={currentQuestion}
-                selectedAnswer={currentAnswer?.chosen ?? selectedAnswer}
-                feedback={currentAnswer?.check ?? null}
-                isChecking={isChecking}
-                onAnswerSelect={handleAnswerSelect}
-                onCheckAnswer={handleCheckAnswer}
-            />
+            <div className="practice-bottom-bar">
+                {actionError && (
+                    <PracticeErrorMessage
+                        message={t(errorMessageKey)}
+                        onRetry={actionError.roundClosed ? undefined : retryFailedAction}
+                        onBack={actionError.roundClosed ? goBack : undefined}
+                        backLabelKey={backLabelKey}
+                    />
+                )}
 
-            {actionError && (
-                <PracticeErrorMessage
-                    message={t(errorMessageKey)}
-                    // Trying again can't help once the round is closed.
-                    onRetry={actionError.roundClosed ? undefined : retryFailedAction}
-                    onBack={actionError.roundClosed ? goBack : undefined}
-                    backLabelKey={backLabelKey}
+                <PracticeNavigation
+                    onPrevious={handlePrevious}
+                    onNext={handleNext}
+                    isFirstQuestion={currentQuestionIndex === 0}
+                    isLastQuestion={currentQuestionIndex === questions.length - 1}
+                    canGoNext={currentAnswer !== undefined}
                 />
-            )}
-
-            <PracticeNavigation
-                onPrevious={handlePrevious}
-                onNext={handleNext}
-                isFirstQuestion={currentQuestionIndex === 0}
-                isLastQuestion={currentQuestionIndex === questions.length - 1}
-                canGoNext={currentAnswer !== undefined}
-            />
+            </div>
         </div>
     );
 };

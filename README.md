@@ -5,7 +5,7 @@ A Progressive Web App (PWA) for practicing the Swedish Hunter Exam theory test (
 
 ## Project Overview
 
-Hunter Exam Trainer is a web and mobile-friendly application designed to help users prepare for the Swedish Hunter Theory Examination (Jägarexamen).
+JägarQuizzen is a web and mobile-friendly application designed to help users prepare for the Swedish Hunter Theory Examination (Jägarexamen).
 
 The application provides:
 
@@ -278,7 +278,8 @@ Start the backend with the local defaults, request a link using Forgot Password,
 and open the email at `http://localhost:8025`. Follow the link, enter and confirm
 a new password, then log in. Restart the backend after changing its environment.
 Production needs an SMTP provider, authorized sender and any required domain
-verification, authentication, STARTTLS, and an HTTPS `FRONTEND_URL`. Configure
+verification, authentication, STARTTLS, and an HTTPS `FRONTEND_URL`. The temporary
+deployment uses Brevo: see [Password Reset Email (Brevo)](#password-reset-email-brevo). Configure
 `APP_CORS_ALLOWED_ORIGINS` and `VITE_API_BASE_URL` as usual. The frontend host must
 serve its SPA at `/reset-password`; the existing Vercel rewrite supports this.
 
@@ -669,23 +670,23 @@ This is useful during development and debugging.
 
 ## Temporary Deployment (PWA Testing)
 
-The app is temporarily deployed to free hosting so we can test the **PWA install workflow on a real mobile device** — mobile browsers require HTTPS to install a PWA, which `localhost` cannot provide.
+The app is temporarily deployed to free hosting so the PWA can be installed on real phones (mobile browsers require HTTPS, which `localhost` cannot provide) and so Allez's students can use it in the user test (from 2026-11-09).
 
-This deployment is **not production, and not a permanent staging environment.** It exists to validate the PWA install flow and to let the team demo the app on real phones. If it stops being useful, it can be torn down without affecting local development.
+This is **not the real deployment.** Allez decides later where and how the app is hosted (see Q-013 in `docs/ProjectManagement/Clarifications.md`). Real students use it, so treat its data with care.
 
 ### URLs
 
 | Service | URL | Platform |
 |---|---|---|
 | Backend | https://hunter-exam-trainer-bak.onrender.com | Render (Docker) |
-| Frontend | https://hunter01-kappa.vercel.app | Vercel (Vite) |
-| Database | Neon (same instance as local dev) | — |
+| Frontend | https://hunter-exam.vercel.app | Vercel (Vite) |
+| Database | Neon (PostgreSQL), used only by the deployment | — |
 
 ### How It Works
 
-- Both services are connected to the repo and pick up code changes from `develop`.
+- Both services deploy from `main`. `develop` is merged into `main` only after a release test (see `docs/Testing/`, e.g. `2026-11-08-release-test.md`), so only tested versions reach the students.
 - Configuration is via environment variables on each platform. No secrets are committed to the repo.
-- The deployed backend uses the same Neon database as local development — test data created on the deployment will also appear locally.
+- The deployed database holds real students' data. Local development uses its own database (Docker, see [First-Time Setup](#first-time-setup)); never point a local backend at the deployed database.
 
 ### Environment Variables
 
@@ -693,14 +694,14 @@ This deployment is **not production, and not a permanent staging environment.** 
 
 | Variable                   | Value / Notes                                                                                                                               |
 |----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
-| `DB_URL`                   | Neon connection string                                                                                                                      |
+| `DB_URL`                   | Connection string of the deployment's Neon database                                                                                         |
 | `DB_USERNAME`              | Neon username                                                                                                                               |
 | `DB_PASSWORD`              | Neon password                                                                                                                               |
 | `JWT_SECRET`               | Same Base64 secret used locally                                                                                                             |
 | `ADMIN_EMAIL`              | Admin seed email (optional for local development; app starts with a warning if missing)                                                                                                                        |
 | `ADMIN_PASSWORD`           | Admin seed password (optional for local development)                                                                                                                        |
-| `APP_CORS_ALLOWED_ORIGINS` | `http://localhost:5173,https://hunter01-kappa.vercel.app`                                                                                   |
-| `FRONTEND_URL`             | Base URL for frontend redirects after OAuth2 login (e.g. `http://localhost:5173` locally or `https://hunter01-kappa.vercel.app` on staging) |
+| `APP_CORS_ALLOWED_ORIGINS` | Comma-separated; must include `https://hunter-exam.vercel.app`                                                                              |
+| `FRONTEND_URL`             | `https://hunter-exam.vercel.app`: used in password reset links and after Google login (locally `http://localhost:5173`)                     |
 
 **On Vercel (frontend):**
 
@@ -712,10 +713,52 @@ This deployment is **not production, and not a permanent staging environment.** 
 
 ⚠️ **Set Vercel env vars for all environments** (Production, Preview, Development) — otherwise preview deployments fall back to `localhost:8080`.
 
+### Password Reset Email (Brevo)
+
+The deployed backend sends password reset emails through [Brevo](https://www.brevo.com)'s
+SMTP relay (free plan: 300 emails per day; EU-based company). The Brevo account
+is owned by the development team for the temporary deployment; ask Hans for
+access. Allez can take it over, or use their own provider, for the real
+deployment: only the settings below change, not the code.
+
+Add these on Render (backend), next to the variables above. The SMTP key is a
+secret: only in Render's settings, never in the repo, an issue or a chat.
+
+| Variable | Value |
+|---|---|
+| `MAIL_HOST` | `smtp-relay.brevo.com` |
+| `MAIL_PORT` | `2525` (see below) |
+| `MAIL_USERNAME` | The SMTP login from Brevo, **Settings → SMTP & API** (`...@smtp-brevo.com`) |
+| `MAIL_PASSWORD` | An SMTP key from the same page (shown only once; generate a new one if lost) |
+| `MAIL_SMTP_AUTH` | `true` |
+| `MAIL_STARTTLS_ENABLED` | `true` |
+| `MAIL_FROM` | Sender name and a verified sender address, e.g. `JägarQuizzen <address@gmail.com>` |
+| `FRONTEND_URL` | The deployed frontend address, so the link in the email opens the reset page |
+
+Things to know:
+
+- **Port 2525, not 587.** Render's free plan blocks outgoing traffic on the usual
+  mail ports 25, 465 and 587. Brevo also accepts port 2525, which Render doesn't block.
+- **The sender address must be verified** in Brevo under **Settings → Senders,
+  domains & dedicated IPs**. The sender name in `MAIL_FROM` is what users see;
+  renaming the app only changes this setting.
+- **Free address (Gmail) as sender:** Brevo sends such emails from its own domain
+  (`<address>@<number>.brevosend.com`) so they pass spam checks. Some emails may
+  still land in the spam folder. For the real deployment, authenticate the
+  owner's own domain in Brevo instead.
+- **The SMTP key expires** (the current one in May 2027). Generate a new key in
+  Brevo and update `MAIL_PASSWORD` on Render before then.
+- **Checking delivery:** Brevo's **Transactional → Logs** shows each email and
+  what happened to it. The backend only logs a generic warning when sending fails.
+
+To test locally against Brevo instead of Mailpit, put the same values in the
+backend's IntelliJ Run Configuration with `FRONTEND_URL=http://localhost:5173`.
+Real emails are sent, so use an address you can read.
+
 ### Known Limitations
 
 - **Render free tier sleeps after ~15 minutes of inactivity.** The first request after sleep takes 30–60 seconds.
-- **No test gate before deploy.** Pushing to `develop` deploys whatever is on `develop` — a broken `develop` will produce a broken deployed app.
+- **No automatic test gate.** Whatever is merged into `main` is deployed, so run the release test on `develop` before merging it into `main`.
 - **CORS origins must match exactly** — including `https://` vs `http://` and no trailing slash.
 
 ### Testing on Mobile (PWA Install)
@@ -727,13 +770,10 @@ Once installed, the app launches full-screen and behaves like a native app.
 
 ### Current Deployment Setup Is Temporary
 
-The Vercel project is deployed from a **standalone copy of the frontend repo** because the main `hunter-exam-trainer` repo is org-owned and requires org-level approval for the Vercel GitHub App. Once that approval is granted, the plan is to:
-
-1. Create a new Vercel project on the main repo, watching `develop`
-2. Update `APP_CORS_ALLOWED_ORIGINS` on Render with the new URL
-3. Retire the standalone frontend repo
-
-Until then, treat this deployment as a **test rig for PWA workflows**, not as our canonical staging environment.
+The hosting accounts (Render, Vercel, Neon, and Brevo for email) are on free
+plans and owned by the development team for the internship. When Allez decides
+on the real deployment, they take over or replace them; settings change, the
+code doesn't.
 
 ### Frontend API Configuration
 

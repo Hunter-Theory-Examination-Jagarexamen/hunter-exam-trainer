@@ -9,6 +9,12 @@
     "back": "Tillbaka",
     "or": "eller"
   },
+  "notFound": {
+    "title": "404 - Sidan hittades inte",
+    "message": "Sidan du letar efter finns inte eller har flyttats.",
+    "dashboardButton": "Gå till Hem",
+    "loginButton": "Gå till inloggningen"
+  },
   "auth": {
     "loginTitle": "Logga in",
     "registerTitle": "Skapa konto",
@@ -47,7 +53,9 @@
     "createPasswordPlaceholder": "Skapa ett lösenord",
     "registerFailed": "Registreringen misslyckades. Försök igen.",
     "signingIn": "Loggar in dig...",
-    "registerTagLine": "Skapa ett konto för att följa dina framsteg och förbättra dina resultat."
+    "registerTagLine": "Skapa ett konto för att följa dina framsteg och förbättra dina resultat.",
+    "accountDeletedSuccess": "Ditt konto har tagits bort."
+
   },
   "forgotPassword": {
     "brandSubtitle": "Återställ ditt lösenord för att fortsätta träna.",
@@ -58,6 +66,7 @@
     "emptyEmailAlert": "Vänligen ange din e-postadress",
     "submitButton": "Skicka återställningslänk",
     "submittingButton": "Skickar...",
+    "sent": "Om det finns ett konto för den e-postadressen har vi skickat en länk för att återställa lösenordet. Kolla även skräpposten.",
     "defaultError": "Något gick fel. Försök igen.",
     "rememberPassword": "Kom du ihåg ditt lösenord?",
     "backToLogin": "Tillbaka till inloggning"
@@ -66,6 +75,7 @@
     "brandSubtitle": "Återställ ditt lösenord för att fortsätta träna.",
     "title": "Återställ lösenord",
     "subtitle": "Välj ett nytt lösenord på minst 8 tecken.",
+    "success": "Lösenordet är ändrat. Nu kan du logga in.",
     "invalidToken": "Återställningslänken är ogiltig. Vänligen begär en ny återställningslänk.",
     "passwordLabel": "Nytt lösenord",
     "confirmPasswordLabel": "Bekräfta nytt lösenord",
@@ -78,10 +88,10 @@
     "defaultError": "Kunde inte återställa lösenordet. Försök igen."
   },
   "dashboard": {
-    "title": "Instrumentpanel",
+    "title": "Hem",
     "subtitle": "Följ dina inlärningsframsteg.",
     "quickActionsTitle": "Snabbåtgärder",
-    "startPractice": "Börja öva",
+    "startPractice": "Starta Quiz",
     "startMockExam": "Starta övningsprov",
     "recentActivityTitle": "Senaste aktivitet",
     "activityHeader": "Aktivitet",
@@ -91,9 +101,9 @@
     "loadingActivities": "Laddar senaste aktiviteter...",
     "noActivities": "Ingen aktivitet än.",
     "loadActivityError": "Kunde inte ladda senaste aktiviteter. Försök igen.",
-    "loadingDetails": "Laddar instrumentpanelens detaljer...",
-    "detailsError": "Kunde inte ladda instrumentpanelens detaljer. Försök igen.",
-    "noDetails": "Instrumentpanelens detaljer är inte tillgängliga.",
+    "loadingDetails": "Laddar översikten...",
+    "detailsError": "Kunde inte ladda översikten. Försök igen.",
+    "noDetails": "Översikten är inte tillgänglig.",
     "cardMockExams": "Övningsprov",
     "cardQuestionsAnswered": "Besvarade frågor",
     "cardAverageScore": "Genomsnittspoäng",
@@ -151,7 +161,13 @@
     "nameLabel": "Namn",
     "emailLabel": "E-post",
     "roleLabel": "Roll",
-    "memberSinceLabel": "Medlem sedan"
+    "memberSinceLabel": "Medlem sedan",
+    "dangerZoneTitle": "Riskzon",
+    "dangerZoneText": "Om du tar bort ditt konto raderas allt permanent. Detta kan inte ångras.",
+    "deleteAccountButton": "Ta bort konto",
+    "deleteAccountWarning": "Ditt konto, alla dina svar och all din statistik raderas permanent. Detta kan inte ångras. Säkerhetskopior rensas helt inom några dagar.",
+    "deleteAccountConfirm": "Ta bort mitt konto",
+    "deletingAccount": "Tar bort..."
   },
   "mockExam": {
     "title": "Övningsprov",
@@ -166,13 +182,13 @@
     "startButton": "Starta övningsprov"
   },
   "practice": {
-    "title": "Öva",
+    "title": "Quiz",
     "subtitle": "Svara på frågorna och förbättra dina kunskaper.",
     "subjectsTitle": "Öva per ämne",
     "subjectsSubtitle": "Välj ett ämnesområde för att börja öva.",
     "randomTitle": "Slumpmässig övning",
     "backToSubjects": "Tillbaka till ämnen",
-    "backToModes": "Tillbaka till övning",
+    "backToModes": "Tillbaka till Quiz",
     "subjectNotFound": "Ämnet hittades inte.",
     "randomNoQuestions": "Det finns inga frågor att öva på än.",
     "noQuestionsYet": "Det finns inga frågor i det här ämnet än.",
@@ -196,28 +212,28 @@
     "quitTitle": "Avsluta omgången?",
     "quitText": "Svar du redan har gett är sparade.",
     "quitConfirm": "Avsluta",
-    "quitCancel": "Fortsätt öva",
+    "quitCancel": "Fortsätt Quiz",
     "modesSubtitle": "Välj ett läge för att börja öva.",
     "loadSubjectsError": "Kunde inte ladda ämnen. Försök igen.",
     "loadingSubjects": "Laddar ämnen...",
     "subjectQuestionCount": "{{count}} frågor",
-    "startPracticeButton": "Börja öva"
+    "startPracticeButton": "Starta Quiz"
   },
   "layout": {
     "menuAria": "Växla navigeringsmeny",
-    "appTitle": "Jägarexamen Tränare",
+    "appTitle": "JägarQuizzen",
     "welcome": "Välkommen, {{name}}",
     "defaultUser": "Användare",
     "userLoadError": "Kunde inte ladda användardetaljer. Försök igen.",
-    "navDashboard": "Instrumentpanel",
-    "navPractice": "Öva",
+    "navDashboard": "Hem",
+    "navPractice": "Quiz",
     "navMockExam": "Övningsprov",
     "navStatistics": "Statistik",
     "navProfile": "Profil",
     "navAdmin": "Admin",
     "navQuestions": "Frågor",
     "navSubjects": "Ämnen",
-    "navLearners": "Elever",
+    "navLearners": "Deltagare",
     "navFeedback": "Feedback",
     "giveFeedback": "Ge feedback",
     "logout": "Logga ut"
@@ -266,8 +282,8 @@
         "caption": "Öppna ämneshanteringen"
       },
       "learners": {
-        "title": "Studenter",
-        "caption": "Öppna studenternas framsteg"
+        "title": "Deltagare",
+        "caption": "Öppna deltagarnas framsteg"
       },
       "feedback": {
         "title": "Feedback",
@@ -280,10 +296,10 @@
     }
   },
   "learnerProgress": {
-    "title": "Studenternas framsteg",
-    "subtitle": "Följ studenternas utveckling.",
-    "loading": "Laddar studenter...",
-    "noLearners": "Inga studenter ännu.",
+    "title": "Deltagarnas framsteg",
+    "subtitle": "Följ deltagarnas utveckling.",
+    "loading": "Laddar deltagare...",
+    "noLearners": "Inga deltagare ännu.",
     "lastActivity": "Senaste aktivitet:",
     "never": "Aldrig",
     "noMockExams": "Inga övningsprov ännu.",
@@ -294,14 +310,28 @@
     "notPassed": " · Ej godkänd",
     "best": "Bästa:",
     "noPracticeResults": "Inga övningsresultat ännu.",
-    "loadFailed": "Kunde inte ladda studenternas framsteg. Försök igen.",
+    "loadFailed": "Kunde inte ladda deltagarnas framsteg. Försök igen.",
     "backToList": "Tillbaka till listan",
     "loadingOne": "Laddar...",
     "notFound": "Användaren finns inte.",
     "admins": "Administratörer",
-    "students": "Studenter",
-    "noStudents": "Inga studenter ännu.",
-    "listSubtitle": "Välj en person för att se framstegen."
+    "students": "Deltagare",
+    "noStudents": "Inga deltagare ännu.",
+    "listSubtitle": "Välj en person för att se framstegen.",
+    "detail": {
+      "dangerZoneTitle": "Riskzon",
+      "dangerZoneText": "Om du tar bort kontot raderas det permanent. Alla deltagarens svar och all statistik försvinner. Detta kan inte ångras.",
+      "deleteButton": "Ta bort deltagarkonto",
+      "deleteConfirmTitle": "Ta bort {{name}}s konto?",
+      "deleteConfirmText": "{{name}}s konto, alla deras svar och all deras statistik raderas permanent. Detta kan inte ångras.",
+      "deleteConfirmCancel": "Avbryt",
+      "deleteConfirmButton": "Ta bort konto",
+      "deleteConfirmDeleting": "Tar bort…",
+      "deleteFailed": "Kunde inte ta bort kontot. Försök igen."
+    },
+    "list": {
+      "deleteSuccess": "{{name}}s konto har tagits bort."
+    }
   },
   "questionBank": {
     "title": "Admin - Frågebank",
@@ -485,7 +515,7 @@
       "description": "Svara på slumpmässiga frågor från alla ämnen.",
       "feature1": "Slumpade frågor",
       "feature2": "Förbättra din helhetskunskap",
-      "button": "Välj"
+      "button": "Starta Quiz"
     },
     "mockExam": {
       "title": "Övningsprov",
@@ -500,8 +530,8 @@
     "alt": "Bild för fråga: {{questionText}}"
   },
   "brand": {
-    "title": "JÄGAREXAMEN TRÄNARE",
-    "logoAlt": "Jägarexamen Tränare logotyp"
+    "title": "JägarQuizzen",
+    "logoAlt": "JägarQuizzen logotyp"
   },
   "feedback": {
     "title": "Ge feedback",
@@ -528,7 +558,7 @@
     },
     "admin": {
       "title": "Feedback",
-      "subtitle": "Meddelanden och felrapporter från studenterna.",
+      "subtitle": "Meddelanden och felrapporter från deltagarna.",
       "typeFilter": "Typ",
       "allTypes": "Alla typer",
       "showHandled": "Visa hanterade",

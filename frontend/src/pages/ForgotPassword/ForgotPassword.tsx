@@ -28,9 +28,9 @@ const ForgotPassword = () => {
             setError("");
             setMessage("");
 
-            const response = await forgotPassword(email);
+            await forgotPassword(email);
 
-            setMessage(response.message);
+            setMessage(t("forgotPassword.sent"));  // Swedish text from sv.json, not the backend's English message (#209)
 
         } catch (error) {
             setError(error instanceof Error ? error.message : t("forgotPassword.defaultError"));
