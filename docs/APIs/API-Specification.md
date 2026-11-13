@@ -105,7 +105,9 @@ answers. `409 Conflict` if there are fewer than 70 questions.
 
 Any mock exam of the same student that is still running (tab closed, abandoned
 through the menu, ...) is closed **without scoring it** first, so at most one
-mock exam can be open at a time. Practice rounds are never touched by this.
+mock exam can be open at a time; its answers given within the time limit count
+in statistics as usual (see "Counted answers" below). Practice rounds are never
+touched by this.
 
 ```json
 {
@@ -144,8 +146,9 @@ mock exam can be open at a time. Practice rounds are never touched by this.
 - Submitting closes the exam (no more answers or submits) and adds each
   answered question to the student's per-subject totals.
 - `400` if more than 60 minutes (+ 2 minutes grace) have passed since start: the
-  exam is closed, but not scored. `409` if already submitted, `403` if it
-  belongs to another user, `404` if it doesn't exist.
+  exam is closed, but not scored. Its answers given within the time limit still
+  count in statistics as usual (see "Counted answers" below). `409` if already
+  submitted, `403` if it belongs to another user, `404` if it doesn't exist.
 
 Response:
 
@@ -157,9 +160,11 @@ Response:
 
 No request body. Ends the student's running mock exam **without scoring it**:
 the attempt is closed (finish time set, `scored` stays `false`), so it can never
-be answered or submitted again and never appears as a result, in statistics, or
-in the subject totals. Used when the student confirms leaving a running exam
-through the menu or the browser's back button.
+be answered or submitted again and never appears as a result or in the mock exam
+summary. Its answers given within the time limit count in statistics as usual
+(see "Counted answers" below), exactly once no matter how often the exam is
+ended afterwards. Used when the student confirms leaving a running exam through
+the menu or the browser's back button.
 
 - Response: `204 No Content`.
 - `409` if the exam is already submitted or abandoned (treat as "already
@@ -186,11 +191,15 @@ The `mockExams` field is a separate object so it can be filtered out per student
 The statistics are calculated from the stored answers (`attempts`,
 `attempt_questions`) and the per-subject totals (`subject_stats`).
 
-- **Counted answers:** every answered practice question, and the answers of
-  **scored** mock exams. A mock exam is scored when it was submitted in time;
-  open exams and late submits (`400`) don't count anywhere. Unanswered
-  questions are not counted as answers (in a mock exam's score they count as
-  not correct).
+- **Counted answers:** every answered practice question, and every answer a
+  student gave **within a mock exam's time limit** (start + 60 minutes +
+  2 minutes grace) — no matter whether the exam ends as a scored result
+  (submitted in time) or without one (abandon #186, late submit `400`,
+  closed by starting the next exam). Such an answer counts exactly once, no
+  matter how often or through which path the exam is ended afterwards;
+  answers given after the limit don't count, and an exam that is still open
+  counts nothing yet. Unanswered questions are not counted as answers (in a
+  scored mock exam's score they count as not correct).
 - **Per subject** (`/api/statistics/subjects`, `subjectPerformances` in
   `/api/admin/learners/{userId}`): `percentage` = correct ÷ answered over all counted
   answers in the subject, rounded. Only subjects with at least one answer are

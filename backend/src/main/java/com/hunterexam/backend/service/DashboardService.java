@@ -17,9 +17,11 @@ import java.util.List;
  * Fetch dashboard details.
  * <p>
  * The cards (mock exams, questions answered, average and best score) and the
- * recent mock exams. Mock exam figures come from scored mock exams only
- * (open or late exams don't count); "questions answered" counts every
- * answered question, practice and mock exams, from {@code SubjectStats}.
+ * recent mock exams. The score cards and the recent list come from scored
+ * mock exams only (open and late exams never produce a score); "questions
+ * answered" counts every counted answer, practice and mock exam answers
+ * alike, from {@code SubjectStats} — including the in-window answers of mock
+ * exams that ended without a result (#187).
  */
 @Service
 public class DashboardService {
