@@ -1,8 +1,8 @@
 # Test: release test of `develop` before updating `main`
 
 - **Date:** 2026-11-13
-- **Branch / commit:** `develop` at `9243b94` (Merge PR #226)
-- **Related issues:** #212, #194, #216, #209, #211, #222 (PRs #213, #215, #217, #218, #219, #220, #226)
+- **Branch / commit:** `develop` at `9243b94` (Merge PR #226); row 8 and the second frontend run at `923f012` (Merge PR #228)
+- **Related issues:** #212, #194, #216, #209, #211, #222, #207 (PRs #213, #215, #217, #218, #219, #220, #226, #227, #228)
 
 ## What we tested and why
 
@@ -11,7 +11,9 @@ Since then `develop` has added the Terms of Use and Privacy Policy pages,
 account deletion (by the user and by an admin), a check that rejects the
 login token of a deleted user on every request, the deployed password reset
 email, the login button on the 404 page, a shared base for controller tests
-and the new app and menu names. No table or setting changed. This round
+and the new app and menu names. PR #228 (practice page buttons stay in
+place, #207) was merged during this round; row 8 and a second frontend
+run cover it. No table or setting changed. This round
 tests only what changed; each PR was tested in detail before it was merged.
 
 ## How
@@ -27,6 +29,7 @@ created in row 2. The password reset email is checked on the deployed app after 
 | Backend tests | `./mvnw test` (in `backend/`) | ❌ on `develop`: `AdminLearnerControllerTests` didn't compile (`LearnerProgressResponse` got a `role` field in #220). Fixed in one line on `fix/learner-progress-test-role`; then ✅ 235 tests, 0 failures |
 | Frontend tests | `npx vitest run` (in `frontend/`) | ✅ 44 files, 297 tests passed |
 | Frontend build | `npm run build` (in `frontend/`) | ✅ built, no errors |
+| Frontend tests and build again, with #228 | `npx vitest run`, `npm run build` | ✅ 44 files, 297 tests passed; built, no errors |
 
 ### Manual
 
@@ -41,9 +44,11 @@ Mark each row ✅ (as expected), ❌ (not as expected; note what happened) or �
 | 5 | In the student's browser: click any menu item | Logged out / sent to login; logging in again fails | #194 | ✅ Next click sent the deleted user to `/login?expired=1` with "Din session har gått ut. Vänligen logga in igen." (see Notes). Logging in again not tried |
 | 6 | Register a second throwaway account; Profil → "Ta bort konto" with its password | Logged out; logging in again fails | #194 | ✅ "Delete Test": Profil → Riskzon shows the warning and a password field; "Ta bort mitt konto" → login page. Logging in again not tried. Small findings in Notes |
 | 7 | Open an unknown URL (e.g. `/xyz`) logged out, then logged in | Logged out: a login button; logged in: "Gå till Hem" | #211, #222 | ✅ `/loginnnnn` logged out: "Gå till inloggningen"; `/dashboardddd` logged in: "Gå till Hem" |
+| 8 | Quiz by subject, desktop and a phone-sized window: answer several questions of different length, check answers, go to the next; finish the round | Föregående / Nästa stay in the same place; a new question opens at its start; buttons don't cover the feedback; the result page has no large empty area | #207 | ✅ Phone-sized window (312 × 464): Föregående / Nästa (Slutför on the last question) stay pinned at the bottom for short and long questions and after checking; "Fråga 2 av 7" opens at its start. On this small screen the last line of the feedback or "Rapportera fel i frågan" can sit under the bar (see Notes) |
 
 ## Notes
 
 - Row 5: a deleted user sees "Din session har gått ut" (your session has expired). The user is logged out cleanly, but the message doesn't say the account was removed. Fine for now; a clearer message could be a small later fix.
+- Row 8: on a very small screen (312 × 464) the end of the answer feedback, or the "Rapportera fel i frågan" link, can be hidden under the pinned button bar. A clear improvement over before; the remaining part could be a small follow-up for #207.
 - Row 6: in the delete-account form, "Avbryt" is an unstyled browser button next to the styled red button, and the "Nuvarande lösenord" label sits tight against its field. Cosmetic only.
 
