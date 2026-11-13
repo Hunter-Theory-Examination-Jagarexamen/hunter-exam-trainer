@@ -28,7 +28,7 @@ describe("NotFound", () => {
 
         renderNotFound();
 
-        const link = screen.getByRole("link", { name: "Gå till instrumentpanelen" });
+        const link = screen.getByRole("link", { name: "Gå till Hem" });
         expect(link).toHaveAttribute("href", "/dashboard");
     });
 

@@ -31,7 +31,7 @@ describe("Admin overview cards", () => {
         const subjects = screen.getByRole("link", {name: /Ämnen|Subjects/i});
         expect(subjects).toHaveAttribute("href", "/admin/subjects");
         expect(subjects).toHaveTextContent("5");
-        const learners = screen.getByRole("link", {name: /Elever|Learners|Studenter/i});
+        const learners = screen.getByRole("link", {name: /Deltagare|Participants/i});
         expect(learners).toHaveAttribute("href", "/admin/learners");
         expect(learners).toHaveTextContent("17");
         const feedback = screen.getByRole("link", {name: /Feedback/});

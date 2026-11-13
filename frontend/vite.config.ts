@@ -15,8 +15,8 @@ export default defineConfig({
         overrideManifestIcons: true,
       },
       manifest: {
-        name: 'Jägarexamen Tränare',
-        short_name: 'Jägarexamen',
+        name: 'JägarQuizzen',
+        short_name: 'JägarQuizzen',
         description: 'Övningsapp för teoriprovet i jägarexamen',
         theme_color: '#863bff',
         background_color: '#ffffff',
