@@ -167,7 +167,17 @@
     "deleteAccountButton": "Ta bort konto",
     "deleteAccountWarning": "Ditt konto, alla dina svar och all din statistik raderas permanent. Detta kan inte ångras. Säkerhetskopior rensas helt inom några dagar.",
     "deleteAccountConfirm": "Ta bort mitt konto",
-    "deletingAccount": "Tar bort..."
+    "deletingAccount": "Tar bort...",
+    "resultSharingTitle": "Resultat som delas",
+    "resultSharingText": "Välj vilka av dina resultat som kursledningen ska kunna se. Allt är dolt som standard och visas bara för dig.",
+    "resultSharingLoading": "Laddar dina delningsinställningar...",
+    "shareSubjectStatisticsLabel": "Ämnesstatistik (resultat från quiz och övningsprov)",
+    "shareMockExamResultsLabel": "Övningsprovresultat",
+    "resultSharingSaveButton": "Spara inställningar",
+    "resultSharingSaving": "Sparar...",
+    "resultSharingSuccess": "Dina inställningar har sparats",
+    "resultSharingLoadError": "Kunde inte ladda dina delningsinställningar. Försök igen.",
+    "resultSharingSaveError": "Kunde inte spara dina inställningar. Försök igen."
   },
   "mockExam": {
     "title": "Övningsprov",
@@ -310,6 +320,9 @@
     "notPassed": " · Ej godkänd",
     "best": "Bästa:",
     "noPracticeResults": "Inga övningsresultat ännu.",
+    "nothingShared": "Deltagaren har inte delat några resultat.",
+    "notShared": "Inte delad av deltagaren.",
+    "noSharedActivity": "Ingen aktivitet i de delade resultaten.",
     "loadFailed": "Kunde inte ladda deltagarnas framsteg. Försök igen.",
     "backToList": "Tillbaka till listan",
     "loadingOne": "Laddar...",

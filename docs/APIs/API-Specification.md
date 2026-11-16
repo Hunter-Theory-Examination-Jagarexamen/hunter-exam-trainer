@@ -13,6 +13,8 @@ endpoints are added to this table, not duplicated elsewhere.
 | GET    | /api/auth/google/status       | Whether Google login is enabled                 | Public           |
 | GET    | /api/users/me                 | Get logged-in user's profile                    | Required         |
 | PUT    | /api/users/me/password        | Change the logged-in user's password            | Required         |
+| GET    | /api/users/me/result-sharing  | Get the logged-in student's result sharing choices | Required      |
+| PUT    | /api/users/me/result-sharing  | Replace the logged-in student's result sharing choices | Required   |
 | GET    | /api/subjects                 | Get all subjects and question counts            | Required         |
 | GET    | /api/subjects/{id}            | Get one subject                                 | Required         |
 | POST   | /api/admin/subjects           | Create a new subject                            | Required (ADMIN) |
@@ -178,13 +180,65 @@ the menu or the browser's back button.
   sorted by name.
 - `GET /api/admin/learners/{userId}` returns one user's progress (student or
   admin) with `userId`, `fullName`, `email`, `createdAt` and:
-- `subjectPerformances` — performance per subject, weakest first (same numbers as `/api/statistics/subjects`)
-- `mockExams` — mock exam summary (count, latest/best score, latest pass/fail), scored mock exams only
-- `lastActivityAt` — the latest answer (practice or mock exam) or mock exam submit; `null` if none
+- `subjectPerformances` — performance per subject, weakest first (same numbers as `/api/statistics/subjects`); `null` when the student has not shared this category
+- `mockExams` — mock exam summary (count, latest/best score, latest pass/fail), scored mock exams only; `null` when the student has not shared this category
+- `lastActivityAt` — the latest answer (practice or mock exam) or mock exam submit **among the shared categories**; `null` if there is none (including when nothing is shared)
 
 **Question note:** `correctAnswer` in `POST/PUT /api/admin/questions` must be a single letter A–D, matching the correct option's position. (Previously it was the option's text; see #155.)
 
-The `mockExams` field is a separate object so it can be filtered out per student in a future sharing feature (#125).
+## Result sharing: what course leaders see (#125)
+
+Students choose per result category whether course leaders (admins) may see
+their results. **Default: private** — both flags are `false` for new students
+and for students who existed before this feature, so nobody is shared without
+opting in.
+
+Two categories, matching what the admin endpoint actually returns:
+
+- `shareSubjectStatistics` — the per-subject performance in Learner Progress.
+  The per-subject totals mix practice answers and mock exam answers, so the
+  two cannot be separated reliably; one flag covers both.
+- `shareMockExamResults` — the scored mock exam summary (count, latest/best
+  score, pass/fail).
+
+### `GET /api/users/me/result-sharing`
+
+Returns the caller's own choices. The owner comes from the JWT; there is no id
+in the URL or body.
+
+```json
+{ "shareSubjectStatistics": false, "shareMockExamResults": false }
+```
+
+### `PUT /api/users/me/result-sharing`
+
+```json
+{ "shareSubjectStatistics": true, "shareMockExamResults": false }
+```
+
+- Both fields are required booleans; a missing field answers `400`. The
+  response is the persisted state, which is also what the next read returns.
+- The owner is always the authenticated user, so no student can read or change
+  another student's preferences, whatever the body contains.
+- Students always see **all** of their own results (`/api/statistics/subjects`,
+  `/api/statistics/progress`, `/api/dashboard`, ...) regardless of these
+  choices; only admin reads are filtered.
+
+### How the admin response is filtered
+
+`GET /api/admin/learners/{userId}` is filtered in the backend before the
+response DTO is built:
+
+- a category the student has not shared is `null` — never an empty list or a
+  zero-filled summary that could be misread as "no performance";
+- `lastActivityAt` is derived only from shared categories, so hidden answers
+  cannot leak through a timestamp;
+- hidden categories are not read from the database at all.
+
+No other admin endpoint returns individual student results (`GET
+/api/admin/learners` is names and roles only, `GET /api/admin/stats` is
+counts). These are technical controls only; they do not by themselves
+guarantee GDPR compliance.
 
 ## Statistics: what the numbers count
 
@@ -203,7 +257,8 @@ The statistics are calculated from the stored answers (`attempts`,
 - **Per subject** (`/api/statistics/subjects`, `subjectPerformances` in
   `/api/admin/learners/{userId}`): `percentage` = correct ÷ answered over all counted
   answers in the subject, rounded. Only subjects with at least one answer are
-  listed. Student and admin see the same numbers.
+  listed. The student always sees their own numbers; an admin only sees them
+  when the student shares that category (see "Result sharing" above).
 - **Progress over time** (`/api/statistics/progress?weeks=N`): one point per
   week (Monday) with counted answers, oldest first; `accuracy` = correct ÷
   answered that week, `questionsAnswered` = answers that week.

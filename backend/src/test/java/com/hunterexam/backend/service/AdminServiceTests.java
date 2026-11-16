@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,6 +57,12 @@ class AdminServiceTests {
         learner.setEmail("learner@test.com");
         learner.setRole(Role.STUDENT);
         learner.setCreatedAt(LocalDateTime.now().minusDays(30));
+        // These tests are about aggregation, so the learner shares everything;
+        // the private-by-default behaviour and the filtering itself are
+        // covered by the tests at the bottom of this class and by
+        // StudentResultSharingIntegrationTests.
+        learner.setShareSubjectStatistics(true);
+        learner.setShareMockExamResults(true);
     }
 
     /** One scored mock exam of the learner, as the grouped query returns it. */
@@ -221,6 +228,70 @@ class AdminServiceTests {
         assertEquals(71, lr.mockExams().latestScore());
         assertEquals(90, lr.mockExams().bestScore());
         assertFalse(lr.mockExams().latestPassed());   // 50 of 70
+    }
+
+    // ----- Sharing choices (#125): hidden results never reach the response -----
+
+    @Test
+    void hiddenSubjectStatisticsAreNotReturnedNorQueried() {
+        learner.setShareSubjectStatistics(false);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(learner));
+
+        LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
+
+        assertNull(lr.subjectPerformances());
+        // Not even an empty stand-in that could be read as "no answers".
+        verifyNoInteractions(subjectStatsRepository);
+    }
+
+    @Test
+    void hiddenMockExamsAreNotReturnedNorQueried() {
+        learner.setShareMockExamResults(false);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(learner));
+
+        LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
+
+        assertNull(lr.mockExams());
+        verifyNoInteractions(attemptQuestionRepository);
+    }
+
+    @Test
+    void partiallySharedProgressShowsOnlyTheSharedCategory() {
+        learner.setShareMockExamResults(false);
+        LocalDateTime practiceTime = LocalDateTime.now().minusDays(1);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(learner));
+        when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner)))
+                .thenReturn(List.of(stats(learner, subject(3L, "Ekologi"), 10, 8, practiceTime)));
+
+        LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
+
+        assertEquals(1, lr.subjectPerformances().size());
+        assertEquals(80, lr.subjectPerformances().getFirst().getPercentage());
+        assertNull(lr.mockExams());
+        assertEquals(practiceTime, lr.lastActivityAt());   // only from the shared category
+        verifyNoInteractions(attemptQuestionRepository);
+    }
+
+    @Test
+    void nothingSharedMeansNoResultsAndNoLastActivity() {
+        learner.setShareSubjectStatistics(false);
+        learner.setShareMockExamResults(false);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(learner));
+
+        LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
+
+        assertNull(lr.subjectPerformances());
+        assertNull(lr.mockExams());
+        assertNull(lr.lastActivityAt());
+        verifyNoInteractions(subjectStatsRepository, attemptQuestionRepository);
+    }
+
+    @Test
+    void newAccountsArePrivateByDefault() {
+        User fresh = new User();
+
+        assertFalse(fresh.isShareSubjectStatistics());
+        assertFalse(fresh.isShareMockExamResults());
     }
 
     @Test

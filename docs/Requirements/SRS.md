@@ -270,6 +270,15 @@ The system shall provide each user with a personal profile containing account in
 | FR-031 | The system shall allow users to update their personal information.        | Low      |
 | FR-032 | The system shall allow users to change their password.                    | Medium   |
 | FR-033 | The system shall display the total number of quizzes and exams completed. | Medium   |
+| FR-053 | The system shall let students choose, per result category, which of their results course leaders may see, and let them change that choice at any time. | High |
+
+Result sharing granularity (#125): two categories — **subject statistics**
+(the per-subject totals mix practice and mock exam answers, so those cannot be
+separated) and **mock exam results**. The default is **private** for new and
+existing students: nothing is shared until the student opts in. Students always
+see all of their own results; the sharing choice only controls what course
+leaders receive. These are technical controls, not a guarantee of GDPR
+compliance.
 
 ## 3.7 Administration Panel
 
@@ -289,6 +298,7 @@ The system shall provide an administration interface that enables instructors to
 | FR-050 | The system shall allow administrators to read student feedback, filter it by type and mark it as handled, without seeing who sent it. | High    |
 | FR-051 | The system shall let administrators open a reported question from the feedback. | Medium  |
 | FR-052 | The system shall list all users by name, administrators first, so administrators can see who has admin access and open each user's progress. | Medium  |
+| FR-054 | The system shall show administrators a student's results only for the categories the student has shared, and shall never return hidden results in an admin response. | High    |
 
 
 ## 3.8 General System Functions
