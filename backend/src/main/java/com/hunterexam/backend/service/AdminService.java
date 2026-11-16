@@ -35,6 +35,7 @@ public class AdminService {
     private final SubjectRepository subjectRepository;
     private final SubjectStatsRepository subjectStatsRepository;
     private final FeedbackRepository feedbackRepository;
+    private final StatisticsService statisticsService;
 
     public AdminService(
             UserRepository userRepository,
@@ -42,7 +43,8 @@ public class AdminService {
             QuestionRepository questionRepository,
             SubjectRepository subjectRepository,
             SubjectStatsRepository subjectStatsRepository,
-            FeedbackRepository feedbackRepository
+            FeedbackRepository feedbackRepository,
+            StatisticsService statisticsService
     ) {
         this.userRepository = userRepository;
         this.attemptQuestionRepository = attemptQuestionRepository;
@@ -50,6 +52,7 @@ public class AdminService {
         this.subjectRepository = subjectRepository;
         this.subjectStatsRepository = subjectStatsRepository;
         this.feedbackRepository = feedbackRepository;
+        this.statisticsService = statisticsService;
     }
 
     /**
@@ -128,10 +131,7 @@ public class AdminService {
         // zero performance. Same calculation as the student's own Statistics
         // page; weakest subject first. The queries only run when shared.
         List<SubjectPerformanceResponse> perSubject = shareSubjectStatistics
-                ? StatisticsService.toSubjectMastery(
-                                attemptQuestionRepository.findCountedAnswers(learner),
-                                subjectRepository.findQuestionCounts())
-                        .stream()
+                ? statisticsService.subjectMasteryFor(learner).stream()
                         .sorted(Comparator.comparingLong(SubjectPerformanceResponse::getPercentage))
                         .toList()
                 : null;

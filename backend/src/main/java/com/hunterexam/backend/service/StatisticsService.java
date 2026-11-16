@@ -61,8 +61,18 @@ public class StatisticsService {
      */
     public List<SubjectPerformanceResponse> getSubjectPerformance(String email) {
 
-        User user = findUser(email);
+        return subjectMasteryFor(findUser(email));
+    }
 
+    /**
+     * Mastery per subject for one student. Shared by the Statistics page and
+     * the admin's Learner Progress ({@code AdminService}), so a student and an
+     * admin always see the same numbers.
+     *
+     * @param user the student
+     * @return one row per subject that has questions
+     */
+    public List<SubjectPerformanceResponse> subjectMasteryFor(User user) {
         return toSubjectMastery(
                 attemptQuestionRepository.findCountedAnswers(user),
                 subjectRepository.findQuestionCounts());
@@ -73,15 +83,14 @@ public class StatisticsService {
      * Subjects without answers yet are included (0 mastered); subjects without
      * questions are left out (nothing to master).
      * <p>
-     * {@code static} because it only uses its arguments, so
-     * {@code AdminService} can call it for Learner Progress with rows it
-     * loaded itself, and a student and an admin always see the same numbers.
+     * {@code static} because it only uses its arguments: no database, so a
+     * test can call it directly with answers it made up.
      *
      * @param answers  the student's counted answers, oldest first
      * @param subjects every subject with its number of questions
      * @return one row per subject with questions, in the order of {@code subjects}
      */
-    public static List<SubjectPerformanceResponse> toSubjectMastery(
+    static List<SubjectPerformanceResponse> toSubjectMastery(
             List<CountedAnswer> answers,
             List<SubjectQuestionCount> subjects
     ) {
