@@ -78,17 +78,31 @@ class AttemptQuestionRepositoryTests {
     /**
      * Saves a 4-question round. {@code answers} holds one entry per question:
      * {@code true} = right, {@code false} = wrong, {@code null} = not answered.
+     * The round started 2 hours ago and its answers were given 1 hour ago,
+     * i.e. inside the 60 + 2 minute answer window.
      */
     private Attempt saveRound(User user, AttemptType type, LocalDateTime finishedAt,
                               boolean scored, Boolean... answers) {
-        Attempt attempt = new Attempt(user, type, now.minusHours(2));
+        return saveRound(user, type, now.minusHours(2), now.minusHours(1),
+                finishedAt, scored, answers);
+    }
+
+    /**
+     * Overload with explicit timestamps, for tests about the answer window:
+     * the round started at {@code startedAt} and its answers were given at
+     * {@code answeredAt}.
+     */
+    private Attempt saveRound(User user, AttemptType type, LocalDateTime startedAt,
+                              LocalDateTime answeredAt, LocalDateTime finishedAt,
+                              boolean scored, Boolean... answers) {
+        Attempt attempt = new Attempt(user, type, startedAt);
         attempt.setFinishedAt(finishedAt);
         attempt.setScored(scored);
         attempts.saveAndFlush(attempt);
         for (int i = 0; i < bank.size(); i++) {
             AttemptQuestion row = new AttemptQuestion(attempt, bank.get(i), i + 1);
             if (answers[i] != null) {
-                row.recordAnswer(answers[i] ? "A" : "B", answers[i], now.minusHours(1));
+                row.recordAnswer(answers[i] ? "A" : "B", answers[i], answeredAt);
             }
             attemptQuestions.saveAndFlush(row);
         }
@@ -141,8 +155,9 @@ class AttemptQuestionRepositoryTests {
     }
 
     @Test
-    void countedAnswersArePracticeAndScoredExamsOnly() {
-        // Arrange: saveRound gives every answer the time now - 1 hour
+    void countedAnswersArePracticeScoredAndEndedExamsButNotOpenOnes() {
+        // Arrange: saveRound gives every answer 1 hour after the 2-hour-old
+        // start, i.e. inside the answer window
         User other = saveUser("other@example.test");
         saveRound(student, AttemptType.SUBJECT_PRACTICE, null, false,       // practice, still open: counts
                 true, false, null, null);
@@ -150,7 +165,7 @@ class AttemptQuestionRepositoryTests {
                 true, true, true, null);
         saveRound(student, AttemptType.MOCK_EXAM, null, false,              // open exam: doesn't
                 true, true, true, true);
-        saveRound(student, AttemptType.MOCK_EXAM, now, false,               // late exam: doesn't
+        saveRound(student, AttemptType.MOCK_EXAM, now, false,               // ended without a result: counts (#187)
                 true, true, true, true);
         saveRound(other, AttemptType.SUBJECT_PRACTICE, now, false,          // another student: doesn't
                 true, true, true, true);
@@ -158,9 +173,32 @@ class AttemptQuestionRepositoryTests {
         // Act
         List<AnswerOutcome> answers = attemptQuestions.findCountedAnswersSince(student, now.minusDays(1));
 
-        // Assert: 2 practice answers + 3 exam answers; unanswered rows left out
-        assertEquals(5, answers.size());
-        assertEquals(4, answers.stream().filter(AnswerOutcome::isCorrect).count());
+        // Assert: 2 practice + 3 scored + 4 ended-exam answers; unanswered
+        // rows left out, open exams and other students too
+        assertEquals(9, answers.size());
+        assertEquals(8, answers.stream().filter(AnswerOutcome::isCorrect).count());
+    }
+
+    @Test
+    void countedAnswersLeaveOutAnswersAfterTheExamWindow() {
+        // Arrange: three mock exams ended without a result. The answer
+        // window is start + 60 minutes limit + 2 minutes grace (#187).
+        saveRound(student, AttemptType.MOCK_EXAM,
+                now.minusHours(3), now.minusHours(3).plusMinutes(10), now, false,
+                true, null, null, null);                                   // start + 10 min: counts
+        saveRound(student, AttemptType.MOCK_EXAM,
+                now.minusHours(2), now.minusHours(2).plusMinutes(62), now, false,
+                true, null, null, null);                                   // exactly the deadline: counts
+        saveRound(student, AttemptType.MOCK_EXAM,
+                now.minusHours(3), now.minusHours(3).plusMinutes(90), now, false,
+                true, null, null, null);                                   // start + 90 min: doesn't
+
+        // Act
+        List<AnswerOutcome> answers = attemptQuestions.findCountedAnswersSince(student, now.minusDays(1));
+
+        // Assert: the in-window answers (including the one exactly on the
+        // deadline), not the one given after it
+        assertEquals(2, answers.size());
     }
 
     @Test
@@ -175,9 +213,10 @@ class AttemptQuestionRepositoryTests {
     }
 
     @Test
-    void abandonedExamsAreNeitherResultsNorCountedAnswers() {
-        // Arrange: an abandoned exam (#186) is closed but never scored, even
-        // though its answers are saved on its rows.
+    void abandonedExamsAreNotResultsButTheirInWindowAnswersCount() {
+        // Arrange: an abandoned exam (#186) is closed and never scored, even
+        // though its answers are saved on its rows — but those answers now
+        // count toward the statistics (#187).
         saveRound(student, AttemptType.MOCK_EXAM, now, false,
                 true, true, false, true);
 
@@ -185,8 +224,9 @@ class AttemptQuestionRepositoryTests {
         List<MockExamScore> scores = attemptQuestions.findScoredMockExams(List.of(student));
         List<AnswerOutcome> answers = attemptQuestions.findCountedAnswersSince(student, now.minusDays(1));
 
-        // Assert: no result, and its answers don't count toward statistics
+        // Assert: no result, but its four in-window answers count (3 right)
         assertTrue(scores.isEmpty());
-        assertTrue(answers.isEmpty());
+        assertEquals(4, answers.size());
+        assertEquals(3, answers.stream().filter(AnswerOutcome::isCorrect).count());
     }
 }

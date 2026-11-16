@@ -52,8 +52,9 @@ import java.util.stream.Collectors;
  *   <li><b>Mock exam (this class):</b> like the real exam, the student can
  *       change an answer as often as they like until they submit, and sees
  *       nothing about correctness before that. The answers are added to
- *       the per-subject totals only once, at submit, so a changed answer
- *       isn't counted twice. There is also a time limit.</li>
+ *       the per-subject totals once, when the exam ends — at submit, or
+ *       when it ends without a result (#187) — so a changed answer or a
+ *       repeated ending isn't counted twice. There is also a time limit.</li>
  * </ul>
  * One shared service would need "if practice … else exam" checks in most
  * methods. Two services keep each set of rules in one readable place;
@@ -68,6 +69,9 @@ public class ExamService {
     /**
      * A short grace period after the time limit, so a submit that arrives
      * seconds late (slow connection, timer edge case) is still accepted.
+     * It also bounds the answer window: only answers given at most
+     * {@code limit + grace} minutes after the exam's start ever count
+     * (#187), and the progress chart applies the same bound.
      */
     private static final long SUBMIT_GRACE_MINUTES = 2;
 
@@ -99,7 +103,8 @@ public class ExamService {
      * given. Returns them without the correct answers.
      * <p>
      * Any mock exam the student left running is closed first, without
-     * scoring it (#186), so there is never more than one open exam.
+     * scoring it (#186), so there is never more than one open exam. Its
+     * answers given within the time limit still count (#187).
      *
      * @param email email of the logged-in user
      * @return the attempt id and the 70 questions
@@ -120,8 +125,10 @@ public class ExamService {
 
         // One open mock exam per student: an earlier exam left running (tab
         // closed, abandoned through the menu, ...) is closed without scoring
-        // it, so at most one exam can be running. Same idea as practice
-        // start; only mock exams are closed, never practice rounds.
+        // it — its in-window answers are counted once, through the same
+        // ending as abandonment (#187) — so at most one exam can be running.
+        // Same idea as practice start; only mock exams are closed, never
+        // practice rounds.
         for (Attempt leftExam : attemptRepository.findByUserAndFinishedAtIsNullAndTypeIn(
                 user, Set.of(AttemptType.MOCK_EXAM))) {
             endWithoutScore(leftExam);
@@ -221,18 +228,20 @@ public class ExamService {
     }
 
     /**
-     * Ends a running mock exam without scoring it (#186).
+     * Ends a running mock exam without scoring it (#186), counting the
+     * answers it holds within the time limit into the statistics (#187).
      * <p>
      * Called when the student confirms leaving through the menu or the
-     * browser's back button, and it is the only way an exam ends without a
-     * result: the exam is closed ({@code finishedAt} set, {@code scored}
-     * stays false), so it can't be answered or submitted again and never
-     * appears as a result, in statistics, or in the subject totals. The
-     * student's answers stay on the server but count for nothing.
+     * browser's back button. The exam is closed ({@code finishedAt} set,
+     * {@code scored} stays false), so it can't be answered or submitted
+     * again and never appears as a result or in scored-exam statistics —
+     * but the answers given within the permitted window do count, exactly
+     * like practice answers, in the per-subject totals.
      * <p>
-     * {@link #endWithoutScore} is the one place an exam is closed this way;
-     * starting a new exam closes an earlier one the same way, and future
-     * changes to ending an exam without a result belong there too.
+     * {@link #endWithoutScore} is the one place an exam ends this way;
+     * starting a new exam closes an earlier one the same way, a late
+     * submit ends up there too, and future changes to ending an exam
+     * without a result belong there too.
      *
      * @param attemptId the exam (its attempt id)
      * @param email     email of the logged-in user
@@ -243,15 +252,62 @@ public class ExamService {
     }
 
     /**
-     * Closes an exam without scoring it: sets {@code finishedAt} and leaves
-     * {@code scored} false (it is only ever set true by a timed submit).
-     * Used by {@link #abandonExam} and by {@link #startExam} for exams that
-     * were left running.
+     * Closes an exam without scoring it: sets {@code finishedAt}, leaves
+     * {@code scored} false (it is only ever set true by an in-time submit),
+     * and counts the answers given within the time limit into the
+     * per-subject totals (#187). Used by {@link #abandonExam}, by
+     * {@link #startExam} for exams that were left running, and by
+     * {@link #submitExam} for a submit that arrived too late.
+     * <p>
+     * The close is an atomic "only if still open" update
+     * ({@link AttemptRepository#finishIfOpen}), and the counting happens in
+     * the same transaction as the request that won it. A repeated or
+     * concurrent ending of the same exam loses that update and counts
+     * nothing, so every answer is counted exactly once no matter how many
+     * times, or through which path, the exam is ended.
      */
     private void endWithoutScore(Attempt exam) {
-        exam.setFinishedAt(LocalDateTime.now());
+        LocalDateTime now = LocalDateTime.now();
+
+        if (attemptRepository.finishIfOpen(exam.getId(), now) == 0) {
+            // Another request already ended this exam (and counted its
+            // answers): do nothing rather than count them a second time.
+            return;
+        }
+
+        exam.setFinishedAt(now);
         exam.setScored(false);
-        attemptRepository.save(exam);
+        countAnswersWithinTimeLimit(exam);
+    }
+
+    /**
+     * Adds the exam's answers that fall within the permitted answer window
+     * to the student's per-subject totals, keeping each answer's original
+     * {@code answeredAt} so time-based statistics group it where it was
+     * given.
+     * <p>
+     * The window is the exam's time limit ({@value #EXAM_TIME_LIMIT_MINUTES}
+     * minutes) plus the same grace as submit ({@value #SUBMIT_GRACE_MINUTES}
+     * minutes), measured from the exam's stored start — an answer counts
+     * iff {@code answeredAt <= startedAt + limit + grace}, the same rule the
+     * progress chart applies. Answers after that instant, and unanswered
+     * questions, are not counted. Uses only server-side timestamps; the
+     * client has no say in them.
+     * <p>
+     * Only used when an exam ends without a result: a scored submit counts
+     * its answers itself, unchanged.
+     */
+    private void countAnswersWithinTimeLimit(Attempt exam) {
+        LocalDateTime deadline = exam.getStartedAt()
+                .plusMinutes(EXAM_TIME_LIMIT_MINUTES + SUBMIT_GRACE_MINUTES);
+
+        for (AttemptQuestion row : attemptQuestionRepository.findByAttemptIdOrderByPosition(exam.getId())) {
+            if (!row.isAnswered() || row.getAnsweredAt().isAfter(deadline)) {
+                continue;
+            }
+            boolean correct = Boolean.TRUE.equals(row.getCorrect());
+            addToSubjectStats(exam.getUser(), row.getQuestion().getSubject(), correct, row.getAnsweredAt());
+        }
     }
 
 
@@ -264,9 +320,15 @@ public class ExamService {
      * can't be answered or submitted again, and adds each answered question
      * to the student's per-subject totals.
      * <p>
+     * A submit that arrives more than {@link #SUBMIT_GRACE_MINUTES} minutes
+     * after the time limit ends the exam without a result instead: it is
+     * closed and its in-window answers are counted (#187) through the same
+     * {@link #endWithoutScore} as abandonment, but no score, pass/fail or
+     * scored-exam entry is produced.
+     * <p>
      * {@code noRollbackFor}: normally an exception undoes all database
-     * changes in the method. A late submit should still close the exam,
-     * so that one exception keeps the change.
+     * changes in the method. A late submit should still close the exam and
+     * keep the answers it counted, so that one exception keeps the changes.
      *
      * @param request the exam's attempt id
      * @param email   email of the logged-in user
@@ -287,10 +349,12 @@ public class ExamService {
         // A short grace period lets a submit that arrives a few seconds late
         // (slow connection, timer edge case) still be accepted.
         long minutesElapsed = Duration.between(exam.getStartedAt(), now).toMinutes();
-        exam.setFinishedAt(now);
-        attemptRepository.save(exam);
 
         if (minutesElapsed > EXAM_TIME_LIMIT_MINUTES + SUBMIT_GRACE_MINUTES) {
+            // Too late for a result, but the exam still ends and its in-window
+            // answers still count (#187) — through the shared ending, so the
+            // answers can't be counted twice by a later abandonment or cleanup.
+            endWithoutScore(exam);
             throw new ExamTimeLimitExceededException(
                 "Exam submission failed: Time limit of " + EXAM_TIME_LIMIT_MINUTES
                     + " minutes exceeded by more than the " + SUBMIT_GRACE_MINUTES
@@ -298,7 +362,15 @@ public class ExamService {
             );
         }
 
-        // In time: the exam counts as scored (saved at the end of the transaction).
+        // In time: claim the closing transition. A concurrent abandonment or
+        // submit that got there first already counted the answers, so this
+        // one must not score the exam again.
+        if (attemptRepository.finishIfOpen(exam.getId(), now) == 0) {
+            throw new ConflictException("This mock exam has already been submitted.");
+        }
+        exam.setFinishedAt(now);
+
+        // The exam counts as scored (saved at the end of the transaction).
         exam.setScored(true);
 
         List<AttemptQuestion> rows = attemptQuestionRepository.findByAttemptIdOrderByPosition(exam.getId());

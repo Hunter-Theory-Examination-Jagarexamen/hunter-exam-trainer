@@ -64,7 +64,7 @@ class AdminLearnerControllerTests extends ControllerTestBase {
     @Test
     void adminReceivesOneLearnersProgress() throws Exception {
         when(service.getLearnerProgress(7L)).thenReturn(new LearnerProgressResponse(
-                7L, "Anna Andersson", "anna@example.com", null, null, List.of(), null));
+                7L, "Anna Andersson", "anna@example.com", null, null, null, List.of(), null));
 
         mvc.perform(get("/api/admin/learners/7").with(jwt().authorities(ADMIN)))
                 .andExpect(status().isOk())

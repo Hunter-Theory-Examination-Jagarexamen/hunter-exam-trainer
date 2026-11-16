@@ -2,6 +2,8 @@ package com.hunterexam.backend.controller;
 
 import com.hunterexam.backend.dto.ChangePasswordRequest;
 import com.hunterexam.backend.dto.DeleteAccountRequest;
+import com.hunterexam.backend.dto.ResultSharingPreferencesResponse;
+import com.hunterexam.backend.dto.UpdateResultSharingPreferencesRequest;
 import com.hunterexam.backend.dto.UserResponse;
 import com.hunterexam.backend.service.AccountDeletionService;
 import com.hunterexam.backend.service.UserService;
@@ -21,7 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
  * REST controller for the currently authenticated user.
  * <p>
  * Provides endpoints for retrieving user profile information,
- * changing the user's password, and deleting the user's own account.
+ * changing the user's password, managing result sharing choices,
+ * and deleting the user's own account.
  */
 @RestController
 @RequestMapping("/api/users")
@@ -76,6 +79,37 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    /**
+     * Returns which of the authenticated user's results are shared with course
+     * leaders (#125). The owner comes from the JWT, so a student can only ever
+     * read their own choices.
+     *
+     * @param authentication authentication information from Spring Security
+     * @return the current sharing preferences
+     */
+    @GetMapping("/me/result-sharing")
+    public ResultSharingPreferencesResponse getResultSharing(Authentication authentication) {
+        return userService.getResultSharing(authentication.getName());
+    }
+
+
+    /**
+     * Replaces the authenticated user's result sharing choices. Both flags are
+     * required in the body; the owner is taken from the JWT and never from the
+     * request, so no student can change another student's preferences.
+     *
+     * @param authentication authentication information from Spring Security
+     * @param request         the new sharing preferences
+     * @return the persisted sharing preferences
+     */
+    @PutMapping("/me/result-sharing")
+    public ResultSharingPreferencesResponse updateResultSharing(
+            Authentication authentication,
+            @RequestBody @Valid UpdateResultSharingPreferencesRequest request) {
+        return userService.updateResultSharing(authentication.getName(), request);
+    }
+
 
     /**
      * Deletes the authenticated user's own account and all personal data

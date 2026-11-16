@@ -127,6 +127,8 @@ public class StatisticsService {
      * <p>
      * Every answer is read, also those from before the range, so the first
      * point starts from what the student already knew.
+     * Which answers count (practice, scored mock exams, and mock exams ended
+     * without a result) is decided by {@code AttemptQuestionRepository.findCountedAnswers}.
      *
      * @param email user's email
      * @param weeks number of weeks to look back

@@ -13,6 +13,8 @@ endpoints are added to this table, not duplicated elsewhere.
 | GET    | /api/auth/google/status       | Whether Google login is enabled                 | Public           |
 | GET    | /api/users/me                 | Get logged-in user's profile                    | Required         |
 | PUT    | /api/users/me/password        | Change the logged-in user's password            | Required         |
+| GET    | /api/users/me/result-sharing  | Get the logged-in student's result sharing choices | Required      |
+| PUT    | /api/users/me/result-sharing  | Replace the logged-in student's result sharing choices | Required   |
 | GET    | /api/subjects                 | Get all subjects and question counts            | Required         |
 | GET    | /api/subjects/{id}            | Get one subject                                 | Required         |
 | POST   | /api/admin/subjects           | Create a new subject                            | Required (ADMIN) |
@@ -105,7 +107,9 @@ answers. `409 Conflict` if there are fewer than 70 questions.
 
 Any mock exam of the same student that is still running (tab closed, abandoned
 through the menu, ...) is closed **without scoring it** first, so at most one
-mock exam can be open at a time. Practice rounds are never touched by this.
+mock exam can be open at a time; its answers given within the time limit count
+in statistics as usual (see "Counted answers" below). Practice rounds are never
+touched by this.
 
 ```json
 {
@@ -144,8 +148,9 @@ mock exam can be open at a time. Practice rounds are never touched by this.
 - Submitting closes the exam (no more answers or submits) and adds each
   answered question to the student's per-subject totals.
 - `400` if more than 60 minutes (+ 2 minutes grace) have passed since start: the
-  exam is closed, but not scored. `409` if already submitted, `403` if it
-  belongs to another user, `404` if it doesn't exist.
+  exam is closed, but not scored. Its answers given within the time limit still
+  count in statistics as usual (see "Counted answers" below). `409` if already
+  submitted, `403` if it belongs to another user, `404` if it doesn't exist.
 
 Response:
 
@@ -157,9 +162,11 @@ Response:
 
 No request body. Ends the student's running mock exam **without scoring it**:
 the attempt is closed (finish time set, `scored` stays `false`), so it can never
-be answered or submitted again and never appears as a result, in statistics, or
-in the subject totals. Used when the student confirms leaving a running exam
-through the menu or the browser's back button.
+be answered or submitted again and never appears as a result or in the mock exam
+summary. Its answers given within the time limit count in statistics as usual
+(see "Counted answers" below), exactly once no matter how often the exam is
+ended afterwards. Used when the student confirms leaving a running exam through
+the menu or the browser's back button.
 
 - Response: `204 No Content`.
 - `409` if the exam is already submitted or abandoned (treat as "already
@@ -173,28 +180,85 @@ through the menu or the browser's back button.
   sorted by name.
 - `GET /api/admin/learners/{userId}` returns one user's progress (student or
   admin) with `userId`, `fullName`, `email`, `createdAt` and:
-- `subjectPerformances` — performance per subject, weakest first (same numbers as `/api/statistics/subjects`)
-- `mockExams` — mock exam summary (count, latest/best score, latest pass/fail), scored mock exams only
-- `lastActivityAt` — the latest answer (practice or mock exam) or mock exam submit; `null` if none
+- `subjectPerformances` — performance per subject, weakest first (same numbers as `/api/statistics/subjects`); `null` when the student has not shared this category
+- `mockExams` — mock exam summary (count, latest/best score, latest pass/fail), scored mock exams only; `null` when the student has not shared this category
+- `lastActivityAt` — the latest answer (practice or mock exam) or mock exam submit **among the shared categories**; `null` if there is none (including when nothing is shared)
 
 **Question note:** `correctAnswer` in `POST/PUT /api/admin/questions` must be a single letter A–D, matching the correct option's position. (Previously it was the option's text; see #155.)
 
-The `mockExams` field is a separate object so it can be filtered out per student in a future sharing feature (#125).
+## Result sharing: what course leaders see (#125)
+
+Students choose per result category whether course leaders (admins) may see
+their results. **Default: private** — both flags are `false` for new students
+and for students who existed before this feature, so nobody is shared without
+opting in.
+
+Two categories, matching what the admin endpoint actually returns:
+
+- `shareSubjectStatistics` — the per-subject performance in Learner Progress.
+  The per-subject totals mix practice answers and mock exam answers, so the
+  two cannot be separated reliably; one flag covers both.
+- `shareMockExamResults` — the scored mock exam summary (count, latest/best
+  score, pass/fail).
+
+### `GET /api/users/me/result-sharing`
+
+Returns the caller's own choices. The owner comes from the JWT; there is no id
+in the URL or body.
+
+```json
+{ "shareSubjectStatistics": false, "shareMockExamResults": false }
+```
+
+### `PUT /api/users/me/result-sharing`
+
+```json
+{ "shareSubjectStatistics": true, "shareMockExamResults": false }
+```
+
+- Both fields are required booleans; a missing field answers `400`. The
+  response is the persisted state, which is also what the next read returns.
+- The owner is always the authenticated user, so no student can read or change
+  another student's preferences, whatever the body contains.
+- Students always see **all** of their own results (`/api/statistics/subjects`,
+  `/api/statistics/progress`, `/api/dashboard`, ...) regardless of these
+  choices; only admin reads are filtered.
+
+### How the admin response is filtered
+
+`GET /api/admin/learners/{userId}` is filtered in the backend before the
+response DTO is built:
+
+- a category the student has not shared is `null` — never an empty list or a
+  zero-filled summary that could be misread as "no performance";
+- `lastActivityAt` is derived only from shared categories, so hidden answers
+  cannot leak through a timestamp;
+- hidden categories are not read from the database at all.
+
+No other admin endpoint returns individual student results (`GET
+/api/admin/learners` is names and roles only, `GET /api/admin/stats` is
+counts). These are technical controls only; they do not by themselves
+guarantee GDPR compliance.
 
 ## Statistics: what the numbers count
 
 The statistics are calculated from the stored answers (`attempts`,
 `attempt_questions`) and the per-subject totals (`subject_stats`).
 
-- **Counted answers:** every answered practice question, and the answers of
-  **scored** mock exams. A mock exam is scored when it was submitted in time;
-  open exams and late submits (`400`) don't count anywhere. Unanswered
-  questions are not counted as answers (in a mock exam's score they count as
-  not correct).
+- **Counted answers:** every answered practice question, and every answer a
+  student gave **within a mock exam's time limit** (start + 60 minutes +
+  2 minutes grace) — no matter whether the exam ends as a scored result
+  (submitted in time) or without one (abandon #186, late submit `400`,
+  closed by starting the next exam). Such an answer counts exactly once, no
+  matter how often or through which path the exam is ended afterwards;
+  answers given after the limit don't count, and an exam that is still open
+  counts nothing yet. Unanswered questions are not counted as answers (in a
+  scored mock exam's score they count as not correct).
 - **Per subject** (`/api/statistics/subjects`, `subjectPerformances` in
   `/api/admin/learners/{userId}`): `percentage` = correct ÷ answered over all counted
   answers in the subject, rounded. Only subjects with at least one answer are
-  listed. Student and admin see the same numbers.
+  listed. The student always sees their own numbers; an admin only sees them
+  when the student shares that category (see "Result sharing" above).
 - **Progress over time** (`/api/statistics/progress?weeks=N`): one point per
   week (Monday) with counted answers, oldest first; `accuracy` = correct ÷
   answered that week, `questionsAnswered` = answers that week.

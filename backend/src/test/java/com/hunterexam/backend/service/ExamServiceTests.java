@@ -86,6 +86,11 @@ class ExamServiceTests {
         subject.setId(7L);
         // Submit updates the student's totals row; 1 = "one row updated" (the row exists).
         lenient().when(subjectStatsRepository.addAnswer(any(), any(), anyLong(), any())).thenReturn(1);
+
+        // Ending an exam goes through the atomic "close only if still open"
+        // update; 1 = this call was the one that closed it, so it counts the
+        // answers (the mock default 0 would mean "already closed elsewhere").
+        lenient().when(attemptRepository.finishIfOpen(anyLong(), any())).thenReturn(1);
     }
 
     /** A question whose correct answer is option B ("Two"). */
@@ -162,6 +167,14 @@ class ExamServiceTests {
         AttemptQuestion row = new AttemptQuestion(attempt, question(questionId), 0);
         when(attemptQuestionRepository.findByAttemptIdAndQuestionId(ATTEMPT_ID, questionId))
             .thenReturn(Optional.of(row));
+        return row;
+    }
+
+    /** A question row of the exam with an answer already saved at the given time. */
+    private AttemptQuestion answeredRow(Attempt exam, Question question, int position,
+                                        LocalDateTime answeredAt, boolean correct) {
+        AttemptQuestion row = new AttemptQuestion(exam, question, position);
+        row.recordAnswer(correct ? "B" : "A", correct, answeredAt);
         return row;
     }
 
@@ -348,7 +361,8 @@ class ExamServiceTests {
 
         assertTrue(exam.isFinished());
         assertTrue(exam.isScored(), "an exam submitted in time counts as scored");
-        verify(attemptRepository).save(exam);
+        // Closing goes through the atomic "only if still open" update.
+        verify(attemptRepository).finishIfOpen(eq(ATTEMPT_ID), any());
     }
 
     @Test
@@ -499,9 +513,14 @@ class ExamServiceTests {
     }
 
     @Test
-    void submitMoreThanGracePeriodLateIsRejectedAndClosesTheExam() {
-        // 63 minutes elapsed = 60 limit + 2 grace + 1 over
-        Attempt exam = givenAttempt(AttemptType.MOCK_EXAM, LocalDateTime.now().minusMinutes(63));
+    void submitMoreThanGracePeriodLateIsRejectedClosesTheExamAndCountsItsInWindowAnswers() {
+        // 63 minutes elapsed = 60 limit + 2 grace + 1 over. The answers were
+        // given at start, inside the permitted window.
+        Attempt exam = givenOpenExamWith(
+            List.of(question(1), question(2)),
+            Map.of(1L, "B", 2L, "A"),
+            LocalDateTime.now().minusMinutes(63)
+        );
 
         // Still a 400 (it extends IllegalArgumentException).
         assertThrows(ExamTimeLimitExceededException.class,
@@ -509,8 +528,12 @@ class ExamServiceTests {
 
         assertTrue(exam.isFinished(), "a late exam should be closed");
         assertFalse(exam.isScored(), "a late exam is closed but not scored");
-        verify(attemptRepository).save(exam);
-        verifyNoInteractions(attemptQuestionRepository, subjectStatsRepository);
+        verify(attemptRepository).finishIfOpen(eq(ATTEMPT_ID), any());
+        // Ends without a result, but the in-window answers count once:
+        // +1 for the correct answer, +0 for the wrong one (#187).
+        verify(subjectStatsRepository).addAnswer(eq(user), eq(subject), eq(1L), any());
+        verify(subjectStatsRepository).addAnswer(eq(user), eq(subject), eq(0L), any());
+        verify(subjectStatsRepository, times(2)).addAnswer(any(), any(), anyLong(), any());
     }
 
     @Test
@@ -567,19 +590,79 @@ class ExamServiceTests {
         assertEquals(70, differentIds, "no question should appear twice");
     }
 
-    // ----- Leaving an exam without scoring it (#186) -----
+    // ----- Leaving an exam without scoring it (#186), counting its answers (#187) -----
 
     @Test
-    void abandonClosesTheExamWithoutScoringIt() {
-        Attempt exam = givenAttempt(AttemptType.MOCK_EXAM);
+    void abandonClosesTheExamWithoutScoringItAndCountsItsInWindowAnswers() {
+        // Answers are recorded at start, inside the permitted window.
+        Attempt exam = givenOpenExamWith(
+            List.of(question(1), question(2)),
+            Map.of(1L, "B", 2L, "A"),
+            LocalDateTime.now().minusMinutes(10)
+        );
 
         examService.abandonExam(ATTEMPT_ID, EMAIL);
 
         assertTrue(exam.isFinished());
         assertFalse(exam.isScored(), "an abandoned exam must not count as a result");
-        verify(attemptRepository).save(exam);
-        // No score, no totals: nothing about the exam is counted anywhere.
-        verifyNoInteractions(attemptQuestionRepository, subjectStatsRepository);
+        verify(attemptRepository).finishIfOpen(eq(ATTEMPT_ID), any());
+        // The answers count once each — +1 correct, +0 wrong — but the exam
+        // still produces no score or result (#187).
+        verify(subjectStatsRepository).addAnswer(eq(user), eq(subject), eq(1L), any());
+        verify(subjectStatsRepository).addAnswer(eq(user), eq(subject), eq(0L), any());
+        verify(subjectStatsRepository, times(2)).addAnswer(any(), any(), anyLong(), any());
+    }
+
+    @Test
+    void abandonCountsOnlyAnswersGivenWithinTheTimeLimit() {
+        // Started 70 minutes ago, so the window ends 62 minutes after start
+        // (= 8 minutes ago). An answer exactly on the deadline still counts;
+        // one later does not (#187 boundary rule: answeredAt <= start + 62 min).
+        LocalDateTime startedAt = LocalDateTime.now().minusMinutes(70);
+        LocalDateTime deadline = startedAt.plusMinutes(62);
+        Attempt exam = givenAttempt(AttemptType.MOCK_EXAM, startedAt);
+
+        AttemptQuestion inWindow = answeredRow(exam, question(1), 0, startedAt.plusMinutes(10), true);
+        AttemptQuestion onDeadline = answeredRow(exam, question(2), 1, deadline, false);
+        AttemptQuestion tooLate = answeredRow(exam, question(3), 2, deadline.plusSeconds(1), true);
+        AttemptQuestion unanswered = new AttemptQuestion(exam, question(4), 3);
+        when(attemptQuestionRepository.findByAttemptIdOrderByPosition(ATTEMPT_ID))
+            .thenReturn(List.of(inWindow, onDeadline, tooLate, unanswered));
+
+        examService.abandonExam(ATTEMPT_ID, EMAIL);
+
+        verify(subjectStatsRepository).addAnswer(
+            eq(user), eq(subject), eq(1L), eq(startedAt.plusMinutes(10)));
+        verify(subjectStatsRepository).addAnswer(eq(user), eq(subject), eq(0L), eq(deadline));
+        // Exactly two: the in-window answers. The too-late and unanswered
+        // rows are not counted, and nothing is counted twice.
+        verify(subjectStatsRepository, times(2)).addAnswer(any(), any(), anyLong(), any());
+    }
+
+    @Test
+    void anEndingThatLosesTheCloseRaceCountsNothing() {
+        // A concurrent ending closed the exam between the read and the close:
+        // the conditional close matches no row, so this request must leave
+        // the statistics alone instead of counting the answers a second time.
+        when(attemptRepository.finishIfOpen(anyLong(), any())).thenReturn(0);
+        Attempt exam = givenAttempt(AttemptType.MOCK_EXAM);
+
+        examService.abandonExam(ATTEMPT_ID, EMAIL);
+
+        verify(attemptQuestionRepository, never()).findByAttemptIdOrderByPosition(anyLong());
+        verify(subjectStatsRepository, never()).addAnswer(any(), any(), anyLong(), any());
+    }
+
+    @Test
+    void endingTheSameExamTwiceCountsItsAnswersOnlyOnce() {
+        Attempt exam = givenOpenExamWith(List.of(question(1)), Map.of(1L, "B"));
+
+        examService.abandonExam(ATTEMPT_ID, EMAIL);
+        // The retry finds the exam already ended and is rejected (409).
+        assertThrows(ConflictException.class,
+            () -> examService.abandonExam(ATTEMPT_ID, EMAIL));
+
+        verify(subjectStatsRepository, times(1)).addAnswer(any(), any(), anyLong(), any());
     }
 
     @Test
@@ -592,6 +675,8 @@ class ExamServiceTests {
             () -> examService.abandonExam(ATTEMPT_ID, EMAIL));
 
         verify(attemptRepository, never()).save(any());
+        verify(attemptRepository, never()).finishIfOpen(anyLong(), any());
+        verify(subjectStatsRepository, never()).addAnswer(any(), any(), anyLong(), any());
     }
 
     @Test
@@ -643,7 +728,8 @@ class ExamServiceTests {
 
         assertTrue(earlier.isFinished(), "an exam left running is closed by the next start");
         assertFalse(earlier.isScored(), "closed this way it gets no score");
-        verify(attemptRepository).save(earlier);
+        // Closed through the same atomic ending as abandonment (#186/#187).
+        verify(attemptRepository).finishIfOpen(eq(7L), any());
     }
 
     @Test
