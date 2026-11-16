@@ -1,11 +1,14 @@
 package com.hunterexam.backend.service;
 
+import com.hunterexam.backend.dto.ResultSharingPreferencesResponse;
+import com.hunterexam.backend.dto.UpdateResultSharingPreferencesRequest;
 import com.hunterexam.backend.dto.UserResponse;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Handles user profile operations.
@@ -74,5 +77,51 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(newPassword));
 
         userRepository.save(user);
+    }
+
+
+    /**
+     * The logged-in user's result sharing choices (#125).
+     *
+     * @param email user's email id, from the security context
+     * @return the current preferences (both false for a new or untouched account)
+     */
+    @Transactional(readOnly = true)
+    public ResultSharingPreferencesResponse getResultSharing(String email) {
+
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new NotFoundException("User not found"));
+
+        return toResultSharing(user);
+    }
+
+
+    /**
+     * Replaces the logged-in user's result sharing choices. Only the user the
+     * token belongs to is changed: the email comes from the security context,
+     * so no client-supplied id can reach another account.
+     *
+     * @param email   user's email id, from the security context
+     * @param request the new preferences, both fields required
+     * @return the persisted preferences
+     */
+    @Transactional
+    public ResultSharingPreferencesResponse updateResultSharing(
+            String email, UpdateResultSharingPreferencesRequest request) {
+
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new NotFoundException("User not found"));
+
+        user.setShareSubjectStatistics(request.shareSubjectStatistics());
+        user.setShareMockExamResults(request.shareMockExamResults());
+        userRepository.save(user);
+
+        return toResultSharing(user);
+    }
+
+    private static ResultSharingPreferencesResponse toResultSharing(User user) {
+        return new ResultSharingPreferencesResponse(
+                user.isShareSubjectStatistics(),
+                user.isShareMockExamResults());
     }
 }

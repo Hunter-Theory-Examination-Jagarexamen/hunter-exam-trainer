@@ -6,6 +6,10 @@ export interface MockExamSummary {
     latestPassed: boolean | null;
 }
 
+// One row from GET /api/admin/learners/{userId}.
+// Sharing (#125): subjectPerformances and mockExams are null when the student
+// has not shared that category (never an empty stand-in), and lastActivityAt
+// only covers shared categories.
 export interface LearnerProgress {
     userId: number;
     fullName: string;
@@ -17,8 +21,8 @@ export interface LearnerProgress {
         subjectId: number;
         subjectName: string;
         percentage: number;
-    }[];
-    mockExams: MockExamSummary;
+    }[] | null;
+    mockExams: MockExamSummary | null;
 }
 
 // One row from GET /api/admin/learners: admins first, then students, each by name.

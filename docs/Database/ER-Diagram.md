@@ -18,6 +18,8 @@ erDiagram
         varchar email UK 
         varchar password 
         varchar role "STUDENT or ADMIN" 
+        boolean share_subject_statistics "student's sharing choice, false = hidden from course leaders (#125)"
+        boolean share_mock_exam_results "student's sharing choice, false = hidden from course leaders (#125)"
         datetime created_at
     }
 

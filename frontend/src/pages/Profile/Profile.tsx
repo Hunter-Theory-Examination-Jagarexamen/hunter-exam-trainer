@@ -3,6 +3,7 @@ import PageTitle from "../../components/common/PageTitle";
 import "../../styles/profile.css";
 import UserInformation from "../../components/profile/UserInformation";
 import AccountSettings from "../../components/profile/AccountSettings";
+import ResultSharingSettings from "../../components/profile/ResultSharingSettings";
 import DangerZone from "../../components/profile/DangerZone";
 import LegalLinks from "../../components/legal/LegalLinks";
 
@@ -17,6 +18,7 @@ const Profile = () => {
             />
             <UserInformation />
             <AccountSettings />
+            <ResultSharingSettings />
             <DangerZone />
             <LegalLinks />
         </div>
