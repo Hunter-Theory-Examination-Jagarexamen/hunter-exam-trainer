@@ -24,17 +24,17 @@ describe("ServerStatusBanner", () => {
         expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     });
 
-    it("appears when a request gets no answer, and disappears when the next one does", async () => {
+    it("shows the starting banner when a request gets no answer, and hides it when the next one does", async () => {
         render(<ServerStatusBanner />);
 
         vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
         await act(() => apiClient("/api/users/me").catch(() => {}));
-        expect(screen.getByRole("alert")).toHaveTextContent("Det går inte att nå servern");
-        expect(screen.getByRole("button", {name: /try again|försök igen/i})).toBeInTheDocument();
+        expect(screen.getByRole("status")).toHaveTextContent("Servern startar");
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 
         vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, {status: 204})));
         await act(() => apiClient("/api/users/me"));
-        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+        expect(screen.queryByRole("status")).not.toBeInTheDocument();
     });
 
     it("'Try again' says so when the server still can't be reached (#188)", async () => {
