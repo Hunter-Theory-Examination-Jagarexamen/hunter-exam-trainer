@@ -9,6 +9,7 @@ import "../../../i18n/config";
 afterEach(() => {
     act(() => setServerStatus("ok"));
     vi.unstubAllGlobals();
+    vi.useRealTimers();
 });
 
 describe("ServerStatusBanner", () => {
@@ -35,6 +36,27 @@ describe("ServerStatusBanner", () => {
         vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, {status: 204})));
         await act(() => apiClient("/api/users/me"));
         expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
+    it("a cold start that recovers never ends with the red banner (#206)", async () => {
+       vi.useFakeTimers();
+       render(<ServerStatusBanner />);
+
+       // The server is waking up: the request fails.
+        vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
+        await act(() => apiClient("/api/users/me").catch(() => {}));
+        expect(screen.getByRole("status")).toBeInTheDocument();
+
+        // Still waking up after 30 s: the banner stays orange.
+        await act(() => vi.advanceTimersByTimeAsync(30_000));
+        expect(screen.getByRole("status")).toBeInTheDocument();
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+        // The server answers: the next background check hides the banner.
+        vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, {status: 200})));
+        await act(() => vi.advanceTimersByTimeAsync(3_000));
+        expect(screen.queryByRole("status")).not.toBeInTheDocument();
+        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     });
 
     it("'Try again' says so when the server still can't be reached (#188)", async () => {
