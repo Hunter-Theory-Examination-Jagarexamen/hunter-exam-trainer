@@ -4,6 +4,11 @@ import { getServerStatus, setServerStatus, subscribeServerStatus } from "../../a
 import { API_BASE_URL } from "../../api/apiClient";
 import "../../styles/server-status.css";
 
+// How often the banner checks in the background, and how long "starting"
+// may last before it turns red (about as long as Render takes to wake).
+const CHECK_INTERVAL_MS = 3_000;
+const GIVE_UP_AFTER_MS = 90_000;
+
 // One shared message for the whole app when the backend is slow to answer
 // or can't be reached. The pages keep their own "Loading…" and
 // "Failed to load …" messages; this explains why.
@@ -16,6 +21,33 @@ const ServerStatusBanner = () => {
 
     useEffect(() => {
         if (status === "ok") setStillDown(false);
+    }, [status]);
+
+    useEffect(() => {
+        if (status === "ok") return undefined;
+
+        let cancelled = false;
+        const check = async () => {
+            try {
+                await fetch(API_BASE_URL, { mode: "no-cors", cache: "no-store" });
+                if (!cancelled) setServerStatus("ok");
+            } catch {
+                // Still down: the next tick tries again.
+            }
+        };
+        const intervalId = setInterval(check, CHECK_INTERVAL_MS);
+
+        // Only "starting" can turn red here; "unreachable" is already red.
+        const giveUpId =
+            status === "starting"
+                ? setTimeout(() => setServerStatus("unreachable"), GIVE_UP_AFTER_MS)
+                : undefined;
+
+        return () => {
+            cancelled = true;
+            clearInterval(intervalId);
+            clearTimeout(giveUpId);
+        };
     }, [status]);
 
     // "Try again" first checks that the server answers, then reloads (#188).

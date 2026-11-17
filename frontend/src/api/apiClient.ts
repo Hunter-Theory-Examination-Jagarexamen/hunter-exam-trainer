@@ -84,7 +84,7 @@ const apiClient = async (
         });
     } catch {
         // fetch only throws when no answer came at all, or when we aborted it.
-        setServerStatus("unreachable");
+        setServerStatus("starting");
         throw new ServerUnreachableError();
     } finally {
         clearTimeout(timeoutId);
@@ -92,7 +92,7 @@ const apiClient = async (
     }
 
     if (SERVER_UNAVAILABLE_STATUSES.includes(response.status)) {
-        setServerStatus("unreachable");
+        setServerStatus("starting");
         throw new ServerUnreachableError();
     }
     answerCount++;
