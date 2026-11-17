@@ -151,11 +151,14 @@ touched by this.
   exam is closed, but not scored. Its answers given within the time limit still
   count in statistics as usual (see "Counted answers" below). `409` if already
   submitted, `403` if it belongs to another user, `404` if it doesn't exist.
+- `passed` is `true` only when the exam has exactly 70 questions and at least
+  60 are correct (see `ExamScoring` in the backend). The frontend shows
+  "Godkänt" / "Ej godkänt" based on this flag; it never repeats the numbers.
 
 Response:
 
 ```json
-{ "totalQuestions": 70, "correctAnswers": 52, "incorrectAnswers": 10, "unanswered": 8, "score": 74 }
+{ "totalQuestions": 70, "correctAnswers": 52, "incorrectAnswers": 10, "unanswered": 8, "score": 74, "passed": false }
 ```
 
 ### `POST /api/exam/{attemptId}/abandon`

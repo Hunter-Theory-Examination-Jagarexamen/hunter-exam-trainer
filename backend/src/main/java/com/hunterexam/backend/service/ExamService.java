@@ -11,6 +11,7 @@ import com.hunterexam.backend.entity.Question;
 import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.SubjectStats;
 import com.hunterexam.backend.entity.User;
+import com.hunterexam.backend.domain.ExamScoring;
 import com.hunterexam.backend.exception.ConflictException;
 import com.hunterexam.backend.exception.ExamTimeLimitExceededException;
 import com.hunterexam.backend.exception.NotFoundException;
@@ -396,11 +397,12 @@ public class ExamService {
         long score = Math.round(((double) correctAnswers / totalQuestions) * 100);
 
         return new ExamSubmitResponse(
-                totalQuestions,
-                correctAnswers,
-                incorrectAnswers,
-                unanswered,
-                score
+            totalQuestions,
+            correctAnswers,
+            incorrectAnswers,
+            unanswered,
+            score,
+            ExamScoring.isPassed(correctAnswers, totalQuestions)
         );
     }
 

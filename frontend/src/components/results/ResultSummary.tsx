@@ -7,6 +7,7 @@ interface ResultSummaryProps {
     incorrectAnswers: number;
     unanswered: number;
     totalQuestions: number;
+    passed: boolean;
 }
 
 const ResultSummary = ({
@@ -14,7 +15,8 @@ const ResultSummary = ({
                            correctAnswers,
                            incorrectAnswers,
                            unanswered,
-                           totalQuestions
+                           totalQuestions,
+                           passed
                        }: ResultSummaryProps) => {
     const { t } = useTranslation();
 
@@ -27,6 +29,13 @@ const ResultSummary = ({
                     {t("result.correctFraction", { correct: correctAnswers, total: totalQuestions })}
                 </p>
             </div>
+
+            <p
+                className={`result-passed ${passed ? "result-passed--passed" : "result-passed--failed"}`}
+                role="status"
+            >
+                {passed ? t("result.passed") : t("result.failed")}
+            </p>
 
             <div className="result-details">
 

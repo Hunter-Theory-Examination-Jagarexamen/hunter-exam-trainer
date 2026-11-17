@@ -256,7 +256,9 @@
     "correctFraction": "{{correct}} / {{total}} Rätt",
     "correctAnswers": "Rätta svar",
     "incorrectAnswers": "Felaktiga svar",
-    "unanswered": "Ej besvarade"
+    "unanswered": "Ej besvarade",
+    "passed": "Godkänt",
+    "failed": "Ej godkänt"
   },
   "errors": {
     "EMAIL_TAKEN": "E-postadressen är redan registrerad.",

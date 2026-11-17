@@ -256,7 +256,9 @@
     "correctFraction": "{{correct}} / {{total}} Correct",
     "correctAnswers": "Correct Answers",
     "incorrectAnswers": "Incorrect Answers",
-    "unanswered": "Unanswered"
+    "unanswered": "Unanswered",
+    "passed": "Passed",
+    "failed": "Not passed"
   },
   "errors": {
     "EMAIL_TAKEN": "Email already registered.",
