@@ -17,6 +17,7 @@ import com.hunterexam.backend.repository.SubjectStatsRepository;
 import com.hunterexam.backend.repository.UserRepository;
 import com.hunterexam.backend.repository.projection.MockExamScore;
 import org.springframework.stereotype.Service;
+import com.hunterexam.backend.domain.ExamScoring;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -25,9 +26,6 @@ import java.util.stream.Stream;
 
 @Service
 public class AdminService {
-
-    private static final int PASS_CORRECT_ANSWERS = 60;
-    private static final int EXAM_TOTAL_QUESTIONS = 70;
 
     private final UserRepository userRepository;
     private final AttemptQuestionRepository attemptQuestionRepository;
@@ -80,6 +78,12 @@ public class AdminService {
 
     /**
      * Progress for one user (student or admin), for the admin's detail view.
+     * <p>
+     * Respects the student's sharing choices (#125): a category the student
+     * has not shared is {@code null} in the response and is never even read
+     * from the database, so hidden results cannot leak through the response,
+     * its totals or its timestamps. Students always see their own results
+     * through their own endpoints — only these admin reads are filtered.
      *
      * @throws NotFoundException if no user has this id
      */
@@ -87,27 +91,54 @@ public class AdminService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
+        boolean shareSubjectStatistics = user.isShareSubjectStatistics();
+        boolean shareMockExamResults = user.isShareMockExamResults();
+
         // The repository queries take a list of users; here it's a list of one.
+        // Hidden categories are not queried at all.
         List<User> oneUser = List.of(user);
+        List<SubjectStats> subjectStats = shareSubjectStatistics
+                ? subjectStatsRepository.findAnsweredByUserIn(oneUser)
+                : List.of();
+        List<MockExamScore> examScores = shareMockExamResults
+                ? attemptQuestionRepository.findScoredMockExams(oneUser)
+                : List.of();
+
         return buildLearnerProgress(
                 user,
-                subjectStatsRepository.findAnsweredByUserIn(oneUser),
-                attemptQuestionRepository.findScoredMockExams(oneUser));
+                subjectStats,
+                examScores,
+                shareSubjectStatistics,
+                shareMockExamResults);
     }
 
     private LearnerProgressResponse buildLearnerProgress(
             User learner,
             List<SubjectStats> subjectStats,
-            List<MockExamScore> examScores
+            List<MockExamScore> examScores,
+            boolean shareSubjectStatistics,
+            boolean shareMockExamResults
     ) {
 
-        // Same calculation as the student's own Statistics page; weakest subject first.
-        List<SubjectPerformanceResponse> perSubject =
-                StatisticsService.toSubjectPerformance(subjectStats).stream()
+        // null means "not shared by this student" — deliberately different
+        // from an empty list or MockExamSummary.empty(), which mean "shared,
+        // but there is no data yet", so hidden results are never shown as
+        // zero performance.
+        List<SubjectPerformanceResponse> perSubject = shareSubjectStatistics
+                ? StatisticsService.toSubjectPerformance(subjectStats).stream()
                         .sorted(Comparator.comparingLong(SubjectPerformanceResponse::getPercentage))
-                        .toList();
-        MockExamSummary mockExams = aggregateMockExams(examScores);
-        LocalDateTime lastActivity = computeLastActivity(subjectStats, examScores);
+                        .toList()
+                : null;
+        MockExamSummary mockExams = shareMockExamResults
+                ? aggregateMockExams(examScores)
+                : null;
+
+        // Last activity is derived from the same answers, so it is only
+        // computed from categories the student actually shares; with nothing
+        // shared there is no activity to report.
+        LocalDateTime lastActivity = computeLastActivity(
+                shareSubjectStatistics ? subjectStats : List.of(),
+                shareMockExamResults ? examScores : List.of());
 
         return new LearnerProgressResponse(
                 learner.getId(),
@@ -139,9 +170,7 @@ public class AdminService {
                 .max()
                 .orElse(0);
 
-        boolean latestPassed =
-                latest.total() == EXAM_TOTAL_QUESTIONS
-                        && latest.correct() >= PASS_CORRECT_ANSWERS;
+        boolean latestPassed = ExamScoring.isPassed(latest.correct(), latest.total());
 
         return new MockExamSummary(
                 examScores.size(),
@@ -156,9 +185,10 @@ public class AdminService {
      * The student's latest answer (practice or mock exam, from the subject
      * totals) or latest mock exam submit, whichever is newest. An exam's
      * answers are given before it is submitted, so its {@code finishedAt}
-     * is usually the later one.
+     * is usually the later one. Callers pass only the categories the student
+     * shares (#125), so hidden activity never shows up here.
      *
-     * @return null when the student has no answers and no exams
+     * @return null when the given categories have no answers and no exams
      */
     private LocalDateTime computeLastActivity(
             List<SubjectStats> subjectStats,

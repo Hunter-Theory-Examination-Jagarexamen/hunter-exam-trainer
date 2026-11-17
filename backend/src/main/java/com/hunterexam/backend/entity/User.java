@@ -56,6 +56,16 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
+    // Student-controlled sharing with course leaders (#125). Both default to
+    // false (private by default): the columnDefinition makes ddl-auto=update
+    // fill existing rows with false, and the field initialiser does the same
+    // for new accounts, so old and new students behave identically.
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean shareSubjectStatistics = false;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean shareMockExamResults = false;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 }

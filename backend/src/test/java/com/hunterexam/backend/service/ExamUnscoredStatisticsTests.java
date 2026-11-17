@@ -90,6 +90,10 @@ class ExamUnscoredStatisticsTests {
         user.setPassword(passwordEncoder.encode("secret123"));
         user.setRole(Role.STUDENT);
         user.setCreatedAt(LocalDateTime.now());
+        // This class checks how results are counted, not whether they are
+        // shared, so the student shares both categories (#125).
+        user.setShareSubjectStatistics(true);
+        user.setShareMockExamResults(true);
         return users.saveAndFlush(user);
     }
 

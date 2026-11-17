@@ -1,5 +1,6 @@
 package com.hunterexam.backend.service;
 
+import com.hunterexam.backend.domain.ExamScoring;
 import com.hunterexam.backend.dto.ExamSubmitResponse;
 import com.hunterexam.backend.dto.ExamStartResponse;
 import com.hunterexam.backend.dto.ExamSubmitRequest;
@@ -744,5 +745,42 @@ class ExamServiceTests {
 
         verify(attemptRepository).findByUserAndFinishedAtIsNullAndTypeIn(
             eq(user), eq(Set.of(AttemptType.MOCK_EXAM)));
+    }
+
+    //  #205: the submit response carries `passed`
+
+    @Test
+    void submitResponseIncludesPassedFlag() {
+        // The mock has 4 questions, so this exam can't reach 70 passed must
+        // be false even with all answers correct. Proves the flag is computed
+        // through ExamScoring.isPassed and that it's on the DTO.
+        givenOpenExamWith(
+            List.of(question(1), question(2), question(3), question(4)),
+            Map.of(1L, "B", 2L, "B", 3L, "B", 4L, "B")
+        );
+
+        ExamSubmitResponse result = examService.submitExam(submission(), EMAIL);
+
+        assertFalse(result.isPassed(),
+            "a 4-question exam can never reach the 60-of-70 pass mark");
+        // Belt and braces: the flag matches the shared rule for these numbers.
+        assertEquals(
+            ExamScoring.isPassed(result.getCorrectAnswers(), result.getTotalQuestions()),
+            result.isPassed()
+        );
+    }
+
+    @Test
+    void submitOfFull70QuestionExamWithSixtyCorrectPasses() {
+        List<Question> questions = questionBank(70);
+        Map<Long, String> answers = new java.util.HashMap<>();
+        for (long id = 1; id <= 60; id++) answers.put(id, "B"); // 60 correct
+        givenOpenExamWith(questions, answers);
+
+        ExamSubmitResponse result = examService.submitExam(submission(), EMAIL);
+
+        assertEquals(60, result.getCorrectAnswers());
+        assertEquals(70, result.getTotalQuestions());
+        assertTrue(result.isPassed());
     }
 }

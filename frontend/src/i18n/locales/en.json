@@ -167,7 +167,17 @@
     "deleteAccountButton": "Delete account",
     "deleteAccountWarning": "Your account, all your answers, and all your statistics will be deleted permanently. This cannot be undone. Backups are purged completely within a few days.",
     "deleteAccountConfirm": "Delete my account",
-    "deletingAccount": "Deleting..."
+    "deletingAccount": "Deleting...",
+    "resultSharingTitle": "Shared results",
+    "resultSharingText": "Choose which of your results course leaders can see. Everything is hidden by default and only shown to you.",
+    "resultSharingLoading": "Loading your sharing settings...",
+    "shareSubjectStatisticsLabel": "Subject statistics (quiz and mock exam answers)",
+    "shareMockExamResultsLabel": "Mock exam results",
+    "resultSharingSaveButton": "Save settings",
+    "resultSharingSaving": "Saving...",
+    "resultSharingSuccess": "Your settings have been saved",
+    "resultSharingLoadError": "Could not load your sharing settings. Please try again.",
+    "resultSharingSaveError": "Could not save your settings. Please try again."
   },
   "mockExam": {
     "title": "Mock Exam",
@@ -246,7 +256,9 @@
     "correctFraction": "{{correct}} / {{total}} Correct",
     "correctAnswers": "Correct Answers",
     "incorrectAnswers": "Incorrect Answers",
-    "unanswered": "Unanswered"
+    "unanswered": "Unanswered",
+    "passed": "Passed",
+    "failed": "Not passed"
   },
   "errors": {
     "EMAIL_TAKEN": "Email already registered.",
@@ -310,6 +322,9 @@
     "notPassed": " · Not passed",
     "best": "Best:",
     "noPracticeResults": "No practice results yet.",
+    "nothingShared": "This participant hasn't shared any results.",
+    "notShared": "Not shared by the participant.",
+    "noSharedActivity": "No activity in the shared results.",
     "loadFailed": "Failed to load participant progress. Please try again.",
     "backToList": "Back to the list",
     "loadingOne": "Loading...",

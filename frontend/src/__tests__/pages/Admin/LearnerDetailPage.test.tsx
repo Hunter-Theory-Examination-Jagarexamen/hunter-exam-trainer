@@ -148,6 +148,41 @@ describe("LearnerDetailPage", () => {
         expect(await screen.findByRole("alert")).toHaveTextContent("learnerProgress.notFound");
     });
 
+    // ─── NEW TESTS FOR #125 (student-controlled sharing) ───
+
+    it("says nothing is shared when the student shares neither category", async () => {
+        vi.mocked(apiClient).mockResolvedValue({
+            ...baseLearner,
+            lastActivityAt: null,
+            subjectPerformances: null,
+            mockExams: null,
+        });
+        renderPage();
+
+        expect(await screen.findByText("learnerProgress.nothingShared")).toBeInTheDocument();
+        // Not "no results yet" and not "never" — that would misrepresent hidden data.
+        expect(screen.queryByText("learnerProgress.noMockExams")).not.toBeInTheDocument();
+        expect(screen.queryByText("learnerProgress.noPracticeResults")).not.toBeInTheDocument();
+        expect(screen.queryByText("learnerProgress.never")).not.toBeInTheDocument();
+    });
+
+    it("shows only the shared category when sharing is partial", async () => {
+        vi.mocked(apiClient).mockResolvedValue({
+            ...baseLearner,
+            lastActivityAt: null,
+            subjectPerformances: [{ subjectId: 3, subjectName: "Ekologi", percentage: 80 }],
+            mockExams: null,
+        });
+        renderPage();
+
+        expect(await screen.findByText("Ekologi")).toBeInTheDocument();
+        expect(screen.getByText("learnerProgress.notShared")).toBeInTheDocument();
+        expect(screen.queryByText("learnerProgress.noMockExams")).not.toBeInTheDocument();
+        // Last activity only covers shared results, so it says so instead of "never".
+        expect(screen.getByText("learnerProgress.noSharedActivity")).toBeInTheDocument();
+        expect(screen.queryByText("learnerProgress.never")).not.toBeInTheDocument();
+    });
+
     // ─── NEW TESTS FOR #194 (Admin Delete Student) ───
 
     it("shows the delete button for a student", async () => {
