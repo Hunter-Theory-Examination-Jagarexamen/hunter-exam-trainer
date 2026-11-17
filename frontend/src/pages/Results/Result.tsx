@@ -12,12 +12,12 @@ interface ResultData {
     incorrectAnswers: number;
     unanswered: number;
     totalQuestions: number;
+    passed: boolean;
 }
 
 const Result = () => {
     const { t } = useTranslation();
     const location = useLocation();
-    // True while the feedback dialog is open.
     const [isGivingFeedback, setIsGivingFeedback] = useState(false);
 
     const result = location.state as ResultData | undefined;
@@ -49,9 +49,9 @@ const Result = () => {
                 unanswered={result.unanswered}
                 incorrectAnswers={result.incorrectAnswers}
                 totalQuestions={result.totalQuestions}
+                passed={result.passed}
             />
 
-            {/* Only after the exam, never during it; no specific question is attached. */}
             <div className="result-feedback">
                 <p>{t("feedback.afterExamText")}</p>
                 <button type="button" className="practice-secondary-button"

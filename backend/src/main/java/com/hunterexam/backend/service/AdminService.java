@@ -17,6 +17,7 @@ import com.hunterexam.backend.repository.SubjectStatsRepository;
 import com.hunterexam.backend.repository.UserRepository;
 import com.hunterexam.backend.repository.projection.MockExamScore;
 import org.springframework.stereotype.Service;
+import com.hunterexam.backend.domain.ExamScoring;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -25,9 +26,6 @@ import java.util.stream.Stream;
 
 @Service
 public class AdminService {
-
-    private static final int PASS_CORRECT_ANSWERS = 60;
-    private static final int EXAM_TOTAL_QUESTIONS = 70;
 
     private final UserRepository userRepository;
     private final AttemptQuestionRepository attemptQuestionRepository;
@@ -139,9 +137,7 @@ public class AdminService {
                 .max()
                 .orElse(0);
 
-        boolean latestPassed =
-                latest.total() == EXAM_TOTAL_QUESTIONS
-                        && latest.correct() >= PASS_CORRECT_ANSWERS;
+        boolean latestPassed = ExamScoring.isPassed(latest.correct(), latest.total());
 
         return new MockExamSummary(
                 examScores.size(),
