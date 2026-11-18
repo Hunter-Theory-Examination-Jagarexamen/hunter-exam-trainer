@@ -253,6 +253,7 @@
     "noDataSubtitle": "Ingen resultatdata hittades.",
     "noDataMessage": "Vänligen genomför ett övningsprov för att se dina resultat.",
     "hasDataSubtitle": "Här är ditt resultat för övningsprovet.",
+    "bookmarkedTitle": "Frågor du bokmärkte",
     "correctFraction": "{{correct}} / {{total}} Rätt",
     "correctAnswers": "Rätta svar",
     "incorrectAnswers": "Felaktiga svar",

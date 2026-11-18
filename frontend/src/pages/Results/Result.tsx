@@ -64,17 +64,20 @@ const Result = () => {
             </div>
 
             {result.bookmarkedQuestions && result.bookmarkedQuestions.length > 0 && (
-                <ul className="result-bookmarked">
-                    {result.bookmarkedQuestions.map(question => (
-                        <li key={question.id}>
-                            <span>{question.questionText}</span>
-                            <button type="button" className="practice-secondary-button"
-                                    onClick={() => setReportedQuestionId(question.id)}>
-                                {t("feedback.reportQuestion")}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
+                <>
+                    <h2>{t("result.bookmarkedTitle")}</h2>
+                    <ul className="result-bookmarked">
+                        {result.bookmarkedQuestions.map(question => (
+                            <li key={question.id}>
+                                <span>{question.questionText}</span>
+                                <button type="button" className="practice-secondary-button"
+                                        onClick={() => setReportedQuestionId(question.id)}>
+                                    {t("feedback.reportQuestion")}
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                </>
             )}
 
             {reportedQuestionId !== null && (

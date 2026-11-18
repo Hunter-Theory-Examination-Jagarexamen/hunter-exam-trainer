@@ -253,6 +253,7 @@
     "noDataSubtitle": "No result data found.",
     "noDataMessage": "Please take a mock exam to see your results.",
     "hasDataSubtitle": "Here are your results for the mock exam.",
+    "bookmarkedTitle": "Questions you bookmarked",
     "correctFraction": "{{correct}} / {{total}} Correct",
     "correctAnswers": "Correct Answers",
     "incorrectAnswers": "Incorrect Answers",
