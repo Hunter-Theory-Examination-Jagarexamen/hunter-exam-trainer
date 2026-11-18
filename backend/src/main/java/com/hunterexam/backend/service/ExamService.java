@@ -75,7 +75,16 @@ public class ExamService {
      * (#187), and the progress chart applies the same bound.
      */
     private static final long SUBMIT_GRACE_MINUTES = 2;
-
+    /**
+     * "Introduktion" questions are not part of the real theory exam (they
+     * introduce the course, and one has a joke option), so they are left
+     * out of the mock exam (#221). Practice rounds keep them, unchanged.
+     * <p>
+     * Matched by name, case-insensitively — an admin renaming the subject
+     * would currently break this; the follow-up is an "includedInMockExam"
+     * flag on {@link Subject}. Until then, keep the name stable.
+     */
+    private static final String EXCLUDED_FROM_MOCK_EXAM = "Introduktion";
     private final QuestionRepository questionRepository;
     private final UserRepository userRepository;
     private final AttemptRepository attemptRepository;
@@ -116,7 +125,10 @@ public class ExamService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        List<Question> questions = questionRepository.findAll();
+        List<Question> questions = new ArrayList<>(
+            questionRepository.findAll().stream()
+                .filter(question -> !isExcludedFromMockExam(question.getSubject()))
+                .toList());
 
         if (questions.size() < 70) {
             throw new ConflictException(
@@ -226,6 +238,16 @@ public class ExamService {
             throw new ConflictException("This mock exam has already been submitted.");
         }
         return exam;
+    }
+
+    /**
+     * True for subjects whose questions never appear in a mock exam (#221).
+     * Matches case-insensitively so "INTRODUKTION" and "introduktion" are
+     * still excluded. Null-safe (a question with no subject is kept).
+     */
+    private static boolean isExcludedFromMockExam(Subject subject) {
+        return subject != null
+            && EXCLUDED_FROM_MOCK_EXAM.equalsIgnoreCase(subject.getName());
     }
 
     /**
