@@ -5,6 +5,7 @@ import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import FeedbackDialog from "../../components/feedback/FeedbackDialog";
+import type { ExamQuestion } from "../../types/examQuestion.ts";
 
 interface ResultData {
     score: number;
@@ -13,12 +14,14 @@ interface ResultData {
     unanswered: number;
     totalQuestions: number;
     passed: boolean;
+    bookmarkedQuestions?: ExamQuestion[];
 }
 
 const Result = () => {
     const { t } = useTranslation();
     const location = useLocation();
     const [isGivingFeedback, setIsGivingFeedback] = useState(false);
+    const [reportedQuestionId, setReportedQuestionId] = useState<number | null>(null);
 
     const result = location.state as ResultData | undefined;
 
@@ -59,6 +62,28 @@ const Result = () => {
                     {t("feedback.afterExamButton")}
                 </button>
             </div>
+
+            {result.bookmarkedQuestions && result.bookmarkedQuestions.length > 0 && (
+                <ul className="result-bookmarked">
+                    {result.bookmarkedQuestions.map(question => (
+                        <li key={question.id}>
+                            <span>{question.questionText}</span>
+                            <button type="button" className="practice-secondary-button"
+                                    onClick={() => setReportedQuestionId(question.id)}>
+                                {t("feedback.reportQuestion")}
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+
+            {reportedQuestionId !== null && (
+                <FeedbackDialog
+                    initialType="QUESTION"
+                    questionId={reportedQuestionId}
+                    onClose={() => setReportedQuestionId(null)}
+                />
+            )}
 
             {isGivingFeedback && <FeedbackDialog onClose={() => setIsGivingFeedback(false)} />}
         </section>

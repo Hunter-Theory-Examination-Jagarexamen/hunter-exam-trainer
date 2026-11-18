@@ -148,7 +148,11 @@ const Exam = () => {
             // result page (the ref is read before React re-renders, #186).
             examActiveRef.current = false;
             navigate("/result", {
-                state: result
+                state: {
+                    ...result,
+                    // The bookmarked questions, so the result page can list them (#199).
+                    bookmarkedQuestions: questions.filter(q => bookmarks.has(q.id))
+                }
             });
         }
         catch (err) {
@@ -168,7 +172,7 @@ const Exam = () => {
             submitRequest.current = false;
             setIsSubmitting(false);
         }
-    }, [attemptId, navigate, t]);
+    }, [attemptId, navigate, t, questions, bookmarks]);
 
 
     //Load exam questions
