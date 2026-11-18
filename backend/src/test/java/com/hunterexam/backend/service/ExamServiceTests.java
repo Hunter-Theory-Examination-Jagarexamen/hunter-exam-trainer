@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -782,5 +783,71 @@ class ExamServiceTests {
         assertEquals(60, result.getCorrectAnswers());
         assertEquals(70, result.getTotalQuestions());
         assertTrue(result.isPassed());
+    }
+
+    @Test
+    void startExamNeverPicksQuestionsFromTheIntroduktionSubject() {
+        // The bank has 7 "Introduktion" questions and 93 from another subject.
+        // If the filter doesn't work, those 7 could show up in the 70 chosen.
+        Subject intro = new Subject();
+        intro.setId(99L);
+        intro.setName("Introduktion");
+
+        Subject ekologi = new Subject();
+        ekologi.setId(7L);
+        ekologi.setName("Ekologi");
+
+        List<Question> bank = new ArrayList<>();
+        for (long id = 1; id <= 7; id++) {
+            Question q = question(id);
+            q.setSubject(intro);
+            bank.add(q);
+        }
+        for (long id = 8; id <= 100; id++) {
+            Question q = question(id);
+            q.setSubject(ekologi);
+            bank.add(q);
+        }
+        when(questionRepository.findAll()).thenReturn(bank);
+        givenAttemptIsSavedWithId(42L);
+
+        ExamStartResponse response = examService.startExam(EMAIL);
+
+        assertEquals(70, response.getQuestions().size(),
+            "the exam still has 70 questions after filtering");
+        // Every chosen question must be from "Ekologi", never "Introduktion".
+        response.getQuestions().forEach(q -> assertNotEquals(99L,
+            // Find the question in the bank to check its subject id.
+            bank.stream()
+                .filter(original -> original.getId().equals(q.getId()))
+                .findFirst().orElseThrow().getSubject().getId(),
+            "question " + q.getId() + " is from the Introduktion subject"));
+    }
+
+    @Test
+    void startExamFailsClearlyWhenTooFewNonIntroduktionQuestionsRemain() {
+        // 50 "Introduktion" + 50 "Ekologi" = 100 total, but only 50 non-Intro.
+        // After filtering, only 50 questions remain — not enough for a 70-question exam.
+        Subject intro = new Subject();
+        intro.setId(99L);
+        intro.setName("Introduktion");
+
+        List<Question> bank = new ArrayList<>();
+        for (long id = 1; id <= 50; id++) {
+            Question q = question(id);
+            q.setSubject(intro);
+            bank.add(q);
+        }
+        for (long id = 51; id <= 100; id++) {
+            Question q = question(id);
+            q.setSubject(subject); // the default "Ekologi" test subject
+            bank.add(q);
+        }
+        when(questionRepository.findAll()).thenReturn(bank);
+
+        assertThrows(ConflictException.class, () -> examService.startExam(EMAIL),
+            "should be 409: only 50 non-Introduktion questions remain");
+
+        verifyNoInteractions(attemptRepository, attemptQuestionRepository);
     }
 }
