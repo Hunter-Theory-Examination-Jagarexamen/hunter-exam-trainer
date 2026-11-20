@@ -33,4 +33,24 @@ describe("Result page feedback", () => {
         renderResult();
         expect(screen.queryByRole("button", { name: "Ge feedback om provet" })).not.toBeInTheDocument();
     });
+
+    it("reports the right question from the bookmarked list", async () => {
+        vi.mocked(apiClient).mockResolvedValue("");
+        renderResult({
+            ...result,
+            passed: true,
+            bookmarkedQuestions: [
+                { id: 11, questionText: "Första frågan", optionA: "A", optionB: "B", optionC: "C", optionD: "D" },
+                { id: 22, questionText: "Andra frågan", optionA: "A", optionB: "B", optionC: "C", optionD: "D" },
+            ],
+        });
+
+        expect(screen.getByText("Frågor du bokmärkte")).toBeInTheDocument();
+        await userEvent.click(screen.getAllByRole("button", { name: "Rapportera fel i frågan" })[1]);
+        await userEvent.type(screen.getByLabelText("Ditt meddelande"), "Fel svar");
+        await userEvent.click(screen.getByRole("button", { name: "Skicka" }));
+
+        expect(JSON.parse(vi.mocked(apiClient).mock.lastCall![1]!.body as string))
+            .toEqual({ type: "QUESTION", text: "Fel svar", questionId: 22 });
+    });
 });
