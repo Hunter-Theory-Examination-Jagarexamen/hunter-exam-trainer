@@ -111,6 +111,10 @@ mock exam can be open at a time; its answers given within the time limit count
 in statistics as usual (see "Counted answers" below). Practice rounds are never
 touched by this.
 
+Questions from the "Introduktion" subject are excluded: they introduce the
+course and are not part of the real theory exam (#221). Practice rounds 
+(subject and random) are unchanged and still offer "Introduktion" questions.
+
 ```json
 {
   "attemptId": 12,
