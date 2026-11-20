@@ -81,3 +81,29 @@
     background: #fdecea;
     color: #b3261e;
 }
+
+.result-bookmarked {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.result-bookmarked li {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+}
+
+.result-bookmarked span {
+    font-size: 0.95rem;
+    color: var(--color-text);
+}
