@@ -16,6 +16,12 @@ public interface SubjectStatsRepository extends JpaRepository<SubjectStats, Long
 
     boolean existsByUserAndSubject(User user, Subject subject);
 
+    /**
+     * The student's totals for every subject with at least one answer, with
+     * the subject loaded in the same query ({@code JOIN FETCH}), ordered by
+     * subject id. Rows with 0 answers exist when a round was started but
+     * nothing was answered yet; they are left out.
+     */
     @Query("""
             SELECT s FROM SubjectStats s
             JOIN FETCH s.subject
@@ -24,6 +30,10 @@ public interface SubjectStatsRepository extends JpaRepository<SubjectStats, Long
             """)
     List<SubjectStats> findAnsweredByUser(@Param("userId") Long userId);
 
+    /**
+     * Same as {@link #findAnsweredByUser}, for many students in one query
+     * (Learner Progress), instead of one query per student.
+     */
     @Query("""
             SELECT s FROM SubjectStats s
             JOIN FETCH s.subject
@@ -32,9 +42,21 @@ public interface SubjectStatsRepository extends JpaRepository<SubjectStats, Long
             """)
     List<SubjectStats> findAnsweredByUserIn(@Param("users") Collection<User> users);
 
+    /**
+     * All questions the student has answered, summed over their subjects
+     * (practice answers and scored mock exams). {@code COALESCE} turns the
+     * {@code null} that {@code SUM} gives for no rows into 0.
+     */
     @Query("SELECT COALESCE(SUM(s.answered), 0) FROM SubjectStats s WHERE s.user = :user")
     long countAnsweredByUser(@Param("user") User user);
 
+    /**
+     * Adds one answer to the totals, letting the database do the adding
+     * ({@code answered = answered + 1}) so two answers saved at the same time
+     * can't overwrite each other.
+     *
+     * @return the number of rows updated: 0 means the row doesn't exist yet
+     */
     @Modifying
     @Query("""
             UPDATE SubjectStats s
