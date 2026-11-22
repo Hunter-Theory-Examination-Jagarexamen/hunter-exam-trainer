@@ -18,3 +18,18 @@ export const getLearnerProgress = (userId: number): Promise<LearnerProgress> =>
  */
 export const deleteStudent = (userId: number): Promise<void> =>
     apiClient(`/api/admin/users/${userId}`, { method: "DELETE" });
+
+/**
+ * Promotes a student to administrator ("ADMIN") or demotes an administrator
+ * to student ("STUDENT"). Admin-only; the backend rejects self-demotion,
+ * demoting the last administrator and unknown ids (409/404), so those errors
+ * come back as failed promises with the backend's message.
+ */
+export const updateUserRole = (
+    userId: number,
+    role: LearnerSummary["role"]
+): Promise<LearnerSummary> =>
+    apiClient(`/api/admin/users/${userId}/role`, {
+        method: "PUT",
+        body: JSON.stringify({ role }),
+    });

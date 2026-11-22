@@ -27,6 +27,19 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     long countByRole(Role role);
 
+    /**
+     * Locks every user with the given role for the rest of the transaction.
+     * <p>
+     * Demotions use this so that two concurrent requests cannot both count the
+     * same administrators and then remove all of them: the second request waits
+     * here until the first one commits and then sees the updated count.
+     * The result is ordered by id, so concurrent callers lock the rows in the
+     * same order.
+     */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select u from User u where u.role = :role order by u.id")
+    List<User> findByRoleForUpdate(@Param("role") Role role);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select u from User u where u.id = :id")
     Optional<User> findByIdForUpdate(@Param("id") Long id);

@@ -8,7 +8,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,8 +20,6 @@ import org.springframework.security.oauth2.client.registration.InMemoryClientReg
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -61,27 +58,6 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    /**
-     * Maps the "role" claim from a JWT into a Spring Security authority
-     * of the form {@code ROLE_<role>}.
-     * <p>
-     * Spring Security's {@code hasRole("ADMIN")} check expects an authority
-     * named {@code ROLE_ADMIN}, so the prefix is added here.
-     *
-     * @return JWT authentication converter
-     */
-    @Bean
-    @Primary
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        authoritiesConverter.setAuthorityPrefix("ROLE_");
-        authoritiesConverter.setAuthoritiesClaimName("role");
-
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
-        return converter;
     }
 
     /**
@@ -131,7 +107,10 @@ public class SecurityConfig {
                         // All other endpoints require authentication.
                         .anyRequest().authenticated()
                 )
-                // Use JWT tokens to authenticate protected requests.
+                // Use JWT tokens to authenticate protected requests. The converter
+                // rejects tokens of deleted users and builds the authorities from the
+                // role in the database, so a role change applies from the next
+                // request on instead of waiting for the token to expire.
             .oauth2ResourceServer(oauth2 ->
                 oauth2.jwt(jwt ->
                     jwt.jwtAuthenticationConverter(userExistsJwtAuthenticationConverter)

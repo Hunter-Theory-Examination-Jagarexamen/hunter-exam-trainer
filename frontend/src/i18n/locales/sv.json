@@ -343,7 +343,22 @@
       "deleteConfirmCancel": "Avbryt",
       "deleteConfirmButton": "Ta bort konto",
       "deleteConfirmDeleting": "Tar bort…",
-      "deleteFailed": "Kunde inte ta bort kontot. Försök igen."
+      "deleteFailed": "Kunde inte ta bort kontot. Försök igen.",
+      "roleChangeTitle": "Behörighet",
+      "promoteButton": "Gör till administratör",
+      "demoteButton": "Gör till deltagare",
+      "promoteConfirmTitle": "Gör {{name}} till administratör?",
+      "promoteConfirmText": "Administratörer kan se deltagarnas information och resultat samt hantera frågebanken. {{name}} får administratörsbehörighet så snart du bekräftar.",
+      "demoteConfirmTitle": "Gör {{name}} till deltagare?",
+      "demoteConfirmText": "{{name}} förlorar administratörsbehörigheten direkt och kan inte längre använda adminvyer. Du kan göra {{name}} till administratör igen senare.",
+      "promoteConfirmButton": "Gör till administratör",
+      "demoteConfirmButton": "Gör till deltagare",
+      "roleConfirmCancel": "Avbryt",
+      "roleSaving": "Sparar…",
+      "promoteSuccess": "{{name}} är nu administratör.",
+      "demoteSuccess": "{{name}} är nu deltagare.",
+      "roleChangeFailed": "Kunde inte ändra behörigheten. Försök igen.",
+      "selfDemotionBlocked": "Du kan inte ändra din egen behörighet här."
     },
     "list": {
       "deleteSuccess": "{{name}}s konto har tagits bort."

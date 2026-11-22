@@ -10,7 +10,9 @@ const AdminRoute = () => {
     if (error) return <p role="alert">{error}</p>;
     if (user?.role !== UserRole.ADMIN) return <Navigate to="/dashboard" replace />;
 
-    return <Outlet />;
+    // Forward the current user to admin sub-pages (LearnerDetailPage needs it
+    // to detect self-demotion); react-router's Outlet does not chain contexts.
+    return <Outlet context={{user, isLoading, error}} />;
 };
 
 export default AdminRoute;
