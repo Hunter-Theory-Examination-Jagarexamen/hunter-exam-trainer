@@ -26,7 +26,7 @@ const LeaveExamDialog = ({ onConfirm, onCancel, isLeaving = false, error, leaveA
                 <div className="exam-leave-actions">
                     <button
                         type="button"
-                        className="next-button"
+                        className="btn btn-primary"
                         onClick={onConfirm}
                         disabled={isLeaving}
                     >
@@ -34,7 +34,7 @@ const LeaveExamDialog = ({ onConfirm, onCancel, isLeaving = false, error, leaveA
                     </button>
                     <button
                         type="button"
-                        className="previous-button"
+                        className="btn btn-secondary"
                         onClick={onCancel}
                         disabled={isLeaving}
                     >

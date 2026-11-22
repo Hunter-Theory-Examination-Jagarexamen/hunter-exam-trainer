@@ -19,7 +19,7 @@ const ExamNavigation = (
     return (
         <section className="exam-navigation">
             <button
-                className="previous-button"
+                className="btn btn-secondary"
                 onClick={onPrevious}
                 disabled={isFirstQuestion}
             >
@@ -30,11 +30,11 @@ const ExamNavigation = (
                 mistake here). Only on the last question, where Next has
                 nowhere to go, does it take Next's place (#188). */}
             {isLastQuestion ? (
-                <button className="next-button" onClick={onSubmit} disabled={isSubmitting}>
+                <button className="btn btn-primary" onClick={onSubmit} disabled={isSubmitting}>
                     {isSubmitting ? t("exam.navigation.submitting") : t("exam.navigation.submit")}
                 </button>
             ) : (
-                <button className="next-button" onClick={onNext}>
+                <button className="btn btn-primary" onClick={onNext}>
                     {t("exam.navigation.next")}
                 </button>
             )}

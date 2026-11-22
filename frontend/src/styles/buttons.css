@@ -33,6 +33,11 @@
     cursor: not-allowed;
 }
 
+/* Pressed: the feedback touch users see (hover rarely applies on phones) */
+.btn:active:not(:disabled) {
+    filter: brightness(0.9);
+}
+
 .btn-primary {
     background-color: var(--color-primary);
     color: white;
