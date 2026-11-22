@@ -45,6 +45,7 @@ endpoints are added to this table, not duplicated elsewhere.
 | PATCH  | /api/admin/feedback/{id}/handled | Mark feedback as handled or unhandled         | Required (ADMIN) |
 | DELETE | /api/users/me                 | Delete own account and all personal data        | Required         |
 | DELETE | /api/admin/users/{id}         | Delete a student account                        | Required (ADMIN) |
+| PUT    | /api/admin/users/{id}/role    | Promote a participant to ADMIN or demote an ADMIN to STUDENT | Required (ADMIN) |
 
 Subject writes were moved from `/api/subjects` to `/api/admin/subjects`. The old
 paths have no write handlers anymore: an ADMIN call to them answers
@@ -414,6 +415,47 @@ Admin-only endpoint to delete a student account. Admin accounts cannot be delete
 
 _Used by the participant detail page (Admin → Deltagare → name). The confirmation naming
 the participant and the danger-zone styling are frontend-only._
+
+## Role changes (promote / demote): request and response
+
+### `PUT /api/admin/users/{id}/role`
+Admin-only endpoint that changes a user's role.
+
+Request body:
+```json
+{ "role": "ADMIN" }
+```
+`role` must be `"ADMIN"` or `"STUDENT"`; anything else (including a missing
+body field) is `400 Bad Request`.
+
+- **200 OK**: Success, returns the updated summary.
+  ```json
+  { "userId": 7, "fullName": "Anna Andersson", "role": "ADMIN" }
+  ```
+- **400 Bad Request**: The body is missing or the role is not `ADMIN`/`STUDENT`.
+- **401 Unauthorized**: No (valid) token.
+- **403 Forbidden**: The caller is not an administrator.
+- **404 Not Found**: The id doesn't exist.
+- **409 Conflict**: The change is refused by a business rule —
+  - the caller tries to change their **own** role,
+  - the **last administrator** would be demoted (checked under a lock, so
+    concurrent demotions cannot leave the system without an admin),
+  - the user already has the requested role.
+
+The acting administrator is taken from the token, never from the request body.
+
+**Immediate effect:** JWTs only carry identity claims, so the authority on every
+request is read from the database (`UserExistsJwtAuthenticationConverter`). A
+demoted administrator loses `/api/admin/**` access with their very next request
+— no re-login or token expiry needed — while the same token keeps working for
+regular endpoints (`GET /api/admin/...` answers `403`, `GET /api/users/me`
+still answers `200`). Promotions work the same way in reverse with a fresh
+request.
+
+_Used by the role section on the participant detail page (Admin → Deltagare →
+name): a confirmation dialog naming the participant, and a disabled button with
+an explanation for demoting yourself. The list page re-reads roles (admins
+first) the next time it is opened._
 
 ## Roles
 

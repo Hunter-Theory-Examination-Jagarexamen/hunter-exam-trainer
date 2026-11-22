@@ -343,7 +343,22 @@
       "deleteConfirmCancel": "Cancel",
       "deleteConfirmButton": "Delete account",
       "deleteConfirmDeleting": "Deleting…",
-      "deleteFailed": "Could not delete the account. Please try again."
+      "deleteFailed": "Could not delete the account. Please try again.",
+      "roleChangeTitle": "Role",
+      "promoteButton": "Make administrator",
+      "demoteButton": "Make participant",
+      "promoteConfirmTitle": "Make {{name}} an administrator?",
+      "promoteConfirmText": "Administrators can see participants' information and results and manage the question bank. {{name}} gets administrator access as soon as you confirm.",
+      "demoteConfirmTitle": "Make {{name}} a participant?",
+      "demoteConfirmText": "{{name}} loses administrator access immediately and can no longer use the admin views. You can make {{name}} an administrator again later.",
+      "promoteConfirmButton": "Make administrator",
+      "demoteConfirmButton": "Make participant",
+      "roleConfirmCancel": "Cancel",
+      "roleSaving": "Saving…",
+      "promoteSuccess": "{{name}} is now an administrator.",
+      "demoteSuccess": "{{name}} is now a participant.",
+      "roleChangeFailed": "Could not change the role. Please try again.",
+      "selfDemotionBlocked": "You cannot change your own role here."
     },
     "list": {
       "deleteSuccess": "{{name}}'s account has been deleted."

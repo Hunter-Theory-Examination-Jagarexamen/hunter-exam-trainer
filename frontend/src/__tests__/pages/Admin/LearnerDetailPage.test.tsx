@@ -3,19 +3,22 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter, Outlet, Route, Routes } from "react-router-dom";
 import LearnerDetailPage from "../../../pages/Admin/LearnerDetailPage";
 import apiClient from "../../../api/apiClient.ts";
 import type { LearnerProgress } from "../../../types/learnerProgress.ts";
+import type { User } from "../../../types/user.ts";
 
 vi.mock("../../../api/apiClient.ts", () => ({
     default: vi.fn(),
 }));
 
 // Mock the translation so it returns the key (e.g. "learnerProgress.detail.deleteButton")
-// instead of the Swedish text, so our assertions match.
+// instead of the Swedish text, so our assertions match. The function must be stable:
+// LearnerDetailPage re-runs its load effect when `t` changes identity.
+const { t } = vi.hoisted(() => ({ t: (key: string) => key }));
 vi.mock("react-i18next", () => ({
-    useTranslation: () => ({ t: (key: string) => key }),
+    useTranslation: () => ({ t }),
 }));
 
 const navigate = vi.fn();
@@ -40,15 +43,30 @@ const emptyMockExams = {
     latestPassed: null,
 };
 
-function renderPage() {
+function renderPage(currentUser?: User | null) {
     render(
         <MemoryRouter initialEntries={["/admin/learners/1"]}>
             <Routes>
-                <Route path="/admin/learners/:userId" element={<LearnerDetailPage />} />
+                <Route element={<CurrentUserOutlet user={currentUser ?? null} />}>
+                    <Route path="/admin/learners/:userId" element={<LearnerDetailPage />} />
+                </Route>
             </Routes>
         </MemoryRouter>
     );
 }
+
+// Supplies the same outlet context AdminRoute passes down (the signed-in user).
+function CurrentUserOutlet({ user }: { user: User | null }) {
+    return <Outlet context={{ user, isLoading: false, error: "" }} />;
+}
+
+const studentProgress = () => ({
+    ...baseLearner, lastActivityAt: null, subjectPerformances: [], mockExams: emptyMockExams,
+});
+
+const adminUser: User = {
+    id: 99, fullName: "Admin User", email: "admin@test.com", role: "ADMIN", createdAt: "2026-01-01T00:00:00",
+};
 
 describe("LearnerDetailPage", () => {
 
@@ -274,5 +292,110 @@ describe("LearnerDetailPage", () => {
 
         expect(await screen.findByText("Server error")).toBeInTheDocument();
         expect(navigate).not.toHaveBeenCalled();
+    });
+
+    // ─── NEW TESTS FOR #204 (promote / demote) ───
+
+    it("offers to make a student an administrator", async () => {
+        vi.mocked(apiClient).mockResolvedValue(studentProgress());
+        renderPage(adminUser);
+
+        expect(await screen.findByText("learnerProgress.detail.promoteButton")).toBeInTheDocument();
+        expect(screen.queryByText("learnerProgress.detail.demoteButton")).not.toBeInTheDocument();
+    });
+
+    it("offers to make an administrator a participant", async () => {
+        vi.mocked(apiClient).mockResolvedValue({ ...studentProgress(), role: "ADMIN" });
+        renderPage(adminUser);
+
+        expect(await screen.findByText("learnerProgress.detail.demoteButton")).toBeInTheDocument();
+        expect(screen.queryByText("learnerProgress.detail.promoteButton")).not.toBeInTheDocument();
+        // The delete button is only for participants.
+        expect(screen.queryByText("learnerProgress.detail.deleteButton")).not.toBeInTheDocument();
+    });
+
+    it("promotes after confirmation and updates the page", async () => {
+        vi.mocked(apiClient).mockImplementation((url) =>
+            url.includes("/role")
+                ? Promise.resolve({ userId: 1, fullName: "Test Learner", role: "ADMIN" })
+                : Promise.resolve(studentProgress()));
+        renderPage(adminUser);
+
+        fireEvent.click(await screen.findByText("learnerProgress.detail.promoteButton"));
+        expect(screen.getByText("learnerProgress.detail.promoteConfirmTitle")).toBeInTheDocument();
+
+        fireEvent.click(screen.getByText("learnerProgress.detail.promoteConfirmButton"));
+
+        await waitFor(() => {
+            expect(apiClient).toHaveBeenCalledWith("/api/admin/users/1/role", {
+                method: "PUT",
+                body: JSON.stringify({ role: "ADMIN" }),
+            });
+        });
+        expect(await screen.findByText("learnerProgress.detail.promoteSuccess")).toBeInTheDocument();
+        // The page now shows the admin view of this person.
+        expect(screen.getByText("learnerProgress.detail.demoteButton")).toBeInTheDocument();
+        expect(screen.queryByText("learnerProgress.detail.deleteButton")).not.toBeInTheDocument();
+        expect(screen.queryByText("learnerProgress.detail.promoteConfirmTitle")).not.toBeInTheDocument();
+    });
+
+    it("demotes after confirmation", async () => {
+        vi.mocked(apiClient).mockImplementation((url) =>
+            url.includes("/role")
+                ? Promise.resolve({ userId: 1, fullName: "Test Learner", role: "STUDENT" })
+                : Promise.resolve({ ...studentProgress(), role: "ADMIN" }));
+        renderPage(adminUser);
+
+        fireEvent.click(await screen.findByText("learnerProgress.detail.demoteButton"));
+        expect(screen.getByText("learnerProgress.detail.demoteConfirmTitle")).toBeInTheDocument();
+
+        fireEvent.click(screen.getByText("learnerProgress.detail.demoteConfirmButton"));
+
+        await waitFor(() => {
+            expect(apiClient).toHaveBeenCalledWith("/api/admin/users/1/role", {
+                method: "PUT",
+                body: JSON.stringify({ role: "STUDENT" }),
+            });
+        });
+        expect(await screen.findByText("learnerProgress.detail.demoteSuccess")).toBeInTheDocument();
+        expect(screen.getByText("learnerProgress.detail.promoteButton")).toBeInTheDocument();
+    });
+
+    it("cancelling the role dialog does not call the API", async () => {
+        vi.mocked(apiClient).mockResolvedValue(studentProgress());
+        renderPage(adminUser);
+
+        fireEvent.click(await screen.findByText("learnerProgress.detail.promoteButton"));
+        fireEvent.click(screen.getByText("learnerProgress.detail.roleConfirmCancel"));
+
+        expect(screen.queryByText("learnerProgress.detail.promoteConfirmTitle")).not.toBeInTheDocument();
+        expect(apiClient).toHaveBeenCalledTimes(1); // only the initial load
+    });
+
+    it("shows the backend message when the role change is refused", async () => {
+        vi.mocked(apiClient).mockImplementation((url) =>
+            url.includes("/role")
+                ? Promise.reject(new Error(JSON.stringify({
+                    message: "The last administrator cannot be demoted.",
+                })))
+                : Promise.resolve({ ...studentProgress(), role: "ADMIN" }));
+        renderPage(adminUser);
+
+        fireEvent.click(await screen.findByText("learnerProgress.detail.demoteButton"));
+        fireEvent.click(screen.getByText("learnerProgress.detail.demoteConfirmButton"));
+
+        expect(await screen.findByText("The last administrator cannot be demoted.")).toBeInTheDocument();
+        // Still an admin on the page.
+        expect(screen.getByText("learnerProgress.detail.demoteButton")).toBeInTheDocument();
+    });
+
+    it("refuses to demote the signed-in administrator's own account", async () => {
+        vi.mocked(apiClient).mockResolvedValue({ ...studentProgress(), role: "ADMIN", userId: 99 });
+        renderPage(adminUser);
+
+        const button = await screen.findByText("learnerProgress.detail.demoteButton");
+        expect(button).toBeDisabled();
+        expect(screen.getByText("learnerProgress.detail.selfDemotionBlocked")).toBeInTheDocument();
+        expect(apiClient).toHaveBeenCalledTimes(1); // only the initial load
     });
 });

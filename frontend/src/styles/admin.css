@@ -232,3 +232,54 @@
     padding: 0.6rem 0;
     color: var(--color-primary);
 }
+
+/* Learner detail: promote / demote a participant's role (#204) */
+.role-change {
+    margin-top: 2rem;
+    max-width: 40rem;
+    padding: 1.5rem;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: var(--color-surface);
+}
+
+.role-change h2 {
+    margin-top: 0;
+    font-size: 1.1rem;
+}
+
+.role-change-button {
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font: inherit;
+    cursor: pointer;
+}
+
+.role-change-button:hover:not(:disabled) {
+    filter: brightness(1.1);
+}
+
+.role-change-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.role-change-note {
+    margin: 0.5rem 0 0;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+/* Confirmation after a role change or account deletion (#204) */
+.success-banner {
+    margin: 1rem 0;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--color-success);
+    border-radius: 8px;
+    background: #e9f7ee;
+    color: var(--color-success);
+    font-weight: 500;
+}
