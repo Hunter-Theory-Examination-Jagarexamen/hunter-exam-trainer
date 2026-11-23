@@ -15,6 +15,7 @@ How we work in this repository. Short on purpose: if something here is unclear o
 
 - **Formatting:** Code formatting is standardized via the root `.editorconfig` file. If you are using VS Code, make sure to install the [EditorConfig extension](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig).
 - **Styling:** Frontend styling uses plain CSS files located in `src/styles/`. Tailwind CSS is not installed or supported.
+- **Buttons:** Use the shared button classes from `src/styles/buttons.css`: `btn` plus `btn-primary` (main action), `btn-secondary` (other options, "Avbryt") or `btn-danger` (destructive actions), e.g. `<button className="btn btn-primary">`. Don't add colours, padding or hover rules for buttons in page CSS; a page class may only add layout (width, margins).
 
 ## Shared branches only change through PRs
 
