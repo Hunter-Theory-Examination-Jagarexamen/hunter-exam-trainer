@@ -37,7 +37,7 @@ const LegalDialog = ({ title, onClose, children }: LegalDialogProps) => {
                 <p className="legal-temporary">{t("temporaryNote")}</p>
                 {children}
                 <div className="legal-actions">
-                    <button type="button" className="check-answer-button" onClick={onClose}>
+                    <button type="button" className="btn btn-primary" onClick={onClose}>
                         {t("close")}
                     </button>
                 </div>

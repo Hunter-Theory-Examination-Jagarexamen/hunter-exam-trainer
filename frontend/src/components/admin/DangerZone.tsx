@@ -77,7 +77,7 @@ const DangerZone = ({ userId, userName }: DangerZoneProps) => {
                         <div className="feedback-actions">
                             <button
                                 type="button"
-                                className="practice-secondary-button"
+                                className="btn btn-secondary"
                                 onClick={() => { setIsConfirming(false); setError(null); }}
                                 disabled={isDeleting}
                             >

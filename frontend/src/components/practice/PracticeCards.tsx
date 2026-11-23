@@ -33,7 +33,7 @@ const PracticeCards = () => {
                     </ul>
 
                     <button
-                        className="practice-button"
+                        className="btn btn-secondary practice-button"
                         onClick={() => navigate(card.route)}
                     >
                         {t(card.buttonLabel)}

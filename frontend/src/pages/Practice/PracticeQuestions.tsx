@@ -359,7 +359,7 @@ const PracticeQuestions = ({ mode = "subject" }: PracticeQuestionsProps) => {
             />
 
             <div className="practice-quit-row">
-                <button className="practice-secondary-button" onClick={() => setIsConfirmingQuit(true)}
+                <button className="btn btn-secondary" onClick={() => setIsConfirmingQuit(true)}
                         disabled={isConfirmingQuit}>
                     {t("practice.quitRound")}
                 </button>

@@ -57,7 +57,7 @@ const Result = () => {
 
             <div className="result-feedback">
                 <p>{t("feedback.afterExamText")}</p>
-                <button type="button" className="practice-secondary-button"
+                <button type="button" className="btn btn-secondary"
                         onClick={() => setIsGivingFeedback(true)}>
                     {t("feedback.afterExamButton")}
                 </button>
@@ -70,7 +70,7 @@ const Result = () => {
                         {result.bookmarkedQuestions.map(question => (
                             <li key={question.id}>
                                 <span>{question.questionText}</span>
-                                <button type="button" className="practice-secondary-button"
+                                <button type="button" className="btn btn-secondary"
                                         onClick={() => setReportedQuestionId(question.id)}>
                                     {t("feedback.reportQuestion")}
                                 </button>

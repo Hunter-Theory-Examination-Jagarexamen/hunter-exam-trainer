@@ -73,6 +73,7 @@ const SubjectCards = () => {
                                 {t("practice.subjectQuestionCount", { count: subject.questionCount })}
                             </span>
                             <button
+                                className="btn btn-primary"
                                 onClick={() => navigate(`/practice/subjects/${subject.id}`)}
                             >
                                 {t("practice.startPracticeButton")}

@@ -18,10 +18,10 @@ const QuitRoundDialog = ({ onConfirm, onCancel, isQuitting = false }: QuitRoundD
             <h2 id="quit-round-title">{t("practice.quitTitle")}</h2>
             <p>{t("practice.quitText")}</p>
             <div className="practice-dialog-actions">
-                <button className="check-answer-button" onClick={onConfirm} disabled={isQuitting}>
+                <button className="btn btn-primary" onClick={onConfirm} disabled={isQuitting}>
                     {t("practice.quitConfirm")}
                 </button>
-                <button className="practice-secondary-button" onClick={onCancel} disabled={isQuitting}>
+                <button className="btn btn-secondary" onClick={onCancel} disabled={isQuitting}>
                     {t("practice.quitCancel")}
                 </button>
             </div>
