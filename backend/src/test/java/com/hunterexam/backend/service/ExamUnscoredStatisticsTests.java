@@ -31,7 +31,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -242,10 +245,17 @@ class ExamUnscoredStatisticsTests {
         assertThat(totals.answered()).isEqualTo(2);
         assertThat(totals.correct()).isEqualTo(1);
 
-        // Visible in the student's per-subject Statistics: 1 of 2 = 50 %.
+        // Visible in the student's per-subject Statistics: 1 of the subject's
+        // questions mastered (the right one, the wrong one is not).
         List<SubjectPerformanceResponse> rows = statisticsService.getSubjectPerformance(EMAIL);
-        assertThat(rows).hasSize(1);
-        assertThat(rows.getFirst().getPercentage()).isEqualTo(50);
+        SubjectPerformanceResponse windowRow = rows.stream()
+                .filter(row -> row.getSubjectId().equals(subject.getId()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(windowRow.getMasteredQuestions()).isEqualTo(1);
+        assertThat(windowRow.getAnsweredQuestions()).isEqualTo(2);
+        assertThat(windowRow.getMasteryPercentage())
+                .isEqualTo(Math.round(100.0 / windowRow.getTotalQuestions()));
     }
 
     @Test
@@ -290,9 +300,17 @@ class ExamUnscoredStatisticsTests {
 
         LearnerProgressResponse progress = adminService.getLearnerProgress(student.getId());
 
-        // Per-subject performance: 1 of 2 correct = 50 %, like any other answer.
-        assertThat(progress.subjectPerformances()).hasSize(1);
-        assertThat(progress.subjectPerformances().getFirst().getPercentage()).isEqualTo(50);
+        // Per-subject performance: 1 of the subject's questions mastered, like
+        // any other counted answer — same numbers as the student's own page.
+        assertThat(progress.subjectPerformances()).isNotEmpty();
+        SubjectPerformanceResponse windowRow = progress.subjectPerformances().stream()
+                .filter(row -> row.getSubjectId().equals(subject.getId()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(windowRow.getMasteredQuestions()).isEqualTo(1);
+        assertThat(windowRow.getAnsweredQuestions()).isEqualTo(2);
+        assertThat(windowRow.getMasteryPercentage())
+                .isEqualTo(Math.round(100.0 / windowRow.getTotalQuestions()));
         // ...but the exam itself is not one of the scored mock exams.
         assertThat(progress.mockExams().count()).isZero();
         assertThat(progress.mockExams().latestScore()).isNull();
@@ -313,11 +331,25 @@ class ExamUnscoredStatisticsTests {
         assertThat(totals.answered()).isEqualTo(1);
         assertThat(totals.correct()).isEqualTo(1);
 
-        List<ProgressOverTimeResponse> weeks = statisticsService.getProgressOverTime(EMAIL, 4);
+        List<ProgressOverTimeResponse> points = statisticsService.getProgressOverTime(EMAIL, 4);
 
-        assertThat(weeks).hasSize(1);
-        assertThat(weeks.getFirst().questionsAnswered()).isEqualTo(1);
-        assertThat(weeks.getFirst().accuracy()).isEqualTo(100);
+        // One point per day from the Monday of that week to today.
+        LocalDate from = LocalDate.now()
+                .minusWeeks(4)
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        assertThat(points)
+                .hasSize((int) from.datesUntil(LocalDate.now().plusDays(1)).count());
+
+        // The only eligible answer was given today: every earlier day has
+        // nothing mastered yet, and today shows the one mastered question out
+        // of the whole bank.
+        assertThat(points.subList(0, points.size() - 1))
+                .allMatch(point -> point.masteredQuestions() == 0);
+        ProgressOverTimeResponse today = points.getLast();
+        assertThat(today.masteredQuestions()).isEqualTo(1);
+        assertThat(today.totalQuestions()).isEqualTo(questions.count());
+        assertThat(today.masteryPercentage())
+                .isEqualTo(Math.round(100.0 / today.totalQuestions()));
     }
 
     // ----- Existing scored behaviour is unchanged -----

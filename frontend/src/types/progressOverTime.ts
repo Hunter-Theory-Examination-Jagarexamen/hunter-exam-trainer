@@ -1,5 +1,6 @@
 export interface ProgressPoint {
-    weekStart: string;
-    accuracy: number;
-    questionsAnswered: number;
+    date: string;
+    masteryPercentage: number;
+    masteredQuestions: number;
+    totalQuestions: number;
 }

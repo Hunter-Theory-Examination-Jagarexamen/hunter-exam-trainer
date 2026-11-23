@@ -9,7 +9,7 @@ describe("ProgressBar", () => {
 
     it("shows the subject name", () => {
         // Arrange: draw the component with test data
-        render(<ProgressBar subject="Viltvård" percentage={40} />);
+        render(<ProgressBar subject="Viltvård" masteredQuestions={2} totalQuestions={5} percentage={40} />);
 
         // Assert: the subject name is visible on the page
         expect(screen.getByText("Viltvård")).toBeInTheDocument();
@@ -17,7 +17,7 @@ describe("ProgressBar", () => {
 
     it("shows the percentage as text", () => {
         // Arrange: draw the component with test data
-        render(<ProgressBar subject="Viltvård" percentage={40} />);
+        render(<ProgressBar subject="Viltvård" masteredQuestions={2} totalQuestions={5} percentage={40} />);
 
         // Assert: the number is shown with a % sign
         expect(screen.getByText("40%")).toBeInTheDocument();
@@ -25,7 +25,7 @@ describe("ProgressBar", () => {
 
     it("sets the fill width to the percentage", () => {
         // Arrange: draw the component and keep the "container" (its HTML)
-        const { container } = render(<ProgressBar subject="Viltvård" percentage={40} />);
+        const { container } = render(<ProgressBar subject="Viltvård" masteredQuestions={2} totalQuestions={5} percentage={40} />);
 
         // Find the coloured fill by its CSS class (it has no text to search for)
         const fill = container.querySelector(".progress-fill");
@@ -37,7 +37,7 @@ describe("ProgressBar", () => {
     it("calls onClick when clicked", async () => {
         // Arrange: a mock function that records every call, passed as the onClick prop
         const onClick = vi.fn();
-        render(<ProgressBar subject="Viltvård" percentage={40} onClick={onClick} />);
+        render(<ProgressBar subject="Viltvård" masteredQuestions={2} totalQuestions={5} percentage={40} onClick={onClick} />);
 
         // Act: click the button, the way a user would
         await userEvent.click(screen.getByRole("button"));

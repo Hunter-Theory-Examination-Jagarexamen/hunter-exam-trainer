@@ -100,7 +100,7 @@ const Statistics = () => {
     const strongestSubject =
         subjectPerformance.length > 0
             ? subjectPerformance.reduce((strongest, current) =>
-                current.percentage > strongest.percentage
+                current.masteryPercentage > strongest.masteryPercentage
                     ? current
                     : strongest
             )
@@ -109,7 +109,7 @@ const Statistics = () => {
     const needsImprovement =
         subjectPerformance.length > 0
             ? subjectPerformance.reduce((lowest, current) =>
-                current.percentage < lowest.percentage
+                current.masteryPercentage < lowest.masteryPercentage
                     ? current
                     : lowest
             )
@@ -137,6 +137,7 @@ const Statistics = () => {
                         <option value={12}>{t("statistics.last12Weeks")}</option>
                     </select>
                 </div>
+                <p>{t("statistics.progressOverTimeDescription")}</p>
 
                 <div className="statistics-card">
                     {isLoadingProgressOverTime && <p>{t("statistics.loadingProgress")}</p>}
@@ -175,7 +176,9 @@ const Statistics = () => {
                                 <ProgressBar
                                     key={subject.subjectId}
                                     subject={subject.subjectName}
-                                    percentage={subject.percentage}
+                                    masteredQuestions={subject.masteredQuestions}
+                                    totalQuestions={subject.totalQuestions}
+                                    percentage={subject.masteryPercentage}
                                     onClick={() =>
                                         navigate(`/practice/subjects/${subject.subjectId}`)
                                     }

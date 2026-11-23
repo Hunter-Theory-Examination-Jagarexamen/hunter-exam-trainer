@@ -3,6 +3,7 @@ package com.hunterexam.backend.service;
 import com.hunterexam.backend.dto.AdminStatsResponse;
 import com.hunterexam.backend.dto.LearnerProgressResponse;
 import com.hunterexam.backend.dto.LearnerSummaryResponse;
+import com.hunterexam.backend.dto.SubjectPerformanceResponse;
 import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.SubjectStats;
@@ -30,6 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -43,6 +46,7 @@ class AdminServiceTests {
     @Mock SubjectRepository subjectRepository;
     @Mock SubjectStatsRepository subjectStatsRepository;
     @Mock FeedbackRepository feedbackRepository;
+    @Mock StatisticsService statisticsService;
 
     private AdminService adminService;
     private User learner;
@@ -50,7 +54,8 @@ class AdminServiceTests {
     @BeforeEach
     void setUp() {
         adminService = new AdminService(userRepository, attemptQuestionRepository,
-                questionRepository, subjectRepository, subjectStatsRepository, feedbackRepository);
+                questionRepository, subjectRepository, subjectStatsRepository,
+                feedbackRepository, statisticsService);
         learner = new User();
         learner.setId(1L);
         learner.setFullName("Test Learner");
@@ -68,6 +73,13 @@ class AdminServiceTests {
     /** One scored mock exam of the learner, as the grouped query returns it. */
     private MockExamScore exam(long correct, long total, LocalDateTime at) {
         return new MockExamScore(100L, learner.getId(), at, total, correct);
+    }
+
+    /** One subject's question-mastery row, as the shared calculation returns it. */
+    private SubjectPerformanceResponse mastery(long subjectId, String name,
+                                               long mastered, long total) {
+        return new SubjectPerformanceResponse(subjectId, name, mastered, total,
+                mastered, mastered * 100 / Math.max(total, 1));
     }
 
     /** A student's running totals in one subject. */
@@ -141,6 +153,8 @@ class AdminServiceTests {
         when(userRepository.findById(1L)).thenReturn(Optional.of(learner));
         when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner)))
                 .thenReturn(List.of(stats(learner, ekologi, 10, 8, practiceTime)));
+        when(statisticsService.subjectPerformanceFor(learner))
+                .thenReturn(List.of(mastery(3L, "Ekologi", 8, 10)));
 
         LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
 
@@ -149,7 +163,9 @@ class AdminServiceTests {
         assertEquals(practiceTime, lr.lastActivityAt());
         assertEquals(1, lr.subjectPerformances().size());
         assertEquals("Ekologi", lr.subjectPerformances().getFirst().getSubjectName());
-        assertEquals(80, lr.subjectPerformances().getFirst().getPercentage());
+        assertEquals(80, lr.subjectPerformances().getFirst().getMasteryPercentage());
+        assertEquals(8, lr.subjectPerformances().getFirst().getMasteredQuestions());
+        assertEquals(10, lr.subjectPerformances().getFirst().getTotalQuestions());
     }
 
     @Test
@@ -162,6 +178,8 @@ class AdminServiceTests {
                 .thenReturn(List.of(exam(62, 70, examTime)));
         when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner)))
                 .thenReturn(List.of(stats(learner, ekologi, 10, 7, practiceTime)));
+        when(statisticsService.subjectPerformanceFor(learner))
+                .thenReturn(List.of(mastery(3L, "Ekologi", 7, 10)));
 
         LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
 
@@ -198,19 +216,22 @@ class AdminServiceTests {
     }
 
     @Test
-    void subjectsAreSortedWeakestFirst() {
-        Subject ekologi = subject(3L, "Ekologi");
-        Subject vapen = subject(4L, "Vapen");
+    void subjectsAreSortedWeakestFirstWithQuestionlessSubjectsLast() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(learner));
-        when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner))).thenReturn(List.of(
-                stats(learner, ekologi, 20, 18),   // 90 %
-                stats(learner, vapen, 10, 4)));    // 40 %
+        when(statisticsService.subjectPerformanceFor(learner)).thenReturn(List.of(
+                mastery(3L, "Ekologi", 18, 20),    // 90 %
+                mastery(4L, "Vapen", 4, 10),       // 40 %
+                mastery(5L, "Ny", 0, 0)));         // nothing to master yet
 
         LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
 
+        // Weakest mastery first, and a subject without questions comes last —
+        // it cannot be "weakest" when there is nothing to master.
         assertEquals("Vapen", lr.subjectPerformances().get(0).getSubjectName());
-        assertEquals(40, lr.subjectPerformances().get(0).getPercentage());
-        assertEquals(90, lr.subjectPerformances().get(1).getPercentage());
+        assertEquals(40, lr.subjectPerformances().get(0).getMasteryPercentage());
+        assertEquals(90, lr.subjectPerformances().get(1).getMasteryPercentage());
+        assertEquals("Ny", lr.subjectPerformances().get(2).getSubjectName());
+        assertEquals(0, lr.subjectPerformances().get(2).getTotalQuestions());
     }
 
     @Test
@@ -240,8 +261,10 @@ class AdminServiceTests {
         LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
 
         assertNull(lr.subjectPerformances());
-        // Not even an empty stand-in that could be read as "no answers".
+        // Not even an empty stand-in that could be read as "no answers", and
+        // the mastery calculation itself is never run for a hidden category.
         verifyNoInteractions(subjectStatsRepository);
+        verify(statisticsService, never()).subjectPerformanceFor(any());
     }
 
     @Test
@@ -262,11 +285,13 @@ class AdminServiceTests {
         when(userRepository.findById(1L)).thenReturn(Optional.of(learner));
         when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner)))
                 .thenReturn(List.of(stats(learner, subject(3L, "Ekologi"), 10, 8, practiceTime)));
+        when(statisticsService.subjectPerformanceFor(learner))
+                .thenReturn(List.of(mastery(3L, "Ekologi", 8, 10)));
 
         LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
 
         assertEquals(1, lr.subjectPerformances().size());
-        assertEquals(80, lr.subjectPerformances().getFirst().getPercentage());
+        assertEquals(80, lr.subjectPerformances().getFirst().getMasteryPercentage());
         assertNull(lr.mockExams());
         assertEquals(practiceTime, lr.lastActivityAt());   // only from the shared category
         verifyNoInteractions(attemptQuestionRepository);
@@ -284,6 +309,7 @@ class AdminServiceTests {
         assertNull(lr.mockExams());
         assertNull(lr.lastActivityAt());
         verifyNoInteractions(subjectStatsRepository, attemptQuestionRepository);
+        verify(statisticsService, never()).subjectPerformanceFor(any());
     }
 
     @Test
