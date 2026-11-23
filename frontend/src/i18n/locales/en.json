@@ -263,9 +263,9 @@
   },
   "errors": {
     "EMAIL_TAKEN": "Email already registered.",
-    "INVALID_CREDENTIALS": "Invalid email or password",
+    "INVALID_CREDENTIALS": "Invalid email or password.",
     "PASSWORD_TOO_SHORT": "Password is too short.",
-    "UNKNOWN_ERROR": "An unexpected error occurred. Please try again.",
+    "UNKNOWN_ERROR": "An unexpected error occurred.",
     "MISSING_FIELDS": "Please fill in all fields.",
     "PASSWORD_MISMATCH": "Passwords do not match.",
     "TERMS_REQUIRED": "Please accept the Terms of Use and Privacy Policy."
