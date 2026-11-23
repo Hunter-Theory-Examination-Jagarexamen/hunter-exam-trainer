@@ -7,7 +7,7 @@ import com.hunterexam.backend.entity.Question;
 import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.User;
-import com.hunterexam.backend.repository.projection.AnswerOutcome;
+import com.hunterexam.backend.repository.projection.MasteryAnswer;
 import com.hunterexam.backend.repository.projection.MockExamScore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,8 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Tests the JPQL queries against a real (H2) database:
  * {@code findScoredMockExams} (only scored mock exams count, each exam's score
- * counted from its rows) and {@code findCountedAnswersSince} (the answers the
- * progress chart counts).
+ * counted from its rows) and {@code findMasteryAnswers} (the one eligibility
+ * rule the question-mastery statistics share).
  */
 @DataJpaTest(showSql = false)
 @ActiveProfiles("test")
@@ -155,7 +155,7 @@ class AttemptQuestionRepositoryTests {
     }
 
     @Test
-    void countedAnswersArePracticeScoredAndEndedExamsButNotOpenOnes() {
+    void masteryAnswersArePracticeScoredAndEndedExamsButNotOpenOnes() {
         // Arrange: saveRound gives every answer 1 hour after the 2-hour-old
         // start, i.e. inside the answer window
         User other = saveUser("other@example.test");
@@ -171,16 +171,16 @@ class AttemptQuestionRepositoryTests {
                 true, true, true, true);
 
         // Act
-        List<AnswerOutcome> answers = attemptQuestions.findCountedAnswersSince(student, now.minusDays(1));
+        List<MasteryAnswer> answers = attemptQuestions.findMasteryAnswers(student);
 
         // Assert: 2 practice + 3 scored + 4 ended-exam answers; unanswered
         // rows left out, open exams and other students too
         assertEquals(9, answers.size());
-        assertEquals(8, answers.stream().filter(AnswerOutcome::isCorrect).count());
+        assertEquals(8, answers.stream().filter(MasteryAnswer::isCorrect).count());
     }
 
     @Test
-    void countedAnswersLeaveOutAnswersAfterTheExamWindow() {
+    void masteryAnswersLeaveOutAnswersAfterTheExamWindow() {
         // Arrange: three mock exams ended without a result. The answer
         // window is start + 60 minutes limit + 2 minutes grace (#187).
         saveRound(student, AttemptType.MOCK_EXAM,
@@ -194,7 +194,7 @@ class AttemptQuestionRepositoryTests {
                 true, null, null, null);                                   // start + 90 min: doesn't
 
         // Act
-        List<AnswerOutcome> answers = attemptQuestions.findCountedAnswersSince(student, now.minusDays(1));
+        List<MasteryAnswer> answers = attemptQuestions.findMasteryAnswers(student);
 
         // Assert: the in-window answers (including the one exactly on the
         // deadline), not the one given after it
@@ -202,14 +202,24 @@ class AttemptQuestionRepositoryTests {
     }
 
     @Test
-    void countedAnswersLeaveOutAnswersBeforeSince() {
-        // Arrange: answers at now - 1 hour
+    void masteryAnswersComeBackOldestFirstForReplay() {
+        // Arrange: two practice rounds, the second one's answers half an hour
+        // after the first round's
         saveRound(student, AttemptType.SUBJECT_PRACTICE, now, false,
-                true, true, true, true);
+                true, false, true, false);
+        saveRound(student, AttemptType.SUBJECT_PRACTICE, now.minusHours(2), now.minusMinutes(30),
+                now, false, true, true, true, true);
 
-        // Act + Assert: "since" after the answers gives nothing; before gives all 4
-        assertTrue(attemptQuestions.findCountedAnswersSince(student, now.minusMinutes(30)).isEmpty());
-        assertFalse(attemptQuestions.findCountedAnswersSince(student, now.minusHours(2)).isEmpty());
+        // Act
+        List<MasteryAnswer> answers = attemptQuestions.findMasteryAnswers(student);
+
+        // Assert: all 8 answers, ordered by when they were given — the order
+        // the mastery replay walks them in
+        assertEquals(8, answers.size());
+        for (int i = 1; i < answers.size(); i++) {
+            assertFalse(answers.get(i - 1).answeredAt().isAfter(answers.get(i).answeredAt()),
+                    "answers must come back oldest first");
+        }
     }
 
     @Test
@@ -222,11 +232,11 @@ class AttemptQuestionRepositoryTests {
 
         // Act
         List<MockExamScore> scores = attemptQuestions.findScoredMockExams(List.of(student));
-        List<AnswerOutcome> answers = attemptQuestions.findCountedAnswersSince(student, now.minusDays(1));
+        List<MasteryAnswer> answers = attemptQuestions.findMasteryAnswers(student);
 
         // Assert: no result, but its four in-window answers count (3 right)
         assertTrue(scores.isEmpty());
         assertEquals(4, answers.size());
-        assertEquals(3, answers.stream().filter(AnswerOutcome::isCorrect).count());
+        assertEquals(3, answers.stream().filter(MasteryAnswer::isCorrect).count());
     }
 }

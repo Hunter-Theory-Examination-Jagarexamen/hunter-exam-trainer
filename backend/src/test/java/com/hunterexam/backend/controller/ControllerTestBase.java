@@ -3,6 +3,7 @@ package com.hunterexam.backend.controller;
 import com.hunterexam.backend.config.OAuth2LoginSuccessHandler;
 import com.hunterexam.backend.config.SecurityConfig;
 import com.hunterexam.backend.repository.UserRepository;
+import com.hunterexam.backend.security.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -40,4 +41,7 @@ abstract class ControllerTestBase {
      */
     @MockitoBean
     protected UserRepository userRepository;
+
+    @MockitoBean
+    protected JwtService jwtService;
 }

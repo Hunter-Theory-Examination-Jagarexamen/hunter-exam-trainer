@@ -30,8 +30,8 @@ endpoints are added to this table, not duplicated elsewhere.
 | POST   | /api/exam/{attemptId}/abandon | End the running mock exam without scoring it | Required         |
 | GET    | /api/dashboard                | Get dashboard statistics for the logged-in user | Required         |
 | GET    | /api/dashboard/recent         | Get the user's 5 most recent scored mock exams  | Required         |
-| GET    | /api/statistics/subjects      | Get the user's performance by subject (practice and mock exams) | Required |
-| GET    | /api/statistics/progress      | Get the user's weekly accuracy over time        | Required         |
+| GET    | /api/statistics/subjects      | Get the user's question mastery by subject (practice and eligible mock exam answers) | Required |
+| GET    | /api/statistics/progress      | Get daily question mastery over time             | Required         |
 | GET    | /api/admin/learners           | List all users (admins first, then students) | Required (ADMIN) |
 | GET    | /api/admin/learners/{userId}  | Get one user's progress (`404` if the id doesn't exist) | Required (ADMIN) |
 | GET    | /api/admin/stats              | Get question, subject and learner counts, and unhandled feedback | Required (ADMIN) |
@@ -263,13 +263,19 @@ The statistics are calculated from the stored answers (`attempts`,
   counts nothing yet. Unanswered questions are not counted as answers (in a
   scored mock exam's score they count as not correct).
 - **Per subject** (`/api/statistics/subjects`, `subjectPerformances` in
-  `/api/admin/learners/{userId}`): `percentage` = correct ÷ answered over all counted
-  answers in the subject, rounded. Only subjects with at least one answer are
-  listed. The student always sees their own numbers; an admin only sees them
-  when the student shares that category (see "Result sharing" above).
+  `/api/admin/learners/{userId}`): `masteredQuestions` counts each question
+  whose latest counted answer is correct; `totalQuestions` is every question
+  currently in that subject, including unanswered questions; `answeredQuestions`
+  is the number of counted answers; `masteryPercentage` is mastered ÷ total,
+  rounded (0 when the subject has no questions). Subjects with no answers are
+  included with zero mastered. Student and admin values use the same calculation.
 - **Progress over time** (`/api/statistics/progress?weeks=N`): one point per
-  week (Monday) with counted answers, oldest first; `accuracy` = correct ÷
-  answered that week, `questionsAnswered` = answers that week.
+  calendar day in the requested window, oldest first. `date` is the day,
+  `masteredQuestions` is the number mastered at that day's end,
+  `totalQuestions` is the current question bank size, and `masteryPercentage`
+  is mastered ÷ total, rounded. Days without answers retain the previous state.
+  The denominator is current because the schema does not record historical bank
+  sizes. A student with no counted answers or an empty question bank gets no points.
 - **Dashboard** (`/api/dashboard`): `mockExams`, `averageScore` and
   `bestScore` from scored mock exams; `questionsAnswered` = all counted answers
   (practice and mock exams).

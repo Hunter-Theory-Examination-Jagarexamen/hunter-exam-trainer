@@ -33,6 +33,7 @@ public class AdminService {
     private final SubjectRepository subjectRepository;
     private final SubjectStatsRepository subjectStatsRepository;
     private final FeedbackRepository feedbackRepository;
+    private final StatisticsService statisticsService;
 
     public AdminService(
             UserRepository userRepository,
@@ -40,7 +41,8 @@ public class AdminService {
             QuestionRepository questionRepository,
             SubjectRepository subjectRepository,
             SubjectStatsRepository subjectStatsRepository,
-            FeedbackRepository feedbackRepository
+            FeedbackRepository feedbackRepository,
+            StatisticsService statisticsService
     ) {
         this.userRepository = userRepository;
         this.attemptQuestionRepository = attemptQuestionRepository;
@@ -48,6 +50,7 @@ public class AdminService {
         this.subjectRepository = subjectRepository;
         this.subjectStatsRepository = subjectStatsRepository;
         this.feedbackRepository = feedbackRepository;
+        this.statisticsService = statisticsService;
     }
 
     /**
@@ -95,28 +98,32 @@ public class AdminService {
         boolean shareMockExamResults = user.isShareMockExamResults();
 
         // The repository queries take a list of users; here it's a list of one.
-        // Hidden categories are not queried at all.
+        // Hidden categories are not queried at all: the mastery calculation
+        // and the answer totals are both behind the sharing flag.
         List<User> oneUser = List.of(user);
-        List<SubjectStats> subjectStats = shareSubjectStatistics
+        List<SubjectStats> answerTotals = shareSubjectStatistics
                 ? subjectStatsRepository.findAnsweredByUserIn(oneUser)
                 : List.of();
+        List<SubjectPerformanceResponse> subjectMastery = shareSubjectStatistics
+                ? statisticsService.subjectPerformanceFor(user)
+                : null;
         List<MockExamScore> examScores = shareMockExamResults
                 ? attemptQuestionRepository.findScoredMockExams(oneUser)
                 : List.of();
 
         return buildLearnerProgress(
                 user,
-                subjectStats,
+                subjectMastery,
+                answerTotals,
                 examScores,
-                shareSubjectStatistics,
                 shareMockExamResults);
     }
 
     private LearnerProgressResponse buildLearnerProgress(
             User learner,
-            List<SubjectStats> subjectStats,
+            List<SubjectPerformanceResponse> subjectMastery,
+            List<SubjectStats> answerTotals,
             List<MockExamScore> examScores,
-            boolean shareSubjectStatistics,
             boolean shareMockExamResults
     ) {
 
@@ -124,11 +131,16 @@ public class AdminService {
         // from an empty list or MockExamSummary.empty(), which mean "shared,
         // but there is no data yet", so hidden results are never shown as
         // zero performance.
-        List<SubjectPerformanceResponse> perSubject = shareSubjectStatistics
-                ? StatisticsService.toSubjectPerformance(subjectStats).stream()
-                        .sorted(Comparator.comparingLong(SubjectPerformanceResponse::getPercentage))
-                        .toList()
-                : null;
+        // Same numbers as the student's own Statistics page, weakest mastery
+        // first; subjects without questions come last (nothing to master yet).
+        List<SubjectPerformanceResponse> perSubject = subjectMastery == null
+                ? null
+                : subjectMastery.stream()
+                        .sorted(Comparator
+                                .comparingLong((SubjectPerformanceResponse row) ->
+                                        row.getTotalQuestions() == 0 ? 1 : 0)
+                                .thenComparingLong(SubjectPerformanceResponse::getMasteryPercentage))
+                        .toList();
         MockExamSummary mockExams = shareMockExamResults
                 ? aggregateMockExams(examScores)
                 : null;
@@ -136,9 +148,7 @@ public class AdminService {
         // Last activity is derived from the same answers, so it is only
         // computed from categories the student actually shares; with nothing
         // shared there is no activity to report.
-        LocalDateTime lastActivity = computeLastActivity(
-                shareSubjectStatistics ? subjectStats : List.of(),
-                shareMockExamResults ? examScores : List.of());
+        LocalDateTime lastActivity = computeLastActivity(answerTotals, examScores);
 
         return new LearnerProgressResponse(
                 learner.getId(),

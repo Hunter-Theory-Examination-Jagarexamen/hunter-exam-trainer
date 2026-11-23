@@ -20,7 +20,10 @@ export interface LearnerProgress {
     subjectPerformances: {
         subjectId: number;
         subjectName: string;
-        percentage: number;
+        masteredQuestions: number;
+        totalQuestions: number;
+        answeredQuestions: number;
+        masteryPercentage: number;
     }[] | null;
     mockExams: MockExamSummary | null;
 }

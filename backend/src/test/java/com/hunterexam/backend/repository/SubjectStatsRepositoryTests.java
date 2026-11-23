@@ -15,8 +15,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Tests the JPQL query {@code findAnsweredByUser} against a real (H2) database,
- * which the Mockito tests in {@code StatisticsServiceTests} can't do.
+ * Tests the JPQL queries {@code findAnsweredByUserIn} (the answer totals behind
+ * Learner Progress's last activity) and {@code countAnsweredByUser} against a
+ * real (H2) database, which the Mockito tests can't do.
  */
 @DataJpaTest(showSql = false)
 @ActiveProfiles("test")
@@ -51,9 +52,9 @@ class SubjectStatsRepositoryTests {
     }
 
     @Test
-    void returnsOnlyThisStudentsSubjectsWithAnswers() {
+    void returnsOnlyTheGivenStudentsSubjectsWithAnswers() {
         // Arrange: "student" answered in two subjects, started a round in a third
-        // without answering; "other" has answers too
+        // without answering; "other" has answers too but isn't asked for
         User student = saveUser("student@example.test");
         User other = saveUser("other@example.test");
         Subject weapons = saveSubject("Weapons-test");
@@ -65,7 +66,7 @@ class SubjectStatsRepositoryTests {
         saveStats(other, weapons, 5, 5);
 
         // Act
-        List<SubjectStats> rows = subjectStats.findAnsweredByUser(student.getId());
+        List<SubjectStats> rows = subjectStats.findAnsweredByUserIn(List.of(student));
 
         // Assert: the 0-answer row and the other student's row are left out,
         // and the rows come ordered by subject id (Weapons was saved first)
