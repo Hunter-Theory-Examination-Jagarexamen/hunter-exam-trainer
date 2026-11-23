@@ -8,6 +8,7 @@ import logo from "../../assets/images/logo.svg";
 import LegalDialog from "../legal/LegalDialog";
 import TermsContent from "../legal/TermsContent";
 import PrivacyContent from "../legal/PrivacyContent";
+import { errorStatus, isServerUnreachable } from "../../services/apiErrors";
 
 const RegisterForm = () => {
 
@@ -67,14 +68,13 @@ const RegisterForm = () => {
     // Redirects user to login page after successful registration
             navigate("/login", { state: { accountCreated: true } });
         } catch (err: unknown) {
-            const errorCode = (err as { code?: string })?.code || "UNKNOWN_ERROR";
-            setError(
-                t(`errors.${errorCode}`,
-                    err instanceof Error && err.message
-                        ? err.message
-                        : t("auth.registerFailed")
-                )
-            );
+            if (isServerUnreachable(err)) {
+                setError(t("serverStatus.error"));
+            } else if (errorStatus(err) === 409) {
+                setError(t("errors.EMAIL_TAKEN"));
+            } else {
+                setError(t("auth.registerFailed"));
+            }
         } finally {
             setIsLoading(false);
         }

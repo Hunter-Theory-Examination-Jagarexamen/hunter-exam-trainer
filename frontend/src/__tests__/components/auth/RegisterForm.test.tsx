@@ -6,8 +6,10 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import RegisterForm from "../../../components/auth/RegisterForm";
 import apiClient from "../../../api/apiClient";
+import { ApiError } from "../../../api/apiClient";
 
-vi.mock("../../../api/apiClient", () => ({
+vi.mock("../../../api/apiClient", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("../../../api/apiClient")>()),
     default: vi.fn(),
 }));
 
@@ -131,14 +133,25 @@ describe("RegisterForm", () => {
         expect(await screen.findByText("Login page")).toBeInTheDocument();
     });
 
-    it("shows the backend's error message when registration fails", async () => {
-        vi.mocked(apiClient).mockRejectedValue(new Error("E-postadressen är redan registrerad"));
+    it("shows that the email is already registered when the backend answers 409", async () => {
+        vi.mocked(apiClient).mockRejectedValue(new ApiError("{}", 409));
         renderRegisterForm();
 
         await fillForm();
         await clickCreateAccount();
 
-        expect(await screen.findByText("Ett oväntat fel uppstod.")).toBeInTheDocument();
+        expect(await screen.findByText("E-postadressen är redan registrerad.")).toBeInTheDocument();
+        expect(screen.queryByText("Login page")).not.toBeInTheDocument();
+    });
+
+    it("shows a general error when registration fails for another reason", async () => {
+        vi.mocked(apiClient).mockRejectedValue(new ApiError("{}", 500));
+        renderRegisterForm();
+
+        await fillForm();
+        await clickCreateAccount();
+
+        expect(await screen.findByText("Registreringen misslyckades. Försök igen.")).toBeInTheDocument();
         expect(screen.queryByText("Login page")).not.toBeInTheDocument();
     });
 });
