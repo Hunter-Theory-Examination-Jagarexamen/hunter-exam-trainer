@@ -248,25 +248,6 @@
     font-size: 1.1rem;
 }
 
-.role-change-button {
-    background: var(--color-primary);
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: 0.5rem 1rem;
-    font: inherit;
-    cursor: pointer;
-}
-
-.role-change-button:hover:not(:disabled) {
-    filter: brightness(1.1);
-}
-
-.role-change-button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
 .role-change-note {
     margin: 0.5rem 0 0;
     color: var(--color-text-muted);

@@ -53,7 +53,7 @@ const DangerZone = ({ userId, userName }: DangerZoneProps) => {
             <p>{t("learnerProgress.detail.dangerZoneText")}</p>
             <button
                 type="button"
-                className="btn-danger"
+                className="btn btn-danger"
                 onClick={() => setIsConfirming(true)}
             >
                 {t("learnerProgress.detail.deleteButton")}
@@ -85,7 +85,7 @@ const DangerZone = ({ userId, userName }: DangerZoneProps) => {
                             </button>
                             <button
                                 type="button"
-                                className="btn-danger"
+                                className="btn btn-danger"
                                 onClick={handleConfirm}
                                 disabled={isDeleting}
                             >
