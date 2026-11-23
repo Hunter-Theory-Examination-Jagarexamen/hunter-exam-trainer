@@ -133,7 +133,7 @@ const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onS
 
     return <>
         <div className="question-bank-actions">
-            <button ref={addButton} type="button" disabled={editor !== null || deleting !== null}
+            <button ref={addButton} type="button" className="btn btn-primary" disabled={editor !== null || deleting !== null}
                 onClick={() => { setSuccess(""); setEditor("create"); onBusyChange(true); }}>{t("questionBank.addQuestion")}</button>
         </div>
         {success && <p role="status">{success}</p>}
@@ -145,10 +145,10 @@ const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onS
             <p>{t("questionBank.deleteWarning")}</p>
             {deleteError && <p role="alert">{deleteError}</p>}
             <div className="question-bank-actions">
-                <button autoFocus type="button" disabled={submitting} onClick={() => {
+                <button autoFocus type="button" className="btn btn-secondary" disabled={submitting} onClick={() => {
                     setDeleting(null); onBusyChange(false);
                 }}>{t("questionBank.cancelDeletion")}</button>
-                <button type="button" className="question-delete" disabled={submitting} onClick={confirmDelete}>
+                <button type="button" className="btn btn-danger" disabled={submitting} onClick={confirmDelete}>
                     {submitting ? t("questionBank.deleting") : t("questionBank.confirmDeletion")}</button>
             </div>
         </section>}
@@ -175,9 +175,9 @@ const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onS
                     <p><strong>{t("questionBank.correctAnswer")}</strong> {question.correctAnswer}</p>
                     {question.explanation && <p><strong>{t("questionBank.explanation")}</strong> {question.explanation}</p>}
                     <div className="question-bank-actions">
-                        <button type="button" aria-label={t("questionBank.editAria", {id: question.id})} disabled={editor !== null || deleting !== null}
+                        <button type="button" className="btn btn-secondary" aria-label={t("questionBank.editAria", {id: question.id})} disabled={editor !== null || deleting !== null}
                             onClick={() => { setSuccess(""); setEditor(question); onBusyChange(true); }}>{t("questionBank.edit")}</button>
-                        <button type="button" className="question-delete" aria-label={t("questionBank.deleteAria", {id: question.id})}
+                        <button type="button" className="btn btn-danger" aria-label={t("questionBank.deleteAria", {id: question.id})}
                             disabled={editor !== null || deleting !== null} onClick={() => {
                                 setSuccess(""); setDeleteError(""); setDeleting(question);
                                 onBusyChange(true);
@@ -187,9 +187,9 @@ const SubjectQuestions = ({subjectId, subjects, onCountChange, onBusyChange, onS
             ))}
         </div>
         {pageCount > 1 && <nav className="question-bank-pagination" aria-label={t("questionBank.pagesAria")}>
-            <button type="button" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>{t("questionBank.previous")}</button>
+            <button type="button" className="btn btn-secondary" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>{t("questionBank.previous")}</button>
             <span>{t("questionBank.page", {current: currentPage, total: pageCount})}</span>
-            <button type="button" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>{t("questionBank.next")}</button>
+            <button type="button" className="btn btn-primary" disabled={currentPage === pageCount} onClick={() => setPage(currentPage + 1)}>{t("questionBank.next")}</button>
         </nav>}
     </>;
 };

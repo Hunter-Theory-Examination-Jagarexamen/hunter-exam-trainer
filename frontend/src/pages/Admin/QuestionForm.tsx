@@ -95,7 +95,7 @@ export default function QuestionForm({question, subjectId, subjects, onSaved, on
                 <input id="edit-image-url" type="url" maxLength={1000} value={imageUrl}
                        aria-describedby="image-url-help" onChange={e => setImageUrl(e.target.value)} />
                 <p id="image-url-help">{t("questionBank.editor.imageUrlHelp")}</p>
-                {imageUrl && <button type="button" onClick={() => setImageUrl("")}>{t("questionBank.editor.removeImage")}</button>}
+                {imageUrl && <button type="button" className="btn btn-secondary" onClick={() => setImageUrl("")}>{t("questionBank.editor.removeImage")}</button>}
                 <QuestionImage imageUrl={imageUrl} questionText={text.trim() || t("questionBank.editor.newQuestion")} />
             </div>
             <div className="question-bank-field">
@@ -105,8 +105,8 @@ export default function QuestionForm({question, subjectId, subjects, onSaved, on
         </fieldset>
         {error && <p role="alert">{error}</p>}
         <div className="question-bank-actions">
-            <button type="submit" disabled={submitting}>{submitting ? t("questionBank.saving") : t("questionBank.saveQuestion")}</button>
-            <button type="button" disabled={submitting} onClick={onCancel}>{t("questionBank.cancel")}</button>
+            <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? t("questionBank.saving") : t("questionBank.saveQuestion")}</button>
+            <button type="button" className="btn btn-secondary" disabled={submitting} onClick={onCancel}>{t("questionBank.cancel")}</button>
         </div>
     </form>;
 }
