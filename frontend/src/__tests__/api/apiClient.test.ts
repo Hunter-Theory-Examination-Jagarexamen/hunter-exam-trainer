@@ -209,4 +209,38 @@ describe("apiClient — slow backend (\"server is starting\")", () => {
         answer(0);
         await slowRequest;
     });
+
+    it("stores a refreshed token from the X-Refreshed-Token header", async () => {
+        localStorage.setItem("token", "old-token");
+        const newToken = "new-token-from-server";
+
+        vi.stubGlobal("fetch", vi.fn().mockResolvedValue(
+            new Response(JSON.stringify({ ok: true }), {
+                status: 200,
+                headers: {
+                    "content-type": "application/json",
+                    "X-Refreshed-Token": newToken,
+                },
+            }),
+        ));
+
+        await apiClient("/api/users/me");
+
+        expect(localStorage.getItem("token")).toBe(newToken);
+    });
+
+    it("keeps the existing token when no X-Refreshed-Token is returned", async () => {
+        localStorage.setItem("token", "old-token");
+
+        vi.stubGlobal("fetch", vi.fn().mockResolvedValue(
+            new Response(JSON.stringify({ ok: true }), {
+                status: 200,
+                headers: { "content-type": "application/json" },
+            }),
+        ));
+
+        await apiClient("/api/users/me");
+
+        expect(localStorage.getItem("token")).toBe("old-token");
+    });
 });

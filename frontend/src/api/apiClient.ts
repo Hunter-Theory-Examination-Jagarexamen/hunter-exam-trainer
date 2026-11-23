@@ -102,6 +102,13 @@ const apiClient = async (
         handleSessionExpired();
         throw new ApiError("Session expired. Please log in again.", 401);
     }
+    // #210: the backend may return a refreshed JWT when the current one is
+    // getting old. Store it so the next request uses it. Optional chaining
+    // because a mock or a misbehaving proxy may not have a headers object.
+    const refreshedToken = response.headers?.get?.("X-Refreshed-Token");
+    if (refreshedToken) {
+        localStorage.setItem("token", refreshedToken);
+    }
 
     if (!response.ok) {
         const errorMessage = await response.text();
