@@ -225,25 +225,9 @@
    Primary Button
    ========================= */
 
+/* Full width in the auth forms; the look comes from .btn-primary */
 .auth-primary-button {
     width: 100%;
-
-    padding: 0.8rem;
-
-    border: none;
-    border-radius: 8px;
-
-    background-color: var(--color-primary);
-    color: white;
-
-    font-size: 1rem;
-    font-weight: 600;
-
-    cursor: pointer;
-}
-
-.auth-primary-button:hover {
-    opacity: 0.9;
 }
 
 /* =========================
@@ -287,22 +271,6 @@
 
 .auth-secondary-button {
     width: 100%;
-
-    padding: 0.75rem;
-
-    border: 1px solid var(--color-border);
-    border-radius: 8px;
-
-    background-color: var(--color-surface);
-    color: var(--color-text);
-
-    font-size: 0.95rem;
-
-    cursor: pointer;
-}
-
-.auth-secondary-button:hover {
-    border-color: var(--color-primary);
 }
 
 /* =========================
@@ -517,12 +485,6 @@
 
     .input-wrapper input {
         padding: 0.65rem;
-        font-size: 0.95rem;
-    }
-
-    .auth-primary-button,
-    .auth-secondary-button {
-        padding: 0.7rem;
         font-size: 0.95rem;
     }
 

@@ -15,7 +15,7 @@ export const NotFound: React.FC = () => {
             </p>
             <Link
                 to={isLoggedIn ? "/dashboard" : "/login"}
-                className="not-found-button"
+                className="btn btn-primary"
             >
                 {isLoggedIn ? t("notFound.dashboardButton") : t("notFound.loginButton")}
             </Link>

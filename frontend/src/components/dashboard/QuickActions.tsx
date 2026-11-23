@@ -12,11 +12,13 @@ const QuickActions = () => {
 
             <div className="quick-actions">
                 <button
+                    className="btn btn-primary"
                     onClick={() => navigate("/practice")}
                 >
                     {t("dashboard.startPractice")}
                 </button>
                 <button
+                    className="btn btn-primary"
                     onClick={() => navigate("/mockexam")}
                 >
                     {t("dashboard.startMockExam")}

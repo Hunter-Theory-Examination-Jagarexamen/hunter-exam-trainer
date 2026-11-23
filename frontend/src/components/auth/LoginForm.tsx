@@ -163,7 +163,7 @@ const LoginForm = ({ notice }: LoginFormProps) => {
 
                 <button
                     type="submit"
-                    className="auth-primary-button"
+                    className="btn btn-primary auth-primary-button"
                     disabled={isLoading}
                 >
                     {isLoading ? t("auth.loggingIn") : t("auth.loginButton")}
@@ -180,7 +180,7 @@ const LoginForm = ({ notice }: LoginFormProps) => {
                     <div className="auth-secondary-actions">
                         <button
                             type="button"
-                            className="auth-secondary-button"
+                            className="btn btn-secondary auth-secondary-button"
                             onClick={handleGoogleLogin}
                         >
                             {t("auth.continueWithGoogle")}
