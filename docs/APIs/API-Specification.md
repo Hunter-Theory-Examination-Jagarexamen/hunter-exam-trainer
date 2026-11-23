@@ -395,6 +395,11 @@ value gives `400`.
 - `401 Unauthorized` — the JWT is missing, expired, or invalid. The frontend clears the token and redirects to `/login?expired=1`.
 - `403 Forbidden` — the user is logged in but not authorized for this endpoint. The frontend does **not** log them out.
 - `401` from `/api/auth/login` means wrong credentials, not session expiry — the frontend does not redirect.
+- **Sliding session (#210):** any authenticated response may include an
+    `X-Refreshed-Token` header containing a fresh JWT (issued when the current
+    token is more than 30 minutes old). Clients should replace their stored
+    token with it. A token that is not refreshed expires 60 minutes after its
+    issue time, so inactive users are logged out after 1 hour, same as before.
 
 
 ## Account Deletion (GDPR): request and response
