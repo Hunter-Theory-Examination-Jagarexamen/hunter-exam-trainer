@@ -85,7 +85,7 @@ const PracticeQuestionCard = ({
                 </div>
 
                 <button
-                    className="check-answer-button"
+                    className="btn btn-primary"
                     onClick={onCheckAnswer}
                     disabled={!selectedAnswer || showFeedback || isChecking}
                 >

@@ -226,7 +226,7 @@ const RegisterForm = () => {
                 {/* Submit */}
                 <button
                     type="submit"
-                    className="auth-primary-button"
+                    className="btn btn-primary auth-primary-button"
                     disabled={isLoading}
                 >
                     {isLoading ? t("auth.creatingAccount") : t("auth.registerButton")}

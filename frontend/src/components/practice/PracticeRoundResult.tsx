@@ -25,7 +25,7 @@ const PracticeRoundResult = ({ result, onBack, backLabelKey = "practice.backToSu
                     : t("practice.resultPartial",
                         { answered: answeredQuestions, total: totalQuestions, correct: correctAnswers })}
             </p>
-            <button className="check-answer-button" onClick={onBack}>
+            <button className="btn btn-primary" onClick={onBack}>
                 {t(backLabelKey)}
             </button>
         </section>

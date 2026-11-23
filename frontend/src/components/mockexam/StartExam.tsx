@@ -12,7 +12,7 @@ const StartExam = ({ onStartExam }: StartExamProps) => {
         <section className="mockexam-section">
 
             <button
-                className="start-exam-btn"
+                className="btn btn-primary"
                 onClick={onStartExam}
             >
                 {t("mockExam.startButton")}

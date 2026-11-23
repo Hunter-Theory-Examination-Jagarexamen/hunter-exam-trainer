@@ -66,7 +66,7 @@ const FeedbackDialog = ({ onClose, initialType = "APP", questionId }: FeedbackDi
                     <>
                         <p role="status">{t("feedback.sent")}</p>
                         <div className="feedback-actions">
-                            <button type="button" className="check-answer-button" onClick={onClose}>
+                            <button type="button" className="btn btn-primary" onClick={onClose}>
                                 {t("feedback.close")}
                             </button>
                         </div>
@@ -94,11 +94,11 @@ const FeedbackDialog = ({ onClose, initialType = "APP", questionId }: FeedbackDi
                         {errorKey && <p className="feedback-error" role="alert">{t(errorKey)}</p>}
 
                         <div className="feedback-actions">
-                            <button type="button" className="practice-secondary-button" onClick={onClose}
+                            <button type="button" className="btn btn-secondary" onClick={onClose}
                                     disabled={status === "sending"}>
                                 {t("feedback.cancel")}
                             </button>
-                            <button type="submit" className="check-answer-button"
+                            <button type="submit" className="btn btn-primary"
                                     disabled={status === "sending" || text.trim() === ""}>
                                 {status === "sending" ? t("feedback.sending") : t("feedback.send")}
                             </button>

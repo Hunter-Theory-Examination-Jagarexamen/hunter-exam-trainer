@@ -85,7 +85,7 @@ const RoleChangeSection = ({
 
             <button
                 type="button"
-                className="role-change-button"
+                className="btn btn-primary"
                 onClick={() => { setError(null); setIsConfirming(true); }}
                 disabled={isSaving || selfDemotionBlocked}
             >
@@ -128,7 +128,7 @@ const RoleChangeSection = ({
                         <div className="feedback-actions">
                             <button
                                 type="button"
-                                className="practice-secondary-button"
+                                className="btn btn-secondary"
                                 onClick={() => { setIsConfirming(false); setError(null); }}
                                 disabled={isSaving}
                             >
@@ -136,7 +136,7 @@ const RoleChangeSection = ({
                             </button>
                             <button
                                 type="button"
-                                className="role-change-button"
+                                className="btn btn-primary"
                                 onClick={handleConfirm}
                                 disabled={isSaving}
                             >

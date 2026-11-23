@@ -35,32 +35,6 @@
     color: var(--color-text);
 }
 
-.account-settings button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-
-    padding: 0.75rem 1.25rem;
-
-    border: none;
-    border-radius: 8px;
-
-    background: var(--color-primary);
-    color: white;
-    cursor: pointer;
-
-    font-size: 0.95rem;
-    font-weight: 600;
-
-    transition: all 0.2s ease;
-}
-
-.account-settings button:hover {
-    opacity: 0.9;
-    transform: translateY(-2px);
-}
-
 /*
 Change Password
  */
@@ -141,37 +115,6 @@ Result sharing (#125)
     cursor: pointer;
 }
 
-.result-sharing-form button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-
-    padding: 0.75rem 1.25rem;
-
-    border: none;
-    border-radius: 8px;
-
-    background: var(--color-primary);
-    color: white;
-    cursor: pointer;
-
-    font-size: 0.95rem;
-    font-weight: 600;
-
-    transition: all 0.2s ease;
-}
-
-.result-sharing-form button:hover:not(:disabled) {
-    opacity: 0.9;
-    transform: translateY(-2px);
-}
-
-.result-sharing-form button:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
 .danger-zone {
     margin-top: 3rem;
     padding: 1.5rem;
@@ -190,19 +133,31 @@ Result sharing (#125)
     font-weight: 500;
 }
 
-.btn-danger {
-    background: #b3261e;
-    color: #fff;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
+/* Delete-account password field: label above the input, as in the
+   change-password form */
+.danger-zone-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 500px;
+    font-weight: 500;
 }
 
-.btn-danger:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+.danger-zone-form input {
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
 }
+
+/* Delete-account buttons ("Avbryt" + confirm) side by side */
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
 .form-error {
     color: #b3261e;
 }

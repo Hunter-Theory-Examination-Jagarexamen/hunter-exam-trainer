@@ -53,25 +53,3 @@
     line-height: 1.5;
 }
 
-/* Button */
-
-.start-exam-btn {
-    background: var(--color-primary);
-    color: white;
-
-    border: none;
-    border-radius: 8px;
-
-    padding: .85rem 2rem;
-
-    font-size: 1rem;
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition: .2s;
-}
-
-.start-exam-btn:hover {
-    opacity: .9;
-}

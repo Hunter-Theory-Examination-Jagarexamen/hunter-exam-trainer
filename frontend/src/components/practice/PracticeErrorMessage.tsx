@@ -21,10 +21,10 @@ const PracticeErrorMessage = ({ message, onRetry, onBack, backLabelKey = "practi
             <p>{message}</p>
             <div className="practice-dialog-actions">
                 {onRetry && (
-                    <button className="check-answer-button" onClick={onRetry}>{t("practice.tryAgain")}</button>
+                    <button className="btn btn-primary" onClick={onRetry}>{t("practice.tryAgain")}</button>
                 )}
                 {onBack && (
-                    <button className="practice-secondary-button" onClick={onBack}>{t(backLabelKey)}</button>
+                    <button className="btn btn-secondary" onClick={onBack}>{t(backLabelKey)}</button>
                 )}
             </div>
         </div>

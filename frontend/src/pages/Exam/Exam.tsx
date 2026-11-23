@@ -433,7 +433,7 @@ const Exam = () => {
                         bottom bar instead (#188). */}
                     {currentQuestionIndex < questions.length - 1 && (
                         <div className="exam-submit-early">
-                            <button type="button" className="submit-exam-button"
+                            <button type="button" className="btn btn-secondary submit-exam-button"
                                     onClick={handleSubmit} disabled={isSubmitting}>
                                 {isSubmitting ? t("exam.navigation.submitting") : t("exam.navigation.submit")}
                             </button>
@@ -497,10 +497,10 @@ const Exam = () => {
                                 : t("exam.confirm.allAnswered")}
                         </p>
                         <div className="exam-leave-actions">
-                            <button type="button" className="previous-button" onClick={handleCancelSubmit}>
+                            <button type="button" className="btn btn-secondary" onClick={handleCancelSubmit}>
                                 {t("exam.confirm.goBack")}
                             </button>
-                            <button type="button" className="next-button" onClick={handleConfirmSubmit}>
+                            <button type="button" className="btn btn-primary" onClick={handleConfirmSubmit}>
                                 {unansweredCount > 0
                                     ? t("exam.confirm.submitAnyway")
                                     : t("exam.navigation.submit")}

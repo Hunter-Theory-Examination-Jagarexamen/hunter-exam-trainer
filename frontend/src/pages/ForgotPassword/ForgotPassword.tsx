@@ -88,7 +88,7 @@ const ForgotPassword = () => {
 
                     <button
                         type="submit"
-                        className="auth-primary-button"
+                        className="btn btn-primary auth-primary-button"
                         disabled={isLoading}
                     >
                         {isLoading ? t("forgotPassword.submittingButton") : t("forgotPassword.submitButton")}

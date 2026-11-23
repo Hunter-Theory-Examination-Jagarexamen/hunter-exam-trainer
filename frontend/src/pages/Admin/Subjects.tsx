@@ -53,8 +53,8 @@ function SubjectForm({subject, onSaved, onCancel}: {
         </fieldset>
         {error && <p role="alert">{error}</p>}
         <div className="question-bank-actions">
-            <button type="submit" disabled={submitting}>{submitting ? t("subjects.saving") : t("subjects.saveSubject")}</button>
-            <button type="button" disabled={submitting} onClick={onCancel}>{t("subjects.cancel")}</button>
+            <button type="submit" className="btn btn-primary" disabled={submitting}>{submitting ? t("subjects.saving") : t("subjects.saveSubject")}</button>
+            <button type="button" className="btn btn-secondary" disabled={submitting} onClick={onCancel}>{t("subjects.cancel")}</button>
         </div>
     </form>;
 }
@@ -114,15 +114,15 @@ export default function Subjects() {
         {success && <p role="status">{success}</p>}
         {loading ? <p role="status">{t("subjects.loading")}</p> : error ? <>
             <p role="alert">{error}</p>
-            <div className="question-bank-actions"><button type="button" onClick={() => {
+            <div className="question-bank-actions"><button type="button" className="btn btn-primary" onClick={() => {
                 setLoading(true); setError(""); setRevision(value => value + 1);
             }}>{t("subjects.retry")}</button></div>
         </> : <>
             <div className="question-bank-actions">
-                <button ref={createButton} type="button" disabled={busy} onClick={event => {
+                <button ref={createButton} type="button" className="btn btn-primary" disabled={busy} onClick={event => {
                     returnFocus.current = event.currentTarget; setSuccess(""); setEditor("create");
                 }}>{t("subjects.createSubject")}</button>
-                <button type="button" disabled={busy} onClick={() => {
+                <button type="button" className="btn btn-secondary" disabled={busy} onClick={() => {
                     setSuccess(""); setLoading(true); setRevision(value => value + 1);
                 }}>{t("subjects.refreshList")}</button>
             </div>
@@ -137,8 +137,8 @@ export default function Subjects() {
                 <p>{t("subjects.deleteWarning")}</p>
                 {deleteError && <p role="alert">{deleteError}</p>}
                 <div className="question-bank-actions">
-                    <button autoFocus type="button" disabled={submitting} onClick={() => setDeleting(null)}>{t("subjects.cancelDeletion")}</button>
-                    <button type="button" className="question-delete" disabled={submitting} onClick={confirmDelete}>
+                    <button autoFocus type="button" className="btn btn-secondary" disabled={submitting} onClick={() => setDeleting(null)}>{t("subjects.cancelDeletion")}</button>
+                    <button type="button" className="btn btn-danger" disabled={submitting} onClick={confirmDelete}>
                         {submitting ? t("subjects.deleting") : t("subjects.confirmDeletion")}</button>
                 </div>
             </section>}
@@ -148,10 +148,10 @@ export default function Subjects() {
                 <p>{subject.description}</p>
                 <p>{t("subjects.questionsCount", {count: subject.questionCount})}</p>
                 <div className="question-bank-actions">
-                    <button type="button" disabled={busy} aria-label={t("subjects.editAria", {name: subject.name})} onClick={event => {
+                    <button type="button" className="btn btn-secondary" disabled={busy} aria-label={t("subjects.editAria", {name: subject.name})} onClick={event => {
                         returnFocus.current = event.currentTarget; setSuccess(""); setEditor(subject);
                     }}>{t("subjects.edit")}</button>
-                    <button type="button" disabled={busy} className="question-delete" aria-label={t("subjects.deleteAria", {name: subject.name})} onClick={event => {
+                    <button type="button" disabled={busy} className="btn btn-danger" aria-label={t("subjects.deleteAria", {name: subject.name})} onClick={event => {
                         returnFocus.current = event.currentTarget; setSuccess(""); setDeleteError(""); setDeleting(subject);
                     }}>{t("subjects.delete")}</button>
                 </div>

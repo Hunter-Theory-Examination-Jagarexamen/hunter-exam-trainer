@@ -18,6 +18,7 @@ const PracticeNavigation = (
         <div className="practice-navigation">
 
             <button
+                className="btn btn-secondary"
                 onClick={onPrevious}
                 disabled={isFirstQuestion}
             >
@@ -25,6 +26,7 @@ const PracticeNavigation = (
             </button>
 
             <button
+                className="btn btn-primary"
                 onClick={onNext}
                 disabled={!canGoNext}
             >

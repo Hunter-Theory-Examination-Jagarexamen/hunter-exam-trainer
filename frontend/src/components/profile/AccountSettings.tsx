@@ -78,6 +78,7 @@ const AccountSettings = () => {
                 {!showChangePassword && (
                     <button
                         type="button"
+                        className="btn btn-primary"
                         onClick={() => setShowChangePassword(true)}
                     >
                         <Lock size={16}/>
@@ -150,6 +151,7 @@ const AccountSettings = () => {
                         <div className="change-password-actions">
                             <button
                                 type="button"
+                                className="btn btn-secondary"
                                 onClick={handleCancel}
                                 disabled={isLoading}
                             >
@@ -158,6 +160,7 @@ const AccountSettings = () => {
 
                             <button
                                 type="submit"
+                                className="btn btn-primary"
                                 disabled={isLoading}
                             >
                                 {isLoading ? t("profile.changingButton") : t("profile.changePasswordButton")}

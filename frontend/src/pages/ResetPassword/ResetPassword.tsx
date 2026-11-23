@@ -83,7 +83,7 @@ const ResetPassword = () => {
                             </div>
                         </div>
                         {error && <p role="alert" style={{color: "#e53e3e"}}>{error}</p>}
-                        <button type="submit" className="auth-primary-button" disabled={isLoading}>
+                        <button type="submit" className="btn btn-primary auth-primary-button" disabled={isLoading}>
                             {isLoading ? t("resetPassword.submittingButton") : t("resetPassword.submitButton")}
                         </button>
                     </form>

@@ -116,7 +116,7 @@ const AdminFeedback = () => {
                             {failedId === item.id &&
                                 <p className="feedback-error" role="alert">{t("feedback.admin.updateFailed")}</p>}
 
-                            <button type="button" className="practice-secondary-button"
+                            <button type="button" className="btn btn-secondary"
                                     onClick={() => void toggleHandled(item)}>
                                 {item.handled ? t("feedback.admin.markUnhandled") : t("feedback.admin.markHandled")}
                             </button>

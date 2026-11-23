@@ -55,7 +55,7 @@ const DangerZone = () => {
             {!open ? (
                 <button
                     type="button"
-                    className="btn-danger"
+                    className="btn btn-danger"
                     onClick={() => setOpen(true)}
                 >
                     {t("profile.deleteAccountButton")}
@@ -77,12 +77,12 @@ const DangerZone = () => {
                     </label>
                     {error && <p className="form-error">{error}</p>}
                     <div className="form-actions">
-                        <button type="button" onClick={cancel} disabled={busy}>
+                        <button type="button" className="btn btn-secondary" onClick={cancel} disabled={busy}>
                             {t("common.cancel")}
                         </button>
                         <button
                             type="submit"
-                            className="btn-danger"
+                            className="btn btn-danger"
                             disabled={busy || !password}
                         >
                             {busy

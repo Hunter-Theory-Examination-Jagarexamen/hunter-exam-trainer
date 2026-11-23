@@ -93,7 +93,7 @@ const ResultSharingSettings = () => {
                     {message && <p className="password-success" role="status">{message}</p>}
 
                     <div className="change-password-actions">
-                        <button type="submit" disabled={isSaving}>
+                        <button type="submit" className="btn btn-primary" disabled={isSaving}>
                             <Share2 size={16} />
                             {isSaving
                                 ? t("profile.resultSharingSaving")
