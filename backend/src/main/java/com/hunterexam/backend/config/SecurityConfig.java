@@ -1,5 +1,6 @@
 package com.hunterexam.backend.config;
 
+import com.hunterexam.backend.security.TokenRefreshFilter;
 import com.hunterexam.backend.security.UserExistsJwtAuthenticationConverter;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -39,12 +40,15 @@ public class SecurityConfig {
 
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final UserExistsJwtAuthenticationConverter userExistsJwtAuthenticationConverter;
+    private final TokenRefreshFilter tokenRefreshFilter;
 
     public SecurityConfig(
         @Lazy OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
-        UserExistsJwtAuthenticationConverter userExistsJwtAuthenticationConverter) {
+        UserExistsJwtAuthenticationConverter userExistsJwtAuthenticationConverter,
+        TokenRefreshFilter tokenRefreshFilter) {
         this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
         this.userExistsJwtAuthenticationConverter = userExistsJwtAuthenticationConverter;
+        this.tokenRefreshFilter = tokenRefreshFilter;
     }
 
     /**
@@ -115,7 +119,9 @@ public class SecurityConfig {
                 oauth2.jwt(jwt ->
                     jwt.jwtAuthenticationConverter(userExistsJwtAuthenticationConverter)
                 )
-            );
+
+            )
+            .addFilterAfter(tokenRefreshFilter, org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter.class);
 
 
 
