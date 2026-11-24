@@ -9,7 +9,7 @@ import type { ExamQuestion } from "../../types/examQuestion.ts";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useBlocker, useNavigate } from "react-router-dom";
 import apiClient, { ApiError } from "../../api/apiClient.ts";
-import { errorStatus } from "../../services/apiErrors.ts";
+import { errorStatus, isServerUnreachable } from "../../services/apiErrors.ts";
 import { useTranslation } from "react-i18next";
 
 
@@ -35,9 +35,9 @@ const Exam = () => {
     // Shown on the page when submitting fails, so the student can read it
     // and try again (#188). Was a browser alert() before.
     const [submitError, setSubmitError] = useState<string | null>(null);
-    // Shown when an answer could not be saved; the answer is then taken
-    // back, so the page never shows an answer the server doesn't have (#188).
+    // Answers remain selected while pending; this message explains their state.
     const [answerSaveError, setAnswerSaveError] = useState<string | null>(null);
+    const [pendingAnswers, setPendingAnswers] = useState<Record<string, string>>({});
     // True while a hand-in is on its way: the Submit buttons say "Submitting…"
     // and are disabled, so a retry is visible and can't be sent twice (#188).
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -72,6 +72,85 @@ const Exam = () => {
     const [leaveFailed, setLeaveFailed] = useState(false);
     // One abandon request at a time: a double click must not send two (#186).
     const leaveRequest = useRef(false);
+    const pendingRef = useRef<Record<string, { answer: string; version: number }>>({});
+    const confirmedRef = useRef<Record<string, string>>({});
+    const answerVersion = useRef(0);
+    const syncPromise = useRef<Promise<boolean> | null>(null);
+    const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const mountedRef = useRef(true);
+    const endingRef = useRef(false);
+    const retryableRef = useRef(true);
+
+    const updatePending = useCallback((questionId: number, answer?: string) => {
+        const key = String(questionId);
+        if (answer === undefined) delete pendingRef.current[key];
+        else pendingRef.current[key] = { answer, version: answerVersion.current };
+        if (mountedRef.current) setPendingAnswers(Object.fromEntries(
+            Object.entries(pendingRef.current).map(([id, pending]) => [id, pending.answer])
+        ));
+    }, []);
+
+    const syncPendingAnswers = useCallback((): Promise<boolean> => {
+        if (syncPromise.current) return syncPromise.current;
+        retryableRef.current = true;
+        const run = async () => {
+            while (attemptId && Object.keys(pendingRef.current).length > 0) {
+                const [questionId, pending] = Object.entries(pendingRef.current)[0];
+                if (confirmedRef.current[questionId] === pending.answer) {
+                    if (pendingRef.current[questionId]?.version === pending.version) updatePending(Number(questionId));
+                    continue;
+                }
+                try {
+                    await apiClient(`/api/exam/${attemptId}/answer`, {
+                        method: "POST",
+                        body: JSON.stringify({ questionId: Number(questionId), answer: pending.answer }),
+                    });
+                    confirmedRef.current[questionId] = pending.answer;
+                    if (pendingRef.current[questionId]?.version === pending.version) updatePending(Number(questionId));
+                } catch (err) {
+                    const status = errorStatus(err);
+                    if (status === 401) return false;
+                    // 4xx responses are permanent (invalid/expired/unauthorized); network,
+                    // throttling and server errors may recover and are retried with bounds.
+                    retryableRef.current = isServerUnreachable(err) || status === undefined || status >= 500 || status === 408 || status === 429;
+                    return false;
+                }
+            }
+            return Object.keys(pendingRef.current).length === 0;
+        };
+        syncPromise.current = run().finally(() => { syncPromise.current = null; });
+        return syncPromise.current;
+    }, [attemptId, updatePending]);
+
+    const requestSync = useCallback(() => {
+        if (endingRef.current || !attemptId || Object.keys(pendingRef.current).length === 0) return;
+        void syncPendingAnswers().then((saved) => {
+            if (saved) {
+                if (retryTimer.current) clearTimeout(retryTimer.current);
+                retryTimer.current = null;
+                if (mountedRef.current) setAnswerSaveError(null);
+            } else if (retryableRef.current && !endingRef.current && mountedRef.current && !retryTimer.current) {
+                retryTimer.current = setTimeout(() => { retryTimer.current = null; requestSync(); }, 3000);
+            }
+        });
+    }, [attemptId, syncPendingAnswers]);
+
+    useEffect(() => {
+        mountedRef.current = true;
+        const online = () => {
+            if (retryTimer.current) clearTimeout(retryTimer.current);
+            retryTimer.current = null;
+            requestSync();
+        };
+        window.addEventListener("online", online);
+        return () => {
+            mountedRef.current = false;
+            window.removeEventListener("online", online);
+            if (retryTimer.current) clearTimeout(retryTimer.current);
+            retryTimer.current = null;
+        };
+    }, [requestSync]);
+
 
     // Ends the exam on the server without scoring it, then lets the blocked
     // navigation continue. If that fails, stay on the exam and say why (#186).
@@ -137,6 +216,18 @@ const Exam = () => {
         setIsSubmitting(true);
         setSubmitError(null);
         try {
+            endingRef.current = true;
+            if (retryTimer.current) clearTimeout(retryTimer.current);
+            retryTimer.current = null;
+            if (Object.keys(pendingRef.current).length > 0) {
+                const saved = await syncPendingAnswers();
+                if (!saved || Object.keys(pendingRef.current).length > 0) {
+                    endingRef.current = false;
+                    setAnswerSaveError(t("exam.unsavedSubmit"));
+                    requestSync();
+                    return;
+                }
+            }
             const result = await apiClient("/api/exam/submit", {
                 method: "POST",
                 // Only which exam: the answers are already saved on the server.
@@ -169,10 +260,11 @@ const Exam = () => {
             setSubmitError(t("exam.submitFailed"));
         }
         finally {
+            endingRef.current = false;
             submitRequest.current = false;
             setIsSubmitting(false);
         }
-    }, [attemptId, navigate, t, questions, bookmarks]);
+    }, [attemptId, navigate, t, questions, bookmarks, syncPendingAnswers, requestSync]);
 
 
     //Load exam questions
@@ -234,7 +326,7 @@ const Exam = () => {
 
         window.addEventListener("beforeunload", handleBeforeUnload);
         return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-    }, []);
+    }, [t]);
 
     // Timer
     useEffect(() => {
@@ -303,7 +395,8 @@ const Exam = () => {
         }
 
         const questionId = currentQuestion.id;
-        const previousAnswer = answers[questionId];
+        answerVersion.current += 1;
+        updatePending(questionId, answerId);
 
         // Update local state immediately for UI responsiveness.
         setAnswers((previousAnswers) => ({
@@ -315,42 +408,8 @@ const Exam = () => {
             return;
         }
 
-        try {
-            await apiClient(`/api/exam/${attemptId}/answer`, {
-                method: "POST",
-                body: JSON.stringify({
-                    questionId: currentQuestion.id,
-                    answer: answerId,
-                }),
-            });
-        }
-        catch (err) {
-            console.error("Failed to save answer:", err);
-
-            if (errorStatus(err) === 401) {
-                // Session expired: apiClient is already redirecting to login.
-                return;
-            }
-
-            // Hand-in only scores what the server has saved, so an answer
-            // that wasn't saved must not look answered (#188). Take it back,
-            // unless the student has picked another option in the meantime.
-            setAnswers((currentAnswers) => {
-                if (currentAnswers[questionId] !== answerId) {
-                    return currentAnswers;
-                }
-                const restored = { ...currentAnswers };
-                if (previousAnswer === undefined) {
-                    delete restored[questionId];
-                } else {
-                    restored[questionId] = previousAnswer;
-                }
-                return restored;
-            });
-            setAnswerSaveError(t("exam.answerSaveFailed"));
-            return;
-        }
         setAnswerSaveError(null);
+        requestSync();
     };
 
     const handleJumpToQuestion = (index: number) => {
@@ -424,6 +483,8 @@ const Exam = () => {
                         question={currentQuestion}
                         selectedAnswer={answers[currentQuestion.id]}
                         onAnswerChange={handleAnswerChange}
+                        disabled={isSubmitting}
+                        isUnsaved={pendingAnswers[String(currentQuestion.id)] !== undefined}
                         isBookmarked={isBookmarked(currentQuestion.id)}
                         onToggleBookmark={handleToggleBookmark}
                     />
@@ -446,6 +507,9 @@ const Exam = () => {
                         {answerSaveError && (
                             <p role="alert" className="exam-submit-error">{answerSaveError}</p>
                         )}
+                        {Object.keys(pendingAnswers).length > 0 && (
+                            <p role="status" className="exam-unsaved-status">{t("exam.unsavedCount", { count: Object.keys(pendingAnswers).length })}</p>
+                        )}
                         {submitError && (
                             <p role="alert" className="exam-submit-error">{submitError}</p>
                         )}
@@ -464,6 +528,7 @@ const Exam = () => {
                     <ExamOverview
                         questions={questions}
                         answers={answers}
+                        pendingAnswers={pendingAnswers}
                         bookmarks={bookmarks}
                         currentIndex={currentQuestionIndex}
                         onJumpToQuestion={handleJumpToQuestion}
@@ -517,6 +582,7 @@ const Exam = () => {
                     isLeaving={isLeaving}
                     error={leaveError}
                     leaveAnyway={leaveFailed}
+                    hasUnsaved={Object.keys(pendingAnswers).length > 0}
                 />
             )}
 

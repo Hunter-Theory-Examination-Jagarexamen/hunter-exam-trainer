@@ -227,24 +227,84 @@ describe("Exam page", () => {
         expect(await screen.findByRole("button", { name: "Lämnar in…" })).toBeDisabled();
     });
 
-    it("takes back an answer that could not be saved, and says so (#188)", async () => {
+    it("keeps a failed answer selected and marked unsaved (#224)", async () => {
         mockBackend();
         failOnce("/api/exam/attempt-1/answer", 500);
         renderExam();
         await screen.findByText("First question?");
-
         await userEvent.click(screen.getByRole("radio", { name: "B1" }));
-
-        expect(await screen.findByRole("alert")).toHaveTextContent(
-            "Svaret kunde inte sparas. Välj det igen när servern svarar."
-        );
-        expect(screen.getByRole("radio", { name: "B1" })).not.toBeChecked();
-
-        // Choosing it again works once the server answers; the message goes.
-        await userEvent.click(screen.getByRole("radio", { name: "B1" }));
-
-        await waitFor(() => expect(screen.queryByRole("alert")).not.toBeInTheDocument());
         expect(screen.getByRole("radio", { name: "B1" })).toBeChecked();
+        expect(await screen.findByText("Svaret \u00e4r valt men har \u00e4nnu inte sparats.")).toBeInTheDocument();
+        await act(async () => { window.dispatchEvent(new Event("online")); });
+        await waitFor(() => expect(screen.queryByText("Svaret \u00e4r valt men har \u00e4nnu inte sparats.")).not.toBeInTheDocument());
+        expect(screen.getByRole("radio", { name: "B1" })).toBeChecked();
+    });
+
+    it("synchronizes only the latest answer selected while the backend is unavailable", async () => {
+        mockBackend();
+        const normal = vi.mocked(apiClient).getMockImplementation()!;
+        let unavailable = true;
+        const serverAnswers = new Map<number, string>();
+        vi.mocked(apiClient).mockImplementation(async (url: string, options?: RequestInit) => {
+            if (url.endsWith("/answer") && unavailable) throw Object.assign(new Error("offline"), { name: "ServerUnreachableError" });
+            if (url.endsWith("/answer")) {
+                const body = JSON.parse(options!.body as string);
+                serverAnswers.set(body.questionId, body.answer);
+            }
+            return normal(url, options);
+        });
+        renderExam();
+        await screen.findByText("First question?");
+        await userEvent.click(screen.getByRole("radio", { name: "B1" }));
+        await userEvent.click(screen.getByRole("radio", { name: "C1" }));
+        expect(screen.getByRole("radio", { name: "C1" })).toBeChecked();
+        expect(await screen.findByText("Svaret \u00e4r valt men har \u00e4nnu inte sparats.")).toBeInTheDocument();
+        unavailable = false;
+        await act(async () => { window.dispatchEvent(new Event("online")); });
+        await waitFor(() => expect(screen.queryByText("Svaret är valt men har ännu inte sparats.")).not.toBeInTheDocument());
+        expect(serverAnswers.get(1)).toBe("C");
+    });
+
+    it("does not let an older in-flight response clear a newer pending answer", async () => {
+        mockBackend();
+        const normal = vi.mocked(apiClient).getMockImplementation()!;
+        let releaseFirst!: () => void;
+        const persisted: string[] = [];
+        vi.mocked(apiClient).mockImplementation(async (url: string, options?: RequestInit) => {
+            if (url.endsWith("/answer")) {
+                const answer = JSON.parse(options!.body as string).answer;
+                if (answer === "B") await new Promise<void>(resolve => { releaseFirst = resolve; });
+                persisted.push(answer);
+            }
+            return normal(url, options);
+        });
+        renderExam();
+        await userEvent.click(await screen.findByRole("radio", { name: "B1" }));
+        await userEvent.click(screen.getByRole("radio", { name: "C1" }));
+        await act(async () => { releaseFirst(); });
+        await waitFor(() => expect(screen.queryByText("Svaret \u00e4r valt men har \u00e4nnu inte sparats.")).not.toBeInTheDocument());
+        expect(screen.getByRole("radio", { name: "C1" })).toBeChecked();
+        expect(persisted.at(-1)).toBe("C");
+    });
+
+    it("blocks hand-in while an answer is pending, then submits after synchronization", async () => {
+        mockBackend();
+        const normal = vi.mocked(apiClient).getMockImplementation()!;
+        let unavailable = true;
+        vi.mocked(apiClient).mockImplementation(async (url: string, options?: RequestInit) => {
+            if (url.endsWith("/answer") && unavailable) throw Object.assign(new Error("offline"), { name: "ServerUnreachableError" });
+            return normal(url, options);
+        });
+        renderExam();
+        await userEvent.click(await screen.findByRole("radio", { name: "B1" }));
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in provet" }));
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in ändå" }));
+        expect(await screen.findByRole("alert")).toHaveTextContent("Provet kan inte lämnas in förrän alla svar har sparats.");
+        expect(calledEndpoints()).not.toContain("/api/exam/submit");
+        unavailable = false;
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in provet" }));
+        await userEvent.click(screen.getByRole("button", { name: "Lämna in ändå" }));
+        expect(await screen.findByText("Result page")).toBeInTheDocument();
     });
 
     it("shows an error message when the exam cannot be loaded", async () => {

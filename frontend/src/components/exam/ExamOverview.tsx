@@ -5,6 +5,7 @@ import type { ExamQuestion } from "../../types/examQuestion";
 interface ExamOverviewProps {
     questions: ExamQuestion[];
     answers: Record<string, string>;
+    pendingAnswers?: Record<string, string>;
     bookmarks: Set<number>;
     currentIndex: number;
     onJumpToQuestion: (index: number) => void;
@@ -13,6 +14,7 @@ interface ExamOverviewProps {
 const ExamOverview = ({
                           questions,
                           answers,
+                          pendingAnswers = {},
                           bookmarks,
                           currentIndex,
                           onJumpToQuestion,
@@ -35,18 +37,23 @@ const ExamOverview = ({
                 {questions.map((question, index) => {
                     const isCurrent = index === currentIndex;
                     const isAnswered = answers[String(question.id)] !== undefined;
+                    const isUnsaved = pendingAnswers[String(question.id)] !== undefined;
                     const isBookmarked = bookmarks.has(question.id);
 
                     const classNames = ["exam-overview-cell"];
                     if (isCurrent) classNames.push("is-current");
                     if (isAnswered) classNames.push("is-answered");
+                    if (isUnsaved) classNames.push("is-unsaved");
                     if (isBookmarked) classNames.push("is-bookmarked");
 
-                    const stateLabel = isCurrent
+                    const stateLabel = (isCurrent
                         ? t("exam.overview.stateCurrent")
-                        : isAnswered
-                            ? t("exam.overview.stateAnswered")
-                            : t("exam.overview.stateUnanswered");
+                        : isUnsaved
+                            ? t("exam.overview.stateUnsaved")
+                            : isAnswered
+                                ? t("exam.overview.stateAnswered")
+                                : t("exam.overview.stateUnanswered"))
+                        + (isCurrent && isUnsaved ? ", " + t("exam.overview.stateUnsaved") : "");
 
                     return (
                         <li key={question.id}>
