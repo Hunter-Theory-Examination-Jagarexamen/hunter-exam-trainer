@@ -3,12 +3,13 @@ package com.hunterexam.backend.service;
 import com.hunterexam.backend.dto.ProgressOverTimeResponse;
 import com.hunterexam.backend.dto.SubjectPerformanceResponse;
 import com.hunterexam.backend.entity.Subject;
-import com.hunterexam.backend.entity.SubjectStats;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.repository.AttemptQuestionRepository;
-import com.hunterexam.backend.repository.SubjectStatsRepository;
+import com.hunterexam.backend.repository.QuestionRepository;
+import com.hunterexam.backend.repository.SubjectRepository;
 import com.hunterexam.backend.repository.UserRepository;
-import com.hunterexam.backend.repository.projection.AnswerOutcome;
+import com.hunterexam.backend.repository.projection.MasteryAnswer;
+import com.hunterexam.backend.repository.projection.SubjectQuestionCount;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,12 +26,10 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 /**
- * Unit tests for the "performance by subject" numbers in {@link StatisticsService}.
+ * Unit tests for the question-mastery numbers in {@link StatisticsService}.
  * The repositories are Mockito mocks, so no database is used.
  */
 @ExtendWith(MockitoExtension.class)
@@ -39,7 +38,8 @@ class StatisticsServiceTests {
     private static final String EMAIL = "student@example.test";
 
     @Mock AttemptQuestionRepository attemptQuestionRepository;
-    @Mock SubjectStatsRepository subjectStatsRepository;
+    @Mock QuestionRepository questionRepository;
+    @Mock SubjectRepository subjectRepository;
     @Mock UserRepository userRepository;
 
     private StatisticsService statisticsService;
@@ -47,7 +47,8 @@ class StatisticsServiceTests {
 
     @BeforeEach
     void setUp() {
-        statisticsService = new StatisticsService(attemptQuestionRepository, subjectStatsRepository, userRepository);
+        statisticsService = new StatisticsService(
+                attemptQuestionRepository, questionRepository, subjectRepository, userRepository);
         user = new User();
         user.setEmail(EMAIL);
     }
@@ -59,61 +60,111 @@ class StatisticsServiceTests {
         return subject;
     }
 
-    /** The student's running totals in one subject. */
-    private SubjectStats stats(Subject subject, long answered, long correct) {
-        SubjectStats stats = new SubjectStats(user, subject);
-        stats.setAnswered(answered);
-        stats.setCorrect(correct);
-        return stats;
+    /** One counted answer: question {@code questionId} in subject {@code subjectId}. */
+    private MasteryAnswer answer(long questionId, long subjectId, LocalDateTime at, boolean correct) {
+        return new MasteryAnswer(questionId, subjectId, at, correct);
     }
 
-    // ----- Performance by subject -----
+    // ----- Mastery per subject -----
 
     @Test
-    void percentageIsCorrectAnswersOutOfAnsweredPerSubject() {
-        // Arrange: Weapons 17 of 20 correct, Wildlife 1 of 3 (33.3 %, rounds down)
+    void masteryIsLatestAnswerPerSubjectWithTheBankAsDenominator() {
+        // Arrange: Weapons has 4 questions; the latest answers are right for
+        // 11 and 13, wrong for 12 (its earlier right answer was un-mastered)
+        // and 14 — 2 of 4 mastered out of 5 counted answers. Wildlife has 5
+        // questions and is untouched. The subject order is the bank's.
         Subject weapons = subject(1, "Weapons");
         Subject wildlife = subject(2, "Wildlife");
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(subjectStatsRepository.findAnsweredByUser(user.getId())).thenReturn(List.of(
-                stats(weapons, 20, 17),
-                stats(wildlife, 3, 1)));
+        when(subjectRepository.findAllByOrderById()).thenReturn(List.of(weapons, wildlife));
+        when(questionRepository.countGroupedBySubject()).thenReturn(List.of(
+                new SubjectQuestionCount(1L, 4L),
+                new SubjectQuestionCount(2L, 5L)));
+        when(attemptQuestionRepository.findMasteryAnswers(user)).thenReturn(List.of(
+                answer(11, 1, LocalDateTime.now().minusDays(2), true),
+                answer(12, 1, LocalDateTime.now().minusDays(2), true),
+                answer(13, 1, LocalDateTime.now().minusDays(2), true),
+                answer(14, 1, LocalDateTime.now().minusDays(1), false),
+                answer(12, 1, LocalDateTime.now().minusHours(1), false)));   // un-masters 12
 
         // Act
         List<SubjectPerformanceResponse> rows = statisticsService.getSubjectPerformance(EMAIL);
 
-        // Assert: one row per subject, in the repository's order
+        // Assert: one row per subject, bank order; Weapons 2 of 4 = 50 % with
+        // 5 counted answers, Wildlife 0 of 5 with no answers at all
         assertEquals(2, rows.size());
-        assertEquals(1L, rows.get(0).getSubjectId());
-        assertEquals("Weapons", rows.get(0).getSubjectName());
-        assertEquals(85, rows.get(0).getPercentage());
-        assertEquals(33, rows.get(1).getPercentage());
+
+        SubjectPerformanceResponse weaponsRow = rows.get(0);
+        assertEquals(1L, weaponsRow.getSubjectId());
+        assertEquals("Weapons", weaponsRow.getSubjectName());
+        assertEquals(2, weaponsRow.getMasteredQuestions());
+        assertEquals(4, weaponsRow.getTotalQuestions());
+        assertEquals(5, weaponsRow.getAnsweredQuestions());
+        assertEquals(50, weaponsRow.getMasteryPercentage());
+
+        SubjectPerformanceResponse wildlifeRow = rows.get(1);
+        assertEquals(5, wildlifeRow.getTotalQuestions());
+        assertEquals(0, wildlifeRow.getMasteredQuestions());
+        assertEquals(0, wildlifeRow.getAnsweredQuestions());
+        assertEquals(0, wildlifeRow.getMasteryPercentage());
     }
 
     @Test
-    void percentageRoundsHalfUp() {
-        // Arrange: 2 of 3 correct = 66.67 %
+    void masteryRoundsHalfUpAndCountsEachQuestionOnce() {
+        // Arrange: 2 of 3 questions mastered, even though question 1 was
+        // answered correctly three times — repeats never count twice
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(subjectStatsRepository.findAnsweredByUser(user.getId())).thenReturn(List.of(
-                stats(subject(1, "Weapons"), 3, 2)));
+        when(subjectRepository.findAllByOrderById()).thenReturn(List.of(subject(1, "Weapons")));
+        when(questionRepository.countGroupedBySubject()).thenReturn(List.of(
+                new SubjectQuestionCount(1L, 3L)));
+        when(attemptQuestionRepository.findMasteryAnswers(user)).thenReturn(List.of(
+                answer(11, 1, LocalDateTime.now().minusDays(1), true),
+                answer(11, 1, LocalDateTime.now().minusHours(3), true),
+                answer(11, 1, LocalDateTime.now().minusHours(2), true),
+                answer(12, 1, LocalDateTime.now().minusHours(1), true)));
+
+        // Act + Assert: 2 of 3 = 66.67 %, rounds up to 67
+        SubjectPerformanceResponse row =
+                statisticsService.getSubjectPerformance(EMAIL).getFirst();
+        assertEquals(2, row.getMasteredQuestions());
+        assertEquals(3, row.getTotalQuestions());
+        assertEquals(67, row.getMasteryPercentage());
+    }
+
+    @Test
+    void subjectWithoutQuestionsHasNoPercentage() {
+        // Arrange: an empty subject still shows as a row, with nothing to master
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(subjectRepository.findAllByOrderById()).thenReturn(List.of(subject(1, "Weapons")));
+        when(questionRepository.countGroupedBySubject()).thenReturn(List.of());
 
         // Act + Assert
-        assertEquals(67, statisticsService.getSubjectPerformance(EMAIL).getFirst().getPercentage());
+        SubjectPerformanceResponse row =
+                statisticsService.getSubjectPerformance(EMAIL).getFirst();
+        assertEquals(0, row.getTotalQuestions());
+        assertEquals(0, row.getMasteryPercentage());
     }
 
     @Test
-    void newUserWithNoAnswersGetsAnEmptyList() {
-        // Arrange: a brand-new student who hasn't answered anything yet
+    void newUserWithNoAnswersGetsZeroMasteryRowsNotAnEmptyList() {
+        // Arrange: a brand-new student in a bank that has subjects
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(subjectStatsRepository.findAnsweredByUser(user.getId())).thenReturn(List.of());
+        when(subjectRepository.findAllByOrderById()).thenReturn(List.of(subject(1, "Weapons")));
+        when(questionRepository.countGroupedBySubject()).thenReturn(List.of(
+                new SubjectQuestionCount(1L, 4L)));
+        when(attemptQuestionRepository.findMasteryAnswers(user)).thenReturn(List.of());
 
         // Act
         List<SubjectPerformanceResponse> rows = statisticsService.getSubjectPerformance(EMAIL);
 
-        // Assert: an empty list (not null, no crash, no made-up 0 % rows),
-        // so the statistics page can show "no results yet"
-        assertNotNull(rows, "must be an empty list, not null");
-        assertTrue(rows.isEmpty());
+        // Assert: the subject is listed with 0 mastered of 4, so the page can
+        // show "no answers yet" instead of hiding the subject
+        assertNotNull(rows, "must be a list, not null");
+        assertEquals(1, rows.size());
+        assertEquals(0, rows.getFirst().getMasteredQuestions());
+        assertEquals(4, rows.getFirst().getTotalQuestions());
+        assertEquals(0, rows.getFirst().getAnsweredQuestions());
+        assertEquals(0, rows.getFirst().getMasteryPercentage());
     }
 
     // ----- Progress over time -----
@@ -122,41 +173,81 @@ class StatisticsServiceTests {
     private static final LocalDate THIS_MONDAY =
             LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 
-    private AnswerOutcome answer(LocalDateTime at, boolean correct) {
-        return new AnswerOutcome(at, correct);
+    @Test
+    void progressIsOnePointPerDayOldestFirstWithMasteryOfTheWholeBank() {
+        // Arrange: 4 questions in the bank; the student masters 2 of them
+        // before the window (so the first day carries them in) and a third one
+        // today
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(questionRepository.count()).thenReturn(4L);
+        when(attemptQuestionRepository.findMasteryAnswers(user)).thenReturn(List.of(
+                answer(11, 1, THIS_MONDAY.minusWeeks(3).atTime(10, 0), true),
+                answer(12, 1, THIS_MONDAY.minusWeeks(3).atTime(10, 1), true),
+                answer(13, 1, LocalDate.now().atTime(9, 0), true)));
+
+        // Act
+        List<ProgressOverTimeResponse> points = statisticsService.getProgressOverTime(EMAIL, 2);
+
+        // Assert: one point per calendar day from the Monday of that week to
+        // today, oldest first; days without answers repeat the previous day's
+        // state
+        LocalDate from = THIS_MONDAY.minusWeeks(2);
+        LocalDate today = LocalDate.now();
+        long expectedDays = from.datesUntil(today.plusDays(1)).count();
+        assertEquals(expectedDays, points.size());
+
+        ProgressOverTimeResponse first = points.getFirst();
+        assertEquals(from, first.date());
+        assertEquals(50, first.masteryPercentage());      // 2 of 4 carried in
+        assertEquals(2, first.masteredQuestions());
+        assertEquals(4, first.totalQuestions());
+        assertEquals(50, points.get(1).masteryPercentage());  // still 2 of 4
+
+        ProgressOverTimeResponse last = points.getLast();
+        assertEquals(today, last.date());
+        assertEquals(75, last.masteryPercentage());       // 3 of 4 after today's answer
+        assertEquals(3, last.masteredQuestions());
     }
 
     @Test
-    void progressGroupsAnswersByWeekOldestFirst() {
-        // Arrange: last week 1 of 4 right; this week 3 of 3 right (Monday and Wednesday)
-        LocalDateTime lastWeek = THIS_MONDAY.minusWeeks(1).atTime(10, 0);
-        LocalDateTime thisWeek = THIS_MONDAY.atTime(10, 0);
+    void progressFollowsTheLatestAnswerOfEachQuestion() {
+        // Arrange: one question, mastered, then lost, then mastered again on
+        // three different days inside the window — the series must dip, not
+        // just rise
+        LocalDate from = THIS_MONDAY.minusWeeks(2);
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(attemptQuestionRepository.findCountedAnswersSince(eq(user), any())).thenReturn(List.of(
-                answer(lastWeek, true),
-                answer(lastWeek.plusMinutes(1), false),
-                answer(lastWeek.plusMinutes(2), false),
-                answer(lastWeek.plusDays(3), false),     // Thursday, same week
-                answer(thisWeek, true),
-                answer(thisWeek.plusDays(2), true),
-                answer(thisWeek.plusDays(2).plusMinutes(1), true)));
+        when(questionRepository.count()).thenReturn(1L);
+        when(attemptQuestionRepository.findMasteryAnswers(user)).thenReturn(List.of(
+                answer(11, 1, from.atTime(9, 0), true),
+                answer(11, 1, from.plusDays(1).atTime(9, 0), false),
+                answer(11, 1, from.plusDays(2).atTime(9, 0), true)));
 
         // Act
-        List<ProgressOverTimeResponse> weeks = statisticsService.getProgressOverTime(EMAIL, 4);
+        List<ProgressOverTimeResponse> points = statisticsService.getProgressOverTime(EMAIL, 2);
 
-        // Assert: one point per week, keyed by its Monday, oldest first
-        assertEquals(2, weeks.size());
-        assertEquals(THIS_MONDAY.minusWeeks(1), weeks.get(0).weekStart());
-        assertEquals(25, weeks.get(0).accuracy());
-        assertEquals(4, weeks.get(0).questionsAnswered());
-        assertEquals(THIS_MONDAY, weeks.get(1).weekStart());
-        assertEquals(100, weeks.get(1).accuracy());
-        assertEquals(3, weeks.get(1).questionsAnswered());
+        // Assert: 100 % → 0 % → 100 %, and days without answers hold the value
+        assertEquals(100, points.getFirst().masteryPercentage());
+        assertEquals(0, points.get(1).masteryPercentage());
+        assertEquals(100, points.get(2).masteryPercentage());
+        assertEquals(100, points.getLast().masteryPercentage());
     }
 
     @Test
     void progressIsEmptyWithoutAnswers() {
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(attemptQuestionRepository.findMasteryAnswers(user)).thenReturn(List.of());
+
+        assertTrue(statisticsService.getProgressOverTime(EMAIL, 4).isEmpty());
+    }
+
+    @Test
+    void progressIsEmptyWhenTheBankIsEmpty() {
+        // Arrange: answers exist, but there is nothing to master — no
+        // percentage and no division by zero
+        when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
+        when(attemptQuestionRepository.findMasteryAnswers(user)).thenReturn(List.of(
+                answer(11, 1, LocalDateTime.now().minusDays(1), true)));
+        when(questionRepository.count()).thenReturn(0L);
 
         assertTrue(statisticsService.getProgressOverTime(EMAIL, 4).isEmpty());
     }

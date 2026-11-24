@@ -22,29 +22,34 @@ const ProgressOverTimeChart = ({ data }: Props) => {
     }
 
     const chartData = data.map((point) => ({
-        week: new Date(point.weekStart).toLocaleDateString("sv-SE", {
+        date: new Date(`${point.date}T00:00:00`).toLocaleDateString(undefined, {
             month: "short",
             day: "numeric",
         }),
-        accuracy: point.accuracy,
-        questionsAnswered: point.questionsAnswered,
+        masteryPercentage: point.masteryPercentage,
+        masteredQuestions: point.masteredQuestions,
+        totalQuestions: point.totalQuestions,
     }));
 
     return (
         <ResponsiveContainer width="100%" height={280}>
             <LineChart data={chartData} margin={{ top: 10, right: 20, bottom: 0, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="week" />
+                <XAxis dataKey="date" />
                 <YAxis domain={[0, 100]} unit="%" />
                 <Tooltip
                     formatter={(value, name) => {
-                        if (name === "accuracy") return [`${value}%`, t("statistics.accuracyLabel")];
+                        if (name === "masteryPercentage") return [`${value}%`, t("statistics.masteryLabel")];
+                        if (name === "masteredQuestions") return [
+                            t("statistics.masteredCount", { mastered: value, total: chartData[0]?.totalQuestions ?? 0 }),
+                            t("statistics.masteryLabel"),
+                        ];
                         return [String(value), String(name)];
                     }}
                 />
                 <Line
                     type="monotone"
-                    dataKey="accuracy"
+                    dataKey="masteryPercentage"
                     stroke="#4a7c3f"
                     strokeWidth={2}
                     dot={{ r: 4 }}

@@ -30,13 +30,14 @@ public class StatisticsController {
 
 
     /**
-     * Returns the authenticated user's performance for practiced subjects.
+     * Returns the authenticated user's question mastery for every subject in
+     * the bank: mastered questions ÷ questions in the subject.
      * <p>
      * The user's email is obtained from the JWT authentication context
      * so that statistics are retrieved only for the currently logged-in user.
      *
      * @param authentication authentication information from Spring Security
-     * @return subject performance data
+     * @return question mastery per subject, ordered by subject id
      */
     @GetMapping("/subjects")
     public ResponseEntity<List<SubjectPerformanceResponse>> getSubjectPerformance(
@@ -51,12 +52,12 @@ public class StatisticsController {
     }
 
     /**
-     * Returns the authenticated user's practice accuracy grouped by week,
-     * for the last {@code weeks} weeks (default 8).
+     * Returns the share of the whole question bank the user had mastered at
+     * the end of each day, for the last {@code weeks} weeks (default 8).
      *
      * @param authentication authentication info from Spring Security
      * @param weeks          number of weeks to look back (1–52)
-     * @return weekly progress data, oldest first
+     * @return one point per day, oldest first
      */
     @GetMapping("/progress")
     public ResponseEntity<List<ProgressOverTimeResponse>> getProgressOverTime(
