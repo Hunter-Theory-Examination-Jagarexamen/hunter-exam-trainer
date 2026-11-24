@@ -9,11 +9,12 @@ interface LeaveExamDialogProps {
     error?: string | null;
     // After a failed try: the confirm button becomes "Leave anyway" (#188).
     leaveAnyway?: boolean;
+    hasUnsaved?: boolean;
 }
 
 // Asks before leaving a running mock exam through the menu or the back
 // button (#186). Confirming ends the exam on the server without scoring it.
-const LeaveExamDialog = ({ onConfirm, onCancel, isLeaving = false, error, leaveAnyway = false }: LeaveExamDialogProps) => {
+const LeaveExamDialog = ({ onConfirm, onCancel, isLeaving = false, error, leaveAnyway = false, hasUnsaved = false }: LeaveExamDialogProps) => {
     const { t } = useTranslation();
 
     return (
@@ -22,6 +23,7 @@ const LeaveExamDialog = ({ onConfirm, onCancel, isLeaving = false, error, leaveA
                  aria-modal="true" aria-labelledby="leave-exam-title">
                 <h2 id="leave-exam-title">{t("exam.leave.title")}</h2>
                 <p>{t("exam.leave.text")}</p>
+                {hasUnsaved && <p role="alert">{t("exam.unsavedLeave")}</p>}
                 {error && <p role="alert" className="exam-leave-error">{error}</p>}
                 <div className="exam-leave-actions">
                     <button

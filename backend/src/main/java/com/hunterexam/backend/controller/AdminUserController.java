@@ -1,5 +1,6 @@
 package com.hunterexam.backend.controller;
 
+import com.hunterexam.backend.dto.DeleteAccountRequest;
 import com.hunterexam.backend.dto.LearnerSummaryResponse;
 import com.hunterexam.backend.dto.UpdateUserRoleRequest;
 import com.hunterexam.backend.service.AccountDeletionService;
@@ -39,8 +40,10 @@ public class AdminUserController {
      */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteStudent(@PathVariable Long id) {
-        accountDeletionService.deleteStudentAsAdmin(id);
+    public void deleteStudent(@PathVariable Long id,
+                              Authentication authentication,
+                              @Valid @RequestBody DeleteAccountRequest request) {
+        accountDeletionService.deleteStudentAsAdmin(id, authentication.getName(), request.password());
     }
 
     /**

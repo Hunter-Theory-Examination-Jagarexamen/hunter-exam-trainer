@@ -206,13 +206,14 @@ class AccountDeletionServiceTest {
 
     @Test
     void deleteStudentAsAdmin_deletesStudent() {
+        User admin = newAdmin("acting-admin@x.se");
         User student = newStudent("victim@x.se");
         seedPersonalData(student);
         entityManager.flush();
         entityManager.clear(); // Clear the Hibernate session
         Long studentId = student.getId();
 
-        accountDeletionService.deleteStudentAsAdmin(studentId);
+        accountDeletionService.deleteStudentAsAdmin(studentId, admin.getEmail(), PASSWORD);
         entityManager.flush();
         entityManager.clear();
 
@@ -221,12 +222,13 @@ class AccountDeletionServiceTest {
 
     @Test
     void deleteStudentAsAdmin_whenTargetIsAdmin_isRejected() {
+        User actingAdmin = newAdmin("acting-admin@x.se");
         User admin = newAdmin("target-admin@x.se");
         entityManager.flush();
         entityManager.clear();
 
         assertThatThrownBy(() ->
-            accountDeletionService.deleteStudentAsAdmin(admin.getId()))
+            accountDeletionService.deleteStudentAsAdmin(admin.getId(), actingAdmin.getEmail(), PASSWORD))
             .isInstanceOf(AccessDeniedException.class);
 
         assertThat(userRepository.findById(admin.getId())).isPresent();
@@ -234,8 +236,69 @@ class AccountDeletionServiceTest {
 
     @Test
     void deleteStudentAsAdmin_whenTargetMissing_isRejected() {
+        User actingAdmin = newAdmin("acting-admin@x.se");
         assertThatThrownBy(() ->
-            accountDeletionService.deleteStudentAsAdmin(999_999_999L))
+            accountDeletionService.deleteStudentAsAdmin(999_999_999L, actingAdmin.getEmail(), PASSWORD))
             .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void deleteStudentAsAdmin_withWrongPassword_preservesParticipantAndPersonalData() {
+        User admin = newAdmin("acting-admin@x.se");
+        User student = newStudent("victim@x.se");
+        seedPersonalData(student);
+        Long studentId = student.getId();
+        entityManager.clear();
+
+        assertThatThrownBy(() -> accountDeletionService.deleteStudentAsAdmin(studentId, admin.getEmail(), "wrong"))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Incorrect password.");
+
+        entityManager.clear();
+        assertThat(userRepository.findById(studentId)).isPresent();
+        assertThat(attemptRepository.findIdsByUser(studentId)).hasSize(1);
+        assertThat(subjectStatsRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    void deleteStudentAsAdmin_withMissingPasswordPreservesParticipant() {
+        User admin = newAdmin("acting-admin@x.se");
+        User student = newStudent("victim@x.se");
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThatThrownBy(() -> accountDeletionService.deleteStudentAsAdmin(student.getId(), admin.getEmail(), " "))
+            .isInstanceOf(IllegalArgumentException.class);
+
+        assertThat(userRepository.findById(student.getId())).isPresent();
+    }
+
+    @Test
+    void deleteStudentAsAdmin_whenAdminHasNoLocalPassword_isRejected() {
+        User admin = newAdmin("acting-admin@x.se");
+        admin.setPasswordLoginEnabled(false);
+        User student = newStudent("victim@x.se");
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThatThrownBy(() -> accountDeletionService.deleteStudentAsAdmin(student.getId(), admin.getEmail(), PASSWORD))
+            .isInstanceOf(ConflictException.class)
+            .hasMessage("Password confirmation is unavailable for this account.");
+
+        assertThat(userRepository.findById(student.getId())).isPresent();
+    }
+
+    @Test
+    void deleteStudentAsAdmin_rejectsParticipantsPassword() {
+        User admin = newAdmin("acting-admin@x.se");
+        User student = newStudent("victim@x.se");
+        student.setPassword(passwordEncoder.encode("participant-password"));
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThatThrownBy(() -> accountDeletionService.deleteStudentAsAdmin(student.getId(), admin.getEmail(), "participant-password"))
+            .isInstanceOf(IllegalArgumentException.class);
+
+        assertThat(userRepository.findById(student.getId())).isPresent();
     }
 }

@@ -232,6 +232,8 @@ describe("LearnerDetailPage", () => {
 
         fireEvent.click(await screen.findByText("learnerProgress.detail.deleteButton"));
         expect(screen.getByText("learnerProgress.detail.deleteConfirmTitle")).toBeInTheDocument();
+        expect(screen.getByLabelText("learnerProgress.detail.deletePasswordLabel")).toHaveAttribute("type", "password");
+        expect(screen.getByLabelText("learnerProgress.detail.deletePasswordLabel")).toBeRequired();
     });
 
     it("cancel closes the dialog without calling the API", async () => {
@@ -244,7 +246,7 @@ describe("LearnerDetailPage", () => {
         fireEvent.click(screen.getByText("learnerProgress.detail.deleteConfirmCancel"));
 
         expect(screen.queryByText("learnerProgress.detail.deleteConfirmTitle")).not.toBeInTheDocument();
-        expect(apiClient).not.toHaveBeenCalledWith("/api/admin/users/1", { method: "DELETE" });
+        expect(vi.mocked(apiClient).mock.calls.some(([url]) => url === "/api/admin/users/1")).toBe(false);
     });
 
     it("confirm calls deleteStudent and navigates to the list", async () => {
@@ -260,13 +262,19 @@ describe("LearnerDetailPage", () => {
         renderPage();
 
         fireEvent.click(await screen.findByText("learnerProgress.detail.deleteButton"));
+        expect(screen.getByText("learnerProgress.detail.deleteConfirmButton")).toBeDisabled();
+        expect(apiClient).not.toHaveBeenCalledWith("/api/admin/users/1", expect.anything());
+        fireEvent.change(screen.getByLabelText("learnerProgress.detail.deletePasswordLabel"), { target: { value: "admin-password" } });
 
         fireEvent.click(screen.getByText("learnerProgress.detail.deleteConfirmButton"));
+        expect(screen.getByRole("button", { name: "learnerProgress.detail.deleteConfirmDeleting" })).toBeDisabled();
 
         resolveDelete!(undefined);
 
         await waitFor(() => {
-            expect(apiClient).toHaveBeenCalledWith("/api/admin/users/1", { method: "DELETE" });
+            expect(apiClient).toHaveBeenCalledWith("/api/admin/users/1", {
+                method: "DELETE", body: JSON.stringify({ password: "admin-password" }),
+            });
         });
         expect(navigate).toHaveBeenCalledWith(
             "/admin/learners",
@@ -287,11 +295,38 @@ describe("LearnerDetailPage", () => {
         renderPage();
 
         fireEvent.click(await screen.findByText("learnerProgress.detail.deleteButton"));
+        fireEvent.change(screen.getByLabelText("learnerProgress.detail.deletePasswordLabel"), { target: { value: "admin-password" } });
 
         fireEvent.click(screen.getByText("learnerProgress.detail.deleteConfirmButton"));
 
         expect(await screen.findByText("Server error")).toBeInTheDocument();
         expect(navigate).not.toHaveBeenCalled();
+    });
+
+    it("shows an incorrect-password error and allows a retry", async () => {
+        let deletionAttempts = 0;
+        vi.mocked(apiClient).mockImplementation((url) => {
+            if (url === "/api/admin/users/1") {
+                deletionAttempts++;
+                return deletionAttempts === 1
+                    ? Promise.reject(Object.assign(new Error(JSON.stringify({ message: "Incorrect password." })), { status: 400 }))
+                    : Promise.resolve(null);
+            }
+            return Promise.resolve(studentProgress());
+        });
+        renderPage();
+        fireEvent.click(await screen.findByText("learnerProgress.detail.deleteButton"));
+        const passwordField = screen.getByLabelText("learnerProgress.detail.deletePasswordLabel");
+        fireEvent.change(passwordField, { target: { value: "wrong" } });
+        fireEvent.click(screen.getByText("learnerProgress.detail.deleteConfirmButton"));
+        expect(await screen.findByRole("alert")).toHaveTextContent("learnerProgress.detail.deleteIncorrectPassword");
+        expect(screen.getByRole("dialog")).toBeInTheDocument();
+        fireEvent.change(passwordField, { target: { value: "correct" } });
+        fireEvent.click(screen.getByText("learnerProgress.detail.deleteConfirmButton"));
+        await waitFor(() => expect(navigate).toHaveBeenCalledWith(
+            "/admin/learners", { replace: true, state: { deleted: "Test Learner" } }
+        ));
+        expect(deletionAttempts).toBe(2);
     });
 
     // ─── NEW TESTS FOR #204 (promote / demote) ───

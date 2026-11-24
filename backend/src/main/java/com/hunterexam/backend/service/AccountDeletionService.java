@@ -83,7 +83,22 @@ public class AccountDeletionService {
      * endpoint (they must delete themselves via {@link #deleteOwnAccount}).
      */
     @Transactional
-    public void deleteStudentAsAdmin(Long targetId) {
+    public void deleteStudentAsAdmin(Long targetId, String actingAdminEmail, String password) {
+        User actingAdmin = userRepository.findByEmail(actingAdminEmail)
+            .orElseThrow(() -> new NotFoundException("User not found"));
+        if (actingAdmin.getRole() != Role.ADMIN) {
+            throw new AccessDeniedException("Only administrators can delete participant accounts.");
+        }
+        if (!actingAdmin.isPasswordLoginEnabled()
+            || actingAdmin.getPassword() == null
+            || actingAdmin.getPassword().isBlank()) {
+            throw new ConflictException("Password confirmation is unavailable for this account.");
+        }
+        if (password == null || password.isBlank()
+            || !passwordEncoder.matches(password, actingAdmin.getPassword())) {
+            throw new IllegalArgumentException("Incorrect password.");
+        }
+
         User target = userRepository.findByIdForUpdate(targetId)
             .orElseThrow(() -> new NotFoundException("User not found"));
         if (target.getRole() != Role.STUDENT) {

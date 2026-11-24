@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { deleteStudent } from "../../services/adminLearnerService";
-import { backendMessage } from "../../services/apiErrors";
+import { backendMessage, errorStatus } from "../../services/apiErrors";
 import "../../styles/admin.css";
 
 interface DangerZoneProps {
@@ -11,7 +11,7 @@ interface DangerZoneProps {
 }
 
 /**
- * "Delete student account" section on the student detail page (#<new-issue-number>).
+ * "Delete student account" section on the participant detail page (#232).
  * Reuses the backend endpoint from #194. Kept in its own component so the
  * upcoming promote/demote (#204) can sit next to it.
  */
@@ -21,28 +21,44 @@ const DangerZone = ({ userId, userName }: DangerZoneProps) => {
     const [isConfirming, setIsConfirming] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [password, setPassword] = useState("");
+    const deletingRef = useRef(false);
+
+    const closeDialog = useCallback(() => {
+        setIsConfirming(false);
+        setError(null);
+        setPassword("");
+    }, []);
 
     // Escape closes the confirmation (matches FeedbackDialog / LeaveExamDialog).
     useEffect(() => {
         if (!isConfirming) return;
         const onKeyDown = (event: KeyboardEvent) => {
-            if (event.key === "Escape" && !isDeleting) setIsConfirming(false);
+            if (event.key === "Escape" && !isDeleting) closeDialog();
         };
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
-    }, [isConfirming, isDeleting]);
+    }, [isConfirming, isDeleting, closeDialog]);
 
     const handleConfirm = async () => {
+        if (deletingRef.current || !password.trim()) return;
+        deletingRef.current = true;
         setError(null);
         setIsDeleting(true);
         try {
-            await deleteStudent(userId);
+            await deleteStudent(userId, password);
+            setPassword("");
             navigate("/admin/learners", {
                 replace: true,
                 state: { deleted: userName },
             });
         } catch (failure) {
-            setError(backendMessage(failure) ?? t("learnerProgress.detail.deleteFailed"));
+            const status = errorStatus(failure);
+            if (status === 400) setError(t("learnerProgress.detail.deleteIncorrectPassword"));
+            else if (status === 409) setError(t("learnerProgress.detail.deletePasswordUnavailable"));
+            else setError(backendMessage(failure) ?? t("learnerProgress.detail.deleteFailed"));
+        } finally {
+            deletingRef.current = false;
             setIsDeleting(false);
         }
     };
@@ -54,7 +70,7 @@ const DangerZone = ({ userId, userName }: DangerZoneProps) => {
             <button
                 type="button"
                 className="btn btn-danger"
-                onClick={() => setIsConfirming(true)}
+                onClick={() => { setPassword(""); setError(null); setIsConfirming(true); }}
             >
                 {t("learnerProgress.detail.deleteButton")}
             </button>
@@ -70,30 +86,44 @@ const DangerZone = ({ userId, userName }: DangerZoneProps) => {
                         <h2 id="delete-student-title">
                             {t("learnerProgress.detail.deleteConfirmTitle", { name: userName })}
                         </h2>
-                        <p>
-                            {t("learnerProgress.detail.deleteConfirmText", { name: userName })}
-                        </p>
-                        {error && <p className="feedback-error" role="alert">{error}</p>}
-                        <div className="feedback-actions">
-                            <button
-                                type="button"
-                                className="btn btn-secondary"
-                                onClick={() => { setIsConfirming(false); setError(null); }}
+                        <form onSubmit={event => { event.preventDefault(); void handleConfirm(); }}>
+                            <p>
+                                {t("learnerProgress.detail.deleteConfirmText", { name: userName })}
+                            </p>
+                            <label htmlFor="admin-delete-password">
+                                {t("learnerProgress.detail.deletePasswordLabel")}
+                            </label>
+                            <p>{t("learnerProgress.detail.deletePasswordHelp")}</p>
+                            <input
+                                id="admin-delete-password"
+                                type="password"
+                                autoComplete="current-password"
+                                required
+                                value={password}
+                                onChange={event => setPassword(event.target.value)}
                                 disabled={isDeleting}
-                            >
-                                {t("learnerProgress.detail.deleteConfirmCancel")}
-                            </button>
-                            <button
-                                type="button"
-                                className="btn btn-danger"
-                                onClick={handleConfirm}
-                                disabled={isDeleting}
-                            >
-                                {isDeleting
-                                    ? t("learnerProgress.detail.deleteConfirmDeleting")
-                                    : t("learnerProgress.detail.deleteConfirmButton")}
-                            </button>
-                        </div>
+                            />
+                            {error && <p className="feedback-error" role="alert">{error}</p>}
+                            <div className="feedback-actions">
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary"
+                                    onClick={closeDialog}
+                                    disabled={isDeleting}
+                                >
+                                    {t("learnerProgress.detail.deleteConfirmCancel")}
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="btn btn-danger"
+                                    disabled={isDeleting || !password.trim()}
+                                >
+                                    {isDeleting
+                                        ? t("learnerProgress.detail.deleteConfirmDeleting")
+                                        : t("learnerProgress.detail.deleteConfirmButton")}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}
