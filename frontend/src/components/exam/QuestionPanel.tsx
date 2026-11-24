@@ -10,6 +10,8 @@ interface QuestionPanelProps {
     onAnswerChange: (answerId: string) => void;
     isBookmarked: boolean;
     onToggleBookmark: () => void;
+    disabled?: boolean;
+    isUnsaved?: boolean;
 }
 
 const QuestionPanel = ({
@@ -18,6 +20,8 @@ const QuestionPanel = ({
                            onAnswerChange,
                            isBookmarked,
                            onToggleBookmark,
+                           disabled = false,
+                           isUnsaved = false,
                        }: QuestionPanelProps) => {
 
     const { t } = useTranslation();
@@ -57,6 +61,7 @@ const QuestionPanel = ({
             </div>
 
             <div className="answer-options">
+                {isUnsaved && <p role="status" className="exam-unsaved-status">{t("exam.unsavedAnswer")}</p>}
 
                 {options.map((option) => (
 
@@ -71,6 +76,7 @@ const QuestionPanel = ({
                             name={`question-${question.id}`}
                             value={option.id}
                             checked={selectedAnswer === option.id}
+                            disabled={disabled}
                             onChange={() => onAnswerChange(option.id)}
                         />
 

@@ -408,9 +408,18 @@
     margin: 0 0 0.5rem;
 }
 
+.exam-unsaved-status {
+    color: #8a4b00;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+}
+
+.exam-overview-cell.is-unsaved {
+    outline: 2px dashed #8a4b00;
+}
+
 .exam-leave-actions {
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
 }
-
