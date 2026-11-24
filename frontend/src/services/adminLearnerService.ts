@@ -16,8 +16,11 @@ export const getLearnerProgress = (userId: number): Promise<LearnerProgress> =>
  * Admin-only. Rejects with 403 if the target is an admin; the frontend
  * should also hide the button in that case.
  */
-export const deleteStudent = (userId: number): Promise<void> =>
-    apiClient(`/api/admin/users/${userId}`, { method: "DELETE" });
+export const deleteStudent = (userId: number, password: string): Promise<void> =>
+    apiClient(`/api/admin/users/${userId}`, {
+        method: "DELETE",
+        body: JSON.stringify({ password }),
+    });
 
 /**
  * Promotes a student to administrator ("ADMIN") or demotes an administrator

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import apiClient from "../../api/apiClient";
-import { getLearnerProgress, getLearners, updateUserRole } from "../../services/adminLearnerService";
+import { deleteStudent, getLearnerProgress, getLearners, updateUserRole } from "../../services/adminLearnerService";
 
 vi.mock("../../api/apiClient", () => ({ default: vi.fn() }));
 const apiClientMock = vi.mocked(apiClient);
@@ -19,6 +19,15 @@ describe("Admin learner service", () => {
         apiClientMock.mockResolvedValue({ userId: 7, fullName: "Anna" });
         expect(await getLearnerProgress(7)).toEqual({ userId: 7, fullName: "Anna" });
         expect(apiClientMock).toHaveBeenCalledWith("/api/admin/learners/7");
+    });
+
+    it("sends the administrator password in the participant deletion request body", async () => {
+        apiClientMock.mockResolvedValue(null);
+        await deleteStudent(7, "admin-secret");
+        expect(apiClientMock).toHaveBeenCalledWith("/api/admin/users/7", {
+            method: "DELETE",
+            body: JSON.stringify({ password: "admin-secret" }),
+        });
     });
 
     it("changes a user's role with the requested role as the body", async () => {

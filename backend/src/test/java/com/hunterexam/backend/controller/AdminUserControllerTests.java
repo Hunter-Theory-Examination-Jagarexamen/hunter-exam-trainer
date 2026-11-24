@@ -120,8 +120,23 @@ class AdminUserControllerTests extends ControllerTestBase {
 
     @Test
     void deletingAStudentStillWorks() throws Exception {
-        mvc.perform(delete("/api/admin/users/7").with(jwt().authorities(ADMIN)))
+        mvc.perform(delete("/api/admin/users/7").with(jwt().jwt(token -> token.subject("admin@example.test")).authorities(ADMIN))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"password\":\"secret123\"}"))
                 .andExpect(status().isNoContent());
-        verify(accountDeletionService).deleteStudentAsAdmin(7L);
+        verify(accountDeletionService).deleteStudentAsAdmin(7L, "admin@example.test", "secret123");
+    }
+
+    @Test
+    void deletingAStudentRequiresANonBlankPasswordAndAdminAuthentication() throws Exception {
+        mvc.perform(delete("/api/admin/users/7").with(jwt().authorities(ADMIN)))
+                .andExpect(status().isBadRequest());
+        mvc.perform(delete("/api/admin/users/7").with(jwt().authorities(ADMIN))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"password\":\" \"}"))
+                .andExpect(status().isBadRequest());
+        mvc.perform(delete("/api/admin/users/7").with(jwt().authorities(STUDENT))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"password\":\"secret123\"}"))
+                .andExpect(status().isForbidden());
+        verifyNoInteractions(accountDeletionService);
     }
 }
