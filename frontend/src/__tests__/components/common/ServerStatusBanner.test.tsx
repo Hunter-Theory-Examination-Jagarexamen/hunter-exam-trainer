@@ -80,4 +80,16 @@ describe("ServerStatusBanner", () => {
         expect(screen.queryByRole("alert")).not.toBeInTheDocument();
         window.history.pushState({}, "", "/");
     });
+
+    it("a failed request while the banner is red keeps it red (#254)", async () => {
+        render(<ServerStatusBanner />);
+        act(() => setServerStatus("unreachable"));
+        vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
+
+        await act(() => apiClient("/api/users/me").catch(() => {}));
+
+        expect(screen.getByRole("alert")).toBeInTheDocument();
+        expect(screen.getByRole("button", {name: /försök igen/i})).toBeInTheDocument();
+        expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
 });

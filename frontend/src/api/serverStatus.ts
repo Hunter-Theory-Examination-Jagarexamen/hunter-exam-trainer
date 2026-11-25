@@ -21,6 +21,12 @@ export function setServerStatus(next: ServerStatus): void {
     listeners.forEach(listener => listener());
 }
 
+// Like setServerStatus("starting"), but never takes red back to orange (#254).
+export function markServerStarting(): void {
+    if (status === "unreachable") return;
+    setServerStatus("starting");
+}
+
 // Returns a function that removes the listener again.
 export function subscribeServerStatus(listener: () => void): () => void {
     listeners.add(listener);
