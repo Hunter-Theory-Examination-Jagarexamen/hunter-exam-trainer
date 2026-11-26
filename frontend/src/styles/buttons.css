@@ -12,19 +12,21 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
+    min-height: 44px;                    /* comfortable tap target on phones */
     padding: 0.75rem 1.5rem;
     border: 1px solid transparent;
     border-radius: 8px;
-    font: inherit;
+    font-family: var(--font-heading);    /* Cinzel: capitals by design, like the mockup */
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 0.08em;
     text-decoration: none;
     cursor: pointer;
-    transition: background-color 0.2s ease, opacity 0.2s ease;
+    transition: filter 0.2s ease, background-color 0.2s ease;
 }
 
 .btn:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
 }
 
@@ -38,30 +40,38 @@
     filter: brightness(0.9);
 }
 
+/* Main action: polished brass with dark green text */
 .btn-primary {
-    background-color: var(--color-primary);
-    color: white;
+    background-color: var(--color-brass-light);      /* fallback under the gradient */
+    background-image: var(--gradient-brass-button);
+    border-color: var(--color-brass-dark);
+    color: var(--color-on-accent);
+    letter-spacing: 0.19em;             /* 3px at 16px, as in the mockup */
+    box-shadow: var(--shadow-brass);
+    text-shadow: var(--text-shadow-engraved);
 }
 
 .btn-primary:hover:not(:disabled) {
-    opacity: 0.9;
+    filter: brightness(1.08);
 }
 
+/* Other option: brass outline on the green */
 .btn-secondary {
-    background-color: var(--color-surface);
-    border-color: var(--color-primary);
-    color: var(--color-primary);
+    background-color: transparent;
+    border-color: var(--color-border);
+    color: var(--color-accent);
 }
 
 .btn-secondary:hover:not(:disabled) {
-    background-color: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+    background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
 }
 
+/* Destructive action */
 .btn-danger {
     background-color: var(--color-danger);
-    color: white;
+    color: var(--color-on-danger);
 }
 
 .btn-danger:hover:not(:disabled) {
-    opacity: 0.9;
+    filter: brightness(1.08);
 }

@@ -20,7 +20,11 @@ h1, h2, h3, h4 {
 }
 
 a {
-    color: var(--color-accent);
+    color: var(--color-link);
+}
+
+a:hover {
+    color: var(--color-link-hover);
 }
 
 /* Text fields: dark inset with a thin brass edge (not checkboxes/radios) */
@@ -30,7 +34,8 @@ textarea {
     background-color: var(--color-field-bg);
     color: var(--color-text);
     border: 1px solid var(--color-field-border);
-    border-radius: 6px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-field);
     font: inherit;
 }
 
