@@ -25,3 +25,21 @@ When the backend is really down, the banner turns red after 90 s and shows "För
 ## Conclusion
 
 The test reproduces the bug and the fix removes it. The remaining parts of #254 (one background check at a time, a check that sees Render's error page) are separate steps and will add to this log or get their own.
+
+## Step 3: only one background check at a time
+
+**What and why:** While the banner is orange or red it checks the server every 3 s. A new check started even if the previous one had not answered, so several could be open at once while Render wakes up. We tested that a hanging check blocks new ones.
+
+**How:**
+1. Add the test "runs at most one background check at a time (#254)": `fetch` never answers, 10 s pass with fake timers, `fetch` must be called once.
+2. Run `npx vitest run ServerStatusBanner` before the fix. The new test must fail.
+3. Add a `checkInFlight` flag (`useRef`) in `ServerStatusBanner.tsx`; `check` returns early while it is set and clears it in `finally`.
+4. Run `npx vitest run ServerStatusBanner` again, then `npx vitest run`.
+
+**Result:**
+- Before the fix: 7 passed, 1 failed (`fetch` called 3 times instead of 1).
+- After the fix: 8 of 8 passed in `ServerStatusBanner`.
+- Full run: 46 files, 327 tests passed.
+- Not yet tested in the running app.
+
+**Conclusion:** The test reproduces the bug and the fix removes it. "Try again" is unchanged and has its own check. A check that sees Render's error page is still to do.

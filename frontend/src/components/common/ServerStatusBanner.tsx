@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { getServerStatus, setServerStatus, subscribeServerStatus } from "../../api/serverStatus";
 import { API_BASE_URL } from "../../api/apiClient";
@@ -18,6 +18,7 @@ const ServerStatusBanner = () => {
     const status = useSyncExternalStore(subscribeServerStatus, getServerStatus);
     const [isChecking, setIsChecking] = useState(false);
     const [stillDown, setStillDown] = useState(false);
+    const checkInFlight = useRef(false);
 
     useEffect(() => {
         if (status === "ok") setStillDown(false);
@@ -28,11 +29,15 @@ const ServerStatusBanner = () => {
 
         let cancelled = false;
         const check = async () => {
+            if (checkInFlight.current) return;
+            checkInFlight.current = true;
             try {
                 await fetch(API_BASE_URL, { mode: "no-cors", cache: "no-store" });
                 if (!cancelled) setServerStatus("ok");
             } catch {
                 // Still down: the next tick tries again.
+            } finally {
+                checkInFlight.current = false;
             }
         };
         const intervalId = setInterval(check, CHECK_INTERVAL_MS);

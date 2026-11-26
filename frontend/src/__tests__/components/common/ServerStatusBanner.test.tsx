@@ -92,4 +92,16 @@ describe("ServerStatusBanner", () => {
         expect(screen.getByRole("button", {name: /försök igen/i})).toBeInTheDocument();
         expect(screen.queryByRole("status")).not.toBeInTheDocument();
     });
+
+    it("runs at most one background check at a time (#254)", async () => {
+        vi.useFakeTimers();
+        render(<ServerStatusBanner />);
+        act(() => setServerStatus("starting"));
+        const hangingFetch = vi.fn(() => new Promise<Response>(() => {}));
+        vi.stubGlobal("fetch", hangingFetch);
+
+        await act(() => vi.advanceTimersByTimeAsync(10_000));
+
+        expect(hangingFetch).toHaveBeenCalledTimes(1);
+    });
 });
