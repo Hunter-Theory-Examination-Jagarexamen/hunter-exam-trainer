@@ -36,8 +36,11 @@ const ServerStatusBanner = () => {
             if (checkInFlight.current) return;
             checkInFlight.current = true;
             try {
-                await fetch(API_BASE_URL, { mode: "no-cors", cache: "no-store" });
-                if (!cancelled) setServerStatus("ok");
+                const response = await fetch(API_BASE_URL, { cache: "no-store" });
+                // 502/503/504 is the host's error page, not our backend.
+                if (!cancelled && ![502, 503, 504].includes(response.status)) {
+                    setServerStatus("ok");
+                }
             } catch {
                 // Still down: the next tick tries again.
             } finally {

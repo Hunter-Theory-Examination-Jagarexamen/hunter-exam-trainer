@@ -104,4 +104,17 @@ describe("ServerStatusBanner", () => {
 
         expect(hangingFetch).toHaveBeenCalledTimes(1);
     });
+
+    it("a 503 from the host does not hide the banner (#254)", async () => {
+        vi.useFakeTimers();
+        render(<ServerStatusBanner />);
+        act(() => setServerStatus("starting"));
+        const fetchMock = vi.fn().mockResolvedValue(new Response(null, {status: 503}));
+        vi.stubGlobal("fetch", fetchMock);
+
+        await act(() => vi.advanceTimersByTimeAsync(3_000));
+
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(screen.getByRole("status")).toBeInTheDocument();
+    });
 });

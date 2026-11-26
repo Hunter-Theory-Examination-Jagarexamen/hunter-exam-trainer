@@ -43,3 +43,22 @@ The test reproduces the bug and the fix removes it. The remaining parts of #254 
 - Not yet tested in the running app.
 
 **Conclusion:** The test reproduces the bug and the fix removes it. "Try again" is unchanged and has its own check. A check that sees Render's error page is still to do.
+
+## Step 5: the background check no longer trusts a host error page
+
+**What and why:** The background check used `mode: "no-cors"`, which only fails when nothing answers at all. Render's error page (502/503) counted as an answer, so the banner was hidden, the next request failed and showed it again, and a server that was down might never turn red. The check is now a normal CORS request and does not count 502/503/504 as an answer. We tested that a 503 does not hide the banner.
+
+**How:**
+1. Add the test "a 503 from the host does not hide the banner (#254)": `fetch` answers 503, 3 s pass with fake timers, `fetch` must be called once and the "starting" banner must still be shown.
+2. Run `npx vitest run ServerStatusBanner` before the fix. The new test must fail.
+3. In `ServerStatusBanner.tsx`, remove `mode: "no-cors"` from the background check and only call `setServerStatus("ok")` when the status is not 502/503/504.
+4. Run `npx vitest run ServerStatusBanner` again, then `npx vitest run` and `npm run lint`.
+
+**Result:**
+- Before the fix: 8 passed, 1 failed (the banner disappeared after a 503).
+- After the fix: 9 of 9 passed in `ServerStatusBanner`.
+- Full run: 46 files, 328 tests passed.
+- A local `curl` with an `Origin` header showed that our backend sends CORS headers even on a 401, so a normal request can read its answer.
+- Not yet tested: that Render's real error page has no CORS headers (so `fetch` throws). This is checked on the deployed app after it has slept.
+
+**Conclusion:** The test reproduces the bug and the fix removes it. "Try again" still uses `no-cors` and is the next step.
