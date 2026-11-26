@@ -1,7 +1,8 @@
 .sidebar {
     width: 260px;
     min-height: calc(100vh - 70vh);
-    background: var(--color-primary);
+    background: var(--color-lacquer-dark);
+    border-right: 1px solid var(--color-border);    /* thin brass line */
 }
 
 .sidebar-nav {
@@ -15,7 +16,7 @@
     align-items: center;
     gap: 12px;
     padding: 18px 24px;
-    color: white;
+    color: var(--color-text);
     text-decoration: none;
     transition: all 0.2s ease;
 }
@@ -30,30 +31,31 @@
 
 .sidebar-nav a:hover,
 .sidebar-nav button:hover {
-    background: var(--color-secondary);
+    background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+    color: var(--color-link-hover);
 }
 
+/* Current page: brass bar on the left, brass text */
 .sidebar-nav a.active {
-    background: var(--color-secondary);
-    border-left: 5px solid white;
+    background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    border-left: 4px solid var(--color-accent);
+    color: var(--color-accent);
     font-weight: 600;
 }
 
-/* Section headers: "Dashboard" (everyone) and "Admin" (admins only) */
+/* Section headers: "Hem" (everyone) and "Admin" (admins only), engraved brass labels */
 .sidebar-nav a.sidebar-section-header {
-    background: var(--color-section-header);
+    font-family: var(--font-heading);
     font-weight: 600;
-}
-
-.sidebar-nav a.sidebar-section-header:hover,
-.sidebar-nav a.sidebar-section-header.active {
-    background: var(--color-section-header-active);
+    letter-spacing: 0.08em;
+    color: var(--color-heading);
+    border-top: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
 }
 
 /* Logout: separated from the links above */
 .sidebar-nav button.sidebar-logout {
     margin-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    border-top: 1px solid var(--color-border);
 }
 
 /* =========================
@@ -110,7 +112,7 @@
     }
 
     .sidebar-nav a.active {
-        border-left: 5px solid white;
+        border-left: 4px solid var(--color-accent);
         border-bottom: none;
         font-weight: 600;
     }

@@ -1,7 +1,8 @@
 .layout {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    min-height: 100vh;     /* fallback for old browsers */
+    min-height: 100dvh;    /* the visible height on phones (browser bars shown) */
 }
 
 .layout-body {
@@ -12,7 +13,7 @@
 .main-content {
     flex: 1;
     padding: 2rem;
-    background: var(--color-background);
+    /* no background: the lacquer gradient on <body> shows through */
 }
 
 @media (max-width: 768px) {
