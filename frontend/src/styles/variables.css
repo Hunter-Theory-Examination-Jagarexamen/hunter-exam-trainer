@@ -42,6 +42,15 @@
     --color-paper-text: #2a2418;
     --color-paper-border: #d8c9a3;
 
+    /* Section colours: one per part of the app (Hem tiles, page header bands).
+       A page sets --color-page-accent to its section colour; shared rules use that. */
+    --color-section-quiz: #1d4a52;      /* petrol */
+    --color-section-exam: #23325e;      /* navy */
+    --color-section-results: #46284f;   /* plum */
+    --color-section-profile: #5e1a1a;   /* wine */
+    --color-section-admin: #34404a;     /* slate */
+    --color-page-accent: var(--color-surface);   /* default when a page sets none */
+
     /* ---- Fonts ---- */
     --font-heading: "Cinzel", Georgia, serif;
     --font-body: "EB Garamond", Georgia, serif;
