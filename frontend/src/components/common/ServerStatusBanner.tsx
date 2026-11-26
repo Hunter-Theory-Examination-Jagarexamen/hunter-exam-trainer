@@ -19,10 +19,14 @@ const ServerStatusBanner = () => {
     const [isChecking, setIsChecking] = useState(false);
     const [stillDown, setStillDown] = useState(false);
     const checkInFlight = useRef(false);
+    const [previousStatus, setPreviousStatus] = useState(status);
 
-    useEffect(() => {
+    // Forget "still down" when the server answers again. Done while rendering
+    // instead of in an effect, so there is no extra render with stale state.
+    if (status !== previousStatus) {
+        setPreviousStatus(status);
         if (status === "ok") setStillDown(false);
-    }, [status]);
+    }
 
     useEffect(() => {
         if (status === "ok") return undefined;
