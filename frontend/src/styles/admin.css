@@ -20,9 +20,10 @@
     width: 100%;
     min-width: 0;
     padding: 0.75rem;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-field-border);
     border-radius: 8px;
-    background: var(--color-surface);
+    background: var(--color-field-bg);
+    box-shadow: var(--shadow-field);
     color: var(--color-text);
     font: inherit;
 }
@@ -30,6 +31,48 @@
 .question-bank-list {
     display: grid;
     gap: 1rem;
+}
+
+/* Cards in the admin lists: content from the top with even spacing,
+   instead of spread out over the card's minimum height */
+.question-bank-list .card {
+    justify-content: flex-start;
+    gap: 0.5rem;
+    min-height: 0;
+}
+
+.question-bank-list .card p {
+    margin: 0;
+}
+
+.question-bank-list .card .question-bank-actions {
+    margin: 0.5rem 0 0;
+}
+
+/* A subject's name and question count on a dark name plate, so they
+   stand out from the card colour */
+.admin-card-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding: 0.6rem 1rem;
+    background: var(--color-field-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+}
+
+.admin-card-header .card-title {
+    margin: 0;
+    color: var(--color-heading);
+}
+
+/* The count in brass, next to the name */
+.admin-card-count {
+    color: var(--color-accent);
+    font-size: 0.9rem;
+    white-space: nowrap;
 }
 
 .question-bank-list ol {
@@ -90,7 +133,7 @@
     margin: 1rem 0;
     padding: 0.75rem 1rem;
     border-radius: 8px;
-    background: var(--color-background);
+    background: var(--color-field-bg);   /* an inset panel inside the card */
 }
 
 .mock-exam-line {
@@ -98,12 +141,12 @@
 }
 
 .mock-exam-pass {
-    color: var(--color-primary);
+    color: var(--color-success);
     font-weight: 600;
 }
 
 .mock-exam-fail {
-    color: var(--color-danger, #e53e3e);
+    color: var(--color-danger);
     font-weight: 600;
 }
 
@@ -141,11 +184,11 @@
 
 .admin-overview-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: var(--shadow-dialog);
 }
 
 .admin-overview-card:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
 }
 
@@ -158,7 +201,7 @@
     font-size: 2.5rem;
     font-weight: 700;
     line-height: 1;
-    color: var(--color-primary);
+    color: var(--color-accent);
     text-align: left;
 }
 
@@ -181,7 +224,7 @@
 
 /* A question opened from a link (e.g. a feedback report) */
 .question-bank-list .card.question-bank-linked {
-    outline: 3px solid var(--color-primary);
+    outline: 3px solid var(--color-accent);
     outline-offset: 2px;
     scroll-margin-top: 1rem;
 }
@@ -205,19 +248,32 @@
     list-style: none;
     margin: 0;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-.learner-list li:not(:last-child) {
-    border-bottom: 1px solid var(--color-border);
-}
-
+/* Each name is a framed row, big enough to tap on a phone */
 .learner-list a {
-    display: block;
-    padding: 0.6rem 0;
-    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-field-bg);
+    color: var(--color-text);
+    font-size: 1.05rem;
+    text-decoration: none;
 }
 
-/* Learner detail: promote / demote a participant's role (#204) */
+.learner-list a:hover,
+.learner-list a:focus-visible {
+    border-color: var(--color-accent);
+    color: var(--color-link-hover);
+}
+
+/* Learner detail: promote / demote a participant's role */
 .role-change {
     margin-top: 2rem;
     max-width: 40rem;
@@ -238,13 +294,50 @@
     font-size: 0.9rem;
 }
 
-/* Confirmation after a role change or account deletion (#204) */
+/* Confirmation after a role change or account deletion */
 .success-banner {
     margin: 1rem 0;
     padding: 0.6rem 1rem;
     border: 1px solid var(--color-success);
     border-radius: 8px;
-    background: #e9f7ee;
-    color: var(--color-success);
+    background: var(--color-success-bg);
+    color: var(--color-text);
     font-weight: 500;
+}
+
+/* =========================
+   Admin pages: readable cards
+   ========================= */
+
+/* Card headings on a dark name plate, so they stand out from the slate */
+.main-content[data-section="admin"] :is(.card-title, .learner-group h2, .role-change h2),
+.admin-feedback-meta {
+    margin: 0 0 0.5rem;
+    padding: 0.6rem 1rem;
+    background: var(--color-field-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+}
+
+/* The subject cards already have a plate around name + count */
+.main-content[data-section="admin"] .admin-card-header .card-title {
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+/* Learner detail: one column of cards with the same, readable width */
+.main-content[data-section="admin"] .statistics {
+    max-width: 48rem;
+}
+
+.main-content[data-section="admin"] .statistics .role-change {
+    max-width: none;
+}
+
+/* The learner's e-mail under the name: brass, so it doesn't fade into the page */
+.main-content[data-section="admin"] .statistics h1 + p {
+    color: var(--color-label);
+    font-size: 1.1rem;
 }
