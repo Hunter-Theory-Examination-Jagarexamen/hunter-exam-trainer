@@ -27,8 +27,10 @@ a:hover {
     color: var(--color-link-hover);
 }
 
-/* Text fields: dark inset with a thin brass edge (not checkboxes/radios) */
-input:not([type="checkbox"]):not([type="radio"]),
+/* Text fields: dark inset with a thin brass edge (not checkboxes/radios).
+   :where() gives the rule zero extra specificity, so any page rule like
+   ".input-wrapper input" can still override it. */
+input:where(:not([type="checkbox"]):not([type="radio"])),
 select,
 textarea {
     background-color: var(--color-field-bg);

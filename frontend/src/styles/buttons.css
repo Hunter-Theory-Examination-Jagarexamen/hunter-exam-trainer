@@ -1,5 +1,5 @@
 /*
- * Shared button styles (#246). Use these for all new buttons:
+ * Shared button styles. Use these for all new buttons:
  *   <button className="btn btn-primary">   main action
  *   <button className="btn btn-secondary"> other option, "Avbryt"
  *   <button className="btn btn-danger">    destructive action

@@ -96,7 +96,7 @@ const LoginForm = ({ notice }: LoginFormProps) => {
             )}
 
             {successMessage && (
-                <p role="status" style={{ color: "#38a169", marginBottom: "1rem", fontSize: "0.875rem", fontWeight: 500 }}>
+                <p role="status" className="auth-message auth-message-success">
                     {successMessage}
                 </p>
             )}
@@ -156,7 +156,7 @@ const LoginForm = ({ notice }: LoginFormProps) => {
                 </div>
 
                 {error && (
-                    <p role="alert" style={{ color: "#e53e3e", marginBottom: "1rem", fontSize: "0.875rem" }}>
+                    <p role="alert" className="auth-message auth-message-error">
                         {error}
                     </p>
                 )}

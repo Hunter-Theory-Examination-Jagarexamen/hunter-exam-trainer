@@ -1,5 +1,5 @@
 /*
- * Tin-box theme (#259). The only place colour values live.
+ * Tin-box theme. The only place colour values live.
  * Page CSS uses the role variables (second block), never hex values.
  */
 :root {
@@ -70,7 +70,7 @@
     --font-heading: "Cinzel", Georgia, serif;
     --font-body: "EB Garamond", Georgia, serif;
 
-    /* ---- Old names (pre-#259), kept so existing CSS and open branches still work.
+    /* ---- Old names, kept so existing CSS and open branches still work.
        New code: use the role names above. ---- */
     --color-primary: var(--color-accent);
     --color-secondary: var(--color-brass-dark);

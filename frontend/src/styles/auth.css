@@ -1,8 +1,8 @@
 .auth-page {
     min-height: 100vh;
+    min-height: 100dvh;
     display: grid;
-
-    background-color: var(--color-background);
+    /* no background: the lacquer gradient on <body> shows through */
 }
 
 .login {
@@ -18,8 +18,9 @@
    ========================= */
 
 .auth-brand-panel {
-    background-color: var(--color-primary);
-    color: white;
+    background-color: var(--color-lacquer-dark);
+    border-right: 1px solid var(--color-border);
+    color: var(--color-text);
 
     display: flex;
     align-items: center;
@@ -82,7 +83,7 @@
     border: none;
     background: transparent;
 
-    color: var(--color-primary);
+    color: var(--color-link);
 
     cursor: pointer;
     font-weight: 600;
@@ -134,16 +135,19 @@
 
     font-size: 0.9rem;
     font-weight: 600;
+    color: var(--color-label);
 }
 
 .input-wrapper {
     display: flex;
     align-items: center;
 
-    border: 1px solid var(--color-border);
+    /* The wrapper is the visible field (icon + input); the input inside is see-through */
+    border: 1px solid var(--color-field-border);
     border-radius: 8px;
 
-    background-color: var(--color-surface);
+    background-color: var(--color-field-bg);
+    box-shadow: var(--shadow-field);
 
     padding: 0 0.75rem;
 
@@ -151,7 +155,7 @@
 }
 
 .input-wrapper:focus-within {
-    border-color: var(--color-primary);
+    border-color: var(--color-accent);
 }
 
 .input-wrapper svg {
@@ -163,7 +167,9 @@
     width: 100%;
 
     border: none;
+    border-radius: 0;
     outline: none;
+    box-shadow: none;
 
     background: transparent;
 
@@ -215,7 +221,7 @@
     border: none;
     background: transparent;
 
-    color: var(--color-primary);
+    color: var(--color-link);
 
     cursor: pointer;
     font-weight: 600;
@@ -286,16 +292,15 @@
     font-size: 0.9rem;
 }
 
-/* "Session expired" / Google login error, at the top of the login form
-   (#188; was fixed to the top of the screen, under the server banner) */
+/* "Session expired" / Google login error, at the top of the login form */
 .auth-notice {
     margin: 0 0 1.25rem;
     padding: 0.75rem 1.25rem;
 
     border-radius: 8px;
 
-    background-color: var(--color-danger, #dc2626);
-    color: white;
+    background-color: var(--color-danger);
+    color: var(--color-on-danger);
 
     font-size: 0.9rem;
     font-weight: 600;
@@ -339,7 +344,7 @@
     font-size: 1.25rem;
     letter-spacing: 0.05em;
 
-    color: var(--color-primary);
+    color: var(--color-accent);
 }
 
 .forgot-new-password p {
@@ -347,6 +352,21 @@
 
     color: var(--color-text-muted);
     font-size: 0.85rem;
+}
+
+/* Success / error lines in the auth forms (were inline styles) */
+.auth-message {
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.auth-message-success {
+    color: var(--color-success);
+    font-weight: 500;
+}
+
+.auth-message-error {
+    color: var(--color-danger);
 }
 
 /* =========================
@@ -382,13 +402,13 @@
     cursor: pointer;
 }
 
-/* The Terms/Privacy links are buttons that open a pop-up (#212), styled as links. */
+/* The Terms/Privacy links are buttons that open a pop-up, styled as links. */
 .terms-field .terms-link {
     background: none;
     border: none;
     padding: 0;
     font: inherit;
-    color: var(--color-primary);
+    color: var(--color-link);
     font-weight: 500;
     cursor: pointer;
 }
@@ -403,6 +423,7 @@
     .auth-page {
         display: block;
         min-height: 100vh;
+        min-height: 100dvh;
     }
 
     .auth-brand-panel {

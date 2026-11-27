@@ -82,7 +82,7 @@ const ResetPassword = () => {
                                        onChange={(e) => setConfirmPassword(e.target.value)} />
                             </div>
                         </div>
-                        {error && <p role="alert" style={{color: "#e53e3e"}}>{error}</p>}
+                        {error && <p role="alert" className="auth-message-error">{error}</p>}
                         <button type="submit" className="btn btn-primary auth-primary-button" disabled={isLoading}>
                             {isLoading ? t("resetPassword.submittingButton") : t("resetPassword.submitButton")}
                         </button>
