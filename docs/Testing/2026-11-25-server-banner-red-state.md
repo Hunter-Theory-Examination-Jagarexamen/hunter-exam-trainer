@@ -1,4 +1,4 @@
-# Test: Server banner stays red after failed requests (#254, step 2)
+# Test: Server banner red state and background check (#254)
 
 - **Date:** 2026-11-25
 - **Branch / commit:** fix/254-server-banner-red-state
@@ -62,3 +62,22 @@ The test reproduces the bug and the fix removes it. The remaining parts of #254 
 - Not yet tested: that Render's real error page has no CORS headers (so `fetch` throws). This is checked on the deployed app after it has slept.
 
 **Conclusion:** The test reproduces the bug and the fix removes it. "Try again" still uses `no-cors` and is the next step.
+
+## Step 6: "Try again" no longer trusts a host error page
+
+**What and why:** "Try again" used `mode: "no-cors"` like the background check did, so a 502/503/504 from the host counted as an answer and the page was reloaded into the same error. It is now a normal CORS request with the same rule as the background check: it must succeed and the status must not be 502/503/504, otherwise "Fortfarande ingen kontakt" is shown. We tested that a 503 after clicking "Försök igen" shows that text.
+
+**How:**
+1. Add the test "'Try again' says so when the host answers 503 (#254)": `fetch` answers 503, the button is clicked, the text must appear.
+2. Run `npx vitest run ServerStatusBanner` before the fix. The new test must fail.
+3. In `handleTryAgain`, remove `mode: "no-cors"` and throw on 502/503/504 so the existing `catch` handles it. Update the comment above it.
+4. Run `npx vitest run ServerStatusBanner` again, then `npx vitest run` and `npm run lint`.
+
+**Result:**
+- Before the fix: 9 passed, 1 failed (no "Fortfarande ingen kontakt" after a 503).
+- After the fix: 10 of 10 passed in `ServerStatusBanner`.
+- First full run: 9 tests in 6 other files timed out (5 s) while the computer was busy (128 s instead of about 75 s). Run alone they passed (8 files, 54 tests). A second full run was green.
+- Full run: 46 files, 329 tests passed.
+- Not yet tested in the running app or on the deployed app (see the manual tests for #254).
+
+**Conclusion:** The test reproduces the bug and the fix removes it. Both the background check and "Try again" now ignore the host's error page. Remaining: manual test in the running app, and on the deployed app after Render has slept.

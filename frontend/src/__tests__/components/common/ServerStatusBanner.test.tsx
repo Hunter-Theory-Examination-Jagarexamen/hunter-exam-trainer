@@ -117,4 +117,14 @@ describe("ServerStatusBanner", () => {
         expect(fetchMock).toHaveBeenCalledTimes(1);
         expect(screen.getByRole("status")).toBeInTheDocument();
     });
+
+    it("'Try again' says so when the host answers 503 (#254)", async () => {
+        render(<ServerStatusBanner />);
+        act(() => setServerStatus("unreachable"));
+        vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, {status: 503})));
+
+        await userEvent.click(screen.getByRole("button", {name: /försök igen/i}));
+
+        expect(await screen.findByText(/Fortfarande ingen kontakt/)).toBeInTheDocument();
+    });
 });

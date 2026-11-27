@@ -62,14 +62,17 @@ const ServerStatusBanner = () => {
         };
     }, [status]);
 
-    // "Try again" first checks that the server answers, then reloads (#188).
-    // A bare no-cors request needs no endpoint: it only fails when the
-    // server can't be reached at all.
+    // "Try again" first checks that the backend answers, then reloads (#188).
+    // Same rule as the background check: the request must succeed and the
+    // status must not be 502/503/504 (the host's error page, #254).
     const handleTryAgain = async () => {
         setIsChecking(true);
         setStillDown(false);
         try {
-            await fetch(API_BASE_URL, { mode: "no-cors", cache: "no-store" });
+            const response = await fetch(API_BASE_URL, { cache: "no-store" });
+            if ([502, 503, 504].includes(response.status)) {
+                throw new Error("Host error page");
+            }
         } catch {
             setStillDown(true);
             setIsChecking(false);
