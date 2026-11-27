@@ -1,4 +1,4 @@
-import { setServerStatus } from "./serverStatus";
+import { markServerStarting, setServerStatus } from "./serverStatus";
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
@@ -72,7 +72,7 @@ const apiClient = async (
 
     const answersBefore = answerCount;
     const startingId = setTimeout(() => {
-        if (answerCount === answersBefore) setServerStatus("starting");
+        if (answerCount === answersBefore) markServerStarting();
     }, STARTING_MESSAGE_AFTER_MS);
 
     let response: Response;
@@ -84,7 +84,7 @@ const apiClient = async (
         });
     } catch {
         // fetch only throws when no answer came at all, or when we aborted it.
-        setServerStatus("starting");
+        markServerStarting();
         throw new ServerUnreachableError();
     } finally {
         clearTimeout(timeoutId);
@@ -92,7 +92,7 @@ const apiClient = async (
     }
 
     if (SERVER_UNAVAILABLE_STATUSES.includes(response.status)) {
-        setServerStatus("starting");
+        markServerStarting();
         throw new ServerUnreachableError();
     }
     answerCount++;

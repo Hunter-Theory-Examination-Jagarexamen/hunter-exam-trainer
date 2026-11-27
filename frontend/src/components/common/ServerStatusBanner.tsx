@@ -1,4 +1,4 @@
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { getServerStatus, setServerStatus, subscribeServerStatus } from "../../api/serverStatus";
 import { API_BASE_URL } from "../../api/apiClient";
@@ -18,21 +18,33 @@ const ServerStatusBanner = () => {
     const status = useSyncExternalStore(subscribeServerStatus, getServerStatus);
     const [isChecking, setIsChecking] = useState(false);
     const [stillDown, setStillDown] = useState(false);
+    const checkInFlight = useRef(false);
+    const [previousStatus, setPreviousStatus] = useState(status);
 
-    useEffect(() => {
+    // Forget "still down" when the server answers again. Done while rendering
+    // instead of in an effect, so there is no extra render with stale state.
+    if (status !== previousStatus) {
+        setPreviousStatus(status);
         if (status === "ok") setStillDown(false);
-    }, [status]);
+    }
 
     useEffect(() => {
         if (status === "ok") return undefined;
 
         let cancelled = false;
         const check = async () => {
+            if (checkInFlight.current) return;
+            checkInFlight.current = true;
             try {
-                await fetch(API_BASE_URL, { mode: "no-cors", cache: "no-store" });
-                if (!cancelled) setServerStatus("ok");
+                const response = await fetch(API_BASE_URL, { cache: "no-store" });
+                // 502/503/504 is the host's error page, not our backend.
+                if (!cancelled && ![502, 503, 504].includes(response.status)) {
+                    setServerStatus("ok");
+                }
             } catch {
                 // Still down: the next tick tries again.
+            } finally {
+                checkInFlight.current = false;
             }
         };
         const intervalId = setInterval(check, CHECK_INTERVAL_MS);
@@ -50,14 +62,17 @@ const ServerStatusBanner = () => {
         };
     }, [status]);
 
-    // "Try again" first checks that the server answers, then reloads (#188).
-    // A bare no-cors request needs no endpoint: it only fails when the
-    // server can't be reached at all.
+    // "Try again" first checks that the backend answers, then reloads (#188).
+    // Same rule as the background check: the request must succeed and the
+    // status must not be 502/503/504 (the host's error page, #254).
     const handleTryAgain = async () => {
         setIsChecking(true);
         setStillDown(false);
         try {
-            await fetch(API_BASE_URL, { mode: "no-cors", cache: "no-store" });
+            const response = await fetch(API_BASE_URL, { cache: "no-store" });
+            if ([502, 503, 504].includes(response.status)) {
+                throw new Error("Host error page");
+            }
         } catch {
             setStillDown(true);
             setIsChecking(false);

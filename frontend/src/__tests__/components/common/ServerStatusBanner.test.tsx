@@ -80,4 +80,51 @@ describe("ServerStatusBanner", () => {
         expect(screen.queryByRole("alert")).not.toBeInTheDocument();
         window.history.pushState({}, "", "/");
     });
+
+    it("a failed request while the banner is red keeps it red (#254)", async () => {
+        render(<ServerStatusBanner />);
+        act(() => setServerStatus("unreachable"));
+        vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
+
+        await act(() => apiClient("/api/users/me").catch(() => {}));
+
+        expect(screen.getByRole("alert")).toBeInTheDocument();
+        expect(screen.getByRole("button", {name: /försök igen/i})).toBeInTheDocument();
+        expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
+    it("runs at most one background check at a time (#254)", async () => {
+        vi.useFakeTimers();
+        render(<ServerStatusBanner />);
+        act(() => setServerStatus("starting"));
+        const hangingFetch = vi.fn(() => new Promise<Response>(() => {}));
+        vi.stubGlobal("fetch", hangingFetch);
+
+        await act(() => vi.advanceTimersByTimeAsync(10_000));
+
+        expect(hangingFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it("a 503 from the host does not hide the banner (#254)", async () => {
+        vi.useFakeTimers();
+        render(<ServerStatusBanner />);
+        act(() => setServerStatus("starting"));
+        const fetchMock = vi.fn().mockResolvedValue(new Response(null, {status: 503}));
+        vi.stubGlobal("fetch", fetchMock);
+
+        await act(() => vi.advanceTimersByTimeAsync(3_000));
+
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(screen.getByRole("status")).toBeInTheDocument();
+    });
+
+    it("'Try again' says so when the host answers 503 (#254)", async () => {
+        render(<ServerStatusBanner />);
+        act(() => setServerStatus("unreachable"));
+        vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(null, {status: 503})));
+
+        await userEvent.click(screen.getByRole("button", {name: /försök igen/i}));
+
+        expect(await screen.findByText(/Fortfarande ingen kontakt/)).toBeInTheDocument();
+    });
 });
