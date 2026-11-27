@@ -191,6 +191,7 @@ Practice Subject-Wise Questions
     font-size: 1.25rem;
     /* Long question text reads better in the body font than in Cinzel capitals */
     font-family: var(--font-body);
+    font-size-adjust: var(--font-body-adjust);
     font-weight: 600;
     letter-spacing: normal;
     color: var(--color-text);

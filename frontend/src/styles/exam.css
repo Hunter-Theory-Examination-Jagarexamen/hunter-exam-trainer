@@ -92,6 +92,7 @@
     line-height: 1.6;
     /* Long question text reads better in the body font than in Cinzel capitals */
     font-family: var(--font-body);
+    font-size-adjust: var(--font-body-adjust);
     font-weight: 600;
     letter-spacing: normal;
     color: var(--color-text);

@@ -5,8 +5,9 @@ body {
     margin: 0;
     min-height: 100dvh;
     font-family: var(--font-body);
-    font-size: 1.125rem;        /* EB Garamond runs small; 18px reads like 16px Arial */
-    line-height: 1.5;
+    font-size: 1rem;
+    font-size-adjust: var(--font-body-adjust);   /* text only: rem spacing stays the same */
+    line-height: 1.6;
     background-color: var(--color-background);   /* fallback under the gradient */
     background-image: var(--gradient-lacquer);
     color: var(--color-text);
@@ -14,6 +15,7 @@ body {
 
 h1, h2, h3, h4 {
     font-family: var(--font-heading);
+    font-size-adjust: none;     /* Cinzel is all capitals: keep its own size */
     font-weight: 600;
     letter-spacing: 0.02em;
     color: var(--color-heading);

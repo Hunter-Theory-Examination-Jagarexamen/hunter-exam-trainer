@@ -85,6 +85,10 @@
     /* ---- Fonts ---- */
     --font-heading: "Cinzel", Georgia, serif;
     --font-body: "EB Garamond", Georgia, serif;
+    /* EB Garamond has small lowercase letters for its size. This scales the
+       body font so lowercase letters are 0.45 of the font size, making every
+       text size read larger without changing spacing (see global.css). */
+    --font-body-adjust: 0.45;
 
     /* ---- Old names, kept so existing CSS and open branches still work.
        New code: use the role names above. ---- */

@@ -46,6 +46,7 @@
 /* Section headers: "Hem" (everyone) and "Admin" (admins only), engraved brass labels */
 .sidebar-nav a.sidebar-section-header {
     font-family: var(--font-heading);
+    font-size-adjust: none;
     font-weight: 600;
     letter-spacing: 0.08em;
     color: var(--color-heading);

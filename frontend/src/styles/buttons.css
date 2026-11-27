@@ -17,6 +17,7 @@
     border: 1px solid transparent;
     border-radius: 8px;
     font-family: var(--font-heading);    /* Cinzel: capitals by design, like the mockup */
+    font-size-adjust: none;
     font-size: 1rem;
     font-weight: 800;                    /* thick strokes read better on brass */
     letter-spacing: 0.08em;
