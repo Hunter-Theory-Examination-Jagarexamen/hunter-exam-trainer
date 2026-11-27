@@ -52,33 +52,33 @@ const RecentActivityList = () => {
                     <span>{t("dashboard.scoreHeader")}</span>
                     <span>{t("dashboard.dateHeader")}</span>
                 </div>
-            </div>
 
-            {activities.map((activity) => {
-                return (
-                    <div
-                        className="recent-activity-row"
-                        key={activity.id}
-                    >
-                        <span>{t("dashboard.practiceActivityLabel")}</span>
-                        <span>
-                            {activity.score}%
-                            <small>
-                                {" "}({activity.correctAnswers}/{activity.totalQuestions})
-                            </small>
-                        </span>
-                        <span>
-                            {new Date(
-                                activity.completedAt
-                            ).toLocaleDateString("sv-SE", {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric"
-                            })}
+                {activities.map((activity) => {
+                    return (
+                        <div
+                            className="recent-activity-row"
+                            key={activity.id}
+                        >
+                            <span>{t("dashboard.practiceActivityLabel")}</span>
+                            <span>
+                                {activity.score}%
+                                <small>
+                                    {" "}({activity.correctAnswers}/{activity.totalQuestions})
+                                </small>
+                            </span>
+                            <span>
+                                {new Date(
+                                    activity.completedAt
+                                ).toLocaleDateString("sv-SE", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric"
+                                })}
                         </span>
                     </div>
                 );
             })}
+            </div>
         </section>
     );
 };
