@@ -9,6 +9,12 @@
     gap: 1.5rem;
 }
 
+/* Hem's stat cards: dark lacquer, so they read as information and not as
+   the coloured navigation tiles planned for Hem */
+.dashboard-cards .card {
+    background: var(--color-lacquer-dark);
+}
+
 .dashboard-section:not(:first-child) {
     margin-top: 2rem;
 }
@@ -32,11 +38,15 @@
 
 /* Recent activity container */
 .recent-activity {
-    background: var(--color-surface);
+    /* As wide as the four stat cards above (4 × 260px + 3 gaps), so the
+       columns stay close enough to read across */
+    max-width: calc(4 * 260px + 3 * 1.5rem);
+    background: var(--color-lacquer-dark);   /* dark like the stat cards above */
     border-radius: 12px;
     padding: 0;
     overflow: hidden;
     border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-card);
 }
 
 
@@ -46,10 +56,10 @@
     grid-template-columns: 2fr 1fr 1fr;
     align-items: center;
     padding: 16px 20px;
-    background: var(--color-surface);
-    border-bottom: 1px solid var(--color-border);
-    font-size: 14px;
+    border-bottom: 1px solid var(--color-border);  /* brass line under the header */
+    font-size: 0.95rem;
     font-weight: 600;
+    color: var(--color-label);
 }
 
 
@@ -60,7 +70,7 @@
     align-items: center;
     padding: 16px 20px;
     border-bottom: 1px solid var(--color-border);
-    font-size: 14px;
+    font-size: 1rem;
 }
 
 /* Remove border from the last row */
@@ -68,10 +78,6 @@
     border-bottom: none;
 }
 
-/* Small hover effect */
-.recent-activity-row:hover {
-    background: var(--color-surface);
-}
 
 
 @media (max-width: 768px) {
@@ -113,7 +119,7 @@
         grid-template-columns: 1fr 1fr;
         gap: 8px;
         padding: 14px 16px;
-        font-size: 14px;
+        font-size: 1rem;
     }
 
     .recent-activity-row span:first-child {

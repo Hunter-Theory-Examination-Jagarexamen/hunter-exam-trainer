@@ -1,5 +1,5 @@
 /*
- * Shared button styles (#246). Use these for all new buttons:
+ * Shared button styles. Use these for all new buttons:
  *   <button className="btn btn-primary">   main action
  *   <button className="btn btn-secondary"> other option, "Avbryt"
  *   <button className="btn btn-danger">    destructive action
@@ -12,24 +12,33 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
+    min-height: 44px;                    /* comfortable tap target on phones */
     padding: 0.75rem 1.5rem;
     border: 1px solid transparent;
     border-radius: 8px;
-    font: inherit;
+    font-family: var(--font-heading);    /* Cinzel: capitals by design, like the mockup */
+    font-size-adjust: none;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 800;                    /* thick strokes read better on brass */
+    letter-spacing: 0.08em;
     text-decoration: none;
     cursor: pointer;
-    transition: background-color 0.2s ease, opacity 0.2s ease;
+    transition: filter 0.2s ease, background-color 0.2s ease;
 }
 
 .btn:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
 }
 
-.btn:disabled {
-    opacity: 0.5;
+/* Disabled: flat and quiet instead of see-through, so the text stays readable */
+.btn:disabled,
+.btn-primary:disabled {
+    background: transparent;
+    border-color: color-mix(in srgb, var(--color-border) 60%, transparent);
+    box-shadow: none;
+    text-shadow: none;
+    color: var(--color-text-muted);
     cursor: not-allowed;
 }
 
@@ -38,30 +47,38 @@
     filter: brightness(0.9);
 }
 
+/* Main action: polished brass with dark green text */
 .btn-primary {
-    background-color: var(--color-primary);
-    color: white;
+    background-color: var(--color-brass-light);      /* fallback under the gradient */
+    background-image: var(--gradient-brass-button);
+    border-color: var(--color-brass-dark);
+    color: var(--color-on-accent);
+    letter-spacing: 0.14em;
+    box-shadow: var(--shadow-brass);
+    text-shadow: var(--text-shadow-engraved);
 }
 
 .btn-primary:hover:not(:disabled) {
-    opacity: 0.9;
+    filter: brightness(1.08);
 }
 
+/* Other option: brass outline on the green */
 .btn-secondary {
-    background-color: var(--color-surface);
-    border-color: var(--color-primary);
-    color: var(--color-primary);
+    background-color: transparent;
+    border-color: var(--color-border);
+    color: var(--color-accent);
 }
 
 .btn-secondary:hover:not(:disabled) {
-    background-color: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+    background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
 }
 
+/* Destructive action */
 .btn-danger {
     background-color: var(--color-danger);
-    color: white;
+    color: var(--color-on-danger);
 }
 
 .btn-danger:hover:not(:disabled) {
-    opacity: 0.9;
+    filter: brightness(1.08);
 }

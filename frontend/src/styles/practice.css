@@ -5,7 +5,12 @@
 }
 
 .practice-card {
-    background-color: var(--color-surface);
+    /* Each mode sets --mode-color (below); the card is that colour,
+       darkening towards the bottom like the Hem tiles */
+    --mode-color: var(--color-surface);
+    background: linear-gradient(160deg, var(--mode-color),
+                                color-mix(in srgb, var(--mode-color) 60%, var(--color-lacquer-dark)));
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     padding: 1.75rem;
     width: 250px;
@@ -15,7 +20,7 @@
     align-items: center;
     text-align: center;
 
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-card);
 }
 
 .icon-circle {
@@ -26,22 +31,14 @@
     align-items: center;
     justify-content: center;
     margin-bottom: 1rem;
+    /* Brass ring with a brass icon, as on the Hem tiles in the mockup */
+    border: 1px solid var(--color-border);
+    color: var(--color-accent);
 }
 
-.icon-circle--green {
-    background: color-mix(in srgb, var(--color-success) 15%, transparent);
-    color: var(--color-success);
-}
-
-.icon-circle--amber {
-    background: color-mix(in srgb, var(--color-warning) 15%, transparent);
-    color: var(--color-warning);
-}
-
-.icon-circle--blue {
-    background: color-mix(in srgb, var(--color-primary) 15%, transparent);
-    color: var(--color-primary);
-}
+.practice-card--subject { --mode-color: var(--color-mode-subject); }
+.practice-card--random  { --mode-color: var(--color-mode-random); }
+.practice-card--exam    { --mode-color: var(--color-mode-exam); }
 
 .practice-title h3 {
     font-size: 18px;
@@ -51,7 +48,7 @@
 
 .practice-title p {
     font-size: 14px;
-    color: var(--color-primary);
+    color: var(--color-text-muted);
 }
 
 .practice-features {
@@ -73,7 +70,7 @@
 }
 
 .check-icon {
-    color: var(--color-primary);
+    color: var(--color-accent);
     flex-shrink: 0;
 }
 
@@ -95,9 +92,10 @@ Subject Cards
 
 .subject-card {
     background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-card);
 
     display: flex;
     flex-direction: column;
@@ -119,8 +117,9 @@ Subject Cards
     align-items: center;
     justify-content: center;
 
-    background-color: darkseagreen;
-    color: var(--color-primary);
+    background-color: color-mix(in srgb, var(--color-mode-subject) 70%, transparent);
+    border: 1px solid var(--color-border);
+    color: var(--color-accent);
 
     flex-shrink: 0;
 }
@@ -160,7 +159,7 @@ Practice Subject-Wise Questions
 }
 /* The question view only: at least one screen tall, so the bottom bar sits
  at the bottom of the screen even for short questions. The result view has
- no bar, so it doesn't get this (#207). */
+ no bar, so it doesn't get this. */
 .practice-questions--with-bar {
     min-height: 100dvh;
 }
@@ -181,14 +180,21 @@ Practice Subject-Wise Questions
 
 .practice-question-card {
     background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     padding: 1rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--shadow-card);
 }
 
 .practice-question-card h2 {
     margin: 0 0 1.5rem;
     font-size: 1.25rem;
+    /* Long question text reads better in the body font than in Cinzel capitals */
+    font-family: var(--font-body);
+    font-size-adjust: var(--font-body-adjust);
+    font-weight: 600;
+    letter-spacing: normal;
+    color: var(--color-text);
 }
 
 .practice-answer-options {
@@ -213,22 +219,27 @@ Practice Subject-Wise Questions
 }
 
 .practice-answer:hover {
-    border-color: var(--color-primary);
+    border-color: var(--color-accent);
 }
 
+/* Answer states. Selected: a faint brass tint. Right and wrong: a solid
+   green or wine background (not a tint, so it looks the same on every card
+   colour), a light edge and a thick bar on the left. */
 .practice-answer.selected {
-    background-color: var(--color-secondary);
-    border-color: var(--color-primary);
+    background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
+    border-color: var(--color-accent);
 }
 
 .practice-answer.correct {
-    background-color: #d1fae5;
-    border-color: #22c55e;
+    background-color: var(--color-success-bg);
+    border-color: var(--color-success);
+    box-shadow: inset 6px 0 0 var(--color-success);   /* thick bar on the left */
 }
 
 .practice-answer.incorrect {
-    background-color: #fee2e2;
-    border-color: #ef4444;
+    background-color: var(--color-danger-bg);
+    border-color: var(--color-danger);
+    box-shadow: inset 6px 0 0 var(--color-danger);
 }
 
 .practice-answer input {
@@ -243,15 +254,19 @@ Practice Subject-Wise Questions
 
 .practice-bottom-bar {
     position: sticky;
-    bottom: 0;
+    bottom: 0.5rem;   /* a small gap below the card */
     margin-top: auto;
     z-index: 10;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    background-color: var(--color-background);
-    border-top: 1px solid var(--color-border);
-    padding: 0.75rem 0;
+    /* A card of its own, in the page's card colour, pinned to the bottom of
+       the screen. It covers question text scrolling under the buttons. */
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-card);
+    padding: 0.75rem 1rem;
 }
 
 .practice-quit-row {
@@ -267,6 +282,12 @@ Practice Subject-Wise Questions
 
 
 @media (max-width: 768px) {
+
+    /* Phones: the mode cards fill the width instead of a fixed 250px */
+    .practice-card {
+        width: 100%;
+        box-sizing: border-box;
+    }
 
     .subject-cards {
         grid-template-columns: 1fr;

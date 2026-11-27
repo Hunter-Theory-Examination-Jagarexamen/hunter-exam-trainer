@@ -144,9 +144,11 @@ export default function Subjects() {
             </section>}
             {subjects.length === 0 && <p>{t("subjects.noSubjects")}</p>}
             <div className="question-bank-list">{subjects.map(subject => <article className="card" key={subject.id}>
-                <h2 className="card-title">{subject.name}</h2>
+                <div className="admin-card-header">
+                    <h2 className="card-title">{subject.name}</h2>
+                    <span className="admin-card-count">{t("subjects.questionsCount", {count: subject.questionCount})}</span>
+                </div>
                 <p>{subject.description}</p>
-                <p>{t("subjects.questionsCount", {count: subject.questionCount})}</p>
                 <div className="question-bank-actions">
                     <button type="button" className="btn btn-secondary" disabled={busy} aria-label={t("subjects.editAria", {name: subject.name})} onClick={event => {
                         returnFocus.current = event.currentTarget; setSuccess(""); setEditor(subject);

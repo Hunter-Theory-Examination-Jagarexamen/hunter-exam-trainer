@@ -3,7 +3,68 @@
 
 body {
     margin: 0;
-    font-family: Arial, SansSerif, serif;
-    background-color: var(--color-background);
+    min-height: 100dvh;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-size-adjust: var(--font-body-adjust);   /* text only: rem spacing stays the same */
+    line-height: 1.6;
+    background-color: var(--color-background);   /* fallback under the gradient */
+    background-image: var(--gradient-lacquer);
+    color: var(--color-text);
+}
+
+h1, h2, h3, h4 {
+    font-family: var(--font-heading);
+    font-size-adjust: none;     /* Cinzel is all capitals: keep its own size */
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-heading);
+}
+
+a {
+    color: var(--color-link);
+}
+
+a:hover {
+    color: var(--color-link-hover);
+}
+
+/* Text fields: dark inset with a thin brass edge (not checkboxes/radios).
+   :where() gives the rule zero extra specificity, so any page rule like
+   ".input-wrapper input" can still override it. */
+input:where(:not([type="checkbox"]):not([type="radio"])),
+select,
+textarea {
+    background-color: var(--color-field-bg);
+    color: var(--color-text);
+    border: 1px solid var(--color-field-border);
+    border-radius: 8px;
+    box-shadow: var(--shadow-field);
+    font: inherit;
+}
+
+::placeholder {
+    color: var(--color-text-muted);
+    opacity: 1;
+}
+
+/* Visible keyboard focus everywhere */
+:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+}
+
+/* Error messages without a class of their own (e.g. "Kunde inte ladda
+   statistik. Försök igen."): a wine box with a light red edge, so they
+   stand out like the other errors. Errors with their own class (field
+   errors, the server banner) keep their own look. */
+p[role="alert"]:not([class]) {
+    width: fit-content;      /* as wide as the message, not the whole page */
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 0.75rem 1rem;
+    background: var(--color-danger-bg);
+    border: 1px solid var(--color-danger);
+    border-radius: 8px;
     color: var(--color-text);
 }

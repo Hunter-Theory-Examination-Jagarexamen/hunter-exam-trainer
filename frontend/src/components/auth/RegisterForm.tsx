@@ -218,7 +218,7 @@ const RegisterForm = () => {
                 )}
 
                 {error && (
-                    <p role="alert" style={{ color: "#e53e3e", marginBottom: "1rem", fontSize: "0.875rem" }}>
+                    <p role="alert" className="auth-message auth-message-error">
                         {error}
                     </p>
                 )}

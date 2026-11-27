@@ -31,16 +31,18 @@
 
     width: 100%;
 
-    border: none;
-    background: transparent;
+    /* Each subject is a small card of its own */
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
 
-    padding: 0.5rem 0.75rem;
+    padding: 0.75rem 1rem;
 
     text-align: left;
 
     cursor: pointer;
 
-    border-radius: 8px;
+    border-radius: 12px;
 
     font: inherit;
     color: inherit;
@@ -49,11 +51,11 @@
 }
 
 .subject-progress:hover {
-    background-color: var(--color-surface);
+    background-color: color-mix(in srgb, var(--color-accent) 10%, var(--color-surface));
 }
 
 .subject-progress:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
 }
 
@@ -69,7 +71,8 @@
     width: 100%;
     height: 12px;
 
-    background: #dddddd;
+    background: var(--color-field-bg);
+    border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
 
     border-radius: 20px;
 
@@ -78,16 +81,18 @@
 
 .progress-fill {
     height: 100%;
-    background: var(--color-primary);
+    background: var(--color-accent);
     border-radius: 20px;
     transition: width 0.4s ease;
 }
 
 .statistics-card {
+    max-width: 64rem;      /* don't stretch the chart across very wide screens */
     background: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     padding: 1rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    box-shadow: var(--shadow-card);
 }
 
 /* Recent Results */
@@ -107,7 +112,7 @@
 
 .recent-result-icon,
 .performance-icon {
-    color: var(--color-primary);
+    color: var(--color-accent);
 }
 
 .recent-result-name,
@@ -121,12 +126,12 @@
 .subject-name {
     font-weight: 700;
     font-size: 1rem;
-    color: var(--color-primary);
+    color: var(--color-accent);
 }
 
 .recent-result-date {
     font-size: 0.85rem;
-    color: var(--color-secondary);
+    color: var(--color-text-muted);
 }
 .section-header {
     display: flex;
@@ -137,11 +142,40 @@
 
 .weeks-select {
     padding: 0.4rem 0.8rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background: white;
     font-size: 0.9rem;
     cursor: pointer;
+}
+
+/* Progress chart (Recharts draws SVG). CSS wins over the chart's own
+   attributes, so the theme colours are set here. */
+.recharts-wrapper {
+    color: var(--color-accent);            /* the line uses currentColor */
+}
+
+.recharts-cartesian-grid line {
+    stroke: color-mix(in srgb, var(--color-border) 40%, transparent);
+}
+
+.recharts-cartesian-axis-line,
+.recharts-cartesian-axis-tick-line {
+    stroke: var(--color-border);
+}
+
+.recharts-cartesian-axis-tick-value {
+    fill: var(--color-text-muted);         /* SVG text is coloured with fill */
+    font-family: var(--font-body);
+}
+
+.recharts-dot {
+    fill: var(--color-surface);
+}
+
+/* The tooltip sets its colours inline, so these need !important */
+.recharts-default-tooltip {
+    background-color: var(--color-dialog-surface) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: 8px;
+    color: var(--color-text);
 }
 
 @media (max-width: 768px) {

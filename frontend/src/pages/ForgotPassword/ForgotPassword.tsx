@@ -95,7 +95,7 @@ const ForgotPassword = () => {
                     </button>
                 </form>
 
-                {error && <p role="alert" style={{color: "#e53e3e"}}>{error}</p>}
+                {error && <p role="alert" className="auth-message-error">{error}</p>}
 
                 {message && (
                     <div className="forgot-message" role="status">

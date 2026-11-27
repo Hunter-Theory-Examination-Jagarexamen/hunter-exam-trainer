@@ -40,7 +40,7 @@ const SummaryCards = () => {
     }
 
     if (error) {
-        return <p>{error}</p>;
+        return <p role="alert">{error}</p>;
     }
 
     if (!data) {

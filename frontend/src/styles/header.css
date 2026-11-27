@@ -1,8 +1,8 @@
 .header {
     height: 75px;
-    background: var(--color-surface);
-    border-bottom: 1px solid var(--color-border);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    background: var(--color-lacquer-dark);
+    border-bottom: 1px solid var(--color-border);   /* thin brass line */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 
     display: flex;
     justify-content: space-between;
@@ -19,7 +19,9 @@
 
 .header-left h1 {
     font-size: 1.4rem;
-    font-weight: 600;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    margin: 0;
 }
 
 .header-right {
@@ -29,7 +31,7 @@
 .header-logo {
     height: 30px;
     width: auto;
-    border: solid 2px darkslategrey;
+    border: 1px solid var(--color-border);
     border-radius: 20px;
 }
 
@@ -41,14 +43,14 @@
     display: none;
     border: none;
     background: transparent;
-    color: var(--color-text, #333);
+    color: var(--color-accent);
     cursor: pointer;
     padding: 0.5rem;
     margin-right: 0.25rem;
 }
 
 .menu-toggle:hover {
-    color: var(--color-primary);
+    color: var(--color-link-hover);
 }
 
 /* =========================

@@ -2,7 +2,7 @@ import {BookOpen, Clock, type LucideIcon, Shuffle} from "lucide-react";
 
 export interface PracticeCards {
     icon: LucideIcon;
-    iconVariant: "green" | "amber" | "blue";
+    mode: "subject" | "random" | "exam";   // picks the card colour (practice.css)
     title: string;
     description: string;
     features: string[];
@@ -13,7 +13,7 @@ export interface PracticeCards {
 export const practiceCards: PracticeCards[] = [
     {
         icon: BookOpen,
-        iconVariant: "green",
+        mode: "subject",
         title: "practiceCards.subject.title",
         description: "practiceCards.subject.description",
         features: ["practiceCards.subject.feature1", "practiceCards.subject.feature2"],
@@ -22,7 +22,7 @@ export const practiceCards: PracticeCards[] = [
     },
     {
         icon: Shuffle,
-        iconVariant: "amber",
+        mode: "random",
         title: "practiceCards.random.title",
         description: "practiceCards.random.description",
         features: ["practiceCards.random.feature1", "practiceCards.random.feature2"],
@@ -31,7 +31,7 @@ export const practiceCards: PracticeCards[] = [
     },
     {
         icon: Clock,
-        iconVariant: "blue",
+        mode: "exam",
         title: "practiceCards.mockExam.title",
         description: "practiceCards.mockExam.description",
         features: ["practiceCards.mockExam.feature1", "practiceCards.mockExam.feature2"],

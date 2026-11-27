@@ -8,16 +8,18 @@
 .result-score {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-radius: 16px;
+    border-radius: 12px;
     padding: 2.0rem;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--shadow-card);
 }
 
 .result-score span {
     font-size: 3rem;
+    font-family: var(--font-heading);   /* the big score in Cinzel brass */
+    font-size-adjust: none;
     font-weight: 800;
-    color: var(--color-primary);
+    color: var(--color-accent);
     line-height: 1;
 }
 
@@ -28,7 +30,7 @@
 .result-score p {
     margin-top: 8px;
     font-size: 0.95rem;
-    color: var(--color-secondary);
+    color: var(--color-text-muted);
 }
 
 .result-details {
@@ -39,6 +41,7 @@
     border: 1px solid var(--color-border);
     border-radius: 12px;
     padding: 1.5rem;
+    box-shadow: var(--shadow-card);
 }
 
 .result-details div {
@@ -54,7 +57,7 @@
 
 .result-details span {
     font-size: 0.9rem;
-    color: var(--color-secondary);
+    color: var(--color-label);
 }
 
 .result-details strong {
@@ -66,20 +69,23 @@
 .result-passed {
     margin: 1rem 0 1.5rem;
     padding: 0.75rem 1rem;
-    border-radius: 6px;
+    border-radius: 12px;
     font-size: 1.25rem;
     font-weight: 600;
     text-align: center;
 }
 
+/* Passed / not passed: the same solid green and wine as right and wrong answers */
 .result-passed--passed {
-    background: #e6f4ea;
-    color: #1e7e34;
+    background: var(--color-success-bg);
+    border: 1px solid var(--color-success);
+    color: var(--color-text);
 }
 
 .result-passed--failed {
-    background: #fdecea;
-    color: #b3261e;
+    background: var(--color-danger-bg);
+    border: 1px solid var(--color-danger);
+    color: var(--color-text);
 }
 
 .result-bookmarked {

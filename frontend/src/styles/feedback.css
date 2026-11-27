@@ -2,7 +2,7 @@
 .feedback-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--color-backdrop);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -11,6 +11,8 @@
 }
 
 .feedback-dialog {
+    /* Same green on every page: pin the surface instead of taking the section colour */
+    --color-surface: var(--color-dialog-surface);
     background: var(--color-surface);
     color: var(--color-text);
     border-radius: 12px;
@@ -19,7 +21,8 @@
     width: 100%;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-dialog);
 }
 
 .feedback-dialog h2 {
@@ -41,9 +44,10 @@
 .feedback-dialog textarea {
     font: inherit;
     padding: 0.5rem;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-field-border);
     border-radius: 8px;
-    background: var(--color-background);
+    background: var(--color-field-bg);
+    box-shadow: var(--shadow-field);
     color: var(--color-text);
 }
 
@@ -70,7 +74,7 @@
 }
 
 .feedback-error {
-    color: var(--color-danger, #b00020);
+    color: var(--color-danger);
     font-weight: 600;
     margin: 0.5rem 0 0;
 }
@@ -147,20 +151,20 @@
 /* "Report a problem" link-style button under a practice question */
 .practice-report-button {
     display: block;
-    margin: 1rem 0 0 auto;
-    padding: 0;
+    margin: 0.5rem 0 0 auto;
+    padding: 0.6rem 0;        /* taller tap area without moving the text */
     border: none;
     background: none;
     font: inherit;
-    font-size: 0.9rem;
-    color: var(--color-text-muted);
+    font-size: 1rem;
+    color: var(--color-link);
     text-decoration: underline;
     cursor: pointer;
 }
 
 .practice-report-button:hover,
 .practice-report-button:focus-visible {
-    color: var(--color-primary);
+    color: var(--color-link-hover);
 }
 
 /* Feedback prompt under a mock exam result: a card with the same width and look
@@ -193,7 +197,7 @@
     border: none;
     background: none;
     font: inherit;
-    color: var(--color-primary);
+    color: var(--color-link);
     text-decoration: underline;
     cursor: pointer;
 }
@@ -202,7 +206,7 @@
     margin-top: 0.5rem;
     padding: 0.75rem 1rem;
     border-left: 3px solid var(--color-border);
-    background: var(--color-background);
+    background: var(--color-field-bg);
     border-radius: 4px;
 }
 

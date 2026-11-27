@@ -50,7 +50,7 @@ const ProgressOverTimeChart = ({ data }: Props) => {
                 <Line
                     type="monotone"
                     dataKey="masteryPercentage"
-                    stroke="#4a7c3f"
+                    stroke="currentColor"
                     strokeWidth={2}
                     dot={{ r: 4 }}
                     activeDot={{ r: 6 }}

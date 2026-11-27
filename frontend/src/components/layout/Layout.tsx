@@ -1,5 +1,6 @@
 import Header from "./Header";
 import Sidebar from "./Sidebar";
+import { sectionForPath } from "./pageSections";
 import "../../styles/layout.css";
 import { Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -58,7 +59,7 @@ const Layout = () => {
                     />
                 )}
 
-                <main className="main-content">
+                <main className="main-content" data-section={sectionForPath(location.pathname)}>
                     <Outlet context={currentUser} />
                 </main>
             </div>

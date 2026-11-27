@@ -446,7 +446,7 @@ const Exam = () => {
     if (error) {
         return (
             <div className="exam">
-                <p>{error}</p>
+                <p role="alert">{error}</p>
             </div>
         );
     }
