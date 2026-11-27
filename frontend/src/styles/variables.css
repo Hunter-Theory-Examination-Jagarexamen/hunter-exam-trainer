@@ -49,11 +49,8 @@
        are for text, edges and the bar on the left. */
     --color-danger-bg: #5e1a1a;                      /* wine: wrong answers, errors, danger zone */
     --color-success-bg: #1e6b3a;                     /* green: right answers */
+    --color-on-warning: #2a1a05;                     /* text on a warning background */
 
-    /* Light "paper" surface for dense pages (admin tables, statistics charts) */
-    --color-paper: #f4ecd8;
-    --color-paper-text: #2a2418;
-    --color-paper-border: #d8c9a3;
 
     /* Section colours: one per part of the app (Hem tiles, page header bands).
        A page sets --color-page-accent to its section colour; shared rules use that. */
@@ -89,11 +86,4 @@
        body font so lowercase letters are 0.45 of the font size, making every
        text size read larger without changing spacing (see global.css). */
     --font-body-adjust: 0.45;
-
-    /* ---- Old names, kept so existing CSS and open branches still work.
-       New code: use the role names above. ---- */
-    --color-primary: var(--color-accent);
-    --color-secondary: var(--color-brass-dark);
-    --color-section-header: var(--color-lacquer-dark);
-    --color-section-header-active: var(--color-lacquer-light);
 }
