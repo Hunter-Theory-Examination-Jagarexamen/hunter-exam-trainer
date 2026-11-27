@@ -70,6 +70,9 @@
     --text-shadow-engraved: 0 1px 0 rgba(255, 240, 200, 0.3);
     /* Cards lifted off the lacquer */
     --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.35);
+    /* Pop-ups: the dimmed screen behind, and the shadow under the pop-up */
+    --color-backdrop: rgba(0, 0, 0, 0.55);
+    --shadow-dialog: 0 6px 20px rgba(0, 0, 0, 0.5);
     /* Text field sunk into the lid: dark inner shadow, faint brass line below */
     --shadow-field: inset 0 2px 6px rgba(0, 0, 0, 0.7), 0 1px 0 rgba(243, 220, 149, 0.18);
 
