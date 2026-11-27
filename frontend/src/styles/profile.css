@@ -133,22 +133,6 @@ Result sharing (#125)
     font-weight: 500;
 }
 
-/* Delete-account password field: label above the input, as in the
-   change-password form */
-.danger-zone-form label {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    max-width: 500px;
-    font-weight: 500;
-}
-
-.danger-zone-form input {
-    padding: 10px 12px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    font-size: 14px;
-}
 
 /* Delete-account buttons ("Avbryt" + confirm) side by side */
 .form-actions {
@@ -158,6 +142,3 @@ Result sharing (#125)
     margin-top: 1rem;
 }
 
-.form-error {
-    color: #b3261e;
-}

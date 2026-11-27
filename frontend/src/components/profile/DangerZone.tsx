@@ -13,15 +13,17 @@ const DangerZone = () => {
     const [error, setError] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
 
-    // Backend returns {"message": "..."} for handled errors.
+    // Prefer the backend's code if present (#243); fall back to the English
+    // message so any other failure still shows something useful.
     const messageOf = (err: unknown): string => {
         if (err instanceof ApiError) {
             try {
                 const body = JSON.parse(err.message);
-                return typeof body?.message === "string" ? body.message : err.message;
-            } catch {
-                return err.message;
-            }
+                if (body?.code === "WRONG_PASSWORD") return t("errors.WRONG_PASSWORD");
+                if (body?.code === "LAST_ADMIN") return t("errors.LAST_ADMIN");
+                if (typeof body?.message === "string") return body.message;
+            } catch { /* not JSON */ }
+            return err.message;
         }
         return t("errors.UNKNOWN_ERROR");
     };
@@ -32,7 +34,6 @@ const DangerZone = () => {
         setBusy(true);
         try {
             await deleteMyAccount(password);
-            // Reuse the existing logout flow, but signal why we're logging out.
             navigate("/logout?deleted=1", { replace: true });
         } catch (err) {
             setError(messageOf(err));
@@ -61,22 +62,25 @@ const DangerZone = () => {
                     {t("profile.deleteAccountButton")}
                 </button>
             ) : (
-                <form onSubmit={onSubmit} className="danger-zone-form">
+                <form onSubmit={onSubmit} className="change-password-form">
                     <p className="danger-warning">
                         {t("profile.deleteAccountWarning")}
                     </p>
-                    <label>
-                        {t("profile.currentPasswordLabel")}
+                    <div className="form-group">
+                        <label htmlFor="delete-password">
+                            {t("profile.currentPasswordLabel")}
+                        </label>
                         <input
+                            id="delete-password"
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             autoComplete="current-password"
                             required
                         />
-                    </label>
-                    {error && <p className="form-error">{error}</p>}
-                    <div className="form-actions">
+                    </div>
+                    {error && <p className="password-error">{error}</p>}
+                    <div className="change-password-actions">
                         <button type="button" className="btn btn-secondary" onClick={cancel} disabled={busy}>
                             {t("common.cancel")}
                         </button>

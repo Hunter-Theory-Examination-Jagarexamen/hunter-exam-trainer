@@ -13,3 +13,4 @@ public class LastAdminException extends RuntimeException {
         super("You are the last admin and cannot delete your account.");
     }
 }
+

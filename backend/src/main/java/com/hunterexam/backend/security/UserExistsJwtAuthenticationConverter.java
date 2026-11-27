@@ -1,6 +1,7 @@
 package com.hunterexam.backend.security;
 
 import com.hunterexam.backend.entity.User;
+import com.hunterexam.backend.exception.AccountDeletedException;
 import com.hunterexam.backend.repository.UserRepository;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;
@@ -47,7 +48,8 @@ public class UserExistsJwtAuthenticationConverter implements Converter<Jwt, JwtA
 
         if (user.isEmpty()) {
             throw new OAuth2AuthenticationException(
-                new OAuth2Error(INVALID_TOKEN, "User no longer exists", null));
+                new OAuth2Error("invalid_token", "User no longer exists", null),
+                new AccountDeletedException());
         }
 
         List<GrantedAuthority> authorities = List.of(

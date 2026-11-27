@@ -11,8 +11,11 @@ import java.io.IOException;
 
 /**
  * Returns JSON in the same shape as {@code GlobalExceptionHandler} when the
- * filter chain itself rejects a token (#243). Stateless, so a plain {@code new}
- * instance is safe — instantiated directly inside {@code SecurityConfig}.
+ * filter chain rejects a token because the user was deleted (#243).
+ * <p>
+ * Registered as a bean from {@code SecurityConfig} (not a {@code @Component}),
+ * so {@code @WebMvcTest} slices that include {@code SecurityConfig} still get
+ * it without having to list every security bean.
  */
 public class ApiErrorAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
@@ -32,8 +35,8 @@ public class ApiErrorAuthenticationEntryPoint implements AuthenticationEntryPoin
             return;
         }
 
-        // Default: standard 401 with WWW-Authenticate: Bearer. Same as
-        // Spring's default BearerTokenAuthenticationEntryPoint.
+        // Default behavior for every other case: standard 401 with
+        // WWW-Authenticate: Bearer.
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setHeader("WWW-Authenticate", "Bearer error=\"invalid_token\"");
     }

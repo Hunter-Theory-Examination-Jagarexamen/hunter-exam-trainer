@@ -2,15 +2,15 @@ package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.entity.User;
-import com.hunterexam.backend.exception.ConflictException;
+import com.hunterexam.backend.exception.LastAdminException;
 import com.hunterexam.backend.exception.NotFoundException;
+import com.hunterexam.backend.exception.WrongPasswordException;
 import com.hunterexam.backend.repository.AttemptQuestionRepository;
 import com.hunterexam.backend.repository.AttemptRepository;
 import com.hunterexam.backend.repository.FeedbackRepository;
 import com.hunterexam.backend.repository.SubjectStatsRepository;
 import com.hunterexam.backend.repository.UserRepository;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,37 +50,43 @@ public class AccountDeletionService {
 
     /**
      * Deletes the authenticated user's own account. The password is required
-     * as re-authentication. A wrong password throws {@link BadCredentialsException}
-     * (→ 401 with the project's existing "Invalid email or password" handler, but
-     * that message is misleading for delete; the controller overrides it — see below).
+     * as re-authentication and must match the stored hash.
+     * <p>
+     * Before deleting an admin, locks every admin row so that two concurrent
+     * admin deletions can't both pass the "there is another admin" check
+     * (#243).
+     *
+     * @throws WrongPasswordException if the password is missing or wrong
+     * @throws LastAdminException     if the caller is the only admin
      */
     @Transactional
     public void deleteOwnAccount(String email, String password) {
-        User user = userRepository.findByIdForUpdate(
-                userRepository.findByEmail(email)
-                    .orElseThrow(() -> new NotFoundException("User not found"))
-                    .getId())
+        User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new NotFoundException("User not found"));
 
         if (!user.isPasswordLoginEnabled()
             || user.getPassword() == null
             || !passwordEncoder.matches(password, user.getPassword())) {
-            // The generic handler turns BadCredentialsException into 401 "Invalid email or password".
-            // That's fine as a shape, but the frontend shows a specific message for delete,
-            // so the controller throws a dedicated exception instead — see UserController.
-            throw new IllegalArgumentException("Wrong password");
+            throw new WrongPasswordException();
         }
 
-        if (user.getRole() == Role.ADMIN && userRepository.countByRole(Role.ADMIN) <= 1) {
-            throw new ConflictException("You are the last admin and cannot delete your account.");
+        if (user.getRole() == Role.ADMIN) {
+            // Lock every admin row so a concurrent admin deletion waits here
+            // until we've counted and committed (#243).
+            List<User> admins = userRepository.findByRoleForUpdate(Role.ADMIN);
+            if (admins.size() <= 1) {
+                throw new LastAdminException();
+            }
         }
 
-        performDeletion(user);
+        User locked = userRepository.findByIdForUpdate(user.getId())
+            .orElseThrow(() -> new NotFoundException("User not found"));
+        performDeletion(locked);
     }
 
     /**
-     * Admin endpoint: deletes a student. Admins can't be deleted through this
-     * endpoint (they must delete themselves via {@link #deleteOwnAccount}).
+     * Admin endpoint: deletes a student account. Admin accounts cannot be
+     * deleted through this endpoint.
      */
     @Transactional
     public void deleteStudentAsAdmin(Long targetId, String actingAdminEmail, String password) {
@@ -92,11 +98,11 @@ public class AccountDeletionService {
         if (!actingAdmin.isPasswordLoginEnabled()
             || actingAdmin.getPassword() == null
             || actingAdmin.getPassword().isBlank()) {
-            throw new ConflictException("Password confirmation is unavailable for this account.");
+            throw new WrongPasswordException();
         }
         if (password == null || password.isBlank()
             || !passwordEncoder.matches(password, actingAdmin.getPassword())) {
-            throw new IllegalArgumentException("Incorrect password.");
+            throw new WrongPasswordException();
         }
 
         User target = userRepository.findByIdForUpdate(targetId)
@@ -128,5 +134,4 @@ public class AccountDeletionService {
         // 5) The user.
         userRepository.delete(user);
     }
-
 }

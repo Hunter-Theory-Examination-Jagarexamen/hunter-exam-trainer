@@ -271,7 +271,9 @@
     "UNKNOWN_ERROR": "Ett oväntat fel uppstod.",
     "MISSING_FIELDS": "Vänligen fyll i alla fält.",
     "PASSWORD_MISMATCH": "Lösenorden matchar inte.",
-    "TERMS_REQUIRED": "Du måste godkänna användarvillkoren och integritetspolicyn."
+    "TERMS_REQUIRED": "Du måste godkänna användarvillkoren och integritetspolicyn.",
+    "WRONG_PASSWORD": "Fel lösenord. Försök igen.",
+    "LAST_ADMIN": "Du är den sista administratören och kan inte ta bort ditt konto."
   },
   "serverStatus": {
     "starting": "Servern startar. Det kan ta upp till en minut…",

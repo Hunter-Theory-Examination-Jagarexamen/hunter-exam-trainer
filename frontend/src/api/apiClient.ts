@@ -42,12 +42,6 @@ const SERVER_UNAVAILABLE_STATUSES = [502, 503, 504];
 const isAuthEndpoint = (endpoint: string): boolean =>
     endpoint.startsWith("/api/auth/") || endpoint.startsWith("/auth/");
 
-const handleSessionExpired = (): void => {
-    localStorage.removeItem("token");
-    if (!window.location.pathname.startsWith("/login")) {
-        window.location.href = "/login?expired=1";
-    }
-};
 
 const apiClient = async (
     endpoint: string,
@@ -99,8 +93,23 @@ const apiClient = async (
     setServerStatus("ok");
 
     if (response.status === 401 && !isAuthEndpoint(endpoint)) {
-        handleSessionExpired();
-        throw new ApiError("Session expired. Please log in again.", 401);
+        // Try to read the body to distinguish "account deleted" (#243) from
+        // a plain session timeout. The backend sends {"code": "..."} only
+        // for the delete case; everything else gets the normal redirect.
+        const bodyText = await response.text();
+        let isAccountDeleted = false;
+        try {
+            const body = JSON.parse(bodyText);
+            isAccountDeleted = body?.code === "ACCOUNT_DELETED";
+        } catch { /* not JSON — treat as ordinary 401 */ }
+
+        localStorage.removeItem("token");
+        if (!window.location.pathname.startsWith("/login")) {
+            window.location.href = isAccountDeleted
+                ? "/login?deleted=1"
+                : "/login?expired=1";
+        }
+        throw new ApiError(bodyText || "Unauthorized", 401);
     }
     // #210: the backend may return a refreshed JWT when the current one is
     // getting old. Store it so the next request uses it. Optional chaining

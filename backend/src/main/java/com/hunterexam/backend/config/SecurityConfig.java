@@ -1,5 +1,6 @@
 package com.hunterexam.backend.config;
 
+import com.hunterexam.backend.security.ApiErrorAuthenticationEntryPoint;
 import com.hunterexam.backend.security.TokenRefreshFilter;
 import com.hunterexam.backend.security.UserExistsJwtAuthenticationConverter;
 import io.jsonwebtoken.io.Decoders;
@@ -51,6 +52,7 @@ public class SecurityConfig {
         this.tokenRefreshFilter = tokenRefreshFilter;
     }
 
+
     /**
      * Provides the password encoder used to hash user passwords.
      * <p>
@@ -64,6 +66,10 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    public ApiErrorAuthenticationEntryPoint apiErrorAuthenticationEntryPoint() {
+        return new ApiErrorAuthenticationEntryPoint();
+    }
     /**
      * Configures HTTP security for the application.
      * <p>
@@ -115,15 +121,12 @@ public class SecurityConfig {
                 // rejects tokens of deleted users and builds the authorities from the
                 // role in the database, so a role change applies from the next
                 // request on instead of waiting for the token to expire.
-            .oauth2ResourceServer(oauth2 ->
-                oauth2.jwt(jwt ->
-                    jwt.jwtAuthenticationConverter(userExistsJwtAuthenticationConverter)
-                )
-
+            .oauth2ResourceServer(oauth2 -> oauth2
+                .authenticationEntryPoint(apiErrorAuthenticationEntryPoint())
+                .jwt(jwt -> jwt.jwtAuthenticationConverter(userExistsJwtAuthenticationConverter))
             )
-            .addFilterAfter(tokenRefreshFilter, org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter.class);
-
-
+            .addFilterAfter(tokenRefreshFilter,
+                org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter.class);
 
         // Google OAuth2 login is optional; it is only activated when the
         // corresponding environment variables are configured.

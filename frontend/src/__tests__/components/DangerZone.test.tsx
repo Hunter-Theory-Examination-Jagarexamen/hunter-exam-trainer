@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import DangerZone from "../../components/profile/DangerZone";
-import * as userApi from "../../api/userApi";
-import { ApiError } from "../../api/apiClient";
+import DangerZone from "../../components/profile/DangerZone.tsx";
+import * as userApi from "../../api/userApi.ts";
+import { ApiError } from "../../api/apiClient.ts";
 
 vi.mock("../../api/userApi"); // Updated path
 
@@ -65,6 +65,21 @@ describe("DangerZone", () => {
         fireEvent.click(screen.getByText("profile.deleteAccountConfirm"));
 
         await waitFor(() => expect(navigate).toHaveBeenCalledWith("/logout?deleted=1", { replace: true }));
+    });
+
+    it("shows the localized wrong-password message when the backend returns WRONG_PASSWORD", async () => {
+        vi.mocked(userApi.deleteMyAccount).mockRejectedValueOnce(
+            new ApiError(JSON.stringify({ code: "WRONG_PASSWORD", message: "Wrong password" }), 400),
+        );
+        renderIt();
+
+        fireEvent.click(screen.getByText("profile.deleteAccountButton"));
+        fireEvent.change(screen.getByLabelText("profile.currentPasswordLabel"), {
+            target: { value: "bad" },
+        });
+        fireEvent.click(screen.getByText("profile.deleteAccountConfirm"));
+
+        expect(await screen.findByText("errors.WRONG_PASSWORD")).toBeInTheDocument();
     });
 
     it("cancel clears the form without calling the API", () => {

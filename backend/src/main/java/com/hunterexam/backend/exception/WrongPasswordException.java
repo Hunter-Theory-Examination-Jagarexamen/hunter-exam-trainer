@@ -13,3 +13,4 @@ public class WrongPasswordException extends RuntimeException {
         super("Wrong password");
     }
 }
+

@@ -10,22 +10,22 @@ const Login = () => {
     const [searchParams] = useSearchParams();
     const googleError = searchParams.get("error") === "google";
     const sessionExpired = searchParams.get("expired") === "1";
+    const accountDeleted = searchParams.get("deleted") === "1";
+
     const notice = googleError ? t("auth.googleError")
         : sessionExpired ? t("auth.sessionExpired")
-        : null;
+            : accountDeleted ? t("auth.accountDeletedSuccess")
+                : null;
 
     return (
         <div className="auth-page login">
-
             <div className="auth-brand-panel">
                 <div className="auth-brand-content">
                     <div className="auth-logo">
                         <img src={logo} alt={t("brand.logoAlt")} />
                     </div>
                     <h1>{t("brand.title")}</h1>
-                    <p>
-                        {t("auth.brandTagLine")}
-                    </p>
+                    <p>{t("auth.brandTagLine")}</p>
                 </div>
             </div>
 

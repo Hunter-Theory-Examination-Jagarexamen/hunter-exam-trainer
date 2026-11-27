@@ -91,7 +91,7 @@ the register page.
       instantiated inline in `SecurityConfig` to avoid the slice needing a
       bean it can't see)
     - `DeletedUserTokenTest` 1/1
-- **Frontend:** `npx tsc -b` clean. `npx vitest run` — all pass, including:
+- **Frontend:** `npx tsc -b` clean. `npx vitest run` all pass, including:
     - `Login.test.tsx` (new) 3 tests: `?deleted=1` shows the deleted
       banner, `?expired=1` shows the expired banner, no query shows nothing
     - `DangerZone.test.tsx` new test: `WRONG_PASSWORD` code from backend
@@ -123,3 +123,4 @@ The #194 loose ends are closed:
 
 No regressions in the rest of the backend or frontend test suites.
 Ready for the Friday release test.
+

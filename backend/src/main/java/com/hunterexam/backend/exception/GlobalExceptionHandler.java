@@ -44,6 +44,25 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, message);
     }
 
+
+    // 400: the password typed in the delete-account form was wrong (#243)
+    @ExceptionHandler(WrongPasswordException.class)
+    public ResponseEntity<Map<String, String>> handleWrongPassword(WrongPasswordException ex) {
+        return errorWithCode(HttpStatus.BAD_REQUEST, WrongPasswordException.CODE, ex.getMessage());
+    }
+
+    // 409: the caller is the last remaining admin (#243)
+    @ExceptionHandler(LastAdminException.class)
+    public ResponseEntity<Map<String, String>> handleLastAdmin(LastAdminException ex) {
+        return errorWithCode(HttpStatus.CONFLICT, LastAdminException.CODE, ex.getMessage());
+    }
+
+    // 401: a valid token refers to a user whose account was deleted (#243)
+    @ExceptionHandler(AccountDeletedException.class)
+    public ResponseEntity<Map<String, String>> handleAccountDeleted(AccountDeletedException ex) {
+        return errorWithCode(HttpStatus.UNAUTHORIZED, AccountDeletedException.CODE, ex.getMessage());
+    }
+
     // 400: invalid input, e.g. "Correct answer must match one of the option texts"
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
@@ -123,4 +142,16 @@ public class GlobalExceptionHandler {
         String safeMessage = message != null ? message : "Request failed";
         return ResponseEntity.status(status).body(Map.of("message", safeMessage));
     }
+
+    // For the #243 delete-account errors: body carries a code the frontend
+    // can map to a translated message. Only these three cases use it for
+    // now; every other handler keeps the "message only" shape so nothing
+    // else in the app changes behaviour.
+    private ResponseEntity<Map<String, String>> errorWithCode(
+        HttpStatusCode status, String code, String message) {
+        String safeMessage = message != null ? message : "Request failed";
+        return ResponseEntity.status(status)
+            .body(Map.of("code", code, "message", safeMessage));
+    }
 }
+

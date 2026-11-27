@@ -10,8 +10,9 @@ import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.SubjectStats;
 import com.hunterexam.backend.entity.User;
-import com.hunterexam.backend.exception.ConflictException;
+import com.hunterexam.backend.exception.LastAdminException;
 import com.hunterexam.backend.exception.NotFoundException;
+import com.hunterexam.backend.exception.WrongPasswordException;
 import com.hunterexam.backend.repository.AttemptQuestionRepository;
 import com.hunterexam.backend.repository.AttemptRepository;
 import com.hunterexam.backend.repository.FeedbackRepository;
@@ -112,7 +113,6 @@ class AccountDeletionServiceTest {
         feedbackRepository.save(new Feedback(
             user, FeedbackType.APP, "test message", null, LocalDateTime.now()));
 
-        // Persist everything to DB so tests can find it
         entityManager.flush();
         entityManager.clear();
     }
@@ -129,7 +129,7 @@ class AccountDeletionServiceTest {
 
         assertThatThrownBy(() ->
             accountDeletionService.deleteOwnAccount(user.getEmail(), "not-the-password"))
-            .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(WrongPasswordException.class);
 
         entityManager.flush();
         entityManager.clear();
@@ -138,6 +138,7 @@ class AccountDeletionServiceTest {
         assertThat(attemptRepository.count()).isEqualTo(attemptsBefore);
         assertThat(subjectStatsRepository.count()).isEqualTo(statsBefore);
     }
+
     @Test
     void deleteOwnAccount_withCorrectPassword_deletesAllPersonalData() {
         User user = newStudent("own@x.se");
@@ -151,9 +152,28 @@ class AccountDeletionServiceTest {
         entityManager.clear();
 
         assertThat(userRepository.findById(userId)).isEmpty();
-        // Any attempts that pointed to this user are gone
         assertThat(attemptRepository.count()).isZero();
         assertThat(subjectStatsRepository.count()).isZero();
+    }
+
+    /**
+     * Sub-issue H of #243: the original #194 test only checked that attempts
+     * and stats were gone. This proves the attempt_questions rows are gone
+     * too — they are the actual answers, not just the empty attempt headers.
+     */
+    @Test
+    void deleteOwnAccount_alsoDeletesTheUsersAttemptQuestions() {
+        User user = newStudent("answers@x.se");
+        seedPersonalData(user);
+
+        long aqBefore = attemptQuestionRepository.count();
+        assertThat(aqBefore).as("the seed must have created at least one answer row").isPositive();
+
+        accountDeletionService.deleteOwnAccount(user.getEmail(), PASSWORD);
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(attemptQuestionRepository.count()).isZero();
     }
 
     @Test
@@ -161,7 +181,7 @@ class AccountDeletionServiceTest {
         User user = newStudent("fb@x.se");
         seedPersonalData(user);
         entityManager.flush();
-        entityManager.clear(); // Clear the Hibernate session
+        entityManager.clear();
 
         long feedbackBefore = feedbackRepository.count();
         accountDeletionService.deleteOwnAccount(user.getEmail(), PASSWORD);
@@ -184,7 +204,7 @@ class AccountDeletionServiceTest {
 
         assertThatThrownBy(() ->
             accountDeletionService.deleteOwnAccount(admin.getEmail(), PASSWORD))
-            .isInstanceOf(ConflictException.class);
+            .isInstanceOf(LastAdminException.class);
 
         assertThat(userRepository.findById(admin.getId())).isPresent();
     }
@@ -204,13 +224,21 @@ class AccountDeletionServiceTest {
         assertThat(userRepository.countByRole(Role.ADMIN)).isEqualTo(1L);
     }
 
+    // Sub-issue D of #243: the "last admin" race is prevented by locking
+    // every admin row (findByRoleForUpdate) before counting. We don't test
+    // the race with threads here: a reliable threaded test needs a real DB,
+    // timing/latch coordination, and can flake on slow CI runners. The lock
+    // itself is a plain @Lock(PESSIMISTIC_WRITE); the sequential
+    // deleteOwnAccount_whenNotLastAdmin_succeeds covers the happy path,
+    // and deleteOwnAccount_whenLastAdmin_isRejected covers the guard.
+
     @Test
     void deleteStudentAsAdmin_deletesStudent() {
         User admin = newAdmin("acting-admin@x.se");
         User student = newStudent("victim@x.se");
         seedPersonalData(student);
         entityManager.flush();
-        entityManager.clear(); // Clear the Hibernate session
+        entityManager.clear();
         Long studentId = student.getId();
 
         accountDeletionService.deleteStudentAsAdmin(studentId, admin.getEmail(), PASSWORD);
@@ -251,8 +279,7 @@ class AccountDeletionServiceTest {
         entityManager.clear();
 
         assertThatThrownBy(() -> accountDeletionService.deleteStudentAsAdmin(studentId, admin.getEmail(), "wrong"))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Incorrect password.");
+            .isInstanceOf(WrongPasswordException.class);
 
         entityManager.clear();
         assertThat(userRepository.findById(studentId)).isPresent();
@@ -268,7 +295,7 @@ class AccountDeletionServiceTest {
         entityManager.clear();
 
         assertThatThrownBy(() -> accountDeletionService.deleteStudentAsAdmin(student.getId(), admin.getEmail(), " "))
-            .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(WrongPasswordException.class);
 
         assertThat(userRepository.findById(student.getId())).isPresent();
     }
@@ -282,8 +309,7 @@ class AccountDeletionServiceTest {
         entityManager.clear();
 
         assertThatThrownBy(() -> accountDeletionService.deleteStudentAsAdmin(student.getId(), admin.getEmail(), PASSWORD))
-            .isInstanceOf(ConflictException.class)
-            .hasMessage("Password confirmation is unavailable for this account.");
+            .isInstanceOf(WrongPasswordException.class);
 
         assertThat(userRepository.findById(student.getId())).isPresent();
     }
@@ -297,7 +323,7 @@ class AccountDeletionServiceTest {
         entityManager.clear();
 
         assertThatThrownBy(() -> accountDeletionService.deleteStudentAsAdmin(student.getId(), admin.getEmail(), "participant-password"))
-            .isInstanceOf(IllegalArgumentException.class);
+            .isInstanceOf(WrongPasswordException.class);
 
         assertThat(userRepository.findById(student.getId())).isPresent();
     }

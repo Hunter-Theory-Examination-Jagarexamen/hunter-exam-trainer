@@ -271,7 +271,9 @@
     "UNKNOWN_ERROR": "An unexpected error occurred.",
     "MISSING_FIELDS": "Please fill in all fields.",
     "PASSWORD_MISMATCH": "Passwords do not match.",
-    "TERMS_REQUIRED": "Please accept the Terms of Use and Privacy Policy."
+    "TERMS_REQUIRED": "Please accept the Terms of Use and Privacy Policy.",
+    "WRONG_PASSWORD": "Wrong password. Please try again.",
+    "LAST_ADMIN": "You are the last admin and cannot delete your account."
   },
   "serverStatus": {
     "starting": "The server is starting. This can take up to a minute…",
