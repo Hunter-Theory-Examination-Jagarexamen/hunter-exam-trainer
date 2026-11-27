@@ -37,6 +37,7 @@
     padding: 0;
     overflow: hidden;
     border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-card);
 }
 
 
@@ -46,10 +47,11 @@
     grid-template-columns: 2fr 1fr 1fr;
     align-items: center;
     padding: 16px 20px;
-    background: var(--color-surface);
+    background: var(--color-lacquer-dark);         /* header row a shade darker */
     border-bottom: 1px solid var(--color-border);
-    font-size: 14px;
+    font-size: 0.95rem;
     font-weight: 600;
+    color: var(--color-label);
 }
 
 
@@ -60,7 +62,7 @@
     align-items: center;
     padding: 16px 20px;
     border-bottom: 1px solid var(--color-border);
-    font-size: 14px;
+    font-size: 1rem;
 }
 
 /* Remove border from the last row */
@@ -70,7 +72,7 @@
 
 /* Small hover effect */
 .recent-activity-row:hover {
-    background: var(--color-surface);
+    background: color-mix(in srgb, var(--color-accent) 8%, var(--color-surface));
 }
 
 
@@ -113,7 +115,7 @@
         grid-template-columns: 1fr 1fr;
         gap: 8px;
         padding: 14px 16px;
-        font-size: 14px;
+        font-size: 1rem;
     }
 
     .recent-activity-row span:first-child {
