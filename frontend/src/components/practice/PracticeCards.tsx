@@ -12,9 +12,9 @@ const PracticeCards = () => {
         <section className="practice-cards">
 
             {practiceCards.map((card) => (
-                <div className="practice-card" key={card.title}>
+                <div className={`practice-card practice-card--${card.mode}`} key={card.title}>
 
-                    <div className={`icon-circle icon-circle--${card.iconVariant}`}>
+                    <div className="icon-circle">
                         <card.icon size={28} />
                     </div>
 

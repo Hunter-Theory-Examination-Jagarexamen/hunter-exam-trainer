@@ -3,6 +3,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 // Tin-box fonts, bundled with the app (no Google requests)
 import '@fontsource/cinzel/600.css';
+import '@fontsource/cinzel/800.css';
 import '@fontsource/eb-garamond/400.css';
 import '@fontsource/eb-garamond/400-italic.css';
 import '@fontsource/eb-garamond/600.css';

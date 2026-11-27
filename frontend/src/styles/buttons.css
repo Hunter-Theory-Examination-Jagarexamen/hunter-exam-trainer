@@ -18,7 +18,7 @@
     border-radius: 8px;
     font-family: var(--font-heading);    /* Cinzel: capitals by design, like the mockup */
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 800;                    /* thick strokes read better on brass */
     letter-spacing: 0.08em;
     text-decoration: none;
     cursor: pointer;
@@ -30,8 +30,14 @@
     outline-offset: 2px;
 }
 
-.btn:disabled {
-    opacity: 0.5;
+/* Disabled: flat and quiet instead of see-through, so the text stays readable */
+.btn:disabled,
+.btn-primary:disabled {
+    background: transparent;
+    border-color: color-mix(in srgb, var(--color-border) 60%, transparent);
+    box-shadow: none;
+    text-shadow: none;
+    color: var(--color-text-muted);
     cursor: not-allowed;
 }
 
@@ -46,7 +52,7 @@
     background-image: var(--gradient-brass-button);
     border-color: var(--color-brass-dark);
     color: var(--color-on-accent);
-    letter-spacing: 0.19em;             /* 3px at 16px, as in the mockup */
+    letter-spacing: 0.14em;
     box-shadow: var(--shadow-brass);
     text-shadow: var(--text-shadow-engraved);
 }

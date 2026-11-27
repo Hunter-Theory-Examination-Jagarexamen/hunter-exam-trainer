@@ -17,9 +17,9 @@
     --gradient-brass: linear-gradient(180deg, #7a5a1e 0%, #e8c773 22%, #a9813a 45%,
                                               #f3dc95 62%, #b08a3e 82%, #6e501a 100%);
     /* Button brass (mockup source): bright top, dark band below the middle, lighter bottom.
-       The dark band is #ac853a instead of the mockup's #a9813a so the dark green
-       text reaches 4.7:1 (the mockup value gives 4.48:1, just under 4.5). */
-    --gradient-brass-button: linear-gradient(180deg, #f3dc95 0%, #d1aa55 45%, #ac853a 55%, #c9a24a 100%);
+       The dark band is lighter than the mockup's #a9813a so the button text
+       stays at 6:1 or more on all of it. */
+    --gradient-brass-button: linear-gradient(180deg, #f3dc95 0%, #d1aa55 45%, #b8913f 55%, #c9a24a 100%);
 
     /* ---- Roles: what page CSS uses ---- */
     --color-background: var(--color-lacquer-mid);
@@ -34,7 +34,7 @@
     --color-accent: var(--color-brass-light);        /* links, outlines, active items */
     --color-link: #e2c27a;
     --color-link-hover: #f3dc95;
-    --color-on-accent: #10261a;                      /* text on brass */
+    --color-on-accent: #0b1a12;                      /* text on brass */                      /* text on brass */
 
     --color-field-bg: #07140d;
     --color-field-border: var(--color-brass-mid);
@@ -59,10 +59,17 @@
     --color-section-admin: #34404a;     /* slate */
     --color-page-accent: var(--color-surface);   /* default when a page sets none */
 
+    /* Practice modes (the cards on the Quiz page). Mock exam uses its section colour. */
+    --color-mode-subject: var(--color-section-quiz);
+    --color-mode-random: #6b2e14;       /* rust */
+    --color-mode-exam: var(--color-section-exam);
+
     /* Raised brass button: drop shadow below, bright line along the top edge */
     --shadow-brass: 0 3px 8px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 250, 225, 0.7);
     /* Engraved text: a thin light line under the letters */
-    --text-shadow-engraved: 0 1px 0 rgba(255, 240, 200, 0.6);
+    --text-shadow-engraved: 0 1px 0 rgba(255, 240, 200, 0.3);
+    /* Cards lifted off the lacquer */
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.35);
     /* Text field sunk into the lid: dark inner shadow, faint brass line below */
     --shadow-field: inset 0 2px 6px rgba(0, 0, 0, 0.7), 0 1px 0 rgba(243, 220, 149, 0.18);
 
