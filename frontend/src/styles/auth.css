@@ -299,8 +299,9 @@
 
     border-radius: 8px;
 
-    background-color: var(--color-danger);
-    color: var(--color-on-danger);
+    background-color: var(--color-danger-bg);
+    border: 1px solid var(--color-danger);
+    color: var(--color-text);
 
     font-size: 0.9rem;
     font-weight: 600;

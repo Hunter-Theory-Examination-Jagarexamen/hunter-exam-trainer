@@ -180,6 +180,7 @@ Practice Subject-Wise Questions
 
 .practice-question-card {
     background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 12px;
     padding: 1rem;
     box-shadow: var(--shadow-card);
@@ -220,21 +221,22 @@ Practice Subject-Wise Questions
     border-color: var(--color-accent);
 }
 
-/* Answer states: a faint tint of the state colour, the edge in full colour.
-   The cream text stays readable on all of them. */
+/* Answer states. Selected: a faint brass tint. Right and wrong: a solid
+   green or wine background (not a tint, so it looks the same on every card
+   colour), a light edge and a thick bar on the left. */
 .practice-answer.selected {
     background-color: color-mix(in srgb, var(--color-accent) 14%, transparent);
     border-color: var(--color-accent);
 }
 
 .practice-answer.correct {
-    background-color: color-mix(in srgb, var(--color-success) 28%, transparent);
+    background-color: var(--color-success-bg);
     border-color: var(--color-success);
     box-shadow: inset 6px 0 0 var(--color-success);   /* thick bar on the left */
 }
 
 .practice-answer.incorrect {
-    background-color: color-mix(in srgb, var(--color-danger) 28%, transparent);
+    background-color: var(--color-danger-bg);
     border-color: var(--color-danger);
     box-shadow: inset 6px 0 0 var(--color-danger);
 }
@@ -251,15 +253,19 @@ Practice Subject-Wise Questions
 
 .practice-bottom-bar {
     position: sticky;
-    bottom: 0;
+    bottom: 0.5rem;   /* a small gap below the card */
     margin-top: auto;
     z-index: 10;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    background-color: var(--color-background);
-    border-top: 1px solid var(--color-border);
-    padding: 0.75rem 0;
+    /* A card of its own, in the page's card colour, pinned to the bottom of
+       the screen. It covers question text scrolling under the buttons. */
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-card);
+    padding: 0.75rem 1rem;
 }
 
 .practice-quit-row {

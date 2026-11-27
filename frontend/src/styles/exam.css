@@ -4,7 +4,6 @@
     gap: 1.5rem;
     max-width: 900px;
     margin: 0 auto;
-    --color-page-accent: var(--color-section-exam);
 }
 
 
@@ -16,7 +15,6 @@
     background: var(--color-surface);
     padding: 1.5rem;
     border: 1px solid var(--color-border);
-    border-top: 4px solid var(--color-page-accent);   /* the Övningsprov colour */
     border-radius: 12px;
     box-shadow: var(--shadow-card);
 }
@@ -200,12 +198,16 @@
    screen. The background hides the question scrolling under it. */
 .exam-bottom-bar {
     position: sticky;
-    bottom: 0;
+    bottom: 0.5rem;   /* a small gap below the card */
     margin-top: auto;
     z-index: 10;
-    background-color: var(--color-background);
-    border-top: 1px solid var(--color-border);
-    padding: 0.75rem 0;
+    /* A card of its own, in the page's card colour, pinned to the bottom of
+       the screen. It covers question text scrolling under the buttons. */
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-card);
+    padding: 0.75rem 1rem;
 }
 
 .exam-overview-sidebar {
@@ -385,6 +387,8 @@
 }
 
 .exam-leave-dialog {
+    /* Same green on every page: pin the surface instead of taking the section colour */
+    --color-surface: var(--color-dialog-surface);
     background: var(--color-surface);
     border-radius: 12px;
     padding: 1.5rem;

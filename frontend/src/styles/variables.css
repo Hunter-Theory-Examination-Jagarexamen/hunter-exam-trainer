@@ -44,6 +44,11 @@
     --color-warning: #f0b860;
     --color-danger: #f4978b;
     --color-on-danger: #2a0a0a;                      /* text on a danger button */
+    /* Solid backgrounds for states, the same on every card colour.
+       Cream text on them: wine 10:1, green 5.1:1. The light colours above
+       are for text, edges and the bar on the left. */
+    --color-danger-bg: #5e1a1a;                      /* wine: wrong answers, errors, danger zone */
+    --color-success-bg: #1e6b3a;                     /* green: right answers */
 
     /* Light "paper" surface for dense pages (admin tables, statistics charts) */
     --color-paper: #f4ecd8;
@@ -72,6 +77,7 @@
     --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.35);
     /* Pop-ups: the dimmed screen behind, and the shadow under the pop-up */
     --color-backdrop: rgba(0, 0, 0, 0.55);
+    --color-dialog-surface: var(--color-lacquer-light);   /* pop-ups look the same on every page */
     --shadow-dialog: 0 6px 20px rgba(0, 0, 0, 0.5);
     /* Text field sunk into the lid: dark inner shadow, faint brass line below */
     --shadow-field: inset 0 2px 6px rgba(0, 0, 0, 0.7), 0 1px 0 rgba(243, 220, 149, 0.18);

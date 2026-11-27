@@ -10,6 +10,22 @@
     flex: 1;
 }
 
+/* Section colours: the page background stays green, the cards take the
+   colour of the section the page belongs to (data-section is set in Layout.tsx
+   from components/layout/pageSections.ts). */
+.main-content[data-section="quiz"]    { --color-page-accent: var(--color-section-quiz); }
+.main-content[data-section="random"]  { --color-page-accent: var(--color-mode-random); }
+.main-content[data-section="exam"]    { --color-page-accent: var(--color-section-exam); }
+.main-content[data-section="results"] { --color-page-accent: var(--color-section-results); }
+.main-content[data-section="profile"] { --color-page-accent: var(--color-section-profile); }
+.main-content[data-section="admin"]   { --color-page-accent: var(--color-section-admin); }
+
+/* Everything that uses --color-surface inside the page (cards, answer
+   options, dialogs) now gets the section colour, slightly lightened. */
+.main-content[data-section] {
+    --color-surface: color-mix(in srgb, var(--color-page-accent) 85%, var(--color-lacquer-light));
+}
+
 .main-content {
     flex: 1;
     padding: 2rem;

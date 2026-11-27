@@ -1,8 +1,8 @@
-/* Terms of Use / Privacy Policy pop-up (#212). Same look as the feedback dialog. */
+/* Terms of Use / Privacy Policy pop-up. Same look as the feedback dialog. */
 .legal-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--color-backdrop);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -11,6 +11,8 @@
 }
 
 .legal-dialog {
+    /* Same green on every page: pin the surface instead of taking the section colour */
+    --color-surface: var(--color-dialog-surface);
     background: var(--color-surface);
     color: var(--color-text);
     border-radius: 12px;
@@ -21,7 +23,8 @@
     overflow-y: auto;
     line-height: 1.6;
     text-align: left;   /* don't inherit centring from .legal-links */
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-dialog);
 }
 
 .legal-dialog h2 {
@@ -52,7 +55,7 @@
 .legal-links {
     text-align: center;
     font-size: 0.85rem;
-    color: var(--color-text-muted, var(--color-text));
+    color: var(--color-text-muted);
 }
 
 .legal-link {
@@ -60,7 +63,7 @@
     border: none;
     padding: 0;
     font: inherit;
-    color: var(--color-primary);
+    color: var(--color-link);
     cursor: pointer;
 }
 
