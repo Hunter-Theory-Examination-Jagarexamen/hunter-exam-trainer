@@ -116,6 +116,7 @@ Result sharing
 
 /* Delete account: wine background with a light red edge, like other errors */
 .danger-zone {
+    max-width: 48rem;      /* same readable width as the other cards */
     margin-top: 3rem;
     padding: 1.5rem;
     border: 1px solid var(--color-danger);

@@ -35,7 +35,7 @@ const RecentActivityList = () => {
     }
 
     if (error) {
-        return <p>{error}</p>;
+        return <p role="alert">{error}</p>;
     }
 
     if (activities.length === 0) {
