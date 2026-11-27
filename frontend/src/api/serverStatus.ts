@@ -2,8 +2,10 @@
 // after every request; ServerStatusBanner shows it. A tiny "store": a value
 // plus a list of listeners to call when it changes (used with useSyncExternalStore).
 
-// "starting": a request has waited a few seconds without an answer, so the
-// backend is probably waking up (Render puts it to sleep when unused).
+// "starting": the backend is probably waking up (Render puts it to sleep when
+// unused). Set when a request has waited a few seconds without an answer,
+// when a request failed, or when the host answered 502/503/504.
+// ServerStatusBanner turns it red ("unreachable") after about 90 s.
 export type ServerStatus = "ok" | "starting" | "unreachable";
 
 let status: ServerStatus = "ok";
@@ -17,6 +19,12 @@ export function setServerStatus(next: ServerStatus): void {
     if (next === status) return;
     status = next;
     listeners.forEach(listener => listener());
+}
+
+// Like setServerStatus("starting"), but never takes red back to orange (#254).
+export function markServerStarting(): void {
+    if (status === "unreachable") return;
+    setServerStatus("starting");
 }
 
 // Returns a function that removes the listener again.
