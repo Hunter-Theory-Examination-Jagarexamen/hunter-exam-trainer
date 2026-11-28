@@ -29,7 +29,7 @@ const Statistics = () => {
     const [progressOverTime, setProgressOverTime] = useState<ProgressPoint[]>([]);
     const [isLoadingProgressOverTime, setIsLoadingProgressOverTime] = useState(true);
     const [progressOverTimeError, setProgressOverTimeError] = useState("");
-    const [weeksRange, setWeeksRange] = useState(8);
+    const [weeksRange, setWeeksRange] = useState(4);
 
     useEffect(() => {
         const fetchRecentResults = async () => {
