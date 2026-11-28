@@ -23,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,9 +33,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Question mastery as a whole (#193), against the real database: the latest
  * answer per question decides, the same numbers come out of the student's
- * Statistics and the admin's Learner Progress, and the progress series
- * follows the latest answer over time (right → wrong → right dips and rises
- * again instead of only going up).
+ * Statistics and the admin's Learner Progress, the progress series follows
+ * the latest answer over time (right → wrong → right dips and rises again
+ * instead of only going up), and long ranges get one point per week. The
+ * calculations themselves are unit-tested in {@link StatisticsServiceTests}.
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -135,7 +137,7 @@ class QuestionMasteryStatisticsTests {
     }
 
     @Test
-    void latestAnswerPerQuestionDecidesAndBothViewsShowTheSameNumbers() {
+    void latestAnswerPerQuestionDecides() {
         // Arrange: first is right, then wrong, then right again; second right
         // twice (a repeat never counts twice); third wrong; fourth untouched.
         answer(first, true, rightDay);
@@ -146,17 +148,28 @@ class QuestionMasteryStatisticsTests {
         answer(first, true, rightAgainDay);
 
         // Act
+        SubjectPerformanceResponse row = studentRow();
+
+        // Assert: 2 of the subject's 4 questions mastered (first and second),
+        // 3 questions answered (6 answers), 50 %.
+        assertThat(row.getMastered()).isEqualTo(2);
+        assertThat(row.getTotal()).isEqualTo(4);
+        assertThat(row.getAnswered()).isEqualTo(3);   // distinct questions, not answers
+        assertThat(row.getPercentage()).isEqualTo(50);
+    }
+
+    @Test
+    void studentAndCourseLeaderSeeTheSameNumbers() {
+        // Arrange: one question mastered, one answered wrong
+        answer(first, true, rightDay);
+        answer(second, false, rightDay);
+
+        // Act
         SubjectPerformanceResponse student = studentRow();
         SubjectPerformanceResponse admin = adminRow();
 
-        // Assert: 2 of the subject's 4 questions mastered (first and second),
-        // 3 questions answered (6 answers), 50 % — identical for student and course leader.
-        assertThat(student.getMastered()).isEqualTo(2);
-        assertThat(student.getTotal()).isEqualTo(4);
-        assertThat(student.getAnswered()).isEqualTo(3);   // distinct questions, not answers
-        assertThat(student.getPercentage()).isEqualTo(50);
-
-        assertThat(admin.getMastered()).isEqualTo(student.getMastered());
+        // Assert: Statistics and Learner Progress share one calculation
+        assertThat(admin.getMastered()).isEqualTo(student.getMastered()).isEqualTo(1);
         assertThat(admin.getTotal()).isEqualTo(student.getTotal());
         assertThat(admin.getAnswered()).isEqualTo(student.getAnswered());
         assertThat(admin.getPercentage()).isEqualTo(student.getPercentage());
@@ -201,7 +214,24 @@ class QuestionMasteryStatisticsTests {
     }
 
     @Test
-    void studentAndSubjectWithNoAnswersShowZeroMastery() {
+    void twelveWeeksGiveOnePointPerWeekEndingToday() {
+        // Arrange
+        answer(first, true, rightDay);
+
+        // Act
+        List<ProgressOverTimeResponse> points = statisticsService.getProgressOverTime(EMAIL, 12);
+
+        // Assert: 12 calendar weeks, the current one included; every whole
+        // week ends on its Sunday, the current week on today.
+        assertThat(points).hasSize(12);
+        assertThat(points.subList(0, 11))
+                .allMatch(point -> point.date().getDayOfWeek() == DayOfWeek.SUNDAY);
+        assertThat(points.getLast().date()).isEqualTo(LocalDate.now());
+        assertThat(points.getLast().mastered()).isEqualTo(1);
+    }
+
+    @Test
+    void noAnswersShowZeroMastery() {
         SubjectPerformanceResponse student = studentRow();
         SubjectPerformanceResponse admin = adminRow();
 
@@ -212,6 +242,10 @@ class QuestionMasteryStatisticsTests {
         assertThat(admin.getMastered()).isZero();
         assertThat(admin.getTotal()).isEqualTo(4);
         assertThat(admin.getPercentage()).isZero();
+    }
+
+    @Test
+    void noAnswersGiveAnEmptyChart() {
         assertThat(statisticsService.getProgressOverTime(EMAIL, 4)).isEmpty();
     }
 }
