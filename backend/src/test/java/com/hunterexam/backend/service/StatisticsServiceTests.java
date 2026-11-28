@@ -2,7 +2,6 @@ package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.ProgressOverTimeResponse;
 import com.hunterexam.backend.dto.SubjectPerformanceResponse;
-import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.repository.AttemptQuestionRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
@@ -53,13 +52,6 @@ class StatisticsServiceTests {
         user.setEmail(EMAIL);
     }
 
-    private Subject subject(long id, String name) {
-        Subject subject = new Subject();
-        subject.setId(id);
-        subject.setName(name);
-        return subject;
-    }
-
     /** One counted answer: question {@code questionId} in subject {@code subjectId}. */
     private CountedAnswer answer(long questionId, long subjectId, LocalDateTime at, boolean correct) {
         return new CountedAnswer(questionId, subjectId, at, correct);
@@ -73,13 +65,10 @@ class StatisticsServiceTests {
         // 11 and 13, wrong for 12 (its earlier right answer was un-mastered)
         // and 14 — 2 of 4 mastered out of 5 counted answers. Wildlife has 5
         // questions and is untouched. The subject order is the bank's.
-        Subject weapons = subject(1, "Weapons");
-        Subject wildlife = subject(2, "Wildlife");
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(subjectRepository.findAllByOrderById()).thenReturn(List.of(weapons, wildlife));
-        when(questionRepository.countGroupedBySubject()).thenReturn(List.of(
-                new SubjectQuestionCount(1L, 4L),
-                new SubjectQuestionCount(2L, 5L)));
+        when(subjectRepository.findQuestionCounts()).thenReturn(List.of(
+                new SubjectQuestionCount(1L, "Weapons", 4L),
+                new SubjectQuestionCount(2L, "Wildlife", 5L)));
         when(attemptQuestionRepository.findCountedAnswers(user)).thenReturn(List.of(
                 answer(11, 1, LocalDateTime.now().minusDays(2), true),
                 answer(12, 1, LocalDateTime.now().minusDays(2), true),
@@ -114,9 +103,8 @@ class StatisticsServiceTests {
         // Arrange: 2 of 3 questions mastered, even though question 1 was
         // answered correctly three times — repeats never count twice
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(subjectRepository.findAllByOrderById()).thenReturn(List.of(subject(1, "Weapons")));
-        when(questionRepository.countGroupedBySubject()).thenReturn(List.of(
-                new SubjectQuestionCount(1L, 3L)));
+        when(subjectRepository.findQuestionCounts()).thenReturn(List.of(
+                new SubjectQuestionCount(1L, "Weapons", 3L)));
         when(attemptQuestionRepository.findCountedAnswers(user)).thenReturn(List.of(
                 answer(11, 1, LocalDateTime.now().minusDays(1), true),
                 answer(11, 1, LocalDateTime.now().minusHours(3), true),
@@ -135,8 +123,8 @@ class StatisticsServiceTests {
     void subjectWithoutQuestionsHasNoPercentage() {
         // Arrange: an empty subject still shows as a row, with nothing to master
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(subjectRepository.findAllByOrderById()).thenReturn(List.of(subject(1, "Weapons")));
-        when(questionRepository.countGroupedBySubject()).thenReturn(List.of());
+        when(subjectRepository.findQuestionCounts()).thenReturn(List.of(
+                new SubjectQuestionCount(1L, "Weapons", 0L)));
 
         // Act + Assert
         SubjectPerformanceResponse row =
@@ -149,9 +137,8 @@ class StatisticsServiceTests {
     void newUserWithNoAnswersGetsZeroMasteryRowsNotAnEmptyList() {
         // Arrange: a brand-new student in a bank that has subjects
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(subjectRepository.findAllByOrderById()).thenReturn(List.of(subject(1, "Weapons")));
-        when(questionRepository.countGroupedBySubject()).thenReturn(List.of(
-                new SubjectQuestionCount(1L, 4L)));
+        when(subjectRepository.findQuestionCounts()).thenReturn(List.of(
+                new SubjectQuestionCount(1L, "Weapons", 4L)));
         when(attemptQuestionRepository.findCountedAnswers(user)).thenReturn(List.of());
 
         // Act

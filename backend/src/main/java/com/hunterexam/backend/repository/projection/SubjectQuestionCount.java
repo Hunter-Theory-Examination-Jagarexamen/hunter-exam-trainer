@@ -1,12 +1,14 @@
 package com.hunterexam.backend.repository.projection;
 
 /**
- * How many questions a subject's part of the question bank holds.
+ * A subject and how many questions it holds in the question bank.
  * <p>
- * The denominator of the per-subject mastery percentage: the questions that
- * exist now, whether or not the student has answered them.
+ * The question count is the denominator of the per-subject mastery
+ * percentage: the questions that exist now, whether or not the student has
+ * answered them.
  *
- * @param subjectId the subject
- * @param total     questions in the subject right now (0 for an empty subject)
+ * @param subjectId     the subject
+ * @param subjectName   its name
+ * @param questionCount questions in the subject right now (0 for an empty subject)
  */
-public record SubjectQuestionCount(Long subjectId, Long total) {}
+public record SubjectQuestionCount(Long subjectId, String subjectName, Long questionCount) {}

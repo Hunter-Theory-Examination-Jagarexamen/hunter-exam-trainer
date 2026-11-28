@@ -2,7 +2,6 @@ package com.hunterexam.backend.service;
 
 import com.hunterexam.backend.dto.ProgressOverTimeResponse;
 import com.hunterexam.backend.dto.SubjectPerformanceResponse;
-import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.User;
 import com.hunterexam.backend.exception.NotFoundException;
 import com.hunterexam.backend.repository.AttemptQuestionRepository;
@@ -10,7 +9,6 @@ import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
 import com.hunterexam.backend.repository.UserRepository;
 import com.hunterexam.backend.repository.projection.CountedAnswer;
-import com.hunterexam.backend.repository.projection.SubjectQuestionCount;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -111,11 +109,6 @@ public class StatisticsService {
         List<CountedAnswer> answers = attemptQuestionRepository.findCountedAnswers(user);
         Map<Long, CountedAnswer> latest = latestAnswerPerQuestion(answers);
 
-        Map<Long, Long> totalBySubject = new HashMap<>();
-        for (SubjectQuestionCount count : questionRepository.countGroupedBySubject()) {
-            totalBySubject.put(count.subjectId(), count.total());
-        }
-
         // A mastered question is by definition an answered one, so its subject
         // comes from the answer itself; unanswered questions never contribute.
         Map<Long, Long> masteredBySubject = new HashMap<>();
@@ -130,15 +123,15 @@ public class StatisticsService {
             answeredBySubject.merge(answer.subjectId(), 1L, Long::sum);
         }
 
-        return subjectRepository.findAllByOrderById().stream()
+        return subjectRepository.findQuestionCounts().stream()
                 .map(subject -> {
-                    long total = totalBySubject.getOrDefault(subject.getId(), 0L);
-                    long mastered = masteredBySubject.getOrDefault(subject.getId(), 0L);
-                    long answered = answeredBySubject.getOrDefault(subject.getId(), 0L);
+                    long total = subject.questionCount();
+                    long mastered = masteredBySubject.getOrDefault(subject.subjectId(), 0L);
+                    long answered = answeredBySubject.getOrDefault(subject.subjectId(), 0L);
 
                     return new SubjectPerformanceResponse(
-                            subject.getId(),
-                            subject.getName(),
+                            subject.subjectId(),
+                            subject.subjectName(),
                             mastered,
                             total,
                             answered,
