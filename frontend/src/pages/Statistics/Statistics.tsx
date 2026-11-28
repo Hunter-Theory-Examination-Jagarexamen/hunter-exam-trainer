@@ -12,6 +12,7 @@ import apiClient from "../../api/apiClient.ts";
 import type { SubjectPerformance } from "../../types/subjectPerformance.ts";
 import ProgressOverTimeChart from "../../components/statistics/ProgressOverTimeChart";
 import type { ProgressPoint } from "../../types/progressOverTime.ts";
+import { summarizeSubjects } from "../../utils/subjectSummary.ts";
 
 const Statistics = () => {
     const { t } = useTranslation();
@@ -97,23 +98,7 @@ const Statistics = () => {
         void fetchProgressOverTime();
     }, [weeksRange, t]);
 
-    const strongestSubject =
-        subjectPerformance.length > 0
-            ? subjectPerformance.reduce((strongest, current) =>
-                current.percentage > strongest.percentage
-                    ? current
-                    : strongest
-            )
-            : null;
-
-    const needsImprovement =
-        subjectPerformance.length > 0
-            ? subjectPerformance.reduce((lowest, current) =>
-                current.percentage < lowest.percentage
-                    ? current
-                    : lowest
-            )
-            : null;
+    const summary = summarizeSubjects(subjectPerformance);
 
     return (
         <div className="statistics">
@@ -221,12 +206,12 @@ const Statistics = () => {
                 <h2>{t("statistics.performanceSummaryTitle")}</h2>
 
                 <div className="statistics-card">
-                    {subjectPerformance.length === 0 ? (
+                    {summary === null ? (
                         <p>{t("statistics.noSubjectPerformance")}</p>
                     ) : (
                         <PerformanceSummary
-                            strongestSubject={strongestSubject?.subjectName ?? ""}
-                            needsImprovement={needsImprovement?.subjectName ?? ""}
+                            strongestSubject={summary.strongest.subjectName}
+                            needsImprovement={summary.weakest?.subjectName}
                         />
                     )}
                 </div>

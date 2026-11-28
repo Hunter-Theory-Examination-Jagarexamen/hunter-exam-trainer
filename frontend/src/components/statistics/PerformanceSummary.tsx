@@ -4,7 +4,8 @@ import "../../styles/statistics.css";
 
 interface PerformanceSummaryProps {
     strongestSubject: string;
-    needsImprovement: string;
+    /** Left out when only one subject is started; the row is then hidden. */
+    needsImprovement?: string;
 }
 
 const PerformanceSummary = (
@@ -22,15 +23,17 @@ const PerformanceSummary = (
                     {strongestSubject}
                 </span>
             </div>
-            <div className="performance-result">
-                <BookOpenText size={16} className="performance-icon" />
-                <span className="subject-title">
-                    {t("statistics.needsImprovement")}
-                </span>
-                <span className="subject-name">
-                    {needsImprovement}
-                </span>
-            </div>
+            {needsImprovement && (
+                <div className="performance-result">
+                    <BookOpenText size={16} className="performance-icon" />
+                    <span className="subject-title">
+                        {t("statistics.needsImprovement")}
+                    </span>
+                    <span className="subject-name">
+                        {needsImprovement}
+                    </span>
+                </div>
+            )}
         </section>
     );
 };

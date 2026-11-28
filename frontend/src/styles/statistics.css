@@ -67,6 +67,15 @@
     font-weight: 600;
 }
 
+/* Subject name in capitals, like the headings (game-like look, easier to
+   scan): Statistics (.subject-header) and Learner Progress
+   (.subject-performance-header) */
+.subject-header span:first-child,
+.subject-performance-header span:first-child {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
 .progress-bar {
     width: 100%;
     height: 12px;
