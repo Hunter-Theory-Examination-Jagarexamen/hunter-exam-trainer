@@ -72,13 +72,13 @@ const LearnerProgressCard = ({ learner }: { learner: LearnerProgress }) => {
                         >
                             <div className="subject-performance-header">
                                 <span>{subject.subjectName}</span>
-                                <span>{subject.totalQuestions === 0 ? t("statistics.noQuestions") : `${subject.masteryPercentage}%`}</span>
+                                <span>{subject.total === 0 ? t("statistics.noQuestions") : `${subject.percentage}%`}</span>
                             </div>
-                            <p>{t("statistics.masteredCount", { mastered: subject.masteredQuestions, total: subject.totalQuestions })}</p>
+                            <p>{t("statistics.masteredCount", { mastered: subject.mastered, total: subject.total })}</p>
                             <div className="progress-bar-track">
                                 <div
                                     className="progress-bar-fill"
-                                    style={{ width: `${subject.masteryPercentage}%` }}
+                                    style={{ width: `${subject.percentage}%` }}
                                 />
                             </div>
                         </div>

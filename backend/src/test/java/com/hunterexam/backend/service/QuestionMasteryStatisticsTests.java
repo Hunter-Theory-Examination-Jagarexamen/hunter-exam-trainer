@@ -151,15 +151,15 @@ class QuestionMasteryStatisticsTests {
 
         // Assert: 2 of the subject's 4 questions mastered (first and second),
         // 3 questions answered (6 answers), 50 % — identical for student and course leader.
-        assertThat(student.getMasteredQuestions()).isEqualTo(2);
-        assertThat(student.getTotalQuestions()).isEqualTo(4);
-        assertThat(student.getAnsweredQuestions()).isEqualTo(3);   // distinct questions, not answers
-        assertThat(student.getMasteryPercentage()).isEqualTo(50);
+        assertThat(student.getMastered()).isEqualTo(2);
+        assertThat(student.getTotal()).isEqualTo(4);
+        assertThat(student.getAnswered()).isEqualTo(3);   // distinct questions, not answers
+        assertThat(student.getPercentage()).isEqualTo(50);
 
-        assertThat(admin.getMasteredQuestions()).isEqualTo(student.getMasteredQuestions());
-        assertThat(admin.getTotalQuestions()).isEqualTo(student.getTotalQuestions());
-        assertThat(admin.getAnsweredQuestions()).isEqualTo(student.getAnsweredQuestions());
-        assertThat(admin.getMasteryPercentage()).isEqualTo(student.getMasteryPercentage());
+        assertThat(admin.getMastered()).isEqualTo(student.getMastered());
+        assertThat(admin.getTotal()).isEqualTo(student.getTotal());
+        assertThat(admin.getAnswered()).isEqualTo(student.getAnswered());
+        assertThat(admin.getPercentage()).isEqualTo(student.getPercentage());
     }
 
     @Test
@@ -181,23 +181,23 @@ class QuestionMasteryStatisticsTests {
         // this subject), and days without answers hold the previous day's
         // value instead of disappearing.
         long bankSize = questions.count();
-        assertThat(pointOn(afterFirst, rightDay).masteredQuestions()).isEqualTo(1);
-        assertThat(pointOn(afterFirst, rightDay).masteryPercentage())
+        assertThat(pointOn(afterFirst, rightDay).mastered()).isEqualTo(1);
+        assertThat(pointOn(afterFirst, rightDay).percentage())
                 .isEqualTo(Math.round(100.0 / bankSize));
-        assertThat(pointOn(afterFirst, wrongDay).masteredQuestions())
-                .isEqualTo(pointOn(afterFirst, rightDay).masteredQuestions());
+        assertThat(pointOn(afterFirst, wrongDay).mastered())
+                .isEqualTo(pointOn(afterFirst, rightDay).mastered());
 
-        assertThat(pointOn(afterWrong, wrongDay).masteredQuestions()).isZero();
-        assertThat(pointOn(afterWrong, wrongDay).masteryPercentage()).isZero();
+        assertThat(pointOn(afterWrong, wrongDay).mastered()).isZero();
+        assertThat(pointOn(afterWrong, wrongDay).percentage()).isZero();
 
-        assertThat(pointOn(afterRightAgain, rightAgainDay).masteredQuestions()).isEqualTo(1);
-        assertThat(pointOn(afterRightAgain, rightAgainDay).masteryPercentage())
+        assertThat(pointOn(afterRightAgain, rightAgainDay).mastered()).isEqualTo(1);
+        assertThat(pointOn(afterRightAgain, rightAgainDay).percentage())
                 .isEqualTo(Math.round(100.0 / bankSize));
 
         // The bank's size is the denominator on every day of the series.
-        assertThat(afterRightAgain).allMatch(point -> point.totalQuestions() == bankSize);
+        assertThat(afterRightAgain).allMatch(point -> point.total() == bankSize);
         assertThat(afterRightAgain.getLast().date()).isEqualTo(LocalDate.now());
-        assertThat(afterRightAgain.getLast().masteredQuestions()).isEqualTo(1);
+        assertThat(afterRightAgain.getLast().mastered()).isEqualTo(1);
     }
 
     @Test
@@ -205,13 +205,13 @@ class QuestionMasteryStatisticsTests {
         SubjectPerformanceResponse student = studentRow();
         SubjectPerformanceResponse admin = adminRow();
 
-        assertThat(student.getMasteredQuestions()).isZero();
-        assertThat(student.getTotalQuestions()).isEqualTo(4);
-        assertThat(student.getAnsweredQuestions()).isZero();
-        assertThat(student.getMasteryPercentage()).isZero();
-        assertThat(admin.getMasteredQuestions()).isZero();
-        assertThat(admin.getTotalQuestions()).isEqualTo(4);
-        assertThat(admin.getMasteryPercentage()).isZero();
+        assertThat(student.getMastered()).isZero();
+        assertThat(student.getTotal()).isEqualTo(4);
+        assertThat(student.getAnswered()).isZero();
+        assertThat(student.getPercentage()).isZero();
+        assertThat(admin.getMastered()).isZero();
+        assertThat(admin.getTotal()).isEqualTo(4);
+        assertThat(admin.getPercentage()).isZero();
         assertThat(statisticsService.getProgressOverTime(EMAIL, 4)).isEmpty();
     }
 }

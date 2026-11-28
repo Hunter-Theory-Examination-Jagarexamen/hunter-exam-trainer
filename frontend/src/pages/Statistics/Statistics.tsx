@@ -100,7 +100,7 @@ const Statistics = () => {
     const strongestSubject =
         subjectPerformance.length > 0
             ? subjectPerformance.reduce((strongest, current) =>
-                current.masteryPercentage > strongest.masteryPercentage
+                current.percentage > strongest.percentage
                     ? current
                     : strongest
             )
@@ -109,7 +109,7 @@ const Statistics = () => {
     const needsImprovement =
         subjectPerformance.length > 0
             ? subjectPerformance.reduce((lowest, current) =>
-                current.masteryPercentage < lowest.masteryPercentage
+                current.percentage < lowest.percentage
                     ? current
                     : lowest
             )
@@ -176,9 +176,9 @@ const Statistics = () => {
                                 <ProgressBar
                                     key={subject.subjectId}
                                     subject={subject.subjectName}
-                                    masteredQuestions={subject.masteredQuestions}
-                                    totalQuestions={subject.totalQuestions}
-                                    percentage={subject.masteryPercentage}
+                                    mastered={subject.mastered}
+                                    total={subject.total}
+                                    percentage={subject.percentage}
                                     onClick={() =>
                                         navigate(`/practice/subjects/${subject.subjectId}`)
                                     }

@@ -86,16 +86,16 @@ class StatisticsServiceTests {
         SubjectPerformanceResponse weaponsRow = rows.get(0);
         assertEquals(1L, weaponsRow.getSubjectId());
         assertEquals("Weapons", weaponsRow.getSubjectName());
-        assertEquals(2, weaponsRow.getMasteredQuestions());
-        assertEquals(4, weaponsRow.getTotalQuestions());
-        assertEquals(4, weaponsRow.getAnsweredQuestions());   // distinct questions, not answers
-        assertEquals(50, weaponsRow.getMasteryPercentage());
+        assertEquals(2, weaponsRow.getMastered());
+        assertEquals(4, weaponsRow.getTotal());
+        assertEquals(4, weaponsRow.getAnswered());   // distinct questions, not answers
+        assertEquals(50, weaponsRow.getPercentage());
 
         SubjectPerformanceResponse wildlifeRow = rows.get(1);
-        assertEquals(5, wildlifeRow.getTotalQuestions());
-        assertEquals(0, wildlifeRow.getMasteredQuestions());
-        assertEquals(0, wildlifeRow.getAnsweredQuestions());
-        assertEquals(0, wildlifeRow.getMasteryPercentage());
+        assertEquals(5, wildlifeRow.getTotal());
+        assertEquals(0, wildlifeRow.getMastered());
+        assertEquals(0, wildlifeRow.getAnswered());
+        assertEquals(0, wildlifeRow.getPercentage());
     }
 
     @Test
@@ -114,9 +114,9 @@ class StatisticsServiceTests {
         // Act + Assert: 2 of 3 = 66.67 %, rounds up to 67
         SubjectPerformanceResponse row =
                 statisticsService.getSubjectPerformance(EMAIL).getFirst();
-        assertEquals(2, row.getMasteredQuestions());
-        assertEquals(3, row.getTotalQuestions());
-        assertEquals(67, row.getMasteryPercentage());
+        assertEquals(2, row.getMastered());
+        assertEquals(3, row.getTotal());
+        assertEquals(67, row.getPercentage());
     }
 
     @Test
@@ -129,8 +129,8 @@ class StatisticsServiceTests {
         // Act + Assert
         SubjectPerformanceResponse row =
                 statisticsService.getSubjectPerformance(EMAIL).getFirst();
-        assertEquals(0, row.getTotalQuestions());
-        assertEquals(0, row.getMasteryPercentage());
+        assertEquals(0, row.getTotal());
+        assertEquals(0, row.getPercentage());
     }
 
     @Test
@@ -148,10 +148,10 @@ class StatisticsServiceTests {
         // show "no answers yet" instead of hiding the subject
         assertNotNull(rows, "must be a list, not null");
         assertEquals(1, rows.size());
-        assertEquals(0, rows.getFirst().getMasteredQuestions());
-        assertEquals(4, rows.getFirst().getTotalQuestions());
-        assertEquals(0, rows.getFirst().getAnsweredQuestions());
-        assertEquals(0, rows.getFirst().getMasteryPercentage());
+        assertEquals(0, rows.getFirst().getMastered());
+        assertEquals(4, rows.getFirst().getTotal());
+        assertEquals(0, rows.getFirst().getAnswered());
+        assertEquals(0, rows.getFirst().getPercentage());
     }
 
     // ----- Progress over time -----
@@ -175,25 +175,25 @@ class StatisticsServiceTests {
         // Act
         List<ProgressOverTimeResponse> points = statisticsService.getProgressOverTime(EMAIL, 2);
 
-        // Assert: one point per calendar day from the Monday of that week to
-        // today, oldest first; days without answers repeat the previous day's
-        // state
-        LocalDate from = THIS_MONDAY.minusWeeks(2);
+        // Assert: one point per calendar day from the Monday of last week (2
+        // calendar weeks) to today, oldest first; days without answers repeat
+        // the previous day's state
+        LocalDate from = THIS_MONDAY.minusWeeks(1);
         LocalDate today = LocalDate.now();
         long expectedDays = from.datesUntil(today.plusDays(1)).count();
         assertEquals(expectedDays, points.size());
 
         ProgressOverTimeResponse first = points.getFirst();
         assertEquals(from, first.date());
-        assertEquals(50, first.masteryPercentage());      // 2 of 4 carried in
-        assertEquals(2, first.masteredQuestions());
-        assertEquals(4, first.totalQuestions());
-        assertEquals(50, points.get(1).masteryPercentage());  // still 2 of 4
+        assertEquals(50, first.percentage());      // 2 of 4 carried in
+        assertEquals(2, first.mastered());
+        assertEquals(4, first.total());
+        assertEquals(50, points.get(1).percentage());  // still 2 of 4
 
         ProgressOverTimeResponse last = points.getLast();
         assertEquals(today, last.date());
-        assertEquals(75, last.masteryPercentage());       // 3 of 4 after today's answer
-        assertEquals(3, last.masteredQuestions());
+        assertEquals(75, last.percentage());       // 3 of 4 after today's answer
+        assertEquals(3, last.mastered());
     }
 
     @Test
@@ -201,7 +201,7 @@ class StatisticsServiceTests {
         // Arrange: one question, mastered, then lost, then mastered again on
         // three different days inside the window — the series must dip, not
         // just rise
-        LocalDate from = THIS_MONDAY.minusWeeks(2);
+        LocalDate from = THIS_MONDAY.minusWeeks(1);
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
         when(questionRepository.count()).thenReturn(1L);
         when(attemptQuestionRepository.findCountedAnswers(user)).thenReturn(List.of(
@@ -213,10 +213,10 @@ class StatisticsServiceTests {
         List<ProgressOverTimeResponse> points = statisticsService.getProgressOverTime(EMAIL, 2);
 
         // Assert: 100 % → 0 % → 100 %, and days without answers hold the value
-        assertEquals(100, points.getFirst().masteryPercentage());
-        assertEquals(0, points.get(1).masteryPercentage());
-        assertEquals(100, points.get(2).masteryPercentage());
-        assertEquals(100, points.getLast().masteryPercentage());
+        assertEquals(100, points.getFirst().percentage());
+        assertEquals(0, points.get(1).percentage());
+        assertEquals(100, points.get(2).percentage());
+        assertEquals(100, points.getLast().percentage());
     }
 
     @Test

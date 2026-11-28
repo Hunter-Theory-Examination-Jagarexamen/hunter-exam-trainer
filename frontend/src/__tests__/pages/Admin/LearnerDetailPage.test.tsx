@@ -113,7 +113,7 @@ describe("LearnerDetailPage", () => {
         vi.mocked(apiClient).mockResolvedValue({
             ...baseLearner,
             lastActivityAt: "2026-10-16T10:00:00",
-            subjectPerformances: [{ subjectId: 3, subjectName: "Ekologi", masteredQuestions: 16, totalQuestions: 20, answeredQuestions: 20, masteryPercentage: 80 }],
+            subjectPerformances: [{ subjectId: 3, subjectName: "Ekologi", mastered: 16, total: 20, answered: 20, percentage: 80 }],
             mockExams: emptyMockExams,
         });
         renderPage();
@@ -126,7 +126,7 @@ describe("LearnerDetailPage", () => {
         vi.mocked(apiClient).mockResolvedValue({
             ...baseLearner,
             lastActivityAt: "2026-10-15T10:00:00",
-            subjectPerformances: [{ subjectId: 3, subjectName: "Ekologi", masteredQuestions: 14, totalQuestions: 20, answeredQuestions: 20, masteryPercentage: 70 }],
+            subjectPerformances: [{ subjectId: 3, subjectName: "Ekologi", mastered: 14, total: 20, answered: 20, percentage: 70 }],
             mockExams: { count: 1, latestScore: 89, latestAt: "2026-10-15T10:00:00", bestScore: 89, latestPassed: true },
         });
         renderPage();
@@ -188,7 +188,7 @@ describe("LearnerDetailPage", () => {
         vi.mocked(apiClient).mockResolvedValue({
             ...baseLearner,
             lastActivityAt: null,
-            subjectPerformances: [{ subjectId: 3, subjectName: "Ekologi", masteredQuestions: 16, totalQuestions: 20, answeredQuestions: 20, masteryPercentage: 80 }],
+            subjectPerformances: [{ subjectId: 3, subjectName: "Ekologi", mastered: 16, total: 20, answered: 20, percentage: 80 }],
             mockExams: null,
         });
         renderPage();

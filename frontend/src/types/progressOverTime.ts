@@ -1,6 +1,8 @@
 export interface ProgressPoint {
     date: string;
-    masteryPercentage: number;
-    masteredQuestions: number;
-    totalQuestions: number;
+    percentage: number;
+    mastered: number;
+    total: number;
+    /** The student answered a counted question that day (weekly point: that week). */
+    practised: boolean;
 }

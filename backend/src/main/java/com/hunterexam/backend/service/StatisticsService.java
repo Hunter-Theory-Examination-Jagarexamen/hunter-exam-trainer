@@ -168,8 +168,8 @@ public class StatisticsService {
      * per week (its last day).
      *
      * @param email user's email
-     * @param weeks number of weeks to look back (the window starts on the
-     *              Monday of that week)
+     * @param weeks number of calendar weeks (Monday–Sunday) to show, the
+     *              current week included
      * @return the points, oldest first; empty when the student has answered
      *         nothing or the bank is empty
      */
@@ -179,8 +179,9 @@ public class StatisticsService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         LocalDate today = LocalDate.now();
-        LocalDate from = today.minusWeeks(weeks)
-                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        // Exactly `weeks` calendar weeks, the current one included.
+        LocalDate from = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                .minusWeeks(weeks - 1);
 
         List<ProgressOverTimeResponse> days = masteryPerDay(
                 attemptQuestionRepository.findCountedAnswers(user),
@@ -267,9 +268,9 @@ public class StatisticsService {
             // A later day of the same week replaces the earlier one.
             byWeek.put(monday, new ProgressOverTimeResponse(
                     day.date(),
-                    day.masteryPercentage(),
-                    day.masteredQuestions(),
-                    day.totalQuestions(),
+                    day.percentage(),
+                    day.mastered(),
+                    day.total(),
                     practised));
         }
         return List.copyOf(byWeek.values());

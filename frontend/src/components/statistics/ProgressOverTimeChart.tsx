@@ -26,9 +26,9 @@ const ProgressOverTimeChart = ({ data }: Props) => {
             month: "short",
             day: "numeric",
         }),
-        masteryPercentage: point.masteryPercentage,
-        masteredQuestions: point.masteredQuestions,
-        totalQuestions: point.totalQuestions,
+        percentage: point.percentage,
+        mastered: point.mastered,
+        total: point.total,
     }));
 
     return (
@@ -39,9 +39,9 @@ const ProgressOverTimeChart = ({ data }: Props) => {
                 <YAxis domain={[0, 100]} unit="%" />
                 <Tooltip
                     formatter={(value, name) => {
-                        if (name === "masteryPercentage") return [`${value}%`, t("statistics.masteryLabel")];
-                        if (name === "masteredQuestions") return [
-                            t("statistics.masteredCount", { mastered: value, total: chartData[0]?.totalQuestions ?? 0 }),
+                        if (name === "percentage") return [`${value}%`, t("statistics.masteryLabel")];
+                        if (name === "mastered") return [
+                            t("statistics.masteredCount", { mastered: value, total: chartData[0]?.total ?? 0 }),
                             t("statistics.masteryLabel"),
                         ];
                         return [String(value), String(name)];
@@ -49,7 +49,7 @@ const ProgressOverTimeChart = ({ data }: Props) => {
                 />
                 <Line
                     type="monotone"
-                    dataKey="masteryPercentage"
+                    dataKey="percentage"
                     stroke="currentColor"
                     strokeWidth={2}
                     dot={{ r: 4 }}

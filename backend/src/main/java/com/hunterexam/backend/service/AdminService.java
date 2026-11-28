@@ -138,8 +138,8 @@ public class AdminService {
                 : subjectMastery.stream()
                         .sorted(Comparator
                                 .comparingLong((SubjectPerformanceResponse row) ->
-                                        row.getTotalQuestions() == 0 ? 1 : 0)
-                                .thenComparingLong(SubjectPerformanceResponse::getMasteryPercentage))
+                                        row.getTotal() == 0 ? 1 : 0)
+                                .thenComparingLong(SubjectPerformanceResponse::getPercentage))
                         .toList();
         MockExamSummary mockExams = shareMockExamResults
                 ? aggregateMockExams(examScores)

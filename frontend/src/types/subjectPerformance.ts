@@ -2,8 +2,8 @@ export interface SubjectPerformance {
 
     subjectId: number;
     subjectName: string;
-    masteredQuestions: number;
-    totalQuestions: number;
-    answeredQuestions: number;
-    masteryPercentage: number;
+    mastered: number;
+    total: number;
+    answered: number;
+    percentage: number;
 }

@@ -182,7 +182,7 @@ class StudentResultSharingIntegrationTests {
         mvc.perform(get("/api/admin/learners/" + student.getId()).with(adminAuth()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.subjectPerformances[?(@.subjectName == '"
-                        + SUBJECT_NAME + "')].masteryPercentage", contains(50)))
+                        + SUBJECT_NAME + "')].percentage", contains(50)))
                 .andExpect(jsonPath("$.mockExams").value(nullValue()));
     }
 
@@ -255,11 +255,11 @@ class StudentResultSharingIntegrationTests {
                 .andExpect(status().isOk())
                 // Every subject of the bank is listed; this one shows its mastery.
                 .andExpect(jsonPath("$.subjectPerformances[?(@.subjectName == '"
-                        + SUBJECT_NAME + "')].masteryPercentage", contains(50)))
+                        + SUBJECT_NAME + "')].percentage", contains(50)))
                 .andExpect(jsonPath("$.subjectPerformances[?(@.subjectName == '"
-                        + SUBJECT_NAME + "')].masteredQuestions", contains(1)))
+                        + SUBJECT_NAME + "')].mastered", contains(1)))
                 .andExpect(jsonPath("$.subjectPerformances[?(@.subjectName == '"
-                        + SUBJECT_NAME + "')].totalQuestions", contains(2)))
+                        + SUBJECT_NAME + "')].total", contains(2)))
                 .andExpect(jsonPath("$.mockExams.count").value(1))
                 .andExpect(jsonPath("$.mockExams.latestScore").value(50))
                 .andExpect(jsonPath("$.mockExams.bestScore").value(50))
@@ -276,7 +276,7 @@ class StudentResultSharingIntegrationTests {
                 "{\"shareSubjectStatistics\":true,\"shareMockExamResults\":false}");
         mvc.perform(get("/api/admin/learners/" + student.getId()).with(adminAuth()))
                 .andExpect(jsonPath("$.subjectPerformances[?(@.subjectName == '"
-                        + SUBJECT_NAME + "')].masteryPercentage", contains(50)))
+                        + SUBJECT_NAME + "')].percentage", contains(50)))
                 .andExpect(jsonPath("$.mockExams").value(nullValue()))
                 .andExpect(jsonPath("$.lastActivityAt").isNotEmpty());
 
@@ -302,8 +302,8 @@ class StudentResultSharingIntegrationTests {
                 .andExpect(status().isOk())
                 // One row per subject of the bank; the shared one shows its mastery.
                 .andExpect(jsonPath("$[?(@.subjectName == '"
-                        + SUBJECT_NAME + "')].masteryPercentage", contains(50)))
+                        + SUBJECT_NAME + "')].percentage", contains(50)))
                 .andExpect(jsonPath("$[?(@.subjectName == '"
-                        + SUBJECT_NAME + "')].answeredQuestions", contains(2)));
+                        + SUBJECT_NAME + "')].answered", contains(2)));
     }
 }

@@ -163,9 +163,9 @@ class AdminServiceTests {
         assertEquals(practiceTime, lr.lastActivityAt());
         assertEquals(1, lr.subjectPerformances().size());
         assertEquals("Ekologi", lr.subjectPerformances().getFirst().getSubjectName());
-        assertEquals(80, lr.subjectPerformances().getFirst().getMasteryPercentage());
-        assertEquals(8, lr.subjectPerformances().getFirst().getMasteredQuestions());
-        assertEquals(10, lr.subjectPerformances().getFirst().getTotalQuestions());
+        assertEquals(80, lr.subjectPerformances().getFirst().getPercentage());
+        assertEquals(8, lr.subjectPerformances().getFirst().getMastered());
+        assertEquals(10, lr.subjectPerformances().getFirst().getTotal());
     }
 
     @Test
@@ -228,10 +228,10 @@ class AdminServiceTests {
         // Weakest mastery first, and a subject without questions comes last —
         // it cannot be "weakest" when there is nothing to master.
         assertEquals("Vapen", lr.subjectPerformances().get(0).getSubjectName());
-        assertEquals(40, lr.subjectPerformances().get(0).getMasteryPercentage());
-        assertEquals(90, lr.subjectPerformances().get(1).getMasteryPercentage());
+        assertEquals(40, lr.subjectPerformances().get(0).getPercentage());
+        assertEquals(90, lr.subjectPerformances().get(1).getPercentage());
         assertEquals("Ny", lr.subjectPerformances().get(2).getSubjectName());
-        assertEquals(0, lr.subjectPerformances().get(2).getTotalQuestions());
+        assertEquals(0, lr.subjectPerformances().get(2).getTotal());
     }
 
     @Test
@@ -291,7 +291,7 @@ class AdminServiceTests {
         LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
 
         assertEquals(1, lr.subjectPerformances().size());
-        assertEquals(80, lr.subjectPerformances().getFirst().getMasteryPercentage());
+        assertEquals(80, lr.subjectPerformances().getFirst().getPercentage());
         assertNull(lr.mockExams());
         assertEquals(practiceTime, lr.lastActivityAt());   // only from the shared category
         verifyNoInteractions(attemptQuestionRepository);

@@ -14,9 +14,9 @@ import java.time.LocalDate;
  * question changes.
  *
  * @param date              the day the value describes (inclusive, oldest first)
- * @param masteryPercentage {@link #masteredQuestions} ÷ {@link #totalQuestions}, rounded
- * @param masteredQuestions questions mastered at the end of that day
- * @param totalQuestions    questions in the bank now (see the API
+ * @param percentage {@link #mastered} ÷ {@link #total}, rounded
+ * @param mastered questions mastered at the end of that day
+ * @param total    questions in the bank now (see the API
  *                          specification: historical points use the current
  *                          bank size, because the schema stores no historical
  *                          bank size)
@@ -26,8 +26,8 @@ import java.time.LocalDate;
  */
 public record ProgressOverTimeResponse(
         LocalDate date,
-        long masteryPercentage,
-        long masteredQuestions,
-        long totalQuestions,
+        long percentage,
+        long mastered,
+        long total,
         boolean practised
 ) {}

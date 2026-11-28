@@ -20,10 +20,10 @@ public class SubjectPerformanceResponse {
     private String subjectName;
 
     /** Questions whose latest counted answer is correct. */
-    private long masteredQuestions;
+    private long mastered;
 
     /** Questions the subject holds right now; 0 means "no questions yet". */
-    private long totalQuestions;
+    private long total;
 
     /**
      * Questions in the subject the student has answered at least once (a
@@ -31,24 +31,24 @@ public class SubjectPerformanceResponse {
      * of the percentage; it tells "not started" apart from "nothing mastered
      * yet"
      */
-    private long answeredQuestions;
+    private long answered;
 
-    /** {@link #masteredQuestions} ÷ {@link #totalQuestions}, rounded; 0 when there are no questions. */
-    private long masteryPercentage;
+    /** {@link #mastered} ÷ {@link #total}, rounded; 0 when there are no questions. */
+    private long percentage;
 
     public SubjectPerformanceResponse(
             Long subjectId,
             String subjectName,
-            long masteredQuestions,
-            long totalQuestions,
-            long answeredQuestions,
-            long masteryPercentage
+            long mastered,
+            long total,
+            long answered,
+            long percentage
     ) {
         this.subjectId = subjectId;
         this.subjectName = subjectName;
-        this.masteredQuestions = masteredQuestions;
-        this.totalQuestions = totalQuestions;
-        this.answeredQuestions = answeredQuestions;
-        this.masteryPercentage = masteryPercentage;
+        this.mastered = mastered;
+        this.total = total;
+        this.answered = answered;
+        this.percentage = percentage;
     }
 }

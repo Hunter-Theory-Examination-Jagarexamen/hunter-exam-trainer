@@ -252,10 +252,10 @@ class ExamUnscoredStatisticsTests {
                 .filter(row -> row.getSubjectId().equals(subject.getId()))
                 .findFirst()
                 .orElseThrow();
-        assertThat(windowRow.getMasteredQuestions()).isEqualTo(1);
-        assertThat(windowRow.getAnsweredQuestions()).isEqualTo(2);
-        assertThat(windowRow.getMasteryPercentage())
-                .isEqualTo(Math.round(100.0 / windowRow.getTotalQuestions()));
+        assertThat(windowRow.getMastered()).isEqualTo(1);
+        assertThat(windowRow.getAnswered()).isEqualTo(2);
+        assertThat(windowRow.getPercentage())
+                .isEqualTo(Math.round(100.0 / windowRow.getTotal()));
     }
 
     @Test
@@ -307,10 +307,10 @@ class ExamUnscoredStatisticsTests {
                 .filter(row -> row.getSubjectId().equals(subject.getId()))
                 .findFirst()
                 .orElseThrow();
-        assertThat(windowRow.getMasteredQuestions()).isEqualTo(1);
-        assertThat(windowRow.getAnsweredQuestions()).isEqualTo(2);
-        assertThat(windowRow.getMasteryPercentage())
-                .isEqualTo(Math.round(100.0 / windowRow.getTotalQuestions()));
+        assertThat(windowRow.getMastered()).isEqualTo(1);
+        assertThat(windowRow.getAnswered()).isEqualTo(2);
+        assertThat(windowRow.getPercentage())
+                .isEqualTo(Math.round(100.0 / windowRow.getTotal()));
         // ...but the exam itself is not one of the scored mock exams.
         assertThat(progress.mockExams().count()).isZero();
         assertThat(progress.mockExams().latestScore()).isNull();
@@ -333,10 +333,10 @@ class ExamUnscoredStatisticsTests {
 
         List<ProgressOverTimeResponse> points = statisticsService.getProgressOverTime(EMAIL, 4);
 
-        // One point per day from the Monday of that week to today.
+        // One point per day of the last 4 calendar weeks, this one included.
         LocalDate from = LocalDate.now()
-                .minusWeeks(4)
-                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                .minusWeeks(3);
         assertThat(points)
                 .hasSize((int) from.datesUntil(LocalDate.now().plusDays(1)).count());
 
@@ -344,12 +344,12 @@ class ExamUnscoredStatisticsTests {
         // nothing mastered yet, and today shows the one mastered question out
         // of the whole bank.
         assertThat(points.subList(0, points.size() - 1))
-                .allMatch(point -> point.masteredQuestions() == 0);
+                .allMatch(point -> point.mastered() == 0);
         ProgressOverTimeResponse today = points.getLast();
-        assertThat(today.masteredQuestions()).isEqualTo(1);
-        assertThat(today.totalQuestions()).isEqualTo(questions.count());
-        assertThat(today.masteryPercentage())
-                .isEqualTo(Math.round(100.0 / today.totalQuestions()));
+        assertThat(today.mastered()).isEqualTo(1);
+        assertThat(today.total()).isEqualTo(questions.count());
+        assertThat(today.percentage())
+                .isEqualTo(Math.round(100.0 / today.total()));
     }
 
     // ----- Existing scored behaviour is unchanged -----
