@@ -153,7 +153,7 @@ class AdminServiceTests {
         when(userRepository.findById(1L)).thenReturn(Optional.of(learner));
         when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner)))
                 .thenReturn(List.of(stats(learner, ekologi, 10, 8, practiceTime)));
-        when(statisticsService.subjectPerformanceFor(learner))
+        when(statisticsService.subjectMasteryFor(learner))
                 .thenReturn(List.of(mastery(3L, "Ekologi", 8, 10)));
 
         LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
@@ -178,7 +178,7 @@ class AdminServiceTests {
                 .thenReturn(List.of(exam(62, 70, examTime)));
         when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner)))
                 .thenReturn(List.of(stats(learner, ekologi, 10, 7, practiceTime)));
-        when(statisticsService.subjectPerformanceFor(learner))
+        when(statisticsService.subjectMasteryFor(learner))
                 .thenReturn(List.of(mastery(3L, "Ekologi", 7, 10)));
 
         LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
@@ -218,7 +218,7 @@ class AdminServiceTests {
     @Test
     void subjectsAreSortedWeakestFirstWithQuestionlessSubjectsLast() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(learner));
-        when(statisticsService.subjectPerformanceFor(learner)).thenReturn(List.of(
+        when(statisticsService.subjectMasteryFor(learner)).thenReturn(List.of(
                 mastery(3L, "Ekologi", 18, 20),    // 90 %
                 mastery(4L, "Vapen", 4, 10),       // 40 %
                 mastery(5L, "Ny", 0, 0)));         // nothing to master yet
@@ -264,7 +264,7 @@ class AdminServiceTests {
         // Not even an empty stand-in that could be read as "no answers", and
         // the mastery calculation itself is never run for a hidden category.
         verifyNoInteractions(subjectStatsRepository);
-        verify(statisticsService, never()).subjectPerformanceFor(any());
+        verify(statisticsService, never()).subjectMasteryFor(any());
     }
 
     @Test
@@ -285,7 +285,7 @@ class AdminServiceTests {
         when(userRepository.findById(1L)).thenReturn(Optional.of(learner));
         when(subjectStatsRepository.findAnsweredByUserIn(List.of(learner)))
                 .thenReturn(List.of(stats(learner, subject(3L, "Ekologi"), 10, 8, practiceTime)));
-        when(statisticsService.subjectPerformanceFor(learner))
+        when(statisticsService.subjectMasteryFor(learner))
                 .thenReturn(List.of(mastery(3L, "Ekologi", 8, 10)));
 
         LearnerProgressResponse lr = adminService.getLearnerProgress(1L);
@@ -309,7 +309,7 @@ class AdminServiceTests {
         assertNull(lr.mockExams());
         assertNull(lr.lastActivityAt());
         verifyNoInteractions(subjectStatsRepository, attemptQuestionRepository);
-        verify(statisticsService, never()).subjectPerformanceFor(any());
+        verify(statisticsService, never()).subjectMasteryFor(any());
     }
 
     @Test

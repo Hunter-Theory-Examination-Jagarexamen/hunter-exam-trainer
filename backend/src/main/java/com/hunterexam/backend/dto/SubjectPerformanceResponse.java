@@ -26,9 +26,10 @@ public class SubjectPerformanceResponse {
     private long totalQuestions;
 
     /**
-     * Counted answers the student has given in the subject (0 when they have
-     * not answered anything there). Not part of the percentage; the pages use
-     * it to tell "no answers yet" apart from "nothing mastered yet".
+     * Questions in the subject the student has answered at least once (a
+     * question answered three times counts once; 0 = not started). Not part
+     * of the percentage; it tells "not started" apart from "nothing mastered
+     * yet"
      */
     private long answeredQuestions;
 

@@ -63,7 +63,7 @@ class StatisticsServiceTests {
     void masteryIsLatestAnswerPerSubjectWithTheBankAsDenominator() {
         // Arrange: Weapons has 4 questions; the latest answers are right for
         // 11 and 13, wrong for 12 (its earlier right answer was un-mastered)
-        // and 14 — 2 of 4 mastered out of 5 counted answers. Wildlife has 5
+        // and 14 — 2 of 4 mastered, 4 questions answered (12 twice). Wildlife has 5
         // questions and is untouched. The subject order is the bank's.
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
         when(subjectRepository.findQuestionCounts()).thenReturn(List.of(
@@ -80,7 +80,7 @@ class StatisticsServiceTests {
         List<SubjectPerformanceResponse> rows = statisticsService.getSubjectPerformance(EMAIL);
 
         // Assert: one row per subject, bank order; Weapons 2 of 4 = 50 % with
-        // 5 counted answers, Wildlife 0 of 5 with no answers at all
+        // 4 questions answered, Wildlife 0 of 5 with no answers at all
         assertEquals(2, rows.size());
 
         SubjectPerformanceResponse weaponsRow = rows.get(0);
@@ -88,7 +88,7 @@ class StatisticsServiceTests {
         assertEquals("Weapons", weaponsRow.getSubjectName());
         assertEquals(2, weaponsRow.getMasteredQuestions());
         assertEquals(4, weaponsRow.getTotalQuestions());
-        assertEquals(5, weaponsRow.getAnsweredQuestions());
+        assertEquals(4, weaponsRow.getAnsweredQuestions());   // distinct questions, not answers
         assertEquals(50, weaponsRow.getMasteryPercentage());
 
         SubjectPerformanceResponse wildlifeRow = rows.get(1);

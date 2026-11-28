@@ -150,10 +150,10 @@ class QuestionMasteryStatisticsTests {
         SubjectPerformanceResponse admin = adminRow();
 
         // Assert: 2 of the subject's 4 questions mastered (first and second),
-        // 6 counted answers, 50 % — identical for student and course leader.
+        // 3 questions answered (6 answers), 50 % — identical for student and course leader.
         assertThat(student.getMasteredQuestions()).isEqualTo(2);
         assertThat(student.getTotalQuestions()).isEqualTo(4);
-        assertThat(student.getAnsweredQuestions()).isEqualTo(6);
+        assertThat(student.getAnsweredQuestions()).isEqualTo(3);   // distinct questions, not answers
         assertThat(student.getMasteryPercentage()).isEqualTo(50);
 
         assertThat(admin.getMasteredQuestions()).isEqualTo(student.getMasteredQuestions());

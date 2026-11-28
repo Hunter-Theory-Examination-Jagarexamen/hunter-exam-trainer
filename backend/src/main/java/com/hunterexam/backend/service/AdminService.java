@@ -105,7 +105,7 @@ public class AdminService {
                 ? subjectStatsRepository.findAnsweredByUserIn(oneUser)
                 : List.of();
         List<SubjectPerformanceResponse> subjectMastery = shareSubjectStatistics
-                ? statisticsService.subjectPerformanceFor(user)
+                ? statisticsService.subjectMasteryFor(user)
                 : null;
         List<MockExamScore> examScores = shareMockExamResults
                 ? attemptQuestionRepository.findScoredMockExams(oneUser)
