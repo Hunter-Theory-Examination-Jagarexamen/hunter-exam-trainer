@@ -9,7 +9,7 @@ import com.hunterexam.backend.repository.AttemptQuestionRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
 import com.hunterexam.backend.repository.UserRepository;
-import com.hunterexam.backend.repository.projection.MasteryAnswer;
+import com.hunterexam.backend.repository.projection.CountedAnswer;
 import com.hunterexam.backend.repository.projection.SubjectQuestionCount;
 import org.springframework.stereotype.Service;
 
@@ -39,7 +39,7 @@ import java.util.Map;
  *
  * <h2>Which answers count</h2>
  * Exactly the eligibility rule the statistics have always used, held in one
- * place by {@code AttemptQuestionRepository.findMasteryAnswers}: every practice
+ * place by {@code AttemptQuestionRepository.findCountedAnswers}: every practice
  * answer, plus a mock exam's answers when the exam was scored, or when it
  * ended without a result and the answer was given inside the exam's answer
  * window (start + 60 minutes + 2 minutes grace, #187). Answers of exams still
@@ -108,8 +108,8 @@ public class StatisticsService {
      * @return one row per subject, ordered by subject id
      */
     public List<SubjectPerformanceResponse> subjectPerformanceFor(User user) {
-        List<MasteryAnswer> answers = attemptQuestionRepository.findMasteryAnswers(user);
-        Map<Long, MasteryAnswer> latest = latestAnswerPerQuestion(answers);
+        List<CountedAnswer> answers = attemptQuestionRepository.findCountedAnswers(user);
+        Map<Long, CountedAnswer> latest = latestAnswerPerQuestion(answers);
 
         Map<Long, Long> totalBySubject = new HashMap<>();
         for (SubjectQuestionCount count : questionRepository.countGroupedBySubject()) {
@@ -119,14 +119,14 @@ public class StatisticsService {
         // A mastered question is by definition an answered one, so its subject
         // comes from the answer itself; unanswered questions never contribute.
         Map<Long, Long> masteredBySubject = new HashMap<>();
-        for (MasteryAnswer answer : latest.values()) {
+        for (CountedAnswer answer : latest.values()) {
             if (answer.isCorrect()) {
                 masteredBySubject.merge(answer.subjectId(), 1L, Long::sum);
             }
         }
 
         Map<Long, Long> answeredBySubject = new HashMap<>();
-        for (MasteryAnswer answer : answers) {
+        for (CountedAnswer answer : answers) {
             answeredBySubject.merge(answer.subjectId(), 1L, Long::sum);
         }
 
@@ -177,7 +177,7 @@ public class StatisticsService {
      * already loaded — the admin's Learner Progress shares this calculation.
      */
     public List<ProgressOverTimeResponse> progressOverTimeFor(User user, int weeks) {
-        List<MasteryAnswer> answers = attemptQuestionRepository.findMasteryAnswers(user);
+        List<CountedAnswer> answers = attemptQuestionRepository.findCountedAnswers(user);
         if (answers.isEmpty()) {
             return List.of();
         }
@@ -231,7 +231,7 @@ public class StatisticsService {
      * answer on a mastered question removes one, a later correct answer on an
      * unmastered question adds one, everything else leaves the count alone.
      */
-    private static long apply(MasteryAnswer answer, Map<Long, Boolean> latest, long masteredCount) {
+    private static long apply(CountedAnswer answer, Map<Long, Boolean> latest, long masteredCount) {
         boolean wasMastered = Boolean.TRUE.equals(latest.put(answer.questionId(), answer.isCorrect()));
 
         if (answer.isCorrect() && !wasMastered) {
@@ -247,9 +247,9 @@ public class StatisticsService {
      * The last answer of each question, keeping the repository's order, so
      * equal timestamps resolve by the persisted answer id.
      */
-    private static Map<Long, MasteryAnswer> latestAnswerPerQuestion(List<MasteryAnswer> answers) {
-        Map<Long, MasteryAnswer> latest = new LinkedHashMap<>();
-        for (MasteryAnswer answer : answers) {
+    private static Map<Long, CountedAnswer> latestAnswerPerQuestion(List<CountedAnswer> answers) {
+        Map<Long, CountedAnswer> latest = new LinkedHashMap<>();
+        for (CountedAnswer answer : answers) {
             latest.put(answer.questionId(), answer);
         }
         return latest;

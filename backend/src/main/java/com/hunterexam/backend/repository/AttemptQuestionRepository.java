@@ -1,6 +1,6 @@
 package com.hunterexam.backend.repository;
 
-import com.hunterexam.backend.repository.projection.MasteryAnswer;
+import com.hunterexam.backend.repository.projection.CountedAnswer;
 import com.hunterexam.backend.repository.projection.MockExamScore;
 import com.hunterexam.backend.entity.AttemptQuestion;
 import com.hunterexam.backend.entity.User;
@@ -61,7 +61,7 @@ public interface AttemptQuestionRepository extends JpaRepository<AttemptQuestion
      * @return their counted answers, ordered by when they were given
      */
     @Query("""
-            SELECT new com.hunterexam.backend.repository.projection.MasteryAnswer(
+            SELECT new com.hunterexam.backend.repository.projection.CountedAnswer(
                 q.question.id, q.question.subject.id, q.answeredAt, q.correct)
             FROM AttemptQuestion q JOIN q.attempt a
             WHERE a.user = :user
@@ -72,7 +72,7 @@ public interface AttemptQuestionRepository extends JpaRepository<AttemptQuestion
                        AND q.answeredAt <= (a.startedAt + 62 minute)))
             ORDER BY q.answeredAt, q.id
             """)
-    List<MasteryAnswer> findMasteryAnswers(@Param("user") User user);
+    List<CountedAnswer> findCountedAnswers(@Param("user") User user);
 
     @Modifying
     @Query("delete from AttemptQuestion aq where aq.attempt.id in :attemptIds")

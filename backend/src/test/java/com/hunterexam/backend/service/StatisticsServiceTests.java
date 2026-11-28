@@ -8,7 +8,7 @@ import com.hunterexam.backend.repository.AttemptQuestionRepository;
 import com.hunterexam.backend.repository.QuestionRepository;
 import com.hunterexam.backend.repository.SubjectRepository;
 import com.hunterexam.backend.repository.UserRepository;
-import com.hunterexam.backend.repository.projection.MasteryAnswer;
+import com.hunterexam.backend.repository.projection.CountedAnswer;
 import com.hunterexam.backend.repository.projection.SubjectQuestionCount;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,8 +61,8 @@ class StatisticsServiceTests {
     }
 
     /** One counted answer: question {@code questionId} in subject {@code subjectId}. */
-    private MasteryAnswer answer(long questionId, long subjectId, LocalDateTime at, boolean correct) {
-        return new MasteryAnswer(questionId, subjectId, at, correct);
+    private CountedAnswer answer(long questionId, long subjectId, LocalDateTime at, boolean correct) {
+        return new CountedAnswer(questionId, subjectId, at, correct);
     }
 
     // ----- Mastery per subject -----
@@ -80,7 +80,7 @@ class StatisticsServiceTests {
         when(questionRepository.countGroupedBySubject()).thenReturn(List.of(
                 new SubjectQuestionCount(1L, 4L),
                 new SubjectQuestionCount(2L, 5L)));
-        when(attemptQuestionRepository.findMasteryAnswers(user)).thenReturn(List.of(
+        when(attemptQuestionRepository.findCountedAnswers(user)).thenReturn(List.of(
                 answer(11, 1, LocalDateTime.now().minusDays(2), true),
                 answer(12, 1, LocalDateTime.now().minusDays(2), true),
                 answer(13, 1, LocalDateTime.now().minusDays(2), true),
@@ -117,7 +117,7 @@ class StatisticsServiceTests {
         when(subjectRepository.findAllByOrderById()).thenReturn(List.of(subject(1, "Weapons")));
         when(questionRepository.countGroupedBySubject()).thenReturn(List.of(
                 new SubjectQuestionCount(1L, 3L)));
-        when(attemptQuestionRepository.findMasteryAnswers(user)).thenReturn(List.of(
+        when(attemptQuestionRepository.findCountedAnswers(user)).thenReturn(List.of(
                 answer(11, 1, LocalDateTime.now().minusDays(1), true),
                 answer(11, 1, LocalDateTime.now().minusHours(3), true),
                 answer(11, 1, LocalDateTime.now().minusHours(2), true),
@@ -152,7 +152,7 @@ class StatisticsServiceTests {
         when(subjectRepository.findAllByOrderById()).thenReturn(List.of(subject(1, "Weapons")));
         when(questionRepository.countGroupedBySubject()).thenReturn(List.of(
                 new SubjectQuestionCount(1L, 4L)));
-        when(attemptQuestionRepository.findMasteryAnswers(user)).thenReturn(List.of());
+        when(attemptQuestionRepository.findCountedAnswers(user)).thenReturn(List.of());
 
         // Act
         List<SubjectPerformanceResponse> rows = statisticsService.getSubjectPerformance(EMAIL);
@@ -180,7 +180,7 @@ class StatisticsServiceTests {
         // today
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
         when(questionRepository.count()).thenReturn(4L);
-        when(attemptQuestionRepository.findMasteryAnswers(user)).thenReturn(List.of(
+        when(attemptQuestionRepository.findCountedAnswers(user)).thenReturn(List.of(
                 answer(11, 1, THIS_MONDAY.minusWeeks(3).atTime(10, 0), true),
                 answer(12, 1, THIS_MONDAY.minusWeeks(3).atTime(10, 1), true),
                 answer(13, 1, LocalDate.now().atTime(9, 0), true)));
@@ -217,7 +217,7 @@ class StatisticsServiceTests {
         LocalDate from = THIS_MONDAY.minusWeeks(2);
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
         when(questionRepository.count()).thenReturn(1L);
-        when(attemptQuestionRepository.findMasteryAnswers(user)).thenReturn(List.of(
+        when(attemptQuestionRepository.findCountedAnswers(user)).thenReturn(List.of(
                 answer(11, 1, from.atTime(9, 0), true),
                 answer(11, 1, from.plusDays(1).atTime(9, 0), false),
                 answer(11, 1, from.plusDays(2).atTime(9, 0), true)));
@@ -235,7 +235,7 @@ class StatisticsServiceTests {
     @Test
     void progressIsEmptyWithoutAnswers() {
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(attemptQuestionRepository.findMasteryAnswers(user)).thenReturn(List.of());
+        when(attemptQuestionRepository.findCountedAnswers(user)).thenReturn(List.of());
 
         assertTrue(statisticsService.getProgressOverTime(EMAIL, 4).isEmpty());
     }
@@ -245,7 +245,7 @@ class StatisticsServiceTests {
         // Arrange: answers exist, but there is nothing to master — no
         // percentage and no division by zero
         when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(user));
-        when(attemptQuestionRepository.findMasteryAnswers(user)).thenReturn(List.of(
+        when(attemptQuestionRepository.findCountedAnswers(user)).thenReturn(List.of(
                 answer(11, 1, LocalDateTime.now().minusDays(1), true)));
         when(questionRepository.count()).thenReturn(0L);
 

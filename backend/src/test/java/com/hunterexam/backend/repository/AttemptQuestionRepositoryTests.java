@@ -7,7 +7,7 @@ import com.hunterexam.backend.entity.Question;
 import com.hunterexam.backend.entity.Role;
 import com.hunterexam.backend.entity.Subject;
 import com.hunterexam.backend.entity.User;
-import com.hunterexam.backend.repository.projection.MasteryAnswer;
+import com.hunterexam.backend.repository.projection.CountedAnswer;
 import com.hunterexam.backend.repository.projection.MockExamScore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Tests the JPQL queries against a real (H2) database:
  * {@code findScoredMockExams} (only scored mock exams count, each exam's score
- * counted from its rows) and {@code findMasteryAnswers} (the one eligibility
+ * counted from its rows) and {@code findCountedAnswers} (the one eligibility
  * rule the question-mastery statistics share).
  */
 @DataJpaTest(showSql = false)
@@ -171,12 +171,12 @@ class AttemptQuestionRepositoryTests {
                 true, true, true, true);
 
         // Act
-        List<MasteryAnswer> answers = attemptQuestions.findMasteryAnswers(student);
+        List<CountedAnswer> answers = attemptQuestions.findCountedAnswers(student);
 
         // Assert: 2 practice + 3 scored + 4 ended-exam answers; unanswered
         // rows left out, open exams and other students too
         assertEquals(9, answers.size());
-        assertEquals(8, answers.stream().filter(MasteryAnswer::isCorrect).count());
+        assertEquals(8, answers.stream().filter(CountedAnswer::isCorrect).count());
     }
 
     @Test
@@ -194,7 +194,7 @@ class AttemptQuestionRepositoryTests {
                 true, null, null, null);                                   // start + 90 min: doesn't
 
         // Act
-        List<MasteryAnswer> answers = attemptQuestions.findMasteryAnswers(student);
+        List<CountedAnswer> answers = attemptQuestions.findCountedAnswers(student);
 
         // Assert: the in-window answers (including the one exactly on the
         // deadline), not the one given after it
@@ -211,7 +211,7 @@ class AttemptQuestionRepositoryTests {
                 now, false, true, true, true, true);
 
         // Act
-        List<MasteryAnswer> answers = attemptQuestions.findMasteryAnswers(student);
+        List<CountedAnswer> answers = attemptQuestions.findCountedAnswers(student);
 
         // Assert: all 8 answers, ordered by when they were given — the order
         // the mastery replay walks them in
@@ -232,11 +232,11 @@ class AttemptQuestionRepositoryTests {
 
         // Act
         List<MockExamScore> scores = attemptQuestions.findScoredMockExams(List.of(student));
-        List<MasteryAnswer> answers = attemptQuestions.findMasteryAnswers(student);
+        List<CountedAnswer> answers = attemptQuestions.findCountedAnswers(student);
 
         // Assert: no result, but its four in-window answers count (3 right)
         assertTrue(scores.isEmpty());
         assertEquals(4, answers.size());
-        assertEquals(3, answers.stream().filter(MasteryAnswer::isCorrect).count());
+        assertEquals(3, answers.stream().filter(CountedAnswer::isCorrect).count());
     }
 }
