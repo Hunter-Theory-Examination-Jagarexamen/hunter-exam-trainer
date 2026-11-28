@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -158,98 +156,123 @@ public class StatisticsService {
     }
 
     /**
-     * The share of the whole question bank the student had mastered at the end
-     * of each day of the last {@code weeks} weeks, oldest first — one point per
-     * calendar day, including days without answers (those keep the previous
-     * day's state).
-     * <p>
-     * The whole answer history is read once and replayed in time order, so a
-     * day's value is the state <em>at that day</em> and not today's state
-     * back-dated: question A right → wrong → right gives 1 → 0 → 1.
+     * Above this many weeks the chart gets one point per week instead of one
+     * per day, so a long range stays readable (#193).
+     */
+    static final int MAX_WEEKS_WITH_DAILY_POINTS = 4;
+
+    /**
+     * The share of the whole question bank the student had mastered over the
+     * last {@code weeks} weeks, oldest first: one point per calendar day for
+     * up to {@link #MAX_WEEKS_WITH_DAILY_POINTS} weeks, otherwise one point
+     * per week (its last day).
      *
      * @param email user's email
      * @param weeks number of weeks to look back (the window starts on the
      *              Monday of that week)
-     * @return one point per day in the window, oldest first; empty when the
-     *         student has answered nothing or the bank is empty
+     * @return the points, oldest first; empty when the student has answered
+     *         nothing or the bank is empty
      */
     public List<ProgressOverTimeResponse> getProgressOverTime(String email, int weeks) {
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        return progressOverTimeFor(user, weeks);
+        LocalDate today = LocalDate.now();
+        LocalDate from = today.minusWeeks(weeks)
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+        List<ProgressOverTimeResponse> days = masteryPerDay(
+                attemptQuestionRepository.findCountedAnswers(user),
+                questionRepository.count(),
+                from,
+                today);
+
+        return weeks > MAX_WEEKS_WITH_DAILY_POINTS ? lastDayPerWeek(days) : days;
     }
 
     /**
-     * Same as {@link #getProgressOverTime(String, int)} for a user that is
-     * already loaded — the admin's Learner Progress shares this calculation.
+     * Mastery at the end of every calendar day from {@code from} to {@code to}.
+     * <p>
+     * The answers are replayed in time order with a running count, so a day's
+     * value is the state <em>at that day</em> and not today's state
+     * back-dated: question A right → wrong → right gives 1 → 0 → 1. Answers
+     * given before {@code from} decide the first day's state. Days without
+     * answers keep the previous day's value and have {@code practised} false.
+     *
+     * @param answers the student's counted answers, oldest first
+     * @param total   questions in the bank now
+     * @param from    first day (inclusive)
+     * @param to      last day (inclusive)
+     * @return one point per day, oldest first; empty when there are no
+     *         answers or no questions
      */
-    public List<ProgressOverTimeResponse> progressOverTimeFor(User user, int weeks) {
-        List<CountedAnswer> answers = attemptQuestionRepository.findCountedAnswers(user);
-        if (answers.isEmpty()) {
+    static List<ProgressOverTimeResponse> masteryPerDay(
+            List<CountedAnswer> answers,
+            long total,
+            LocalDate from,
+            LocalDate to
+    ) {
+        if (answers.isEmpty() || total == 0) {
+            // Nothing to show, and no division by zero.
             return List.of();
         }
 
-        long totalQuestions = questionRepository.count();
-        if (totalQuestions == 0) {
-            // Nothing to be master of: no percentage, no division by zero.
-            return List.of();
-        }
-
-        LocalDate from = LocalDate.now()
-                .minusWeeks(weeks)
-                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        LocalDate today = LocalDate.now();
-
-        Map<Long, Boolean> mastered = new HashMap<>();
-        long masteredCount = 0;
-        int index = 0;
-
-        // Answers given before the window decide the first day's state.
-        while (index < answers.size()
-                && answers.get(index).answeredAt().toLocalDate().isBefore(from)) {
-            masteredCount = apply(answers.get(index++), mastered, masteredCount);
-        }
+        // Each answered question's latest result: true = mastered.
+        Map<Long, Boolean> latestCorrect = new HashMap<>();
+        long mastered = 0;
+        int next = 0;
 
         List<ProgressOverTimeResponse> points = new ArrayList<>();
-        for (LocalDate day = from; !day.isAfter(today); day = day.plusDays(1)) {
-            LocalDateTime endOfDay = day.atTime(LocalTime.MAX);
+        for (LocalDate day = from; !day.isAfter(to); day = day.plusDays(1)) {
+            boolean practised = false;
 
-            // Every answer up to and including the end of this day, in the
-            // order it was given; days without answers change nothing.
-            while (index < answers.size()
-                    && !answers.get(index).answeredAt().isAfter(endOfDay)) {
-                masteredCount = apply(answers.get(index++), mastered, masteredCount);
+            // Every answer up to and including this day, in the order given.
+            while (next < answers.size()
+                    && !answers.get(next).answeredAt().toLocalDate().isAfter(day)) {
+                CountedAnswer answer = answers.get(next++);
+                boolean wasMastered = Boolean.TRUE.equals(
+                        latestCorrect.put(answer.questionId(), answer.isCorrect()));
+
+                // The count only changes when a question flips.
+                if (answer.isCorrect() && !wasMastered) {
+                    mastered++;
+                } else if (!answer.isCorrect() && wasMastered) {
+                    mastered--;
+                }
+                practised |= answer.answeredAt().toLocalDate().equals(day);
             }
 
             points.add(new ProgressOverTimeResponse(
-                    day,
-                    percentage(masteredCount, totalQuestions),
-                    masteredCount,
-                    totalQuestions
-            ));
+                    day, percentage(mastered, total), mastered, total, practised));
         }
-
         return points;
     }
 
     /**
-     * Folds one answer into the latest-answer-per-question state and returns
-     * the new mastered count: a first correct answer adds one, a later wrong
-     * answer on a mastered question removes one, a later correct answer on an
-     * unmastered question adds one, everything else leaves the count alone.
+     * One point per week (Monday–Sunday): the week's last day in
+     * {@code days}, practised if any day of that week was. The current week's
+     * point is today.
+     *
+     * @param days one point per day, oldest first
+     * @return one point per week, oldest first
      */
-    private static long apply(CountedAnswer answer, Map<Long, Boolean> latest, long masteredCount) {
-        boolean wasMastered = Boolean.TRUE.equals(latest.put(answer.questionId(), answer.isCorrect()));
+    static List<ProgressOverTimeResponse> lastDayPerWeek(List<ProgressOverTimeResponse> days) {
+        Map<LocalDate, ProgressOverTimeResponse> byWeek = new LinkedHashMap<>();
+        for (ProgressOverTimeResponse day : days) {
+            LocalDate monday = day.date().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+            ProgressOverTimeResponse earlier = byWeek.get(monday);
+            boolean practised = day.practised() || (earlier != null && earlier.practised());
 
-        if (answer.isCorrect() && !wasMastered) {
-            return masteredCount + 1;
+            // A later day of the same week replaces the earlier one.
+            byWeek.put(monday, new ProgressOverTimeResponse(
+                    day.date(),
+                    day.masteryPercentage(),
+                    day.masteredQuestions(),
+                    day.totalQuestions(),
+                    practised));
         }
-        if (!answer.isCorrect() && wasMastered) {
-            return masteredCount - 1;
-        }
-        return masteredCount;
+        return List.copyOf(byWeek.values());
     }
 
     /**

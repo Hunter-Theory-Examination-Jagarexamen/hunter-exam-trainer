@@ -3,8 +3,9 @@ package com.hunterexam.backend.dto;
 import java.time.LocalDate;
 
 /**
- * One day's question-bank mastery: the share of <em>all</em> questions in the
- * bank the student had mastered at the end of that day.
+ * One point of question-bank mastery: the share of <em>all</em> questions in
+ * the bank the student had mastered at the end of {@code date}. For long
+ * ranges there is one point per week, dated the week's last day.
  * <p>
  * A day is a calendar day in the server's default time zone (the zone the
  * stored {@code answered_at} values are read in), and "end of day" means the
@@ -19,10 +20,14 @@ import java.time.LocalDate;
  *                          specification: historical points use the current
  *                          bank size, because the schema stores no historical
  *                          bank size)
+ * @param practised         the student answered at least one counted question
+ *                          that day (for a weekly point: that week), so the
+ *                          chart can mark practice days
  */
 public record ProgressOverTimeResponse(
         LocalDate date,
         long masteryPercentage,
         long masteredQuestions,
-        long totalQuestions
+        long totalQuestions,
+        boolean practised
 ) {}
